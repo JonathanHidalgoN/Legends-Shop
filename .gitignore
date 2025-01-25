@@ -1,0 +1,63 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+*.db
+*.sqlite3
+*.log
+env/
+venv/
+.idea/
+.vscode/
+pip-wheel-metadata/
+
+# Docker
+.docker/
+docker-compose.override.yml
+Dockerfile.dev
+
+# FastAPI
+# (Add any specific FastAPI-related files or folders you may want to exclude)
+*.env
+*.env.*
+.env.local
+.env.production
+*.log
+
+# React & TypeScript
+node_modules/
+build/
+dist/
+*.log
+*.tsbuildinfo
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Editor directories
+.idea/
+.vscode/
+
+# Miscellaneous
+*.bak
+*.swp
+*~
+
+# Coverage reports
+.coverage
+coverage.xml
+*.cover
+*.hypothesis/
+
+# Pytest
+.cache/
