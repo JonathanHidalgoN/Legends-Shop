@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # This is run with docker, so the compose has to inject the environmet variables
 # This won't run local, because in this dir is not the .env file
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL", "Empty")
+DATABASE_URL = os.getenv("INTERNAL_DATABASE_URL", "Empty")
 
 
 # Modules are singletons, first import will create this object and the subsequent imports
