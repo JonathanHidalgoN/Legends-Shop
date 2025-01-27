@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, RootModel
+from typing import List, Dict, Union
 
 
 class Image(BaseModel):
@@ -15,8 +15,8 @@ class Gold(BaseModel):
     sell: int
 
 
-class Stats(BaseModel):
-    FlatHPPoolMod: int
+class Stats(RootModel):
+    root: Dict[str, Union[int, float]]
 
 
 class Item(BaseModel):
@@ -28,4 +28,3 @@ class Item(BaseModel):
     tags: List[str]
     maps: dict
     stats: Stats
-    depth: int
