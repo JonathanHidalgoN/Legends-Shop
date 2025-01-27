@@ -1,6 +1,6 @@
 from typing import List
-import urllib.request
 import json
+import httpx
 
 from pydantic import ValidationError
 from schemas.Item import Item
@@ -18,14 +18,19 @@ class ItemsLoader:
 
     # This method gets the raw json from the API and updates a flag
     # if no errors
-    def getRawJson(self) -> dict | None:
+    async def getRawJson(self) -> dict | None:
         try:
-            response = urllib.request.urlopen(self.ITEMS_URL)
-            data = json.loads(response.read().decode())
-            return data
+            async with httpx.AsyncClient() as client:
+                response = await client.get(self.ITEMS_URL)
+                response.raise_for_status()
+                data = response.json()
+                return data
         except json.JSONDecodeError as e:
             self.updated = False
             print(f"JSON Decode Error getting the items json: {e.msg}")
+        except httpx.RequestError as e:
+            self.updated = False
+            print(f"An error occurred during the HTTP request: {e}")
         except Exception as e:
             self.updated = False
             print(f"An error occurred getting the items json: {e}")
@@ -36,8 +41,8 @@ class ItemsLoader:
         items: List[Item] = []
         if "version" in itemsDict:
             self.version = itemsDict["version"]
-        else:
             self.version = None
+        else:
             print("Error, itemsDict has no version node")
         currentKey = "data"
         if "data" in itemsDict:
@@ -59,8 +64,8 @@ class ItemsLoader:
             print("Error: items json has no data node")
         return items
 
-    def updateItems(self):
-        itemsDict: dict | None = self.getRawJson()
+    async def updateItems(self):
+        itemsDict: dict | None = await self.getRawJson()
         if itemsDict:
             itemsList: List[Item] = self.parseRawJsonIntoItemsList(itemsDict)
             if not itemsList:
