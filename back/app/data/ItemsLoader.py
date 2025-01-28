@@ -3,6 +3,7 @@ import json
 import httpx
 
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.Item import Item
 
 
@@ -11,9 +12,10 @@ class ItemsLoader:
         "https://ddragon.leagueoflegends.com/cdn/15.2.1/data/en_US/item.json"
     )
 
-    def __init__(self, updated: bool = False):
+    def __init__(self, dbSession: AsyncSession, updated: bool = False):
         self.updated: bool = updated
         self.version: str | None = None
+        self.dbSession = dbSession
         self.notUpdatedItemsId: List[int] = []
 
     # This method gets the raw json from the API and updates a flag
@@ -41,8 +43,8 @@ class ItemsLoader:
         items: List[Item] = []
         if "version" in itemsDict:
             self.version = itemsDict["version"]
-            self.version = None
         else:
+            self.version = None
             print("Error, itemsDict has no version node")
         currentKey = "data"
         if "data" in itemsDict:
