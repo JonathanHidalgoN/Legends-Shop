@@ -26,5 +26,4 @@ class Item(BaseModel):
     image: Image
     gold: Gold
     tags: List[str]
-    maps: dict
     stats: Stats
