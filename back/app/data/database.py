@@ -1,20 +1,16 @@
-import os
 from typing import AsyncGenerator
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
+import app.data.utils as utils
 
-# This is run with docker, so the compose has to inject the environmet variables
-# This won't run local, because in this dir is not the .env file
-# TODO: add code to run locally
 load_dotenv()
-DATABASE_URL = os.getenv("INTERNAL_DATABASE_URL", "Empty")
-
-
+DATABASE_URL: str = utils.getDatabaseUrl()
 # Modules are singletons, first import will create this object and the subsequent imports
 # will use the same instance
 # Docs: https://docs.sqlalchemy.org/en/20/tutorial/engine.html#tutorial-engine
 engine = create_async_engine(DATABASE_URL, echo=True)
-
+base = declarative_base()
 AsyncSessionLocal = async_sessionmaker(engine, autoflush=False)
 
 
