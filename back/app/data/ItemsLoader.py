@@ -54,6 +54,7 @@ class ItemsLoader:
                 if currentKey in itemData:
                     try:
                         item: Item = Item(**itemData)
+                        item.id = itemId
                         items.append(item)
                     except ValidationError as e:
                         self.notUpdatedItemsId.append(itemId)
@@ -65,6 +66,9 @@ class ItemsLoader:
             self.updated = False
             print("Error: items json has no data node")
         return items
+
+    def updateTable(self, itemsList: List[Item]):
+        pass
 
     async def updateItems(self):
         itemsDict: dict | None = await self.getRawJson()
