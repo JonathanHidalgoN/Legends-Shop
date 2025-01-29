@@ -5,9 +5,9 @@ from app.data.database import base
 
 class ItemTable(base):
     __tablename__ = "item_table"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    stat_name: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
+    # Add the id manually
+    id: Mapped[int] = mapped_column(primary_key=True, nullable=False)
+    name: Mapped[str] = mapped_column(unique=True, nullable=False)
     plain_text: Mapped[str] = mapped_column(String(100), nullable=False)
     image: Mapped[str] = mapped_column(String(100), nullable=False)
     items: Mapped[list["StatsTable"]] = relationship(
