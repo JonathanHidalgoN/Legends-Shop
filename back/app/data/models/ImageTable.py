@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.ext.declarative import declarative_base
+from app.data.database import base
 
 
-class ImageTable(declarative_base()):
+class ImageTable(base):
     __tablename__ = "image_table"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
