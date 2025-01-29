@@ -6,6 +6,13 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+from app.data.utils import getDatabaseUrl
+from app.data.database import base
+from app.data.models.GoldTable import GoldTable
+from app.data.models.ImageTable import ImageTable
+from app.data.models.ItemTable import ItemTable
+from app.data.models.StatsTable import StatsTable
+from app.data.models.TagsTable import TagsTable
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -15,21 +22,15 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-# -------------------------------------------------------------
-import os
-from dotenv import load_dotenv
 
-# This is run with docker, so the compose has to inject the environmet variables
-# This won't run local, because in this dir is not the .env file
-load_dotenv()
-DATABASE_URL = os.getenv("INTERNAL_DATABASE_URL", "Empty")
+DATABASE_URL = getDatabaseUrl()
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 # -------------------------------------------------------------
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
+target_metadata = base.metadata
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
