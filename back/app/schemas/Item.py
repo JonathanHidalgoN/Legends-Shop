@@ -27,3 +27,4 @@ class Item(BaseModel):
     gold: Gold
     tags: List[str]
     stats: Stats
+    id: int
