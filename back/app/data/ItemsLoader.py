@@ -1,11 +1,17 @@
+from os import name
 from typing import List
 import json
 import httpx
 
 from pydantic import Json, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import TagsTable
-from app.data.queries.itemQueries import getAllTagsTableNames
+from app.data.queries.itemQueries import (
+    getAllStatsTable,
+    getAllStatsTableNames,
+    getAllTagsTableNames,
+)
 from app.schemas.Item import Item
 
 
@@ -72,14 +78,22 @@ class ItemsLoader:
     def updateTable(self, itemsList: List[Item]):
         pass
 
-    async def updateTagsTable(self, tagsList: List[str]):
+    async def updateTagsTable(self, tagsList: List[str]) -> None:
         existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
         for tagName in tagsList:
             if tagName not in existingTagNames:
                 newTag: TagsTable = TagsTable(name=tagName)
                 self.dbSession.add(newTag)
                 existingTagNames.append(newTag)
+        await self.dbSession.commit()
 
+    async def updateStatsTable(self, statsList: List[str]) -> None:
+        existingStats: List[str] = await getAllStatsTableNames(self.dbSession)
+        for stat in statsList:
+            if stat not in existingStats:
+                newStat: StatsTable = StatsTable(name=stat)
+                self.dbSession.add(newStat)
+                existingStats.append(newStat)
         await self.dbSession.commit()
 
     async def updateItems(self):
