@@ -17,5 +17,6 @@ AsyncSessionLocal = async_sessionmaker(engine, autoflush=False)
 # https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#dependencies-with-yield-and-httpexception
 # With yield can execute cleanup
 async def getDbSession() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSession() as session:
+    # Change from asyncSession to asyncSessionLocal to bind it to the engine
+    async with AsyncSessionLocal() as session:
         yield session

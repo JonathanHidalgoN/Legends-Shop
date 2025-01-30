@@ -2,9 +2,11 @@ from typing import List
 import json
 import httpx
 
-from pydantic import ValidationError
+from pydantic import Json, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from schemas.Item import Item
+from app.data.models.TagsTable import TagsTable
+from app.data.queries.itemQueries import getAllTagsTableNames
+from app.schemas.Item import Item
 
 
 class ItemsLoader:
@@ -39,7 +41,7 @@ class ItemsLoader:
         return None
 
     # This method parse the items from the json validating with a pydantic scheme
-    def parseRawJsonIntoItemsList(self, itemsDict: dict) -> List[Item]:
+    def parseRawJsonIntoItemsList(self, itemsDict: Json) -> List[Item]:
         items: List[Item] = []
         if "version" in itemsDict:
             self.version = itemsDict["version"]
@@ -53,8 +55,8 @@ class ItemsLoader:
                 currentKey = "name"
                 if currentKey in itemData:
                     try:
-                        item: Item = Item(**itemData)
-                        item.id = itemId
+                        fullItem: dict = {"id": itemId, **itemData}
+                        item: Item = Item(**fullItem)
                         items.append(item)
                     except ValidationError as e:
                         self.notUpdatedItemsId.append(itemId)
@@ -69,6 +71,16 @@ class ItemsLoader:
 
     def updateTable(self, itemsList: List[Item]):
         pass
+
+    async def updateTagsTable(self, tagsList: List[str]):
+        existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
+        for tagName in tagsList:
+            if tagName not in existingTagNames:
+                newTag: TagsTable = TagsTable(name=tagName)
+                self.dbSession.add(newTag)
+                existingTagNames.append(newTag)
+
+        await self.dbSession.commit()
 
     async def updateItems(self):
         itemsDict: dict | None = await self.getRawJson()
