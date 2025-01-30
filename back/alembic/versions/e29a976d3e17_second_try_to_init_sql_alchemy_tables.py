@@ -1,8 +1,8 @@
-"""Initial database structure
+"""Second try to init sql alchemy tables
 
-Revision ID: 3b7798961a0a
+Revision ID: e29a976d3e17
 Revises: 
-Create Date: 2025-01-29 11:46:49.463085
+Create Date: 2025-01-29 17:14:04.101421
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3b7798961a0a'
+revision: str = 'e29a976d3e17'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -61,7 +61,7 @@ def upgrade() -> None:
     op.create_table('item_stat_association',
     sa.Column('item_id', sa.Integer(), nullable=False),
     sa.Column('stat_id', sa.Integer(), nullable=False),
-    sa.Column('stat_value', sa.Float(), nullable=False),
+    sa.Column('value', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['item_id'], ['item_table.id'], ),
     sa.ForeignKeyConstraint(['stat_id'], ['stats_table.id'], ),
     sa.PrimaryKeyConstraint('item_id', 'stat_id')
