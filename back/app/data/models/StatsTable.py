@@ -1,19 +1,16 @@
-from sqlalchemy import Float, ForeignKey, String
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.data.database import base
+from app.data.models.ItemTable import ItemTable
 
 
-class ItemStatAssociation(base):
-    __tablename__ = "item_stat_association"
-    # This many to many relationship table refers to the other tables with the class
-    item_id: Mapped[int] = mapped_column(
-        ForeignKey("item_table.id"), primary_key=True, nullable=False
-    )
-    # name no the table name
-    stat_id: Mapped[int] = mapped_column(
-        ForeignKey("stats_table.id"), primary_key=True, nullable=False
-    )
-    stat_value: Mapped[float] = mapped_column(Float, nullable=False)
+ItemStatAssociation = Table(
+    "item_stat_association",
+    base.metadata,
+    Column("item_id", Integer, ForeignKey("item_table.id"), primary_key=True),
+    Column("stat_id", Integer, ForeignKey("stats_table.id"), primary_key=True),
+    Column("value", Float, nullable=False),
+)
 
 
 class StatsTable(base):
@@ -24,5 +21,5 @@ class StatsTable(base):
     )
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
     items: Mapped[list["ItemTable"]] = relationship(
-        "ItemTable", secondary="ItemStatAssociation", back_populates="stats"
+        "ItemTable", secondary=ItemStatAssociation
     )

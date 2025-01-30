@@ -1,16 +1,16 @@
-from sqlalchemy import ForeignKey, String, true
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.data.models.ItemTable import ItemTable
+from sqlalchemy.schema import Table
 from app.data.database import base
 
 
-class ItemTagsAssociation(base):
-    __tablename__ = "item_tags_association"
-    item_id: Mapped[int] = mapped_column(
-        ForeignKey("item_table.id"), primary_key=True, nullable=False
-    )
-    tags_id: Mapped[int] = mapped_column(
-        ForeignKey("tags_table.id"), primary_key=True, nullable=False
-    )
+ItemTagsAssociation = Table(
+    "item_tags_association",
+    base.metadata,
+    Column("item_id", Integer, ForeignKey("item_table.id"), primary_key=True),
+    Column("tags_id", Integer, ForeignKey("tags_table.id"), primary_key=True),
+)
 
 
 class TagsTable(base):
@@ -20,7 +20,6 @@ class TagsTable(base):
         primary_key=True, autoincrement=True, nullable=False
     )
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     items: Mapped[list["ItemTable"]] = relationship(
-        "ItemTable", secondary="ItemTagsAssociation", back_populates="tags"
+        "ItemTable", secondary=ItemTagsAssociation
     )
