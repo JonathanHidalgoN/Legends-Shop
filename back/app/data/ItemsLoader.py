@@ -5,8 +5,11 @@ import httpx
 
 from pydantic import Json, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.data.mappers import mapGoldToGoldTable, mapItemToItemTable
+from app.data.models.GoldTable import GoldTable
 from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import TagsTable
+from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
     getAllStatsTable,
     getAllStatsTableNames,
@@ -75,10 +78,22 @@ class ItemsLoader:
             print("Error: items json has no data node")
         return items
 
-    def updateTable(self, itemsList: List[Item]):
-        pass
+    async def _updateItemInTable(self, item: Item) -> None:
+        # goldTable: GoldTable = mapGoldToGoldTable(item.gold)
+        # itemTable: ItemTable = mapItemToItemTable(item, 0, True)
+        return ItemTable
 
-    async def updateTagsTable(self, tagsList: List[str]) -> None:
+    async def updateItemsTable(self, itemsList: List[Item]) -> bool:
+        tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
+        updatedTags: bool = await self.updateTagsTable(tagsList)
+        statsList: List[str] = [stat for item in itemsList for stat in item.stats.root]
+        updatedStats: bool = await self.updateStatsTable(statsList)
+        if updatedTags and updatedStats:
+            for item in itemsList:
+                await self._updateItemInTable(item)
+        return True
+
+    async def updateTagsTable(self, tagsList: List[str]) -> bool:
         existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
         for tagName in tagsList:
             if tagName not in existingTagNames:
@@ -86,8 +101,9 @@ class ItemsLoader:
                 self.dbSession.add(newTag)
                 existingTagNames.append(newTag)
         await self.dbSession.commit()
+        return True
 
-    async def updateStatsTable(self, statsList: List[str]) -> None:
+    async def updateStatsTable(self, statsList: List[str]) -> bool:
         existingStats: List[str] = await getAllStatsTableNames(self.dbSession)
         for stat in statsList:
             if stat not in existingStats:
@@ -95,6 +111,7 @@ class ItemsLoader:
                 self.dbSession.add(newStat)
                 existingStats.append(newStat)
         await self.dbSession.commit()
+        return True
 
     async def updateItems(self):
         itemsDict: dict | None = await self.getRawJson()
@@ -103,4 +120,4 @@ class ItemsLoader:
             if not itemsList:
                 self.updated = False
                 print("Error in items list, it is empy")
-            return itemsList
+            self.updated = await self.updateItemsTable(itemsList)
