@@ -44,3 +44,12 @@ async def getStatIdWithStatName(
         )
         stat = result.scalars().first()
     return stat.id if stat else None
+
+
+async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
+    async with asyncSession.begin():
+        result = await asyncSession.execute(
+            select(TagsTable).where(TagsTable.name == tagName)
+        )
+        tag = result.scalars().first()
+    return tag.id if tag else None
