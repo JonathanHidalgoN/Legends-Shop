@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.data.models.StatsTable import StatsTable
+from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import (
     TagsTable,
 )
@@ -33,3 +33,14 @@ async def getAllStatsTableNames(asyncSession: AsyncSession) -> List[str]:
         result = await asyncSession.execute(select(StatsTable))
         existingStats: List[str] = [tag.name for tag in result.scalars().all()]
     return existingStats
+
+
+async def getStatIdWithStatName(
+    asyncSession: AsyncSession, statName: str
+) -> int | None:
+    async with asyncSession.begin():
+        result = await asyncSession.execute(
+            select(StatsTable).where(StatsTable.name == statName)
+        )
+        stat = result.scalars().first()
+    return stat.id if stat else None
