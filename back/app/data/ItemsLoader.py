@@ -3,6 +3,7 @@ import json
 import httpx
 
 from pydantic import Json, ValidationError
+from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     ItemsLoaderError,
@@ -12,15 +13,17 @@ from app.customExceptions import (
 )
 from app.data.mappers import mapGoldToGoldTable, mapItemToItemTable
 from app.data.models.GoldTable import GoldTable
-from app.data.models.StatsTable import StatsTable
-from app.data.models.TagsTable import TagsTable
+from app.data.models.StatsTable import ItemStatAssociation, StatsTable
+from app.data.models.TagsTable import ItemTagsAssociation, TagsTable
 from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
     getAllStatsTable,
     getAllStatsTableNames,
     getAllTagsTableNames,
+    getStatIdWithStatName,
+    getTagIdWithtTagName,
 )
-from app.schemas.Item import Item
+from app.schemas.Item import Item, Stats
 from app.logger import logger
 
 
@@ -125,10 +128,78 @@ class ItemsLoader:
             logger.error(f"Error, could not update Stats table exception: {e}")
             raise TableUpdateError("Error updating Stats table") from e
 
+    async def _addStatsRelationWithItem(
+        self, itemTable: ItemTable, stats: Stats, value: float
+    ) -> None:
+        try:
+            for stat in stats.root:
+                statId: int | None = await getStatIdWithStatName(self.dbSession, stat)
+                if statId is None:
+                    logger.error(
+                        f"Error, an item has a stat that is not register in the database with name {stat}"
+                    )
+                    raise TableUpdateError(
+                        "Item has a stat that is not in the database"
+                    )
+                itemStatValues: dict = {
+                    "item_id": ItemTable.id,
+                    "stat_id": statId,
+                    "value": 0,
+                }
+                ins = insert(ItemStatAssociation).values(**itemStatValues)
+                await self.dbSession.execute(ins)
+        except Exception as e:
+            await self.dbSession.rollback()
+            logger.error(
+                f"Could not link item with item id {itemTable.id} with stats table relation"
+            )
+            raise TableUpdateError(
+                "Error creating relation between item and stats"
+            ) from e
+
+    async def _addTagsRelationWithItem(
+        self, itemTable: ItemTable, tags: List[str]
+    ) -> None:
+        try:
+            for tag in tags:
+                tagId: int | None = await getTagIdWithtTagName(self.dbSession, tag)
+                if tagId is None:
+                    logger.error(
+                        f"Error, an item has a tag that is not register in the database with name {tag}"
+                    )
+                    raise TableUpdateError("Item has a tag that is not in the database")
+                itemtagsValues: dict = {
+                    "item_id": ItemTable.id,
+                    "tag_id": tagId,
+                    "value": 0,
+                }
+                ins = insert(ItemTagsAssociation).values(**itemtagsValues)
+                await self.dbSession.execute(ins)
+        except Exception as e:
+            await self.dbSession.rollback()
+            logger.error(
+                f"Could not link item with item id {itemTable.id} with tags table relation"
+            )
+            raise TableUpdateError(
+                "Error creating relation between item and tags"
+            ) from e
+
     async def _updateItemInTable(self, item: Item) -> None:
-        # goldTable: GoldTable = mapGoldToGoldTable(item.gold)
-        # itemTable: ItemTable = mapItemToItemTable(item, 0, True)
-        return None
+        try:
+            goldTable: GoldTable = mapGoldToGoldTable(item.gold)
+            self.dbSession.add(goldTable)
+            # Flush will update the id
+            await self.dbSession.flush()
+            goldId: int = goldTable.id
+            itemTable: ItemTable = mapItemToItemTable(item, goldId, True)
+            self.dbSession.add(itemTable)
+            await self.dbSession.flush()
+            await self._addStatsRelationWithItem(itemTable, item.stats, 0)
+            await self._addTagsRelationWithItem(itemTable, item.tags)
+        except Exception as e:
+            await self.dbSession.rollback()
+            logger.error(f"Error, could not update items table, exception: {e}")
+            raise TableUpdateError("Error, could not update items table") from e
 
     async def updateItemsTable(self, itemsList: List[Item]) -> bool:
         try:
