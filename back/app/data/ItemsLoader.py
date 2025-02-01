@@ -1,10 +1,15 @@
-from os import name
 from typing import List
 import json
 import httpx
 
 from pydantic import Json, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.customExceptions import (
+    ItemsLoaderError,
+    JSONFetchError,
+    NoDataNodeInJSON,
+    TableUpdateError,
+)
 from app.data.mappers import mapGoldToGoldTable, mapItemToItemTable
 from app.data.models.GoldTable import GoldTable
 from app.data.models.StatsTable import StatsTable
@@ -16,6 +21,7 @@ from app.data.queries.itemQueries import (
     getAllTagsTableNames,
 )
 from app.schemas.Item import Item
+from app.logger import logger
 
 
 class ItemsLoader:
@@ -29,8 +35,6 @@ class ItemsLoader:
         self.dbSession = dbSession
         self.notUpdatedItemsId: List[int] = []
 
-    # This method gets the raw json from the API and updates a flag
-    # if no errors
     async def getRawJson(self) -> dict | None:
         try:
             async with httpx.AsyncClient() as client:
@@ -39,85 +43,105 @@ class ItemsLoader:
                 data = response.json()
                 return data
         except json.JSONDecodeError as e:
-            self.updated = False
-            print(f"JSON Decode Error getting the items json: {e.msg}")
+            logger.exception(f"JSON decode error when getting the items json : {e}")
+            raise JSONFetchError("Invalid JSON received from API") from e
         except httpx.RequestError as e:
-            self.updated = False
-            print(f"An error occurred during the HTTP request: {e}")
+            logger.exception(f"HTTP request error when gettint the JSON items : {e}")
+            raise JSONFetchError("HTTP error ocurred when fetching the items") from e
         except Exception as e:
-            self.updated = False
-            print(f"An error occurred getting the items json: {e}")
-        return None
+            logger.exception(f"Exception when fetching the JSON with items : {e}")
+            raise JSONFetchError(
+                "An unexpected error ocurred when fetching JSON items"
+            ) from e
 
-    # This method parse the items from the json validating with a pydantic scheme
     def parseRawJsonIntoItemsList(self, itemsDict: Json) -> List[Item]:
         items: List[Item] = []
-        if "version" in itemsDict:
-            self.version = itemsDict["version"]
-        else:
-            self.version = None
-            print("Error, itemsDict has no version node")
-        currentKey = "data"
-        if "data" in itemsDict:
-            itemsData: dict = itemsDict[currentKey]
-            for itemId, itemData in itemsData.items():
-                currentKey = "name"
-                if currentKey in itemData:
-                    try:
-                        fullItem: dict = {"id": itemId, **itemData}
-                        item: Item = Item(**fullItem)
-                        items.append(item)
-                    except ValidationError as e:
-                        self.notUpdatedItemsId.append(itemId)
-                        print(f"Error parsing item {itemId}: {e}")
-                else:
-                    print(f"Error parsing an item {itemId} with no {currentKey} node")
-                    self.notUpdatedItemsId.append(itemId)
-        else:
+        self.version = itemsDict.get("version")
+        if self.version is None:
+            logger.warning(
+                "Error, itemsDict has no 'version' key, item parsing can continue"
+            )
+        itemsData: dict | None = itemsDict.get("data")
+        if itemsData is None:
+            errorStr: str = "Error, the items JSON has no data node!"
+            logger.error(errorStr)
             self.updated = False
-            print("Error: items json has no data node")
+            raise NoDataNodeInJSON(errorStr)
+        for itemId, itemData in itemsData.items():
+            if "name" not in itemData:
+                logger.error(
+                    f"Error, the item with id {itemId} has no 'name' node, item parsing will continue but this item won't be updated"
+                )
+                self.notUpdatedItemsId.append(itemId)
+                continue
+            try:
+                fullItem = {"id": itemId, **itemData}
+                item: Item = Item(**fullItem)
+                items.append(item)
+            except ValidationError as e:
+                self.notUpdatedItemsId.append(itemId)
+                logger.exception(
+                    f"Error, the item with id {itemId} could not be parsed, exception : {e}"
+                )
         return items
+
+    async def updateItems(self) -> None:
+        itemsDict: dict | None = await self.getRawJson()
+        if not itemsDict:
+            raise ItemsLoaderError("Failed to fetch items JSON")
+        itemsList: List[Item] = self.parseRawJsonIntoItemsList(itemsDict)
+        if not itemsList:
+            raise ItemsLoaderError("Error, items list is empty")
+        succes: bool = await self.updateItemsTable(itemsList)
+        if not succes:
+            raise ItemsLoaderError("Failed to update items table")
+        self.updated = True
+
+    async def updateTagsTable(self, tagsList: List[str]) -> bool:
+        try:
+            existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
+            for tag in tagsList:
+                newTag: TagsTable = TagsTable(name=tag)
+                self.dbSession.add(newTag)
+                existingTagNames.append(tag)
+            await self.dbSession.commit()
+            return True
+        except Exception as e:
+            await self.dbSession.rollback()
+            logger.error(f"Error, could not update Tags table exception: {e}")
+            raise TableUpdateError("Error updating tags table") from e
+
+    async def updateStatsTable(self, statsList: List[str]) -> bool:
+        try:
+            existingStatNames: List[str] = await getAllStatsTableNames(self.dbSession)
+            for stat in statsList:
+                newStat: StatsTable = StatsTable(name=stat)
+                self.dbSession.add(newStat)
+                existingStatNames.append(stat)
+            await self.dbSession.commit()
+            return True
+        except Exception as e:
+            await self.dbSession.rollback()
+            logger.error(f"Error, could not update Stats table exception: {e}")
+            raise TableUpdateError("Error updating Stats table") from e
 
     async def _updateItemInTable(self, item: Item) -> None:
         # goldTable: GoldTable = mapGoldToGoldTable(item.gold)
         # itemTable: ItemTable = mapItemToItemTable(item, 0, True)
-        return ItemTable
+        return None
 
     async def updateItemsTable(self, itemsList: List[Item]) -> bool:
-        tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
-        updatedTags: bool = await self.updateTagsTable(tagsList)
-        statsList: List[str] = [stat for item in itemsList for stat in item.stats.root]
-        updatedStats: bool = await self.updateStatsTable(statsList)
-        if updatedTags and updatedStats:
-            for item in itemsList:
-                await self._updateItemInTable(item)
-        return True
-
-    async def updateTagsTable(self, tagsList: List[str]) -> bool:
-        existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
-        for tagName in tagsList:
-            if tagName not in existingTagNames:
-                newTag: TagsTable = TagsTable(name=tagName)
-                self.dbSession.add(newTag)
-                existingTagNames.append(newTag)
-        await self.dbSession.commit()
-        return True
-
-    async def updateStatsTable(self, statsList: List[str]) -> bool:
-        existingStats: List[str] = await getAllStatsTableNames(self.dbSession)
-        for stat in statsList:
-            if stat not in existingStats:
-                newStat: StatsTable = StatsTable(name=stat)
-                self.dbSession.add(newStat)
-                existingStats.append(newStat)
-        await self.dbSession.commit()
-        return True
-
-    async def updateItems(self):
-        itemsDict: dict | None = await self.getRawJson()
-        if itemsDict:
-            itemsList: List[Item] = self.parseRawJsonIntoItemsList(itemsDict)
-            if not itemsList:
-                self.updated = False
-                print("Error in items list, it is empy")
-            self.updated = await self.updateItemsTable(itemsList)
+        try:
+            tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
+            tagsUpdated: bool = await self.updateTagsTable(tagsList)
+            statsList: List[str] = [
+                stat for item in itemsList for stat in item.stats.root
+            ]
+            statsUpdated: bool = await self.updateStatsTable(statsList)
+            if tagsUpdated and statsUpdated:
+                for item in itemsList:
+                    await self._updateItemInTable(item)
+            return True
+        except TableUpdateError as e:
+            self.updated = False
+            raise e
