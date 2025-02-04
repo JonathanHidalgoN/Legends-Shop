@@ -8,48 +8,42 @@ from app.data.models.TagsTable import (
 
 
 async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
-    async with asyncSession.begin():
-        result = await asyncSession.execute(select(TagsTable))
-        existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
+    result = await asyncSession.execute(select(TagsTable))
+    existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
     return existingTags
 
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> List[str]:
-    async with asyncSession.begin():
-        result = await asyncSession.execute(select(TagsTable))
-        existingTags: List[str] = [tag.name for tag in result.scalars().all()]
+    result = await asyncSession.execute(select(TagsTable))
+    existingTags: List[str] = [tag.name for tag in result.scalars().all()]
     return existingTags
 
 
 async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
-    async with asyncSession.begin():
-        result = await asyncSession.execute(select(StatsTable))
-        existingStats: List[StatsTable] = [tag for tag in result.scalars().all()]
+    result = await asyncSession.execute(select(StatsTable))
+    existingStats: List[StatsTable] = [tag for tag in result.scalars().all()]
     return existingStats
 
 
 async def getAllStatsTableNames(asyncSession: AsyncSession) -> List[str]:
-    async with asyncSession.begin():
-        result = await asyncSession.execute(select(StatsTable))
-        existingStats: List[str] = [tag.name for tag in result.scalars().all()]
+    result = await asyncSession.execute(select(StatsTable))
+    existingStats: List[str] = [tag.name for tag in result.scalars().all()]
     return existingStats
 
 
 async def getStatIdWithStatName(
     asyncSession: AsyncSession, statName: str
 ) -> int | None:
-    async with asyncSession.begin():
-        result = await asyncSession.execute(
-            select(StatsTable).where(StatsTable.name == statName)
-        )
-        stat = result.scalars().first()
+    result = await asyncSession.execute(
+        select(StatsTable).where(StatsTable.name == statName)
+    )
+    stat = result.scalars().first()
     return stat.id if stat else None
 
 
 async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
-    async with asyncSession.begin():
-        result = await asyncSession.execute(
-            select(TagsTable).where(TagsTable.name == tagName)
-        )
-        tag = result.scalars().first()
+    result = await asyncSession.execute(
+        select(TagsTable).where(TagsTable.name == tagName)
+    )
+    tag = result.scalars().first()
     return tag.id if tag else None
