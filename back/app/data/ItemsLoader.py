@@ -4,6 +4,7 @@ import httpx
 
 from pydantic import Json, ValidationError
 from sqlalchemy import insert
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     ItemsLoaderError,
@@ -23,7 +24,7 @@ from app.data.queries.itemQueries import (
     getStatIdWithStatName,
     getTagIdWithtTagName,
 )
-from app.schemas.Item import Item, Stats
+from app.schemas.Item import Gold, Item, Stats
 from app.logger import logger
 
 
@@ -199,12 +200,24 @@ class ItemsLoader:
                 "Error creating relation between item and tags"
             ) from e
 
-    async def _updateItemInTable(self, item: Item) -> None:
+
+    async def _createGoldTableAndInsertIt(self, gold: Gold) -> GoldTable:
+        goldTable = None
         try:
-            goldTable: GoldTable = mapGoldToGoldTable(item.gold)
+            goldTable = mapGoldToGoldTable(gold)
             self.dbSession.add(goldTable)
             # Flush will update the id
             await self.dbSession.flush()
+            return goldTable
+        except SQLAlchemyError as e:
+            await self.dbSession.rollback()
+            table_info = goldTable if goldTable is not None else f"Gold data: {gold}"
+            logger.error(f"Error, could not update {GoldTable.__tablename____}. Table info: {table_info}. Exception: {e}")
+            raise TableUpdateError(tableName=GoldTable.__tablename__) from e
+
+    async def _updateItemInTable(self, item: Item) -> None:
+        try:
+            goldTable = await self._createGoldTableAndInsertIt(item.gold)
             goldId: int = goldTable.id
             itemTable: ItemTable = mapItemToItemTable(item, goldId, True)
             self.dbSession.add(itemTable)
