@@ -212,24 +212,21 @@ class ItemsLoader:
             raise TableUpdateError("item_tag_relation") from e
 
 
-    async def _flushGoldTableAndReturnIt(self, gold: Gold) -> GoldTable:
-        goldTable = None
+    async def _flushGoldTable(self, goldTable : GoldTable) -> None:
         try:
-            goldTable = mapGoldToGoldTable(gold)
-            self.dbSession.add(goldTable)
+            await self.dbSession.merge(goldTable)
             # Flush will update the id
             await self.dbSession.flush()
-            return goldTable
         except SQLAlchemyError as e:
             await self.dbSession.rollback()
-            tableInfo:str = goldTable if goldTable is not None else f"Gold data: {gold}"
-            logger.error(f"Error, could not update {GoldTable.__tablename__}. Table info: {tableInfo}. Exception: {e}")
+            logger.error(f"Error, could not update {GoldTable.__tablename__}. Table info: {goldTable}. Exception: {e}")
             raise TableUpdateError(tableName=GoldTable.__tablename__) from e
 
-    async def _flushItemIntoDataBase(self, item: Item) -> None:
+    async def _flushNewItemIntoDataBase(self, item: Item) -> None:
         itemTable: ItemTable | None = None
         try:
-            goldTable = await self._flushGoldTableAndReturnIt(item.gold)
+            goldTable = mapGoldToGoldTable(item.gold)
+            await self._flushGoldTable(goldTable)
             goldId: int = goldTable.id
             itemTable = mapItemToItemTable(item, goldId, True)
             self.dbSession.add(itemTable)
@@ -259,7 +256,7 @@ class ItemsLoader:
             for item in itemsList:
                 itemTable : ItemTable | None = await getItemTableGivenName(self.dbSession,item.name)
                 if itemTable is None:
-                    await self._flushItemIntoDataBase(item)
+                    await self._flushNewItemIntoDataBase(item)
                 else:
                     await self._flushItemTableChangesIntoDataBase(item,itemTable)
                 await self.dbSession.commit()
