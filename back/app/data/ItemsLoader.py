@@ -131,7 +131,7 @@ class ItemsLoader:
             logger.debug(f"Updating stats table with {len(statsList)} stats, just new stats will be added, currently {len(existingStatNames)} in the database")
             counter : int = 0
             for stat in statsList:
-                if stat not in statsList:
+                if stat not in existingStatNames:
                     newStat: StatsTable = StatsTable(name=stat)
                     self.dbSession.add(newStat)
                     existingStatNames.append(stat)
@@ -158,7 +158,7 @@ class ItemsLoader:
                         "Item has a stat that is not in the database"
                     )
                 itemStatValues: dict = {
-                    "item_id": ItemTable.id,
+                    "item_id": itemTable.id,
                     "stat_id": statId,
                     "value": statValue,
                 }
@@ -185,9 +185,8 @@ class ItemsLoader:
                     )
                     raise TableUpdateError("Item has a tag that is not in the database")
                 itemtagsValues: dict = {
-                    "item_id": ItemTable.id,
-                    "tag_id": tagId,
-                    "value": 0,
+                    "item_id": itemTable.id,
+                    "tags_id": tagId
                 }
                 ins = insert(ItemTagsAssociation).values(**itemtagsValues)
                 await self.dbSession.execute(ins)
