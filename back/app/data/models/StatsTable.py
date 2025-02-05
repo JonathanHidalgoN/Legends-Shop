@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.data.database import base
 from app.data.models.ItemTable import ItemTable
 
-
 ItemStatAssociation = Table(
     "item_stat_association",
     base.metadata,
@@ -11,7 +10,6 @@ ItemStatAssociation = Table(
     Column("stat_id", Integer, ForeignKey("stats_table.id"), primary_key=True),
     Column("value", Float, nullable=False),
 )
-
 
 class StatsTable(base):
     __tablename__ = "stats_table"
@@ -23,3 +21,6 @@ class StatsTable(base):
     items: Mapped[list["ItemTable"]] = relationship(
         "ItemTable", secondary=ItemStatAssociation
     )
+
+    def __repr__(self) -> str:
+        return f"<StatsTable(id={self.id}, name={self.name!r})>"
