@@ -18,7 +18,6 @@ from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import ItemTagsAssociation, TagsTable
 from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
-    getAllStatsTable,
     getAllStatsTableNames,
     getAllTagsTableNames,
     getStatIdWithStatName,
@@ -76,7 +75,7 @@ class ItemsLoader:
             raise NoDataNodeInJSON(errorStr)
         for itemId, itemData in itemsData.items():
             if "name" not in itemData:
-                logger.error(
+                logger.warning(
                     f"Error, the item with id {itemId} has no 'name' node, item parsing will continue but this item won't be updated"
                 )
                 self.notUpdatedItemsId.append(itemId)
@@ -90,26 +89,34 @@ class ItemsLoader:
                 logger.exception(
                     f"Error, the item with id {itemId} could not be parsed, exception : {e}"
                 )
-        logger.debug(f"Parsed json items into a list with {len(items)}")
+        logger.debug(f"Parsed json items into a list with {len(items)} items")
         return items
 
     async def updateItems(self) -> None:
         logger.debug("Updating items")
         itemsDict: dict | None = await self.getRawJson()
         if not itemsDict:
+            self.updated = False
             raise ItemsLoaderError("Failed to fetch items JSON")
         itemsList: List[Item] = self.parseRawJsonIntoItemsList(itemsDict)
         if not itemsList:
+            self.updated = False
             raise ItemsLoaderError("Error, items list is empty")
-        succes: bool = await self.updateItemsTable(itemsList)
-        if not succes:
-            raise ItemsLoaderError("Failed to update items table")
+        try:
+            await self.updateItemsTable(itemsList)
+        except Exception as e:
+            self.updated = False
+            raise ItemsLoaderError(f"Error updating {ItemTable.__tablename__}")
         logger.debug("Updated items successfully")
         self.updated = True
 
     async def updateTagsTable(self, tagsList: List[str]) -> bool:
         try:
             existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
+        except SQLAlchemyError as e:
+            logger.error(f"Error, could not get existing stat names in the database: {e}")
+            raise TableUpdateError(StatsTable.__tablename__) from e
+        try:
             logger.debug(f"Updating tags table with {len(tagsList)} tags, just new tags will be added, currently {len(existingTagNames)} in the database")
             counter : int = 0
             for tag in tagsList:
@@ -124,11 +131,15 @@ class ItemsLoader:
         except Exception as e:
             await self.dbSession.rollback()
             logger.error(f"Error, could not update Tags table exception: {e}")
-            raise TableUpdateError("Error updating tags table") from e
+            raise TableUpdateError(StatsTable.__tablename__) from e
 
     async def updateStatsTable(self, statsList: List[str]) -> bool:
         try:
             existingStatNames: List[str] = await getAllStatsTableNames(self.dbSession)
+        except SQLAlchemyError as e:
+            logger.error(f"Error, could not get existing stat names in the database: {e}")
+            raise TableUpdateError(StatsTable.__tablename__) from e
+        try:
             logger.debug(f"Updating stats table with {len(statsList)} stats, just new stats will be added, currently {len(existingStatNames)} in the database")
             counter : int = 0
             for stat in statsList:
@@ -140,10 +151,10 @@ class ItemsLoader:
             await self.dbSession.commit()
             logger.debug(f"Updated stats table successfully, added {counter} new stats")
             return True
-        except Exception as e:
+        except SQLAlchemyError as e:
             await self.dbSession.rollback()
             logger.error(f"Error, could not update Stats table exception: {e}")
-            raise TableUpdateError("Error updating Stats table") from e
+            raise TableUpdateError(StatsTable.__tablename__) from e
 
     async def _addStatsRelationWithItem(
         self, itemTable: ItemTable, stats: Stats
@@ -155,9 +166,7 @@ class ItemsLoader:
                     logger.error(
                         f"Error, an item has a stat that is not register in the database with name {stat}"
                     )
-                    raise TableUpdateError(
-                        "Item has a stat that is not in the database"
-                    )
+                    raise TableUpdateError("item_stat_relation")
                 itemStatValues: dict = {
                     "item_id": itemTable.id,
                     "stat_id": statId,
@@ -165,14 +174,12 @@ class ItemsLoader:
                 }
                 ins = insert(ItemStatAssociation).values(**itemStatValues)
                 await self.dbSession.execute(ins)
-        except Exception as e:
+        except SQLAlchemyError as e:
             await self.dbSession.rollback()
             logger.error(
-                f"Could not link item with item id {itemTable.id} with stats table relation"
+                f"Could not link item with item id {itemTable.id} with stats table"
             )
-            raise TableUpdateError(
-                "Error creating relation between item and stats"
-            ) from e
+            raise TableUpdateError("item_stat_relation") from e
 
     async def _addTagsRelationWithItem(
         self, itemTable: ItemTable, tags: List[str]
@@ -184,21 +191,19 @@ class ItemsLoader:
                     logger.error(
                         f"Error, an item has a tag that is not register in the database with name {tag}"
                     )
-                    raise TableUpdateError("Item has a tag that is not in the database")
+                    raise TableUpdateError("item_tag_relation")
                 itemtagsValues: dict = {
                     "item_id": itemTable.id,
                     "tags_id": tagId
                 }
                 ins = insert(ItemTagsAssociation).values(**itemtagsValues)
                 await self.dbSession.execute(ins)
-        except Exception as e:
+        except SQLAlchemyError as e:
             await self.dbSession.rollback()
             logger.error(
                 f"Could not link item with item id {itemTable.id} with tags table relation"
             )
-            raise TableUpdateError(
-                "Error creating relation between item and tags"
-            ) from e
+            raise TableUpdateError("item_tag_relation") from e
 
 
     async def _createGoldTableAndInsertIt(self, gold: Gold) -> GoldTable:
@@ -211,25 +216,29 @@ class ItemsLoader:
             return goldTable
         except SQLAlchemyError as e:
             await self.dbSession.rollback()
-            table_info = goldTable if goldTable is not None else f"Gold data: {gold}"
-            logger.error(f"Error, could not update {GoldTable.__tablename____}. Table info: {table_info}. Exception: {e}")
+            tableInfo:str = goldTable if goldTable is not None else f"Gold data: {gold}"
+            logger.error(f"Error, could not update {GoldTable.__tablename____}. Table info: {tableInfo}. Exception: {e}")
             raise TableUpdateError(tableName=GoldTable.__tablename__) from e
 
     async def _updateItemInTable(self, item: Item) -> None:
+        itemTable: ItemTable | None = None
         try:
             goldTable = await self._createGoldTableAndInsertIt(item.gold)
             goldId: int = goldTable.id
-            itemTable: ItemTable = mapItemToItemTable(item, goldId, True)
+            itemTable = mapItemToItemTable(item, goldId, True)
             self.dbSession.add(itemTable)
             await self.dbSession.flush()
             await self._addStatsRelationWithItem(itemTable, item.stats)
             await self._addTagsRelationWithItem(itemTable, item.tags)
-        except Exception as e:
+        except SQLAlchemyError as e:
             await self.dbSession.rollback()
-            logger.error(f"Error, could not update items table, exception: {e}")
+            if itemTable is None:
+                logger.error(f"Error, item table is None, exception: {e}")
+            else:
+                logger.error(f"Error, could not update items table with values {itemTable!r}, exception: {e}")
             raise TableUpdateError("Error, could not update items table") from e
 
-    async def updateItemsTable(self, itemsList: List[Item]) -> bool:
+    async def updateItemsTable(self, itemsList: List[Item]) -> None:
         try:
             logger.debug("Updating items table")
             tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
@@ -242,7 +251,6 @@ class ItemsLoader:
                 for item in itemsList:
                     await self._updateItemInTable(item)
             logger.debug("Updated items table successfully")
-            return True
-        except TableUpdateError as e:
-            self.updated = False
+        except Exception as e:
+            logger.error(f"Unexpected exception has ocurred : {e}")
             raise e
