@@ -20,6 +20,7 @@ from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
     getAllStatsTableNames,
     getAllTagsTableNames,
+    getItemTableGivenName,
     getStatIdWithStatName,
     getTagIdWithtTagName,
 )
@@ -243,8 +244,11 @@ class ItemsLoader:
                 logger.error(f"Error, could not update items table with values {itemTable!r}, exception: {e}")
             raise TableUpdateError("Error, could not update items table") from e
 
+    async def _flushItemTableChangesIntoDataBase(self,item:Item, itemTable : ItemTable):
+        pass
+
     async def updateItemsTable(self, itemsList: List[Item]) -> None:
-        logger.debug("Updating items table")
+        logger.debug(f"Updating items table with {len(itemsList)} items")
         tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
         tagsUpdated: bool = await self.updateTagsTable(tagsList)
         statsList: List[str] = [
@@ -253,5 +257,9 @@ class ItemsLoader:
         statsUpdated: bool = await self.updateStatsTable(statsList)
         if tagsUpdated and statsUpdated:
             for item in itemsList:
-                await self._flushItemIntoDataBase(item)
-            await self.dbSession.commit()
+                itemTable : ItemTable | None = await getItemTableGivenName(self.dbSession,item.name)
+                if itemTable is None:
+                    await self._flushItemIntoDataBase(item)
+                else:
+                    await self._flushItemTableChangesIntoDataBase(item,itemTable)
+                await self.dbSession.commit()
