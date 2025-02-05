@@ -7,7 +7,7 @@ class ItemTable(base):
     
     id: Mapped[int] = mapped_column(primary_key=True, nullable=False)
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
-    plain_text: Mapped[str] = mapped_column(String(100), nullable=False)
+    plain_text: Mapped[str] = mapped_column(String(300), nullable=False)
     image: Mapped[str] = mapped_column(String(100), nullable=False)
     updated: Mapped[bool] = mapped_column(Boolean, nullable=False)
     gold_id: Mapped[int] = mapped_column(ForeignKey("gold_table.id"), nullable=False)
