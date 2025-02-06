@@ -250,11 +250,15 @@ class ItemsLoader:
             raise TableUpdateError(GoldTable.__tablename__,msg)
         newGoldTable : GoldTable = mapGoldToGoldTable(gold)
         newGoldTable.id = currentGoldTable.id
-        await self.dbSession.merge(newGoldTable)
+        await self._flushGoldTable(newGoldTable)
+
+    # async def _deleteItemStatsExistingRelations(self,itemId:int) -> None :
+    #     pass
 
 
     async def _flushItemTableChangesIntoDataBase(self,item:Item, itemTable : ItemTable):
         await self._updateGoldTableWithGold(itemTable.id,itemTable.gold_id,item.gold)
+        
 
 
     async def updateItemsTable(self, itemsList: List[Item]) -> None:
