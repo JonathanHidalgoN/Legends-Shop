@@ -20,6 +20,7 @@ from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
     getAllStatsTableNames,
     getAllTagsTableNames,
+    getGoldTableWithItemId,
     getItemTableGivenName,
     getStatIdWithStatName,
     getTagIdWithtTagName,
@@ -110,9 +111,9 @@ class ItemsLoader:
             raise ItemsLoaderError("Error, items list is empty")
         try:
             await self.updateItemsTable(itemsList)
-        except Exception:
+        except Exception as e:
             self.updated = False
-            raise ItemsLoaderError(f"Error updating {ItemTable.__tablename__}")
+            raise ItemsLoaderError(f"Error updating {ItemTable.__tablename__}") from e
         logger.debug("Updated items successfully")
         self.updated = True
 
@@ -241,8 +242,20 @@ class ItemsLoader:
                 logger.error(f"Error, could not update items table with values {itemTable!r}, exception: {e}")
             raise TableUpdateError("Error, could not update items table") from e
 
+    async def _updateGoldTableWithGold(self,itemId:int,goldId:int,gold : Gold):
+        currentGoldTable : GoldTable | None = await getGoldTableWithItemId(self.dbSession,itemId)
+        if currentGoldTable is None:
+            msg : str = f"Item with id {itemId} has a reference to gold_table with id {goldId} but that row do not exist"
+            logger.error(msg)
+            raise TableUpdateError(GoldTable.__tablename__,msg)
+        newGoldTable : GoldTable = mapGoldToGoldTable(gold)
+        newGoldTable.id = currentGoldTable.id
+        await self.dbSession.merge(newGoldTable)
+
+
     async def _flushItemTableChangesIntoDataBase(self,item:Item, itemTable : ItemTable):
-        pass
+        await self._updateGoldTableWithGold(itemTable.id,itemTable.gold_id,item.gold)
+
 
     async def updateItemsTable(self, itemsList: List[Item]) -> None:
         logger.debug(f"Updating items table with {len(itemsList)} items")
@@ -253,6 +266,7 @@ class ItemsLoader:
         ]
         statsUpdated: bool = await self.updateStatsTable(statsList)
         if tagsUpdated and statsUpdated:
+            # TODO : WRAP IN TRANSACTION AND ROLL BACK IF EXCEPTION
             for item in itemsList:
                 itemTable : ItemTable | None = await getItemTableGivenName(self.dbSession,item.name)
                 if itemTable is None:
