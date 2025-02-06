@@ -3,7 +3,7 @@ import json
 import httpx
 
 from pydantic import Json, ValidationError
-from sqlalchemy import insert
+from sqlalchemy import delete, insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
@@ -252,12 +252,27 @@ class ItemsLoader:
         newGoldTable.id = currentGoldTable.id
         await self._flushGoldTable(newGoldTable)
 
-    # async def _deleteItemStatsExistingRelations(self,itemId:int) -> None :
-    #     pass
+    async def _deleteItemStatsExistingRelations(self,itemId:int) -> None :
+        delInstruction = delete(ItemStatAssociation).where(ItemStatAssociation.c.item_id ==itemId)
+        try:
+            await self.dbSession.execute(delInstruction)
+        except SQLAlchemyError as e:
+            logger.exception(f"Error while deleting stats associations for item id {itemId}: {e}")
+            raise TableUpdateError("ItemStatAssociation")
+
+    async def _deleteItemTagsExistingRelations(self,itemId:int) -> None :
+        delInstruction = delete(ItemTagsAssociation).where(ItemTagsAssociation.c.item_id ==itemId)
+        try:
+            await self.dbSession.execute(delInstruction)
+        except SQLAlchemyError as e:
+            logger.exception(f"Error while deleting tags associations for item id {itemId}: {e}")
+            raise TableUpdateError("TagsStatAssociation")
 
 
     async def _flushItemTableChangesIntoDataBase(self,item:Item, itemTable : ItemTable):
         await self._updateGoldTableWithGold(itemTable.id,itemTable.gold_id,item.gold)
+        await self._deleteItemStatsExistingRelations(itemTable.id)
+        await self._deleteItemTagsExistingRelations(itemTable.id)
         
 
 
