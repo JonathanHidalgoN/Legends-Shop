@@ -226,15 +226,14 @@ class ItemsLoader:
     async def _flushNewItemIntoDataBase(self, item: Item, itemTable:ItemTable | None = None) -> None:
         newItemTable: ItemTable | None = None
         try:
-            goldTable = mapGoldToGoldTable(item.gold)
-            await self._flushGoldTable(goldTable)
-            goldId: int = goldTable.id
             newItemTable = None            
             if itemTable is None:
-                newItemTable = mapItemToItemTable(item, goldId, True) 
+                goldTable = mapGoldToGoldTable(item.gold)
+                await self._flushGoldTable(goldTable)
+                newItemTable = mapItemToItemTable(item, goldTable.id, True) 
             else:
                 newItemTable = itemTable
-                newItemTable.gold_id =goldId 
+                await self._updateGoldTableWithGold(itemTable.id,itemTable.gold_id,item.gold)
             self.dbSession.add(newItemTable)
             await self.dbSession.flush()
             await self._flushStatsRelationWithItem(newItemTable, item.stats)
@@ -273,15 +272,6 @@ class ItemsLoader:
             logger.exception(f"Error while deleting tags associations for item id {itemId}: {e}")
             raise TableUpdateError("TagsStatAssociation")
 
-
-    async def _flushItemTableChangesIntoDataBase(self,item:Item, itemTable : ItemTable):
-        await self._updateGoldTableWithGold(itemTable.id,itemTable.gold_id,item.gold)
-        await self._deleteItemStatsExistingRelations(itemTable.id)
-        await self._deleteItemTagsExistingRelations(itemTable.id)
-
-        
-
-
     async def updateItemsTable(self, itemsList: List[Item]) -> None:
         logger.debug(f"Updating items table with {len(itemsList)} items")
         tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
@@ -297,5 +287,9 @@ class ItemsLoader:
                 if itemTable is None:
                     await self._flushNewItemIntoDataBase(item)
                 else:
-                    await self._flushItemTableChangesIntoDataBase(item,itemTable)
+                    #Its easier to delete the many to many relations and repopulate that
+                    #to check if its a new one
+                    await self._deleteItemStatsExistingRelations(itemTable.id)
+                    await self._deleteItemTagsExistingRelations(itemTable.id)
+                    await self._flushNewItemIntoDataBase(item,itemTable)
                 await self.dbSession.commit()
