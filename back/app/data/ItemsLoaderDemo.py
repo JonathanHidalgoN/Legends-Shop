@@ -65,7 +65,13 @@ class ItemsLoader:
         - UpdateItemsError.
         """
         itemsJson: dict = await self.getItemsJson()
+        if not itemsJson:
+            logger.error("Items Json is empty")
+            raise ItemsLoaderError("Items Json is empty!")
         itemsList: List[Item] = await self.parseItemsJsonIntoItemList(itemsJson)
+        if not itemsList:
+            logger.error("Items list is empty")
+            raise ItemsLoaderError("Items Json is empty!")
         await self.updateTagsInDataBase()
         await self.updateStatsInDataBase()
         await self.updateItemsInDataBase(itemsList)
