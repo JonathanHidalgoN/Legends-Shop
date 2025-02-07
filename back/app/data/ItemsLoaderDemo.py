@@ -25,7 +25,7 @@ from app.data.queries.itemQueries import (
     getAllStatsTableNames,
     getAllTagsTableNames,
     getGoldTableWithItemId,
-    getItemTableGivenName,
+    getItemTableGivenItemName,
     getStatIdWithStatName,
     getTagIdWithtTagName,
 )
@@ -134,6 +134,7 @@ class ItemsLoader:
         return itemsList
 
     async def parseDataNodeIntoItem(self,itemId: int, itemData, itemNames : Set[str]) -> Item | None:
+        #TODO: CHECK ASYNC
         """
         Parses the 'data' node of the json with items into an Item.
         Raises nothing but if there is an error just will log a warning and ingore that item
@@ -185,6 +186,7 @@ class ItemsLoader:
         logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
     def addTagInDataBaseIfNew(self,tag:str, existingTagNames:Set[str]) -> bool:
+        ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
         Updates the database with tag, if it do not exist.
         Raises UpdateTagsError
@@ -231,6 +233,7 @@ class ItemsLoader:
         logger.debug(f"Updated stats table successfully, {newAditions} new stats added")
 
     def addStatInDataBaseIfNew(self,stat:str, existingstatNames:Set[str]) -> bool:
+        ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
         Updates the database with stat, if it do not exist.
         Raises UpdatestatsError
@@ -249,5 +252,35 @@ class ItemsLoader:
 
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
         """
+        Updates the items in the database, transactions are added in a batch,
+        if the insert/update fails then the transacion fails and changes are rollback.
+        """
+        logger.debug(f"Updating {len(itemsList)} items in the database")
+        currentItemName : str = ""
+        try:
+            for item in itemsList:
+                currentItemName = item.name
+                existingItem : ItemTable | None = await getItemTableGivenItemName(self.dbSession,item.name)
+                if existingItem is None:
+                    await self.insertItemTable()
+                else:
+                    await self.updateExistingItemTable()
+            await self.dbSession.commit()
+            logger.debug(f"Updated {len(itemsList)} items successfully")
+        except SQLAlchemyError as e:
+            logger.debug(f"Error getting the item from the database with name {currentItemName}, exception: {e}")
+            raise UpdateItemsError() from e
+        except Exception as e:
+            logger.debug(f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}")
+            raise UpdateItemsError() from e
+    
+    async def updateExistingItemTable(self)->None:
+        """
         """
         pass
+
+    async def insertItemTable(self)->None:
+        """
+        """
+        pass
+
