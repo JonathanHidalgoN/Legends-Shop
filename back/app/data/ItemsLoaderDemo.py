@@ -33,48 +33,47 @@ from app.schemas.Item import Gold, Item, Stats
 from app.logger import logger
 
 
-
 class ItemsLoader:
     """
-    This class is responsible to fetch the items from ITEMS_URL, then parse 
+    This class is responsible to fetch the items from ITEMS_URL, then parse
     that json into a collection representing the items, with those items update the database.
 
     The only method to be used is 'updateItems', that method causes:
-    1 - Get the json with items. 
-    2 - Parse the json with items into a list of items.
-    3 - Update the tags table.
-    4 - Update the stats table.
-    5 - Update/insert the items in the database
     """
+
     ITEMS_URL: str = (
         "https://ddragon.leagueoflegends.com/cdn/15.2.1/data/en_US/item.json"
     )
 
-    def __init__(self, dbSession : AsyncSession):
+    def __init__(self, dbSession: AsyncSession):
         pass
 
     async def updateItems(self) -> None:
-        try:
-            itemsJson : dict = await self.getItemsJson()
-            itemsList : List[Item] = await self.parseItemsJsonIntoItemList(itemsJson)
-            await self.updateTagsInDataBase()
-            await self.updateStatsInDataBase()
-            await self.updateItemsInDataBase(itemsList)
-        except JSONFetchError as e:
-            pass 
-        except JsonParseError as e:
-            pass
-        except UpdateTagsError as e:
-            pass
-        except UpdateStatsError as e:
-            pass
-        except UpdateItemsError as e:
-            pass
+        """
+        This method :
+        1 - Get the json with items.
+        2 - Parse the json with items into a list of items.
+        3 - Update the tags table.
+        4 - Update the stats table.
+        5 - Update/insert the items in the database
+
+        Raises ItemsLoaderError in the following flavors
+        - JSONFetchError.
+        - JsonParseError.
+        - UpdateTagsError.
+        - UpdateStatsError.
+        - UpdateItemsError.
+        """
+        itemsJson: dict = await self.getItemsJson()
+        itemsList: List[Item] = await self.parseItemsJsonIntoItemList(itemsJson)
+        await self.updateTagsInDataBase()
+        await self.updateStatsInDataBase()
+        await self.updateItemsInDataBase(itemsList)
 
     async def getItemsJson(self) -> dict:
         """
         This method gets the json from ITEMS_URL and returns it.
-        Raise a JSONFetchError when an error occurs 
+        Raise a JSONFetchError when an error occurs
         """
         logger.debug("Getting json items")
         try:
@@ -85,9 +84,7 @@ class ItemsLoader:
                 logger.debug("Fetched json items successfully")
                 return data
         except (json.JSONDecodeError, httpx.RequestError) as e:
-            logger.exception(
-                f"Error when fetching the JSON with items: {e}"
-            )
+            logger.exception(f"Error when fetching the JSON with items: {e}")
             raise JSONFetchError from e
         except Exception as e:
             logger.exception(
@@ -95,18 +92,15 @@ class ItemsLoader:
             )
             raise JSONFetchError from e
 
-    async def parseItemsJsonIntoItemList(self,itemsJson:Json)->List[Item]:
-        itemsList : List[Item] = []
+    async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
+        itemsList: List[Item] = []
         return itemsList
 
-    async def updateTagsInDataBase(self)->None:
+    async def updateTagsInDataBase(self) -> None:
         pass
 
-    async def updateStatsInDataBase(self)->None:
+    async def updateStatsInDataBase(self) -> None:
         pass
 
-    async def updateItemsInDataBase(self,itemsList:List[Item]) -> None:
+    async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
         pass
-
-    
-
