@@ -170,7 +170,7 @@ class ItemsLoader:
                 f"Error, could not get existing tag names in the database: {e}"
             )
             raise UpdateTagsError() from e
-        logger.debug(f"Adding {len(tagsToAdd)} new tags, just new tags will be aded")
+        logger.debug(f"Adding {len(tagsToAdd)} tags, just new tags will be added")
         newAditions : int = 0
         for tag in tagsToAdd:
             isNew : bool = await self.addTagInDataBaseIfNew(tag, existingTagNames)
@@ -179,7 +179,21 @@ class ItemsLoader:
         logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
     async def addTagInDataBaseIfNew(self,tag:str, existingTagNames:List[str]) -> bool:
-        return True
+        """
+        Updates the database with tag, if it do not exist.
+        Raises UpdateTagsError
+        """
+        try:
+            if tag not in existingTagNames:
+                newTag: TagsTable = TagsTable(name=tag)
+                self.dbSession.add(newTag)
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Error while updating tag {tag}, exception: {e}")
+            raise UpdateTagsError() from e
+
 
     async def updateStatsInDataBase(self, statsToAdd:Set[str]) -> None:
         """
