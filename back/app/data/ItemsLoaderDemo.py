@@ -173,12 +173,18 @@ class ItemsLoader:
         logger.debug(f"Adding {len(tagsToAdd)} tags, just new tags will be added")
         newAditions : int = 0
         for tag in tagsToAdd:
-            isNew : bool = await self.addTagInDataBaseIfNew(tag, existingTagNames)
+            isNew : bool = self.addTagInDataBaseIfNew(tag, existingTagNames)
             if isNew:
                 newAditions +=1
+        try:
+            await self.dbSession.commit()
+        except Exception as e:
+            logger.error(f"An error occurred while commiting tags update: {e}")
+            await self.dbSession.rollback()
+            raise UpdateTagsError() from e
         logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
-    async def addTagInDataBaseIfNew(self,tag:str, existingTagNames:List[str]) -> bool:
+    def addTagInDataBaseIfNew(self,tag:str, existingTagNames:List[str]) -> bool:
         """
         Updates the database with tag, if it do not exist.
         Raises UpdateTagsError
