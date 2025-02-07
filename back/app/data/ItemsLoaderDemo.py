@@ -203,8 +203,49 @@ class ItemsLoader:
 
     async def updateStatsInDataBase(self, statsToAdd:Set[str]) -> None:
         """
+        Given a set of unique stats, iterate over them and update the stats table
+        Raise UpdateStatsError 
         """
-        pass
+        logger.debug("Updating stats table")
+        try:
+            logger.debug("Getting existing gats in the database")
+            existingStatNames: Set[str] = await getAllStatsTableNames(self.dbSession)
+            logger.debug(f"Got {len(existingStatNames)} from database")
+        except SQLAlchemyError as e:
+            logger.error(
+                f"Error, could not get existing stat names in the database: {e}"
+            )
+            raise UpdateStatsError() from e
+        logger.debug(f"Adding {len(statsToAdd)} stats, just new stats will be added")
+        newAditions : int = 0
+        for stat in statsToAdd:
+            isNew : bool = self.addStatInDataBaseIfNew(stat, existingStatNames)
+            if isNew:
+                newAditions +=1
+        try:
+            await self.dbSession.commit()
+        except Exception as e:
+            logger.error(f"An error occurred while commiting stats update: {e}")
+            await self.dbSession.rollback()
+            raise UpdateStatsError() from e
+        logger.debug(f"Updated stats table successfully, {newAditions} new stats added")
+
+    def addStatInDataBaseIfNew(self,stat:str, existingstatNames:Set[str]) -> bool:
+        """
+        Updates the database with stat, if it do not exist.
+        Raises UpdatestatsError
+        """
+        try:
+            if stat not in existingstatNames:
+                newStat: StatsTable = StatsTable(name=stat)
+                self.dbSession.add(newStat)
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Error while updating stat {stat}, exception: {e}")
+            raise UpdateStatsError() from e
+
 
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
         """
