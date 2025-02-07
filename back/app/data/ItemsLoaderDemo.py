@@ -73,8 +73,12 @@ class ItemsLoader:
         if not itemsList:
             logger.error("Items list is empty")
             raise ItemsLoaderError("Items Json is empty!")
-        await self.updateTagsInDataBase()
-        await self.updateStatsInDataBase()
+        uniqueTags: Set[str] = set(tag for item in itemsList for tag in item.tags)
+        await self.updateTagsInDataBase(uniqueTags)
+        uniqueStats: Set[str] = set(
+            stat for item in itemsList for stat in item.stats.root
+        )
+        await self.updateStatsInDataBase(uniqueStats)
         await self.updateItemsInDataBase(itemsList)
 
     async def getItemsJson(self) -> dict:
