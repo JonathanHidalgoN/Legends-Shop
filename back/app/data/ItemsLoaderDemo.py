@@ -269,9 +269,11 @@ class ItemsLoader:
             logger.debug(f"Updated {len(itemsList)} items successfully")
         except SQLAlchemyError as e:
             logger.debug(f"Error getting the item from the database with name {currentItemName}, exception: {e}")
+            await self.dbSession.rollback()
             raise UpdateItemsError() from e
         except Exception as e:
             logger.debug(f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}")
+            await self.dbSession.rollback()
             raise UpdateItemsError() from e
     
     async def updateExistingItemTable(self)->None:
