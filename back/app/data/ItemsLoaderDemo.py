@@ -163,7 +163,7 @@ class ItemsLoader:
         logger.debug("Updating tags table")
         try:
             logger.debug("Getting existing gats in the database")
-            existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
+            existingTagNames: Set[str] = await getAllTagsTableNames(self.dbSession)
             logger.debug(f"Got {len(existingTagNames)} from database")
         except SQLAlchemyError as e:
             logger.error(
@@ -184,7 +184,7 @@ class ItemsLoader:
             raise UpdateTagsError() from e
         logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
-    def addTagInDataBaseIfNew(self,tag:str, existingTagNames:List[str]) -> bool:
+    def addTagInDataBaseIfNew(self,tag:str, existingTagNames:Set[str]) -> bool:
         """
         Updates the database with tag, if it do not exist.
         Raises UpdateTagsError

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.GoldTable import GoldTable
@@ -15,9 +15,9 @@ async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     return existingTags
 
 
-async def getAllTagsTableNames(asyncSession: AsyncSession) -> List[str]:
+async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
     result = await asyncSession.execute(select(TagsTable.name))
-    existingTags: List[str] = [tag for tag in result.scalars().all()]
+    existingTags: Set[str] = set(tag for tag in result.scalars().all())
     return existingTags
 
 
@@ -27,9 +27,9 @@ async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
     return existingStats
 
 
-async def getAllStatsTableNames(asyncSession: AsyncSession) -> List[str]:
+async def getAllStatsTableNames(asyncSession: AsyncSession) -> Set[str]:
     result = await asyncSession.execute(select(StatsTable.name))
-    existingStats: List[str] = [tag for tag in result.scalars().all()]
+    existingStats: Set[str] = set(tag for tag in result.scalars().all())
     return existingStats
 
 async def getItemTableGivenName(asyncSession: AsyncSession, name : str) -> ItemTable | None:
