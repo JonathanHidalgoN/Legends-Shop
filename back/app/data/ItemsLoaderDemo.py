@@ -99,14 +99,67 @@ class ItemsLoader:
             raise JSONFetchError from e
 
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
+        """
+        Parses the json with items into a list of items.
+        """
+        logger.debug("Parsing json with items into a list of items")
         itemsList: List[Item] = []
+        self.version = itemsJson.get("version")
+        if self.version is None:
+            logger.warning(
+                "Error, itemsJson has no 'version' key, item parsing can continue"
+            )
+        itemsData: dict | None = itemsJson.get("data")
+        if itemsData is None:
+            logger.error("Error, the items JSON has no data node!")
+            raise JsonParseError("Error, the items JSON has no data node!")
+        itemNames : Set[str] = set() 
+        noneCounter : int = 0
+        parsedItems : int = 0
+        for itemId, itemData in itemsData.items():
+            item : Item | None = await self.parseDataNodeIntoItem(itemId, itemData, itemNames)
+            if item is None:
+                noneCounter +=1
+            else:
+                itemNames.add(item.name)
+                itemsList.append(item)
+                parsedItems += 1
+        logger.debug(f"Parsed items Json successfully, with {parsedItems} parsed items and {noneCounter} items that could not be parsed")
         return itemsList
 
+    async def parseDataNodeIntoItem(self,itemId: int, itemData, itemNames : Set[str]) -> Item | None:
+        """
+        Parses the 'data' node of the json with items into an Item.
+        Raises nothing but if there is an error just will log a warning and ingore that item
+        """
+        if "name" not in itemData:
+            logger.warning(
+                f"Error, the item with id {itemId} has no 'name' node, item parsing will continue but this item won't be updated")
+            return None
+        try:
+            if itemData["name"] in itemNames:
+                logger.warning(
+                    f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database")
+                return None
+            fullItem = {"id": itemId, **itemData}
+            item: Item = Item(**fullItem)
+            return item 
+        except Exception as e:
+            logger.error(
+                f"Error, the item with id {itemId} had a problem while parsing the json into an Item, exception : {e}")
+            return None
+
     async def updateTagsInDataBase(self) -> None:
+        """
+        """
         pass
 
     async def updateStatsInDataBase(self) -> None:
+        """
+        """
         pass
 
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
+        """
+        """
         pass
