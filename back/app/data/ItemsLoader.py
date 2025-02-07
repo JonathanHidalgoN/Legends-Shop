@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 import json
 import httpx
 
@@ -117,7 +117,7 @@ class ItemsLoader:
         logger.debug("Updated items successfully")
         self.updated = True
 
-    async def updateTagsTable(self, tagsList: List[str]) -> bool:
+    async def updateTagsTable(self, tagsList: Set[str]) -> bool:
         try:
             existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
         except SQLAlchemyError as e:
@@ -140,7 +140,7 @@ class ItemsLoader:
             logger.error(f"Error, could not update Tags table exception: {e}")
             raise TableUpdateError(StatsTable.__tablename__) from e
 
-    async def updateStatsTable(self, statsList: List[str]) -> bool:
+    async def updateStatsTable(self, statsList: Set[str]) -> bool:
         try:
             existingStatNames: List[str] = await getAllStatsTableNames(self.dbSession)
         except SQLAlchemyError as e:
@@ -274,12 +274,10 @@ class ItemsLoader:
 
     async def updateItemsTable(self, itemsList: List[Item]) -> None:
         logger.debug(f"Updating items table with {len(itemsList)} items")
-        tagsList: List[str] = [tag for item in itemsList for tag in item.tags]
-        tagsUpdated: bool = await self.updateTagsTable(tagsList)
-        statsList: List[str] = [
-            stat for item in itemsList for stat in item.stats.root
-        ]
-        statsUpdated: bool = await self.updateStatsTable(statsList)
+        uniqueTags: Set[str] = set(tag for item in itemsList for tag in item.tags) 
+        tagsUpdated: bool = await self.updateTagsTable(uniqueTags)
+        uniqueStats: Set[str] = set(stat for item in itemsList for stat in item.stats.root)
+        statsUpdated: bool = await self.updateStatsTable(uniqueStats)
         if tagsUpdated and statsUpdated:
             # TODO : WRAP IN TRANSACTION AND ROLL BACK IF EXCEPTION
             for item in itemsList:
@@ -292,4 +290,3 @@ class ItemsLoader:
                     await self._deleteItemStatsExistingRelations(itemTable.id)
                     await self._deleteItemTagsExistingRelations(itemTable.id)
                     await self._flushNewItemIntoDataBase(item,itemTable)
-                await self.dbSession.commit()
