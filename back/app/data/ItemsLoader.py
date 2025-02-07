@@ -223,23 +223,28 @@ class ItemsLoader:
             logger.error(f"Error, could not update {GoldTable.__tablename__}. Table info: {goldTable}. Exception: {e}")
             raise TableUpdateError(tableName=GoldTable.__tablename__) from e
 
-    async def _flushNewItemIntoDataBase(self, item: Item) -> None:
-        itemTable: ItemTable | None = None
+    async def _flushNewItemIntoDataBase(self, item: Item, itemTable:ItemTable | None = None) -> None:
+        newItemTable: ItemTable | None = None
         try:
             goldTable = mapGoldToGoldTable(item.gold)
             await self._flushGoldTable(goldTable)
             goldId: int = goldTable.id
-            itemTable = mapItemToItemTable(item, goldId, True)
-            self.dbSession.add(itemTable)
+            newItemTable = None            
+            if itemTable is None:
+                newItemTable = mapItemToItemTable(item, goldId, True) 
+            else:
+                newItemTable = itemTable
+                newItemTable.gold_id =goldId 
+            self.dbSession.add(newItemTable)
             await self.dbSession.flush()
-            await self._flushStatsRelationWithItem(itemTable, item.stats)
-            await self._flushTagsRelationWithItem(itemTable, item.tags)
+            await self._flushStatsRelationWithItem(newItemTable, item.stats)
+            await self._flushTagsRelationWithItem(newItemTable, item.tags)
         except SQLAlchemyError as e:
             await self.dbSession.rollback()
-            if itemTable is None:
+            if newItemTable is None:
                 logger.error(f"Error, item table is None, exception: {e}")
             else:
-                logger.error(f"Error, could not update items table with values {itemTable!r}, exception: {e}")
+                logger.error(f"Error, could not update items table with values {newItemTable!r}, exception: {e}")
             raise TableUpdateError("Error, could not update items table") from e
 
     async def _updateGoldTableWithGold(self,itemId:int,goldId:int,gold : Gold):
@@ -273,6 +278,7 @@ class ItemsLoader:
         await self._updateGoldTableWithGold(itemTable.id,itemTable.gold_id,item.gold)
         await self._deleteItemStatsExistingRelations(itemTable.id)
         await self._deleteItemTagsExistingRelations(itemTable.id)
+
         
 
 
