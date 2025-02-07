@@ -46,6 +46,7 @@ class ItemsLoader:
     )
 
     def __init__(self, dbSession: AsyncSession):
+        self.dbSession = dbSession
         pass
 
     async def updateItems(self) -> None:
@@ -101,6 +102,7 @@ class ItemsLoader:
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
         """
         Parses the json with items into a list of items.
+        Raises JsonParseError if there is no 'data' node
         """
         logger.debug("Parsing json with items into a list of items")
         itemsList: List[Item] = []
@@ -149,12 +151,33 @@ class ItemsLoader:
                 f"Error, the item with id {itemId} had a problem while parsing the json into an Item, exception : {e}")
             return None
 
-    async def updateTagsInDataBase(self) -> None:
+    async def updateTagsInDataBase(self, tagsToAdd:Set[str]) -> None:
         """
+        Given a set of unique tags, iterate over them and update the tags table
+        Raise UpdateTagsError 
         """
-        pass
+        logger.debug("Updating tags table")
+        try:
+            logger.debug("Getting existing gats in the database")
+            existingTagNames: List[str] = await getAllTagsTableNames(self.dbSession)
+            logger.debug(f"Got {len(existingTagNames)} from database")
+        except SQLAlchemyError as e:
+            logger.error(
+                f"Error, could not get existing tag names in the database: {e}"
+            )
+            raise UpdateTagsError() from e
+        logger.debug(f"Adding {len(tagsToAdd)} new tags, just new tags will be aded")
+        newAditions : int = 0
+        for tag in tagsToAdd:
+            isNew : bool = await self.addTagInDataBaseIfNew(tag, existingTagNames)
+            if isNew:
+                newAditions +=1
+        logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
-    async def updateStatsInDataBase(self) -> None:
+    async def addTagInDataBaseIfNew(self,tag:str, existingTagNames:List[str]) -> bool:
+        return True
+
+    async def updateStatsInDataBase(self, statsToAdd:Set[str]) -> None:
         """
         """
         pass
