@@ -53,12 +53,12 @@ class ItemsLoader:
             logger.exception(f"JSON decode error when getting the items json : {e}")
             raise JSONFetchError("Invalid JSON received from API") from e
         except httpx.RequestError as e:
-            logger.exception(f"HTTP request error when gettint the JSON items : {e}")
-            raise JSONFetchError("HTTP error ocurred when fetching the items") from e
+            logger.exception(f"HTTP request error when getting the JSON items : {e}")
+            raise JSONFetchError("HTTP error occurred when fetching the items") from e
         except Exception as e:
             logger.exception(f"Exception when fetching the JSON with items : {e}")
             raise JSONFetchError(
-            "An unexpected error ocurred when fetching JSON items"
+            "An unexpected error occurred when fetching JSON items"
             ) from e
 
     def parseRawJsonIntoItemsList(self, itemsDict: Json) -> List[Item]:
@@ -138,7 +138,7 @@ class ItemsLoader:
         except Exception as e:
             await self.dbSession.rollback()
             logger.error(f"Error, could not update Tags table exception: {e}")
-            raise TableUpdateError(StatsTable.__tablename__) from e
+            raise TableUpdateError(TagsTable.__tablename__) from e
 
     async def updateStatsTable(self, statsList: Set[str]) -> bool:
         try:
