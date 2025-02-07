@@ -16,6 +16,9 @@ async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
 
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
+    """
+    Returns a set(because tag names are unique) with tag names
+    """
     result = await asyncSession.execute(select(TagsTable.name))
     existingTags: Set[str] = set(tag for tag in result.scalars().all())
     return existingTags
@@ -28,6 +31,9 @@ async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
 
 
 async def getAllStatsTableNames(asyncSession: AsyncSession) -> Set[str]:
+    """
+    Returns a set(because stats names are unique) with stat names
+    """
     result = await asyncSession.execute(select(StatsTable.name))
     existingStats: Set[str] = set(tag for tag in result.scalars().all())
     return existingStats
