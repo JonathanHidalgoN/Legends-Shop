@@ -38,7 +38,7 @@ async def getAllStatsTableNames(asyncSession: AsyncSession) -> Set[str]:
     existingStats: Set[str] = set(tag for tag in result.scalars().all())
     return existingStats
 
-async def getItemTableGivenName(asyncSession: AsyncSession, name : str) -> ItemTable | None:
+async def getItemTableGivenItemName(asyncSession: AsyncSession, name : str) -> ItemTable | None:
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.name == name))
     itemTable = result.scalars().first()
     return itemTable if itemTable else None 
