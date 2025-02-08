@@ -309,8 +309,24 @@ class ItemsLoader:
 
     async def addItemStatsRelations(self,itemId:int, stats:Stats) -> None:
         """
+        This function inserts the relations given the itemId and stats
+        Raises UpdateItemsError when something fails
         """
-        pass
+        for stat, statValue in stats.root.items():
+            statId: int | None = await getStatIdWithStatName(self.dbSession,stat)
+            if statId is None:
+                logger.error(f"Stat with name {stat} was not found in the dabatase")
+                raise UpdateItemsError("Stat was not found in the database")
+            else:
+                itemStatValues : dict = {
+                    "item_id":itemId, "stat_id":statId,"value":statValue
+                }
+                try:
+                    ins = insert(ItemStatAssociation).values(**itemStatValues)
+                    await self.dbSession.execute(ins)
+                except Exception as e:
+                    logger.error(f"Could not insert a relation item-stat, itemId: {itemId}, statId: {statId}, statName: {stat}, exception: {e}")
+                    raise UpdateItemsError("Could not insert a relation item-stat") from e
 
     async def addItemTagsRelations(self,itemId:int, tags:List[str]) -> None:
         """
