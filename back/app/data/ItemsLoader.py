@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     ItemsLoaderError,
-    JSONFetchError,
+    JsonFetchError,
     JsonParseError,
     UpdateItemsError,
     UpdateStatsError,
@@ -94,12 +94,12 @@ class ItemsLoader:
                 return data
         except (json.JSONDecodeError, httpx.RequestError) as e:
             logger.exception(f"Error when fetching the JSON with items: {e}")
-            raise JSONFetchError from e
+            raise JsonFetchError from e
         except Exception as e:
             logger.exception(
                 f"Unexpected exception when fetching the JSON with items: {e}"
             )
-            raise JSONFetchError from e
+            raise JsonFetchError from e
 
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
         """
@@ -237,6 +237,36 @@ class ItemsLoader:
             await self.dbSession.rollback()
             raise UpdateStatsError() from e
         logger.debug(f"Updated stats table successfully, {newAditions} new stats added")
+
+# async def updateEffectsInDataBase(self, effectsToAdd: Set[str]) -> None:
+#     """
+#     Given a set of unique effects, iterate over them and update the effects table.
+#     Raises UpdateEffectsError.
+#     """
+#     logger.debug("Updating effects table")
+#     try:
+#         logger.debug("Getting existing effects from the database")
+#         existingEffectNames: Set[str] = await getAllEffectsTableNames(self.dbSession)
+#         logger.debug(f"Got {len(existingEffectNames)} from database")
+#     except SQLAlchemyError as e:
+#         logger.error(
+#             f"Error, could not get existing effect names in the database: {e}"
+#         )
+#         raise UpdateEffectsError() from e
+#
+#     logger.debug(f"Adding {len(effectsToAdd)} effects, only new effects will be added")
+#     newAdditions: int = 0
+#     for effect in effectsToAdd:
+#         isNew: bool = self.addEffectInDataBaseIfNew(effect, existingEffectNames)
+#         if isNew:
+#             newAdditions += 1
+#     try:
+#         await self.dbSession.commit()
+#     except Exception as e:
+#         logger.error(f"An error occurred while committing effects update: {e}")
+#         await self.dbSession.rollback()
+#         raise UpdateEffectsError() from e
+#     logger.debug(f"Updated effects table successfully, {newAdditions} new effects added")
 
     def addStatInDataBaseIfNew(self, stat: str, existingstatNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
