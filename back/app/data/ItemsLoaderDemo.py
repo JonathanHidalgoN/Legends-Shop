@@ -170,10 +170,10 @@ class ItemsLoader:
         """
         logger.debug("Updating tags table")
         try:
-            logger.debug("Getting existing gats in the database")
+            logger.debug("Getting existing tags in the database")
             existingTagNames: Set[str] = await getAllTagsTableNames(self.dbSession)
             logger.debug(f"Got {len(existingTagNames)} from database")
-        except SQLAlchemyError as e:
+        except Exception as e:
             logger.error(
                 f"Error, could not get existing tag names in the database: {e}"
             )
