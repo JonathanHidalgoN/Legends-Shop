@@ -1,6 +1,7 @@
 from typing import List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from app.data.models.EffectsTable import EffectsTable
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.StatsTable import StatsTable
@@ -39,6 +40,21 @@ async def getAllStatsTableNames(asyncSession: AsyncSession) -> Set[str]:
     return existingStats
 
 
+async def getAllEffectsTable(asyncSession: AsyncSession) -> List[EffectsTable]:
+    result = await asyncSession.execute(select(EffectsTable))
+    existingEffects: List[EffectsTable] = [tag for tag in result.scalars().all()]
+    return existingEffects
+
+
+async def getAllEffectsTableNames(asyncSession: AsyncSession) -> Set[str]:
+    """
+    Returns a set (because effect names are unique) with effect names.
+    """
+    result = await asyncSession.execute(select(EffectsTable.name))
+    existingEffects: Set[str] = set(tag for tag in result.scalars().all())
+    return existingEffects
+
+
 async def getItemTableGivenItemName(
     asyncSession: AsyncSession, name: str
 ) -> ItemTable | None:
@@ -55,6 +71,16 @@ async def getStatIdWithStatName(
     )
     stat = result.scalars().first()
     return stat if stat else None
+
+
+async def getEffectIdWithEffectName(
+    asyncSession: AsyncSession, effectName: str
+) -> int | None:
+    result = await asyncSession.execute(
+        select(EffectsTable.id).where(EffectsTable.name == effectName)
+    )
+    effect = result.scalars().first()
+    return effect if effect else None
 
 
 async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | None:
