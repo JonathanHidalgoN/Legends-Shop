@@ -17,5 +17,8 @@ class UpdateStatsError(ItemsLoaderError):
     pass
 
 
+class UpdateEffectsError(ItemsLoaderError):
+    pass
+
 class UpdateItemsError(ItemsLoaderError):
     pass
