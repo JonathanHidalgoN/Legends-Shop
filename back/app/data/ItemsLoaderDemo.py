@@ -24,6 +24,7 @@ from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
     getAllStatsTableNames,
     getAllTagsTableNames,
+    getGoldIdWithItemId,
     getGoldTableWithItemId,
     getItemTableGivenItemName,
     getStatIdWithStatName,
@@ -261,10 +262,7 @@ class ItemsLoader:
             for item in itemsList:
                 currentItemName = item.name
                 existingItem : ItemTable | None = await getItemTableGivenItemName(self.dbSession,item.name)
-                if existingItem is None:
-                    await self.insertItemTable()
-                else:
-                    await self.updateExistingItemTable()
+                await self.insertOrUpdateItemTable(item,existingItem)
             await self.dbSession.commit()
             logger.debug(f"Updated {len(itemsList)} items successfully")
         except SQLAlchemyError as e:
@@ -275,14 +273,35 @@ class ItemsLoader:
             logger.debug(f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}")
             await self.dbSession.rollback()
             raise UpdateItemsError() from e
-    
-    async def updateExistingItemTable(self)->None:
-        """
-        """
-        pass
 
-    async def insertItemTable(self)->None:
+    async def insertOrUpdateItemTable(self, item: Item,existingItem : ItemTable | None)->None:
         """
         """
-        pass
+        if existingItem is None:
+            await self.insertOrUpdateGoldTable(True,item.gold,None)
+        else:
+            await self.insertOrUpdateGoldTable(False,item.gold,existingItem.id)
+
+    async def insertOrUpdateGoldTable(self,createNewGoldTable:bool, gold:Gold, itemId:int | None = None)->None:
+        """
+        Insert or updates the gold table depending on the createNewGoldTable parameter
+        Raises UpdateItemsError
+        """
+        if (itemId is None) and (createNewGoldTable is False):
+            logger.error("Error trying to updating a gold table the item id can not be None")
+            raise UpdateItemsError("Can not update a gold table with no item id")
+        newGoldTable : GoldTable = mapGoldToGoldTable(gold)
+        if (createNewGoldTable is False) and (itemId is not None):
+            existingGoldTableId: int | None = await getGoldIdWithItemId(self.dbSession,itemId)
+            if existingGoldTableId is None:
+                logger.error(f"Error updating the row in gold table with item id {itemId}, did not find the row with goldId {existingGoldTableId}")
+                raise UpdateItemsError("Tried to update a gold row that do not exist")
+            newGoldTable.id = existingGoldTableId
+        try:
+            await self.dbSession.merge(newGoldTable)
+            await self.dbSession.flush()
+        except Exception as e:
+            logger.error(f"Error updating/inserting a gold table, exception: {e}")
+            raise UpdateItemsError("Unexpected exception happened while inserting/updating a gold row") from e
+
 
