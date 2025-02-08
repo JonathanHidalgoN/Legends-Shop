@@ -11,6 +11,7 @@ ItemTagsAssociation = Table(
     Column("tags_id", Integer, ForeignKey("tags_table.id"), primary_key=True),
 )
 
+
 class TagsTable(base):
     __tablename__ = "tags_table"
 

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from app.data.database import base
 
+
 class GoldTable(base):
     __tablename__ = "gold_table"
 

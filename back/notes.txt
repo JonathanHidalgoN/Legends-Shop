@@ -1,0 +1,4 @@
+To run normally :uvicorn app.main:app 
+To attach debbuger :python -m debugpy --listen 5679 --wait-for-client -m uvicorn app.main:app --host 127.0.0.1 --port 8000 
+To use alembic -> Create a table in models folder -> import that table to alembic/env.py file ->
+use alembic revision --autogenerate -m "comment here" -> use alembic upgrade head

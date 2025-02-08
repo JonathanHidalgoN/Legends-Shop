@@ -11,6 +11,7 @@ ItemEffectAssociation = Table(
     Column("value", Float, nullable=False),
 )
 
+
 class EffectsTable(base):
     __tablename__ = "effects_table"
 

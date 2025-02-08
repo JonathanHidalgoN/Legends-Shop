@@ -38,10 +38,14 @@ async def getAllStatsTableNames(asyncSession: AsyncSession) -> Set[str]:
     existingStats: Set[str] = set(tag for tag in result.scalars().all())
     return existingStats
 
-async def getItemTableGivenItemName(asyncSession: AsyncSession, name : str) -> ItemTable | None:
+
+async def getItemTableGivenItemName(
+    asyncSession: AsyncSession, name: str
+) -> ItemTable | None:
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.name == name))
     itemTable = result.scalars().first()
-    return itemTable if itemTable else None 
+    return itemTable if itemTable else None
+
 
 async def getStatIdWithStatName(
     asyncSession: AsyncSession, statName: str
@@ -53,18 +57,24 @@ async def getStatIdWithStatName(
     return stat if stat else None
 
 
-async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId:int) -> int | None:
-    result = await asyncSession.execute(select(ItemTable.gold_id).where(ItemTable.id == itemId))
+async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | None:
+    result = await asyncSession.execute(
+        select(ItemTable.gold_id).where(ItemTable.id == itemId)
+    )
     goldId = result.scalars().first()
     return goldId if goldId else None
 
-async def getGoldTableWithItemId(asyncSession: AsyncSession, itemId:int) -> GoldTable | None:
-    goldId : int | None = await getGoldIdWithItemId(asyncSession,itemId)
+
+async def getGoldTableWithItemId(
+    asyncSession: AsyncSession, itemId: int
+) -> GoldTable | None:
+    goldId: int | None = await getGoldIdWithItemId(asyncSession, itemId)
     if goldId is None:
         return None
     result = await asyncSession.execute(select(GoldTable).where(GoldTable.id == goldId))
     goldTable = result.scalars().first()
     return goldTable if goldTable else None
+
 
 async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
     result = await asyncSession.execute(

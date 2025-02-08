@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, Float, ForeignKey, Integer, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.data.database import base
 from app.data.models.ItemTable import ItemTable
@@ -10,6 +10,7 @@ ItemStatAssociation = Table(
     Column("stat_id", Integer, ForeignKey("stats_table.id"), primary_key=True),
     Column("value", Float, nullable=False),
 )
+
 
 class StatsTable(base):
     __tablename__ = "stats_table"
