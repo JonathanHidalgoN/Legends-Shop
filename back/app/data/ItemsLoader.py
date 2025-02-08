@@ -10,28 +10,35 @@ from app.customExceptions import (
     ItemsLoaderError,
     JsonFetchError,
     JsonParseError,
+    UpdateEffectsError,
     UpdateItemsError,
     UpdateStatsError,
     UpdateTagsError,
 )
 from app.data.mappers import mapGoldToGoldTable, mapItemToItemTable
+from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 from app.data.models.GoldTable import GoldTable
 from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import ItemTagsAssociation, TagsTable
 from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
+    getAllEffectsTableNames,
     getAllStatsTableNames,
     getAllTagsTableNames,
+    getEffectIdWithEffectName,
     getGoldIdWithItemId,
     getItemTableGivenItemName,
     getStatIdWithStatName,
     getTagIdWithtTagName,
 )
-from app.schemas.Item import Gold, Item, Stats
+from app.schemas.Item import Effects, Gold, Item, Stats
 from app.logger import logger
 
 
 class ItemsLoader:
+    #I know this class has a lot of code duplication where stats/effects are involved,
+    #maybe is worth to abastract but for I decided create indivial functions because 
+    #in the future some different functionality will be added 
     """
     This class is responsible to fetch the items from ITEMS_URL, then parse
     that json into a collection representing the items, with those items update the database.
@@ -54,7 +61,8 @@ class ItemsLoader:
         2 - Parse the json with items into a list of items.
         3 - Update the tags table.
         4 - Update the stats table.
-        5 - Update/insert the items in the database
+        5 - Update the effects table.
+        6 - Update/insert the items in the database
 
         Raises ItemsLoaderError in the following flavors
         - JSONFetchError.
@@ -62,6 +70,7 @@ class ItemsLoader:
         - UpdateTagsError.
         - UpdateStatsError.
         - UpdateItemsError.
+        - UpdateEffectsError.
         """
         itemsJson: dict = await self.getItemsJson()
         if not itemsJson:
@@ -77,6 +86,10 @@ class ItemsLoader:
             stat for item in itemsList for stat in item.stats.root
         )
         await self.updateStatsInDataBase(uniqueStats)
+        uniqueEffects: Set[str] = set(
+            effect for item in itemsList for effect in item.effect.root
+        )
+        await self.updateEffectsInDataBase(uniqueEffects)
         await self.updateItemsInDataBase(itemsList)
 
     async def getItemsJson(self) -> dict:
@@ -238,35 +251,54 @@ class ItemsLoader:
             raise UpdateStatsError() from e
         logger.debug(f"Updated stats table successfully, {newAditions} new stats added")
 
-# async def updateEffectsInDataBase(self, effectsToAdd: Set[str]) -> None:
-#     """
-#     Given a set of unique effects, iterate over them and update the effects table.
-#     Raises UpdateEffectsError.
-#     """
-#     logger.debug("Updating effects table")
-#     try:
-#         logger.debug("Getting existing effects from the database")
-#         existingEffectNames: Set[str] = await getAllEffectsTableNames(self.dbSession)
-#         logger.debug(f"Got {len(existingEffectNames)} from database")
-#     except SQLAlchemyError as e:
-#         logger.error(
-#             f"Error, could not get existing effect names in the database: {e}"
-#         )
-#         raise UpdateEffectsError() from e
-#
-#     logger.debug(f"Adding {len(effectsToAdd)} effects, only new effects will be added")
-#     newAdditions: int = 0
-#     for effect in effectsToAdd:
-#         isNew: bool = self.addEffectInDataBaseIfNew(effect, existingEffectNames)
-#         if isNew:
-#             newAdditions += 1
-#     try:
-#         await self.dbSession.commit()
-#     except Exception as e:
-#         logger.error(f"An error occurred while committing effects update: {e}")
-#         await self.dbSession.rollback()
-#         raise UpdateEffectsError() from e
-#     logger.debug(f"Updated effects table successfully, {newAdditions} new effects added")
+    async def updateEffectsInDataBase(self, effectsToAdd: Set[str]) -> None:
+        """
+        Given a set of unique effects, iterate over them and update the effects table.
+        Raises UpdateEffectsError.
+        """
+        logger.debug("Updating effects table")
+        try:
+            logger.debug("Getting existing effects from the database")
+            existingEffectNames: Set[str] = await getAllEffectsTableNames(self.dbSession)
+            logger.debug(f"Got {len(existingEffectNames)} from database")
+        except SQLAlchemyError as e:
+            logger.error(
+                f"Error, could not get existing effect names in the database: {e}"
+            )
+            raise UpdateEffectsError() from e
+
+        logger.debug(f"Adding {len(effectsToAdd)} effects, only new effects will be added")
+        newAdditions: int = 0
+        for effect in effectsToAdd:
+            isNew: bool = self.addEffectInDataBaseIfNew(effect, existingEffectNames)
+            if isNew:
+                newAdditions += 1
+        try:
+            await self.dbSession.commit()
+        except Exception as e:
+            logger.error(f"An error occurred while committing effects update: {e}")
+            await self.dbSession.rollback()
+            raise UpdateEffectsError() from e
+        logger.debug(f"Updated effects table successfully, {newAdditions} new effects added")
+
+
+    def addEffectInDataBaseIfNew(self, effect: str, existingEffectNames: Set[str]) -> bool:
+        ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
+        """
+        Updates the database with effect, if it does not exist.
+        Raises UpdateEffectsError.
+        """
+        try:
+            if effect not in existingEffectNames:
+                newEffect: EffectsTable = EffectsTable(name=effect)
+                self.dbSession.add(newEffect)
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Error while updating effect {effect}, exception: {e}")
+            raise UpdateEffectsError() from e
+
 
     def addStatInDataBaseIfNew(self, stat: str, existingstatNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
@@ -333,6 +365,7 @@ class ItemsLoader:
             itemTable = mapItemToItemTable(item, goldTableId, True)
         else:
             await self.deleteItemStatsExistingRelations(existingItem.id)
+            await self.deleteItemEffectsExistingRelations(existingItem.id)
             await self.deleteItemTagsExistingRelations(existingItem.id)
             goldTableId = await self.insertOrUpdateGoldTable(
                 False, item.gold, existingItem.id
@@ -343,6 +376,7 @@ class ItemsLoader:
             await self.dbSession.merge(itemTable)
             await self.dbSession.flush()
             await self.addItemStatsRelations(itemTable.id, item.stats)
+            await self.addItemEffectsRelations(itemTable.id, item.effect)
             await self.addItemTagsRelations(itemTable.id, item.tags)
         except UpdateItemsError as e:
             raise e
@@ -378,6 +412,35 @@ class ItemsLoader:
                     raise UpdateItemsError(
                         "Could not insert a relation item-stat"
                     ) from e
+
+
+    async def addItemEffectsRelations(self, itemId: int, effects: Effects) -> None:
+        """
+        This function inserts the relations given the itemId and effects.
+        Raises UpdateItemsError when something fails.
+        """
+        for effect, effectValue in effects.root.items():
+            effectId: int | None = await getEffectIdWithEffectName(self.dbSession, effect)
+            if effectId is None:
+                logger.error(f"Effect with name {effect} was not found in the database")
+                raise UpdateItemsError("Effect was not found in the database")
+            else:
+                itemEffectValues: dict = {
+                    "item_id": itemId,
+                    "effect_id": effectId,
+                    "value": effectValue,
+                }
+                try:
+                    ins = insert(ItemEffectAssociation).values(**itemEffectValues)
+                    await self.dbSession.execute(ins)
+                except Exception as e:
+                    logger.error(
+                        f"Could not insert a relation item-effect, itemId: {itemId}, effectId: {effectId}, effectName: {effect}, exception: {e}"
+                    )
+                    raise UpdateItemsError(
+                        "Could not insert a relation item-effect"
+                    ) from e
+
 
     async def addItemTagsRelations(self, itemId: int, tags: List[str]) -> None:
         """
@@ -433,6 +496,25 @@ class ItemsLoader:
                 f"Error while deleting stats associations for item id {itemId}: {e}"
             )
             raise UpdateItemsError("Error while deleting stats associations for item")
+
+
+    async def deleteItemEffectsExistingRelations(self, itemId) -> None:
+        """
+        This function deletes the many-to-many relation of an item with
+        the effects table.
+        Raises UpdateItemsError when something fails.
+        """
+        delInstruction = delete(ItemEffectAssociation).where(
+            ItemEffectAssociation.c.item_id == itemId
+        )
+        try:
+            await self.dbSession.execute(delInstruction)
+        except Exception as e:
+            logger.error(
+                f"Error while deleting effects associations for item id {itemId}: {e}"
+            )
+            raise UpdateItemsError("Error while deleting effects associations for item")
+
 
     async def insertOrUpdateGoldTable(
         self, createNewGoldTable: bool, gold: Gold, itemId: int | None = None
