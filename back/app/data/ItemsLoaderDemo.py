@@ -276,6 +276,13 @@ class ItemsLoader:
 
     async def insertOrUpdateItemTable(self, item: Item,existingItem : ItemTable | None)->None:
         """
+        This function insert or updates the item depending if existingItem is None or itemTable
+        Steps
+        1 - Creates/updates and flush a gold table 
+        2 - Do nothing if its new or deletes existing tags and stats relations with the item if exist
+        3 - Creates a new itemTable and if exist assing the existingItem id to the new item
+        4 - Inserts/updates the new row
+        5 - Add many to many stats and tags relations
         """
         goldTableId : int
         itemTable : ItemTable
@@ -286,13 +293,29 @@ class ItemsLoader:
             await self.deleteItemStatsExistingRelations(existingItem.id)
             await self.deleteItemTagsExistingRelations(existingItem.id)
             goldTableId = await self.insertOrUpdateGoldTable(False,item.gold,existingItem.id)
-            itemTable = existingItem
+            itemTable = mapItemToItemTable(item,goldTableId,True)
+            itemTable.id = existingItem.id
         try:
             await self.dbSession.merge(itemTable)
             await self.dbSession.flush()
+            await self.addItemStatsRelations(itemTable.id,item.stats)
+            await self.addItemTagsRelations(itemTable.id,item.tags)
+        except UpdateItemsError as e:
+            raise e
         except Exception as e:
             logger.error("")
             raise UpdateItemsError() from e
+
+
+    async def addItemStatsRelations(self,itemId:int, stats:Stats) -> None:
+        """
+        """
+        pass
+
+    async def addItemTagsRelations(self,itemId:int, tags:List[str]) -> None:
+        """
+        """
+        pass
        
     async def deleteItemTagsExistingRelations(self, itemId)-> None:
         """
