@@ -330,8 +330,21 @@ class ItemsLoader:
 
     async def addItemTagsRelations(self,itemId:int, tags:List[str]) -> None:
         """
+        This function inserts the relations given the itemId and tags
+        Raises UpdateItemsError when something fails
         """
-        pass
+        for tag in tags:
+            tagId: int | None = await getTagIdWithtTagName(self.dbSession, tag)
+            if tagId is None:
+                logger.error(f"Tag with name {tag} was not found in the dabatase")
+                raise UpdateItemsError("Tag was not found in the database")
+            itemtagsValues: dict = {"item_id": itemId, "tags_id": tagId}
+            try:
+                ins = insert(ItemTagsAssociation).values(**itemtagsValues)
+                await self.dbSession.execute(ins)
+            except Exception as e:
+                logger.error(f"Could not insert a relation item-tag, itemId: {itemId}, tagId: {tagId}, tagName: {tag}, exception: {e}")
+                raise UpdateItemsError("Could not insert a relation item-tag") from e
        
     async def deleteItemTagsExistingRelations(self, itemId)-> None:
         """
