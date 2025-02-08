@@ -295,10 +295,39 @@ class ItemsLoader:
             raise UpdateItemsError() from e
        
     async def deleteItemTagsExistingRelations(self, itemId)-> None:
+        """
+        This function deletes the many to many relation of an item with 
+        the tags table
+        Raises UpdateItemsError when something fails
+        """
+        delInstruction = delete(ItemTagsAssociation).where(
+            ItemTagsAssociation.c.item_id == itemId
+        )
+        try:
+            await self.dbSession.execute(delInstruction)
+        except Exception as e:
+            logger.error(
+                f"Error while deleting tags associations for item id {itemId}: {e}"
+            )
+            raise UpdateItemsError("Error while deleting tags associations for item")
         pass
 
     async def deleteItemStatsExistingRelations(self, itemId)->None:
-        pass
+        """
+        This function deletes the many to many relation of an item with 
+        the stats table
+        Raises UpdateItemsError when something fails
+        """
+        delInstruction = delete(ItemStatAssociation).where(
+            ItemStatAssociation.c.item_id == itemId
+        )
+        try:
+            await self.dbSession.execute(delInstruction)
+        except Exception as e:
+            logger.error(
+                f"Error while deleting stats associations for item id {itemId}: {e}"
+            )
+            raise UpdateItemsError("Error while deleting stats associations for item")
 
     async def insertOrUpdateGoldTable(self,createNewGoldTable:bool, gold:Gold, itemId:int | None = None)->int:
         """
