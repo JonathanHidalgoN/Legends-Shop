@@ -277,12 +277,30 @@ class ItemsLoader:
     async def insertOrUpdateItemTable(self, item: Item,existingItem : ItemTable | None)->None:
         """
         """
+        goldTableId : int
+        itemTable : ItemTable
         if existingItem is None:
-            await self.insertOrUpdateGoldTable(True,item.gold,None)
+            goldTableId = await self.insertOrUpdateGoldTable(True,item.gold,None)
+            itemTable = mapItemToItemTable(item,goldTableId,True)
         else:
-            await self.insertOrUpdateGoldTable(False,item.gold,existingItem.id)
+            await self.deleteItemStatsExistingRelations(existingItem.id)
+            await self.deleteItemTagsExistingRelations(existingItem.id)
+            goldTableId = await self.insertOrUpdateGoldTable(False,item.gold,existingItem.id)
+            itemTable = existingItem
+        try:
+            await self.dbSession.merge(itemTable)
+            await self.dbSession.flush()
+        except Exception as e:
+            logger.error("")
+            raise UpdateItemsError() from e
+       
+    async def deleteItemTagsExistingRelations(self, itemId)-> None:
+        pass
 
-    async def insertOrUpdateGoldTable(self,createNewGoldTable:bool, gold:Gold, itemId:int | None = None)->None:
+    async def deleteItemStatsExistingRelations(self, itemId)->None:
+        pass
+
+    async def insertOrUpdateGoldTable(self,createNewGoldTable:bool, gold:Gold, itemId:int | None = None)->int:
         """
         Insert or updates the gold table depending on the createNewGoldTable parameter
         Raises UpdateItemsError
@@ -300,6 +318,7 @@ class ItemsLoader:
         try:
             await self.dbSession.merge(newGoldTable)
             await self.dbSession.flush()
+            return newGoldTable.id
         except Exception as e:
             logger.error(f"Error updating/inserting a gold table, exception: {e}")
             raise UpdateItemsError("Unexpected exception happened while inserting/updating a gold row") from e
