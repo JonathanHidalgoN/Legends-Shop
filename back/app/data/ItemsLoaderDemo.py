@@ -2,7 +2,7 @@ from typing import List, Set
 import json
 import httpx
 
-from pydantic import Json, ValidationError
+from pydantic import Json
 from sqlalchemy import delete, insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,8 +10,6 @@ from app.customExceptions import (
     ItemsLoaderError,
     JSONFetchError,
     JsonParseError,
-    NoDataNodeInJSON,
-    TableUpdateError,
     UpdateItemsError,
     UpdateStatsError,
     UpdateTagsError,
@@ -25,7 +23,6 @@ from app.data.queries.itemQueries import (
     getAllStatsTableNames,
     getAllTagsTableNames,
     getGoldIdWithItemId,
-    getGoldTableWithItemId,
     getItemTableGivenItemName,
     getStatIdWithStatName,
     getTagIdWithtTagName,
@@ -39,7 +36,7 @@ class ItemsLoader:
     This class is responsible to fetch the items from ITEMS_URL, then parse
     that json into a collection representing the items, with those items update the database.
 
-    The only method to be used is 'updateItems', that method causes:
+    The only method to be used is 'updateItems'
     """
 
     ITEMS_URL: str = (
@@ -120,47 +117,56 @@ class ItemsLoader:
         if itemsData is None:
             logger.error("Error, the items JSON has no data node!")
             raise JsonParseError("Error, the items JSON has no data node!")
-        itemNames : Set[str] = set() 
-        noneCounter : int = 0
-        parsedItems : int = 0
+        itemNames: Set[str] = set()
+        noneCounter: int = 0
+        parsedItems: int = 0
         for itemId, itemData in itemsData.items():
-            item : Item | None = await self.parseDataNodeIntoItem(itemId, itemData, itemNames)
+            item: Item | None = await self.parseDataNodeIntoItem(
+                itemId, itemData, itemNames
+            )
             if item is None:
-                noneCounter +=1
+                noneCounter += 1
             else:
                 itemNames.add(item.name)
                 itemsList.append(item)
                 parsedItems += 1
-        logger.debug(f"Parsed items Json successfully, with {parsedItems} parsed items and {noneCounter} items that could not be parsed")
+        logger.debug(
+            f"Parsed items Json successfully, with {parsedItems} parsed items and {noneCounter} items that could not be parsed"
+        )
         return itemsList
 
-    async def parseDataNodeIntoItem(self,itemId: int, itemData, itemNames : Set[str]) -> Item | None:
-        #TODO: CHECK ASYNC
+    async def parseDataNodeIntoItem(
+        self, itemId: int, itemData, itemNames: Set[str]
+    ) -> Item | None:
+        # TODO: CHECK ASYNC
         """
         Parses the 'data' node of the json with items into an Item.
         Raises nothing but if there is an error just will log a warning and ingore that item
         """
         if "name" not in itemData:
             logger.warning(
-                f"Error, the item with id {itemId} has no 'name' node, item parsing will continue but this item won't be updated")
+                f"Error, the item with id {itemId} has no 'name' node, item parsing will continue but this item won't be updated"
+            )
             return None
         try:
             if itemData["name"] in itemNames:
                 logger.warning(
-                    f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database")
+                    f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database"
+                )
                 return None
             fullItem = {"id": itemId, **itemData}
             item: Item = Item(**fullItem)
-            return item 
+            return item
         except Exception as e:
-            logger.error(
-                f"Error, the item with id {itemId} had a problem while parsing the json into an Item, exception : {e}")
+            logger.exception(
+                f"Error, the item with id {itemId} had a problem while parsing the json into an Item, this item will be ingnore, exception : {e}"
+            )
             return None
 
-    async def updateTagsInDataBase(self, tagsToAdd:Set[str]) -> None:
+    async def updateTagsInDataBase(self, tagsToAdd: Set[str]) -> None:
         """
         Given a set of unique tags, iterate over them and update the tags table
-        Raise UpdateTagsError 
+        Raise UpdateTagsError
         """
         logger.debug("Updating tags table")
         try:
@@ -173,11 +179,11 @@ class ItemsLoader:
             )
             raise UpdateTagsError() from e
         logger.debug(f"Adding {len(tagsToAdd)} tags, just new tags will be added")
-        newAditions : int = 0
+        newAditions: int = 0
         for tag in tagsToAdd:
-            isNew : bool = self.addTagInDataBaseIfNew(tag, existingTagNames)
+            isNew: bool = self.addTagInDataBaseIfNew(tag, existingTagNames)
             if isNew:
-                newAditions +=1
+                newAditions += 1
         try:
             await self.dbSession.commit()
         except Exception as e:
@@ -186,7 +192,7 @@ class ItemsLoader:
             raise UpdateTagsError() from e
         logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
-    def addTagInDataBaseIfNew(self,tag:str, existingTagNames:Set[str]) -> bool:
+    def addTagInDataBaseIfNew(self, tag: str, existingTagNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
         Updates the database with tag, if it do not exist.
@@ -203,11 +209,10 @@ class ItemsLoader:
             logger.error(f"Error while updating tag {tag}, exception: {e}")
             raise UpdateTagsError() from e
 
-
-    async def updateStatsInDataBase(self, statsToAdd:Set[str]) -> None:
+    async def updateStatsInDataBase(self, statsToAdd: Set[str]) -> None:
         """
         Given a set of unique stats, iterate over them and update the stats table
-        Raise UpdateStatsError 
+        Raise UpdateStatsError
         """
         logger.debug("Updating stats table")
         try:
@@ -220,11 +225,11 @@ class ItemsLoader:
             )
             raise UpdateStatsError() from e
         logger.debug(f"Adding {len(statsToAdd)} stats, just new stats will be added")
-        newAditions : int = 0
+        newAditions: int = 0
         for stat in statsToAdd:
-            isNew : bool = self.addStatInDataBaseIfNew(stat, existingStatNames)
+            isNew: bool = self.addStatInDataBaseIfNew(stat, existingStatNames)
             if isNew:
-                newAditions +=1
+                newAditions += 1
         try:
             await self.dbSession.commit()
         except Exception as e:
@@ -233,7 +238,7 @@ class ItemsLoader:
             raise UpdateStatsError() from e
         logger.debug(f"Updated stats table successfully, {newAditions} new stats added")
 
-    def addStatInDataBaseIfNew(self,stat:str, existingstatNames:Set[str]) -> bool:
+    def addStatInDataBaseIfNew(self, stat: str, existingstatNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
         Updates the database with stat, if it do not exist.
@@ -250,85 +255,101 @@ class ItemsLoader:
             logger.error(f"Error while updating stat {stat}, exception: {e}")
             raise UpdateStatsError() from e
 
-
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
         """
         Updates the items in the database, transactions are added in a batch,
         if the insert/update fails then the transacion fails and changes are rollback.
         """
         logger.debug(f"Updating {len(itemsList)} items in the database")
-        currentItemName : str = ""
+        currentItemName: str = ""
         try:
             for item in itemsList:
                 currentItemName = item.name
-                existingItem : ItemTable | None = await getItemTableGivenItemName(self.dbSession,item.name)
-                await self.insertOrUpdateItemTable(item,existingItem)
+                existingItem: ItemTable | None = await getItemTableGivenItemName(
+                    self.dbSession, item.name
+                )
+                await self.insertOrUpdateItemTable(item, existingItem)
             await self.dbSession.commit()
             logger.debug(f"Updated {len(itemsList)} items successfully")
         except SQLAlchemyError as e:
-            logger.debug(f"Error getting the item from the database with name {currentItemName}, exception: {e}")
+            logger.debug(
+                f"Error getting the item from the database with name {currentItemName}, exception: {e}"
+            )
             await self.dbSession.rollback()
             raise UpdateItemsError() from e
         except Exception as e:
-            logger.debug(f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}")
+            logger.debug(
+                f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}"
+            )
             await self.dbSession.rollback()
             raise UpdateItemsError() from e
 
-    async def insertOrUpdateItemTable(self, item: Item,existingItem : ItemTable | None)->None:
+    async def insertOrUpdateItemTable(
+        self, item: Item, existingItem: ItemTable | None
+    ) -> None:
         """
         This function insert or updates the item depending if existingItem is None or itemTable
         Steps
-        1 - Creates/updates and flush a gold table 
+        1 - Creates/updates and flush a gold table
         2 - Do nothing if its new or deletes existing tags and stats relations with the item if exist
         3 - Creates a new itemTable and if exist assing the existingItem id to the new item
         4 - Inserts/updates the new row
         5 - Add many to many stats and tags relations
         """
-        goldTableId : int
-        itemTable : ItemTable
+        goldTableId: int
+        itemTable: ItemTable
         if existingItem is None:
-            goldTableId = await self.insertOrUpdateGoldTable(True,item.gold,None)
-            itemTable = mapItemToItemTable(item,goldTableId,True)
+            goldTableId = await self.insertOrUpdateGoldTable(True, item.gold, None)
+            itemTable = mapItemToItemTable(item, goldTableId, True)
         else:
             await self.deleteItemStatsExistingRelations(existingItem.id)
             await self.deleteItemTagsExistingRelations(existingItem.id)
-            goldTableId = await self.insertOrUpdateGoldTable(False,item.gold,existingItem.id)
-            itemTable = mapItemToItemTable(item,goldTableId,True)
+            goldTableId = await self.insertOrUpdateGoldTable(
+                False, item.gold, existingItem.id
+            )
+            itemTable = mapItemToItemTable(item, goldTableId, True)
             itemTable.id = existingItem.id
         try:
             await self.dbSession.merge(itemTable)
             await self.dbSession.flush()
-            await self.addItemStatsRelations(itemTable.id,item.stats)
-            await self.addItemTagsRelations(itemTable.id,item.tags)
+            await self.addItemStatsRelations(itemTable.id, item.stats)
+            await self.addItemTagsRelations(itemTable.id, item.tags)
         except UpdateItemsError as e:
             raise e
         except Exception as e:
-            logger.error("")
+            logger.error(
+                f"Unexpected exception happened insering/updating the item {item.name}, exception : {e}"
+            )
             raise UpdateItemsError() from e
 
-
-    async def addItemStatsRelations(self,itemId:int, stats:Stats) -> None:
+    async def addItemStatsRelations(self, itemId: int, stats: Stats) -> None:
         """
         This function inserts the relations given the itemId and stats
         Raises UpdateItemsError when something fails
         """
         for stat, statValue in stats.root.items():
-            statId: int | None = await getStatIdWithStatName(self.dbSession,stat)
+            statId: int | None = await getStatIdWithStatName(self.dbSession, stat)
             if statId is None:
                 logger.error(f"Stat with name {stat} was not found in the dabatase")
                 raise UpdateItemsError("Stat was not found in the database")
             else:
-                itemStatValues : dict = {
-                    "item_id":itemId, "stat_id":statId,"value":statValue
+                itemStatValues: dict = {
+                    "item_id": itemId,
+                    "stat_id": statId,
+                    "value": statValue,
                 }
                 try:
                     ins = insert(ItemStatAssociation).values(**itemStatValues)
                     await self.dbSession.execute(ins)
                 except Exception as e:
-                    logger.error(f"Could not insert a relation item-stat, itemId: {itemId}, statId: {statId}, statName: {stat}, exception: {e}")
-                    raise UpdateItemsError("Could not insert a relation item-stat") from e
+                    logger.error(
+                        f"Could not insert a relation item-stat, itemId: {itemId}, statId: {statId}, statName: {stat}, exception: {e}"
+                    )
+                    raise UpdateItemsError(
+                        "Could not insert a relation item-stat"
+                    ) from e
 
-    async def addItemTagsRelations(self,itemId:int, tags:List[str]) -> None:
+    async def addItemTagsRelations(self, itemId: int, tags: List[str]) -> None:
         """
         This function inserts the relations given the itemId and tags
         Raises UpdateItemsError when something fails
@@ -343,12 +364,14 @@ class ItemsLoader:
                 ins = insert(ItemTagsAssociation).values(**itemtagsValues)
                 await self.dbSession.execute(ins)
             except Exception as e:
-                logger.error(f"Could not insert a relation item-tag, itemId: {itemId}, tagId: {tagId}, tagName: {tag}, exception: {e}")
+                logger.error(
+                    f"Could not insert a relation item-tag, itemId: {itemId}, tagId: {tagId}, tagName: {tag}, exception: {e}"
+                )
                 raise UpdateItemsError("Could not insert a relation item-tag") from e
-       
-    async def deleteItemTagsExistingRelations(self, itemId)-> None:
+
+    async def deleteItemTagsExistingRelations(self, itemId) -> None:
         """
-        This function deletes the many to many relation of an item with 
+        This function deletes the many to many relation of an item with
         the tags table
         Raises UpdateItemsError when something fails
         """
@@ -364,9 +387,9 @@ class ItemsLoader:
             raise UpdateItemsError("Error while deleting tags associations for item")
         pass
 
-    async def deleteItemStatsExistingRelations(self, itemId)->None:
+    async def deleteItemStatsExistingRelations(self, itemId) -> None:
         """
-        This function deletes the many to many relation of an item with 
+        This function deletes the many to many relation of an item with
         the stats table
         Raises UpdateItemsError when something fails
         """
@@ -381,19 +404,27 @@ class ItemsLoader:
             )
             raise UpdateItemsError("Error while deleting stats associations for item")
 
-    async def insertOrUpdateGoldTable(self,createNewGoldTable:bool, gold:Gold, itemId:int | None = None)->int:
+    async def insertOrUpdateGoldTable(
+        self, createNewGoldTable: bool, gold: Gold, itemId: int | None = None
+    ) -> int:
         """
         Insert or updates the gold table depending on the createNewGoldTable parameter
         Raises UpdateItemsError
         """
         if (itemId is None) and (createNewGoldTable is False):
-            logger.error("Error trying to updating a gold table the item id can not be None")
+            logger.error(
+                "Error trying to updating a gold table the item id can not be None"
+            )
             raise UpdateItemsError("Can not update a gold table with no item id")
-        newGoldTable : GoldTable = mapGoldToGoldTable(gold)
+        newGoldTable: GoldTable = mapGoldToGoldTable(gold)
         if (createNewGoldTable is False) and (itemId is not None):
-            existingGoldTableId: int | None = await getGoldIdWithItemId(self.dbSession,itemId)
+            existingGoldTableId: int | None = await getGoldIdWithItemId(
+                self.dbSession, itemId
+            )
             if existingGoldTableId is None:
-                logger.error(f"Error updating the row in gold table with item id {itemId}, did not find the row with goldId {existingGoldTableId}")
+                logger.error(
+                    f"Error updating the row in gold table with item id {itemId}, did not find the row with goldId {existingGoldTableId}"
+                )
                 raise UpdateItemsError("Tried to update a gold row that do not exist")
             newGoldTable.id = existingGoldTableId
         try:
@@ -402,6 +433,6 @@ class ItemsLoader:
             return newGoldTable.id
         except Exception as e:
             logger.error(f"Error updating/inserting a gold table, exception: {e}")
-            raise UpdateItemsError("Unexpected exception happened while inserting/updating a gold row") from e
-
-
+            raise UpdateItemsError(
+                "Unexpected exception happened while inserting/updating a gold row"
+            ) from e
