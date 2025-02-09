@@ -1,0 +1,13 @@
+How to connect to postgres if I don't know the user or password? 
+R: sudo -u postgres psql postgres
+
+How can I know which ports is postgres using? 
+SELECT * FROM pg_settings WHERE name = 'port';
+
+
+To run normally :uvicorn app.main:app 
+
+To attach debbuger :python -m debugpy --listen 5679 --wait-for-client -m uvicorn app.main:app --host 127.0.0.1 --port 8000 
+
+To use alembic -> Create a table in models folder -> import that table to alembic/env.py file ->
+use alembic revision --autogenerate -m "comment here" -> use alembic upgrade head
