@@ -28,5 +28,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+        #Where files are, I made a mistake and put /fronted and 
+        #When run docker compose up an error tells me that do not where files are
+      - ./front:/app
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
