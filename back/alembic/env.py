@@ -14,6 +14,7 @@ from app.data.models.ItemTable import ItemTable
 from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import TagsTable
 from app.data.models.EffectsTable import EffectsTable
+from app.data.models.MetaDataTable import MetaDataTable
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
