@@ -30,6 +30,7 @@ from app.data.queries.itemQueries import (
     getItemTableGivenItemName,
     getStatIdWithStatName,
     getTagIdWithtTagName,
+    updateVersion,
 )
 from app.schemas.Item import Effects, Gold, Item, Stats
 from app.logger import logger
@@ -37,7 +38,7 @@ from app.logger import logger
 
 class ItemsLoader:
     #I know this class has a lot of code duplication where stats/effects are involved,
-    #maybe is worth to abastract but for I decided create indivial functions because 
+    #maybe is worth to abastract but for now I decided to create indivial functions because 
     #in the future some different functionality will be added 
     """
     This class is responsible to fetch the items from ITEMS_URL, then parse
@@ -45,9 +46,8 @@ class ItemsLoader:
 
     The only method to be used is 'updateItems'
     """
-
     ITEMS_URL: str = (
-        "https://ddragon.leagueoflegends.com/cdn/15.2.1/data/en_US/item.json"
+        "https://ddragon.leagueoflegends.com/cdn/15.3.1/data/en_US/item.json"
     )
 
     def __init__(self, dbSession: AsyncSession):
@@ -114,6 +114,25 @@ class ItemsLoader:
             )
             raise JsonFetchError from e
 
+    async def updateDbVersion(self, version:Json) -> None:
+        """
+        Checks if there is a version value, and updates it in the database
+        Raises JsonParseError if version is None or error
+        """
+        if version is None:
+            logger.error(
+                "Error, itemsJson has no 'version' key, item parsing won't continue"
+            )
+            raise JsonParseError("items json has not 'version' key")
+        else:
+            self.version = version
+            try:
+                await updateVersion(self.dbSession,self.version)
+            except Exception as e:
+                logger.error(f"An error occurred while updating the version in MetaDataTable, exception: {e}")
+                raise JsonParseError() from e
+
+
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
         """
         Parses the json with items into a list of items.
@@ -121,11 +140,7 @@ class ItemsLoader:
         """
         logger.debug("Parsing json with items into a list of items")
         itemsList: List[Item] = []
-        self.version = itemsJson.get("version")
-        if self.version is None:
-            logger.warning(
-                "Error, itemsJson has no 'version' key, item parsing can continue"
-            )
+        await self.updateDbVersion(itemsJson.get("version"))
         itemsData: dict | None = itemsJson.get("data")
         if itemsData is None:
             logger.error("Error, the items JSON has no data node!")
