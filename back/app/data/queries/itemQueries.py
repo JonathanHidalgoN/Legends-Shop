@@ -1,6 +1,7 @@
 from typing import List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.EffectsTable import EffectsTable
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
@@ -108,3 +109,20 @@ async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int 
     )
     tag = result.scalars().first()
     return tag if tag else None
+
+async def getVersion(asyncSession: AsyncSession) -> str | None:
+    result = await asyncSession.execute(
+        select(MetaDataTable.value).where(MetaDataTable.name == "version")
+    )
+    version = result.scalars().first()
+    return version if version else None
+
+
+async def updateVersion(asyncSession: AsyncSession, version:str)->None:
+    async with asyncSession.begin():
+        versionRow : MetaDataTable = MetaDataTable(
+           field_name = "version",value=version 
+        )
+        await asyncSession.merge(versionRow)
+
+
