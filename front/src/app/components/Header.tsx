@@ -7,14 +7,12 @@ const Header = ({
 }) => {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  // For the extra button you can add more state if you want a dropdown
 
   return (
     <header
       className="w-full flex items-center justify-between p-4"
       style={{ backgroundColor: 'var(--white)', color: "white" }}
     >
-      {/* Left: Brand */}
       <div
         className="text-xl font-legens-shop"
         style={{ backgroundColor: 'var(--white)', color: 'var(--foreground)' }}
@@ -24,7 +22,6 @@ const Header = ({
         </Link>
       </div>
 
-      {/* Middle: Search Bar */}
       <div className="flex-1 mx-4">
         <input
           type="text"
@@ -34,9 +31,7 @@ const Header = ({
         />
       </div>
 
-      {/* Right: Buttons */}
       <div className="flex items-center space-x-4">
-        {/* Login Button */}
         <div className="relative">
           <button
             onClick={() => setShowLoginDropdown((prev) => !prev)}
@@ -47,12 +42,10 @@ const Header = ({
           </button>
           {showLoginDropdown && (
             <div className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
-              {/* Login dropdown content (empty for now) */}
             </div>
           )}
         </div>
 
-        {/* Cart Button */}
         <div className="relative">
           <button
             onClick={() => setShowCartDropdown((prev) => !prev)}
@@ -60,7 +53,6 @@ const Header = ({
             style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
           >
             Cart
-            {/* Example SVG icon for a gold bag */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="gold"
@@ -83,25 +75,11 @@ const Header = ({
           </button>
           {showCartDropdown && (
             <div className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
-              {/* Cart dropdown content (empty for now) */}
+              {/* Cart dropdown */}
             </div>
           )}
         </div>
 
-        {/* Extra Button (Placeholder for future functionality) */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              // Placeholder action – customize as needed
-              alert("Extra button clicked!");
-            }}
-            className="p-2 rounded hover:opacity-80 transition"
-            style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
-          >
-            Menu
-          </button>
-          {/* If you later want a dropdown for this button, implement similar logic */}
-        </div>
       </div>
     </header>
   );
