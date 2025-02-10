@@ -1,7 +1,3 @@
-#Multi stage docker build, first install node and dependecies, create html files 
-#Then install nginx, copy html into the server directly and run it
-#https://blog.alexellis.io/mutli-stage-docker-builds/
-
 #Take the node image
 FROM node:20-alpine 
 
