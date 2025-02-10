@@ -46,13 +46,37 @@ class ItemsLoader:
 
     The only method to be used is 'updateItems'
     """
+    VERSION_URL : str = "https://ddragon.leagueoflegends.com/api/versions.json"
     ITEMS_URL: str = (
         "https://ddragon.leagueoflegends.com/cdn/15.3.1/data/en_US/item.json"
     )
 
     def __init__(self, dbSession: AsyncSession):
         self.dbSession = dbSession
+        self.items_url = ""
         pass
+
+    async def getJson(self, url:str, entitiesName:str) -> dict:
+        """
+        This method gets the json from url and returns it.
+        Raise a JSONFetchError when an error occurs
+        """
+        logger.debug(f"Getting {entitiesName} json in {url}")
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                data = response.json()
+                logger.debug("Fetched json successfully")
+                return data
+        except (json.JSONDecodeError, httpx.RequestError) as e:
+            logger.exception(f"Json decode error fetching {entitiesName} json in {url}, exception: {e}")
+            raise JsonFetchError from e
+        except Exception as e:
+            logger.exception(
+                f"Unexpected exception fetching {entitiesName} json in {url}, exception: {e}"
+            )
+            raise JsonFetchError from e
 
     async def updateItems(self) -> None:
         """
