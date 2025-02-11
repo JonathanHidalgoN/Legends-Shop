@@ -96,12 +96,12 @@ async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | 
     goldId = result.scalars().first()
     return goldId if goldId else None
 
-# async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTable | None:
-#     result = await asyncSession.execute(
-#         select(GoldTable).where(GoldTable.id == goldId)
-#     )
-#     goldTable = result.scalars().first()
-#     return goldTable if goldTable else None
+async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTable | None:
+    result = await asyncSession.execute(
+        select(GoldTable).where(GoldTable.id == goldId)
+    )
+    goldTable = result.scalars().first()
+    return goldTable if goldTable else None
 
 async def getGoldTableWithItemId(
     asyncSession: AsyncSession, itemId: int
