@@ -18,8 +18,10 @@ class Gold(BaseModel):
 class Stats(RootModel):
     root: Dict[str, Union[int, float]]
 
+
 class Effects(RootModel):
     root: Dict[str, Union[int, float]]
+
 
 class Item(BaseModel):
     name: str
@@ -29,5 +31,5 @@ class Item(BaseModel):
     gold: Gold
     tags: List[str]
     stats: Stats
-    effect:Effects 
+    effect: Effects
     id: int

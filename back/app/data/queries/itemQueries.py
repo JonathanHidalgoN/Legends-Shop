@@ -110,6 +110,7 @@ async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int 
     tag = result.scalars().first()
     return tag if tag else None
 
+
 async def getVersion(asyncSession: AsyncSession) -> str | None:
     result = await asyncSession.execute(
         select(MetaDataTable.value).where(MetaDataTable.name == "version")
@@ -118,11 +119,7 @@ async def getVersion(asyncSession: AsyncSession) -> str | None:
     return version if version else None
 
 
-async def updateVersion(asyncSession: AsyncSession, version:str)->None:
+async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
     async with asyncSession.begin():
-        versionRow : MetaDataTable = MetaDataTable(
-           field_name = "version",value=version 
-        )
+        versionRow: MetaDataTable = MetaDataTable(field_name="version", value=version)
         await asyncSession.merge(versionRow)
-
-

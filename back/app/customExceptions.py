@@ -1,6 +1,7 @@
 class ItemsLoaderError(Exception):
     pass
 
+
 class JsonFetchError(ItemsLoaderError):
     pass
 
@@ -19,6 +20,7 @@ class UpdateStatsError(ItemsLoaderError):
 
 class UpdateEffectsError(ItemsLoaderError):
     pass
+
 
 class UpdateItemsError(ItemsLoaderError):
     pass
