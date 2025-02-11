@@ -47,13 +47,12 @@ class ItemsLoader:
     The only method to be used is 'updateItems'
     """
     VERSION_URL : str = "https://ddragon.leagueoflegends.com/api/versions.json"
-    ITEMS_URL: str = (
-        "https://ddragon.leagueoflegends.com/cdn/15.3.1/data/en_US/item.json"
-    )
 
     def __init__(self, dbSession: AsyncSession):
         self.dbSession = dbSession
         self.items_url : str = ""
+        self.version : str = "" 
+        self.itemsUrl : str = "" 
         pass
 
 
@@ -85,11 +84,22 @@ class ItemsLoader:
         Raises JsonParseError when the version list is empty or exceptions raised by getJson method 
         """
         #This is a list, use union to avoid typing error
+        logger.debug("Getting current game version")
         versionJson : list | dict = await self.getJson(self.VERSION_URL, "versions")
         if not versionJson:
             logger.error("Version json is empty")
             raise JsonParseError("Version json is empty")
+        logger.debug(f"Current game version is {versionJson[0]}")
         return versionJson[0] 
+
+    def makeItemsUlr(self, version : str) -> str: 
+        """
+        Makes the items url with the current version of the game
+        """
+        logger.debug("Making items url")
+        itemsUrl : str = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/item.json"
+        logger.debug(f"Items url is {itemsUrl}")
+        return itemsUrl
 
     async def updateItems(self) -> None:
         """
@@ -137,7 +147,7 @@ class ItemsLoader:
         logger.debug("Getting json items")
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(self.ITEMS_URL)
+                response = await client.get(self.itemsUrl)
                 response.raise_for_status()
                 data = response.json()
                 logger.debug("Fetched json items successfully")
