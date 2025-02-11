@@ -78,7 +78,7 @@ class ItemsLoader:
             )
             raise JsonFetchError from e
 
-    async def getLastVersion(self) -> str | None:
+    async def getLastVersion(self) -> str:
         """
         This functions gets the version list from VERSION_URL and get the first element that is the last version
         Raises JsonParseError when the version list is empty or exceptions raised by getJson method 
@@ -104,12 +104,14 @@ class ItemsLoader:
     async def updateItems(self) -> None:
         """
         This method :
-        1 - Get the json with items.
-        2 - Parse the json with items into a list of items.
-        3 - Update the tags table.
-        4 - Update the stats table.
-        5 - Update the effects table.
-        6 - Update/insert the items in the database
+        -1 - Gets the last versin of the game and store 
+        0 - Builds the items url and store 
+        1 - Gets the json with items.
+        2 - Parses the json with items into a list of items.
+        3 - Updates the tags table.
+        4 - Updates the stats table.
+        5 - Updates the effects table.
+        6 - Updates/inserts the items in the database
 
         Raises ItemsLoaderError in the following flavors
         - JSONFetchError.
@@ -119,7 +121,9 @@ class ItemsLoader:
         - UpdateItemsError.
         - UpdateEffectsError.
         """
-        itemsJson: dict = await self.getItemsJson()
+        self.version = await self.getLastVersion()
+        self.itemsUrl = self.makeItemsUlr(self.version)
+        itemsJson: dict | list = await self.getJson(self.itemsUrl,"items")
         if not itemsJson:
             logger.error("Items Json is empty")
             raise ItemsLoaderError("Items Json is empty!")
@@ -138,28 +142,6 @@ class ItemsLoader:
         )
         await self.updateEffectsInDataBase(uniqueEffects)
         await self.updateItemsInDataBase(itemsList)
-
-    async def getItemsJson(self) -> dict:
-        """
-        This method gets the json from ITEMS_URL and returns it.
-        Raise a JSONFetchError when an error occurs
-        """
-        logger.debug("Getting json items")
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(self.itemsUrl)
-                response.raise_for_status()
-                data = response.json()
-                logger.debug("Fetched json items successfully")
-                return data
-        except (json.JSONDecodeError, httpx.RequestError) as e:
-            logger.exception(f"Error when fetching the JSON with items: {e}")
-            raise JsonFetchError from e
-        except Exception as e:
-            logger.exception(
-                f"Unexpected exception when fetching the JSON with items: {e}"
-            )
-            raise JsonFetchError from e
 
     async def updateDbVersion(self, version:Json) -> None:
         """
