@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import List, Set, Union
 import json
 import httpx
 
@@ -53,10 +53,11 @@ class ItemsLoader:
 
     def __init__(self, dbSession: AsyncSession):
         self.dbSession = dbSession
-        self.items_url = ""
+        self.items_url : str = ""
         pass
 
-    async def getJson(self, url:str, entitiesName:str) -> dict:
+
+    async def getJson(self, url:str, entitiesName:str) -> dict | list:
         """
         This method gets the json from url and returns it.
         Raise a JSONFetchError when an error occurs
@@ -77,6 +78,18 @@ class ItemsLoader:
                 f"Unexpected exception fetching {entitiesName} json in {url}, exception: {e}"
             )
             raise JsonFetchError from e
+
+    async def getLastVersion(self) -> str | None:
+        """
+        This functions gets the version list from VERSION_URL and get the first element that is the last version
+        Raises JsonParseError when the version list is empty or exceptions raised by getJson method 
+        """
+        #This is a list, use union to avoid typing error
+        versionJson : list | dict = await self.getJson(self.VERSION_URL, "versions")
+        if not versionJson:
+            logger.error("Version json is empty")
+            raise JsonParseError("Version json is empty")
+        return versionJson[0] 
 
     async def updateItems(self) -> None:
         """
