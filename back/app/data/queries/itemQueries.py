@@ -64,6 +64,11 @@ async def getItemTableGivenItemName(
     return itemTable if itemTable else None
 
 
+async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
+    result = await asyncSession.execute(select(ItemTable))
+    items : List[ItemTable] = [item for  item in result.scalars().all()]
+    return items 
+
 async def getStatIdWithStatName(
     asyncSession: AsyncSession, statName: str
 ) -> int | None:
@@ -91,6 +96,12 @@ async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | 
     goldId = result.scalars().first()
     return goldId if goldId else None
 
+# async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTable | None:
+#     result = await asyncSession.execute(
+#         select(GoldTable).where(GoldTable.id == goldId)
+#     )
+#     goldTable = result.scalars().first()
+#     return goldTable if goldTable else None
 
 async def getGoldTableWithItemId(
     asyncSession: AsyncSession, itemId: int
