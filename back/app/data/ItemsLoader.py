@@ -104,7 +104,8 @@ class ItemsLoader:
     async def updateItems(self) -> None:
         """
         This method :
-        -1 - Gets the last versin of the game and store 
+        -2 - Gets the last version of the game and store 
+        -1 - Updates metadata version in database
         0 - Builds the items url and store 
         1 - Gets the json with items.
         2 - Parses the json with items into a list of items.
@@ -122,6 +123,7 @@ class ItemsLoader:
         - UpdateEffectsError.
         """
         self.version = await self.getLastVersion()
+        await self.updateDbVersion(self.version)
         self.itemsUrl = self.makeItemsUlr(self.version)
         itemsJson: dict | list = await self.getJson(self.itemsUrl,"items")
         if not itemsJson:
@@ -143,23 +145,17 @@ class ItemsLoader:
         await self.updateEffectsInDataBase(uniqueEffects)
         await self.updateItemsInDataBase(itemsList)
 
-    async def updateDbVersion(self, version:Json) -> None:
+    async def updateDbVersion(self, version:str) -> None:
         """
-        Checks if there is a version value, and updates it in the database
+        Updates version in MetaDataTable
         Raises JsonParseError if version is None or error
         """
-        if version is None:
-            logger.error(
-                "Error, itemsJson has no 'version' key, item parsing won't continue"
-            )
-            raise JsonParseError("items json has not 'version' key")
-        else:
-            self.version = version
-            try:
-                await updateVersion(self.dbSession,self.version)
-            except Exception as e:
-                logger.error(f"An error occurred while updating the version in MetaDataTable, exception: {e}")
-                raise JsonParseError() from e
+        try:
+            await updateVersion(self.dbSession,self.version)
+        except Exception as e:
+            await self.dbSession.rollback()
+            logger.error(f"An error occurred while updating the version in MetaDataTable, exception: {e}")
+            raise JsonParseError() from e
 
 
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
