@@ -1,11 +1,11 @@
-from typing import List, Set
+from typing import Dict, List, Set, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.EffectsTable import EffectsTable
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
-from app.data.models.StatsTable import StatsTable
+from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import (
     ItemTagsAssociation,
     TagsTable,
@@ -36,7 +36,28 @@ async def getTagNameWithId(asyncSession : AsyncSession, tagId:int) -> str | None
     )
     tagName = result.scalars().first()
     return tagName if tagName else None
-    
+
+async def getAllStatNamesAndValueAssociatedByItemId(asyncSession:AsyncSession, itemId:int)->Set[Dict[str, int | float]]:
+    result = await asyncSession.execute(
+        select(ItemStatAssociation)
+        .where(ItemStatAssociation.c.item_id == itemId)
+    )
+    statsIdValue: Set[Tuple[int,int]] = set((statAssociationRow.c.item_id, statAssociationRow.c.value) 
+        for statAssociationRow in result.scalars().all())
+    statDicts : Set[Dict[str, int | float]] = set() 
+    for statTuple in statsIdValue:
+        statName : str | None = await getStatNameWithId(asyncSession, statTuple[0])
+        if statName:
+            statDict : Dict[str, int | float] = {statName : statTuple[1]}
+            statDicts.add(statDict)
+    return statDicts 
+
+async def getStatNameWithId(asyncSession : AsyncSession, statId:int):
+    result = await asyncSession.execute(
+        select(StatsTable.name).where(StatsTable.id == statId)
+    )
+    statName = result.scalars().first()
+    return statName if statName else None
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
     """
