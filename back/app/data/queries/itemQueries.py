@@ -2,7 +2,7 @@ from typing import Dict, List, Set, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.MetaDataTable import MetaDataTable
-from app.data.models.EffectsTable import EffectsTable
+from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.StatsTable import ItemStatAssociation, StatsTable
@@ -69,6 +69,34 @@ async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | No
     )
     statName = result.scalars().first()
     return statName if statName else None
+
+
+async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[Dict[str, int | float]]:
+    """Return a set of effect name/value pairs for the given item ID."""
+    result = await asyncSession.execute(
+        select(ItemEffectAssociation)
+        .where(ItemEffectAssociation.c.item_id == itemId)
+    )
+    effectsIdValue: Set[Tuple[int, int]] = set(
+        (effectAssociationRow.c.item_id, effectAssociationRow.c.value)
+        for effectAssociationRow in result.scalars().all()
+    )
+    effectDicts: Set[Dict[str, int | float]] = set()
+    for effectTuple in effectsIdValue:
+        effectName: str | None = await getEffectNameWithId(asyncSession, effectTuple[0])
+        if effectName:
+            effectDict: Dict[str, int | float] = {effectName: effectTuple[1]}
+            effectDicts.add(effectDict)
+    return effectDicts
+
+
+async def getEffectNameWithId(asyncSession: AsyncSession, effectId: int) -> str | None:
+    """Retrieve the name of a effect given its ID."""
+    result = await asyncSession.execute(
+        select(EffectsTable.name).where(EffectsTable.id == effectId)
+    )
+    effectName = result.scalars().first()
+    return effectName if effectName else None
 
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
