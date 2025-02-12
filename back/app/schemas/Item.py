@@ -1,5 +1,5 @@
 from pydantic import BaseModel, RootModel
-from typing import List, Dict, Union
+from typing import List, Dict, Set, Union
 
 
 class Image(BaseModel):
@@ -29,7 +29,7 @@ class Item(BaseModel):
     plaintext: str
     image: Image
     gold: Gold
-    tags: List[str]
+    tags: Set[str]
     stats: Stats
     effect: Effects
     id: int
