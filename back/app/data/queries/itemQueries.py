@@ -13,107 +13,115 @@ from app.data.models.TagsTable import (
 
 
 async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
+    """Fetch all tags from the TagsTable."""
     result = await asyncSession.execute(select(TagsTable))
     existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
     return existingTags
 
-async def getAllTagNamesAssociatedByItemId(asyncSession:AsyncSession, itemId:int)->Set[str]:
+
+async def getAllTagNamesAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[str]:
+    """Return all tag names linked to the specified item ID."""
     result = await asyncSession.execute(
         select(ItemTagsAssociation.c.tags_id)
         .where(ItemTagsAssociation.c.item_id == itemId)
     )
     tagsId: Set[int] = set(tagId for tagId in result.scalars().all())
-    tagNames : Set[str] = set() 
+    tagNames: Set[str] = set()
     for tagId in tagsId:
-        tagName : str | None = await getTagNameWithId(asyncSession,tagId)
+        tagName: str | None = await getTagNameWithId(asyncSession, tagId)
         if tagName:
             tagNames.add(tagName)
     return tagNames
 
-async def getTagNameWithId(asyncSession : AsyncSession, tagId:int) -> str | None:
+
+async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None:
+    """Retrieve a tag's name using its ID."""
     result = await asyncSession.execute(
         select(TagsTable.name).where(TagsTable.id == tagId)
     )
     tagName = result.scalars().first()
     return tagName if tagName else None
 
-async def getAllStatNamesAndValueAssociatedByItemId(asyncSession:AsyncSession, itemId:int)->Set[Dict[str, int | float]]:
+
+async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[Dict[str, int | float]]:
+    """Return a set of stat name/value pairs for the given item ID."""
     result = await asyncSession.execute(
         select(ItemStatAssociation)
         .where(ItemStatAssociation.c.item_id == itemId)
     )
-    statsIdValue: Set[Tuple[int,int]] = set((statAssociationRow.c.item_id, statAssociationRow.c.value) 
-        for statAssociationRow in result.scalars().all())
-    statDicts : Set[Dict[str, int | float]] = set() 
+    statsIdValue: Set[Tuple[int, int]] = set(
+        (statAssociationRow.c.item_id, statAssociationRow.c.value)
+        for statAssociationRow in result.scalars().all()
+    )
+    statDicts: Set[Dict[str, int | float]] = set()
     for statTuple in statsIdValue:
-        statName : str | None = await getStatNameWithId(asyncSession, statTuple[0])
+        statName: str | None = await getStatNameWithId(asyncSession, statTuple[0])
         if statName:
-            statDict : Dict[str, int | float] = {statName : statTuple[1]}
+            statDict: Dict[str, int | float] = {statName: statTuple[1]}
             statDicts.add(statDict)
-    return statDicts 
+    return statDicts
 
-async def getStatNameWithId(asyncSession : AsyncSession, statId:int):
+
+async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | None:
+    """Retrieve the name of a stat given its ID."""
     result = await asyncSession.execute(
         select(StatsTable.name).where(StatsTable.id == statId)
     )
     statName = result.scalars().first()
     return statName if statName else None
 
+
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
-    """
-    Returns a set(because tag names are unique) with tag names
-    """
+    """Return a set of unique tag names from the TagsTable."""
     result = await asyncSession.execute(select(TagsTable.name))
     existingTags: Set[str] = set(tag for tag in result.scalars().all())
     return existingTags
 
 
 async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
+    """Fetch all stat records from the StatsTable."""
     result = await asyncSession.execute(select(StatsTable))
     existingStats: List[StatsTable] = [tag for tag in result.scalars().all()]
     return existingStats
 
 
 async def getAllStatsTableNames(asyncSession: AsyncSession) -> Set[str]:
-    """
-    Returns a set(because stats names are unique) with stat names
-    """
+    """Return a set of unique stat names from the StatsTable."""
     result = await asyncSession.execute(select(StatsTable.name))
     existingStats: Set[str] = set(tag for tag in result.scalars().all())
     return existingStats
 
 
 async def getAllEffectsTable(asyncSession: AsyncSession) -> List[EffectsTable]:
+    """Fetch all effect records from the EffectsTable."""
     result = await asyncSession.execute(select(EffectsTable))
     existingEffects: List[EffectsTable] = [tag for tag in result.scalars().all()]
     return existingEffects
 
 
 async def getAllEffectsTableNames(asyncSession: AsyncSession) -> Set[str]:
-    """
-    Returns a set (because effect names are unique) with effect names.
-    """
+    """Return a set of unique effect names from the EffectsTable."""
     result = await asyncSession.execute(select(EffectsTable.name))
     existingEffects: Set[str] = set(tag for tag in result.scalars().all())
     return existingEffects
 
 
-async def getItemTableGivenItemName(
-    asyncSession: AsyncSession, name: str
-) -> ItemTable | None:
+async def getItemTableGivenItemName(asyncSession: AsyncSession, name: str) -> ItemTable | None:
+    """Retrieve an item from the ItemTable by its name."""
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.name == name))
     itemTable = result.scalars().first()
     return itemTable if itemTable else None
 
 
 async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
+    """Fetch all items from the ItemTable."""
     result = await asyncSession.execute(select(ItemTable))
-    items : List[ItemTable] = [item for  item in result.scalars().all()]
-    return items 
+    items: List[ItemTable] = [item for item in result.scalars().all()]
+    return items
 
-async def getStatIdWithStatName(
-    asyncSession: AsyncSession, statName: str
-) -> int | None:
+
+async def getStatIdWithStatName(asyncSession: AsyncSession, statName: str) -> int | None:
+    """Get the ID of a stat based on its name."""
     result = await asyncSession.execute(
         select(StatsTable.id).where(StatsTable.name == statName)
     )
@@ -121,9 +129,8 @@ async def getStatIdWithStatName(
     return stat if stat else None
 
 
-async def getEffectIdWithEffectName(
-    asyncSession: AsyncSession, effectName: str
-) -> int | None:
+async def getEffectIdWithEffectName(asyncSession: AsyncSession, effectName: str) -> int | None:
+    """Retrieve the ID of an effect by its name."""
     result = await asyncSession.execute(
         select(EffectsTable.id).where(EffectsTable.name == effectName)
     )
@@ -132,22 +139,25 @@ async def getEffectIdWithEffectName(
 
 
 async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | None:
+    """Fetch the gold ID associated with a given item ID."""
     result = await asyncSession.execute(
         select(ItemTable.gold_id).where(ItemTable.id == itemId)
     )
     goldId = result.scalars().first()
     return goldId if goldId else None
 
+
 async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTable | None:
+    """Retrieve gold details by gold ID."""
     result = await asyncSession.execute(
         select(GoldTable).where(GoldTable.id == goldId)
     )
     goldTable = result.scalars().first()
     return goldTable if goldTable else None
 
-async def getGoldTableWithItemId(
-    asyncSession: AsyncSession, itemId: int
-) -> GoldTable | None:
+
+async def getGoldTableWithItemId(asyncSession: AsyncSession, itemId: int) -> GoldTable | None:
+    """Get gold information for a given item by its item ID."""
     goldId: int | None = await getGoldIdWithItemId(asyncSession, itemId)
     if goldId is None:
         return None
@@ -157,6 +167,7 @@ async def getGoldTableWithItemId(
 
 
 async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
+    """Fetch the ID of a tag using its name."""
     result = await asyncSession.execute(
         select(TagsTable.id).where(TagsTable.name == tagName)
     )
@@ -165,6 +176,7 @@ async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int 
 
 
 async def getVersion(asyncSession: AsyncSession) -> str | None:
+    """Retrieve the application version from the metadata."""
     result = await asyncSession.execute(
         select(MetaDataTable.value).where(MetaDataTable.name == "version")
     )
@@ -173,6 +185,7 @@ async def getVersion(asyncSession: AsyncSession) -> str | None:
 
 
 async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
+    """Update the application version in the metadata table."""
     async with asyncSession.begin():
         versionRow: MetaDataTable = MetaDataTable(field_name="version", value=version)
         await asyncSession.merge(versionRow)
