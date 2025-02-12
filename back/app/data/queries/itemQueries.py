@@ -5,6 +5,7 @@ from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
+from app.data.models.ImageTable import ImageTable 
 from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import (
     ItemTagsAssociation,
@@ -17,6 +18,17 @@ async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     result = await asyncSession.execute(select(TagsTable))
     existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
     return existingTags
+
+# async def getImageByItemId(asyncSession, itemId:int)->ImageTable | None:
+#     result = 
+#     result = await asyncSession.execute(select(ImageTable.id))
+#
+
+async def getItemTableByItemId(asyncSession : AsyncSession, itemId : int) -> ItemTable | None:
+    """Retrun itemTable with the item ID"""
+    result = await asyncSession.execute(select(ItemTable).where(ItemTable.id == itemId))
+    itemTable : ItemTable = result.scalars().first()
+    return itemTable if itemTable else None
 
 
 async def getAllTagNamesAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[str]:
