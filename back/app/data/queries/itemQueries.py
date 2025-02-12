@@ -6,12 +6,12 @@ from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
-from app.data.models.ImageTable import ImageTable 
 from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import (
     ItemTagsAssociation,
     TagsTable,
 )
+from app.logger import logger
 
 
 async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
@@ -24,7 +24,11 @@ async def getItemTableByItemId(asyncSession : AsyncSession, itemId : int) -> Ite
     """Retrun itemTable with the item ID"""
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.id == itemId))
     itemTable : ItemTable = result.scalars().first()
-    return itemTable if itemTable else None
+    if itemTable:
+        return itemTable
+    else:
+        logger.warning(f"Tried to get itemTable with id {itemId} but None was found")
+        return None
 
 
 async def getAllTagNamesAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[str]:
@@ -49,7 +53,11 @@ async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None
         select(TagsTable.name).where(TagsTable.id == tagId)
     )
     tagName = result.scalars().first()
-    return tagName if tagName else None
+    if tagName:
+        return tagName
+    else:
+        logger.warning(f"Tried to get tagName with id {tagId} but None was found")
+        return None
 
 
 async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
@@ -74,7 +82,11 @@ async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | No
         select(StatsTable.name).where(StatsTable.id == statId)
     )
     statName = result.scalars().first()
-    return statName if statName else None
+    if statName:
+        return statName
+    else:
+        logger.warning(f"Tried to get statName with id {statId} but None was found")
+        return None
 
 
 async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
@@ -99,7 +111,11 @@ async def getEffectNameWithId(asyncSession: AsyncSession, effectId: int) -> str 
         select(EffectsTable.name).where(EffectsTable.id == effectId)
     )
     effectName = result.scalars().first()
-    return effectName if effectName else None
+    if effectName:
+        return effectName 
+    else:
+        logger.warning(f"Tried to get effectName with id {effectId} but None was found")
+        return None
 
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
@@ -141,7 +157,11 @@ async def getItemTableGivenItemName(asyncSession: AsyncSession, name: str) -> It
     """Retrieve an item from the ItemTable by its name."""
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.name == name))
     itemTable = result.scalars().first()
-    return itemTable if itemTable else None
+    if itemTable:
+        return itemTable 
+    else:
+        logger.warning(f"Tried to get itemTable with item name {name} but None was found")
+        return None
 
 
 async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
@@ -157,7 +177,11 @@ async def getStatIdWithStatName(asyncSession: AsyncSession, statName: str) -> in
         select(StatsTable.id).where(StatsTable.name == statName)
     )
     stat = result.scalars().first()
-    return stat if stat else None
+    if stat:
+        return stat 
+    else:
+        logger.warning(f"Tried to get stat id item  stat name {statName} but None was found")
+        return None
 
 
 async def getEffectIdWithEffectName(asyncSession: AsyncSession, effectName: str) -> int | None:
@@ -175,7 +199,11 @@ async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | 
         select(ItemTable.gold_id).where(ItemTable.id == itemId)
     )
     goldId = result.scalars().first()
-    return goldId if goldId else None
+    if goldId:
+        return goldId
+    else:
+        logger.warning(f"Tried to get gold if with item id {itemId} but None was found")
+        return None
 
 
 async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTable | None:
@@ -184,7 +212,11 @@ async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTab
         select(GoldTable).where(GoldTable.id == goldId)
     )
     goldTable = result.scalars().first()
-    return goldTable if goldTable else None
+    if goldTable:
+        return goldTable
+    else:
+        logger.warning(f"Tried to get gold table with id {goldId} but None was found")
+        return None
 
 
 async def getGoldTableWithItemId(asyncSession: AsyncSession, itemId: int) -> GoldTable | None:
@@ -194,7 +226,12 @@ async def getGoldTableWithItemId(asyncSession: AsyncSession, itemId: int) -> Gol
         return None
     result = await asyncSession.execute(select(GoldTable).where(GoldTable.id == goldId))
     goldTable = result.scalars().first()
-    return goldTable if goldTable else None
+    goldTable = result.scalars().first()
+    if goldTable:
+        return goldTable
+    else:
+        logger.warning(f"Tried to get gold table with item id {itemId} but None was found")
+        return None
 
 
 async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
@@ -203,7 +240,11 @@ async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int 
         select(TagsTable.id).where(TagsTable.name == tagName)
     )
     tag = result.scalars().first()
-    return tag if tag else None
+    if tag:
+        return tag
+    else:
+        logger.warning(f"Trid to get tag id with tag name {tagName} but None was found")
+        return None
 
 
 async def getVersion(asyncSession: AsyncSession) -> str | None:
@@ -212,6 +253,10 @@ async def getVersion(asyncSession: AsyncSession) -> str | None:
         select(MetaDataTable.value).where(MetaDataTable.name == "version")
     )
     version = result.scalars().first()
+    if version:
+        return version
+    else:
+        logger.warning(f"Tried to get version but None was found")
     return version if version else None
 
 
