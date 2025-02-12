@@ -7,6 +7,7 @@ from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import (
+    ItemTagsAssociation,
     TagsTable,
 )
 
@@ -16,6 +17,26 @@ async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
     return existingTags
 
+async def getAllTagNamesAssociatedByItemId(asyncSession:AsyncSession, itemId:int)->Set[str]:
+    result = await asyncSession.execute(
+        select(ItemTagsAssociation.c.tags_id)
+        .where(ItemTagsAssociation.c.item_id == itemId)
+    )
+    tagsId: Set[int] = set(tagId for tagId in result.scalars().all())
+    tagNames : Set[str] = set() 
+    for tagId in tagsId:
+        tagName : str | None = await getTagNameWithId(asyncSession,tagId)
+        if tagName:
+            tagNames.add(tagName)
+    return tagNames
+
+async def getTagNameWithId(asyncSession : AsyncSession, tagId:int) -> str | None:
+    result = await asyncSession.execute(
+        select(TagsTable.name).where(TagsTable.id == tagId)
+    )
+    tagName = result.scalars().first()
+    return tagName if tagName else None
+    
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
     """
