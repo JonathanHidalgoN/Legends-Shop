@@ -1,6 +1,7 @@
+from typing import Set
 from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
-from app.schemas.Item import Gold, Item
+from app.schemas.Item import Effects, Gold, Image, Item, Stats
 
 
 def mapGoldToGoldTable(gold: Gold) -> GoldTable:
@@ -32,3 +33,18 @@ def mapItemToItemTable(item: Item, goldId: int, updated: bool = True) -> ItemTab
         updated=updated,
     )
     return itemTable
+
+def mapItemTableToItem(itemTable: ItemTable, gold : Gold, tags : Set[str], stats: Stats,
+                       effects:Effects, image : Image) -> Item:
+    item : Item = Item(
+        name=itemTable.name,
+        colloq="",
+        plaintext=itemTable.plain_text,
+        gold=gold,
+        tags=tags,
+        stats=stats,
+        effect=effects,
+        id=0,
+        image=image
+    )
+    return item
