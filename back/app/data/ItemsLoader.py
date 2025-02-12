@@ -211,12 +211,14 @@ class ItemsLoader:
                     f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database"
                 )
                 return None
+            #We don't want all the image info, just the name
+            itemData["image"] = itemData["image"]["full"]
             fullItem = {"id": itemId, **itemData}
             item: Item = Item(**fullItem)
             return item
         except Exception as e:
             logger.exception(
-                f"Error, the item with id {itemId} had a problem while parsing the json into an Item, this item will be ingnore, exception : {e}"
+                f"Error, the item with id {itemId} and item data {itemData} had a problem while parsing the json into an Item, this item will be ingnore, exception : {e}"
             )
             return None
 
