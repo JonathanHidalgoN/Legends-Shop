@@ -1,4 +1,5 @@
 from typing import Dict, List, Set, Tuple
+from sqlalchemy import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.MetaDataTable import MetaDataTable
@@ -32,6 +33,7 @@ async def getAllTagNamesAssociatedByItemId(asyncSession: AsyncSession, itemId: i
         select(ItemTagsAssociation.c.tags_id)
         .where(ItemTagsAssociation.c.item_id == itemId)
     )
+    #Here can use scalars because just getting tags_id from select
     tagsId: Set[int] = set(tagId for tagId in result.scalars().all())
     tagNames: Set[str] = set()
     for tagId in tagsId:
@@ -53,16 +55,14 @@ async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None
 async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
     """Return a set of stat name/value pairs for the given item ID."""
     result = await asyncSession.execute(
-        select(ItemStatAssociation)
+        select(ItemStatAssociation.c.stat_id, ItemStatAssociation.c.value)
         .where(ItemStatAssociation.c.item_id == itemId)
     )
-    statsIdValue: Set[Tuple[int, int | float]] = set(
-        (statAssociationRow.c.item_id, statAssociationRow.c.value)
-        for statAssociationRow in result.scalars().all()
-    )
-    statDicts: Dict[str, int | float] = {}
+    #Here can´t use scalars because it is a Table, not an ORM model
+    statsIdValue: Set[Row[Tuple[int, int | float]]] = set(result.all())
+    statDicts : Dict[str, int | float] = {}
     for statTuple in statsIdValue:
-        statName: str | None = await getStatNameWithId(asyncSession, statTuple[0])
+        statName : str | None = await getStatNameWithId(asyncSession, statTuple[0])
         if statName:
             statDicts[statName] = statTuple[1]
     return statDicts
@@ -80,13 +80,11 @@ async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | No
 async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
     """Return a set of effect name/value pairs for the given item ID."""
     result = await asyncSession.execute(
-        select(ItemEffectAssociation)
+        select(ItemEffectAssociation.c.effect_id, ItemEffectAssociation.c.value)
         .where(ItemEffectAssociation.c.item_id == itemId)
     )
-    effectsIdValue: Set[Tuple[int, int | float]] = set(
-        (effectAssociationRow.c.item_id, effectAssociationRow.c.value)
-        for effectAssociationRow in result.scalars().all()
-    )
+    #Here can´t use scalars because it is a Table, not an ORM model
+    effectsIdValue: Set[Row[Tuple[int, int | float]]] = set(result.all())
     effectDicts: Dict[str, int | float] = {}
     for effectTuple in effectsIdValue:
         effectName: str | None = await getEffectNameWithId(asyncSession, effectTuple[0])
