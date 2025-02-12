@@ -43,7 +43,7 @@ async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None
     return tagName if tagName else None
 
 
-async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[Dict[str, int | float]]:
+async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
     """Return a set of stat name/value pairs for the given item ID."""
     result = await asyncSession.execute(
         select(ItemStatAssociation)
@@ -53,12 +53,11 @@ async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, 
         (statAssociationRow.c.item_id, statAssociationRow.c.value)
         for statAssociationRow in result.scalars().all()
     )
-    statDicts: Set[Dict[str, int | float]] = set()
+    statDicts: Dict[str, int | float] = {}
     for statTuple in statsIdValue:
         statName: str | None = await getStatNameWithId(asyncSession, statTuple[0])
         if statName:
-            statDict: Dict[str, int | float] = {statName: statTuple[1]}
-            statDicts.add(statDict)
+            statDicts[statName] = statTuple[1]
     return statDicts
 
 
@@ -71,7 +70,7 @@ async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | No
     return statName if statName else None
 
 
-async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[Dict[str, int | float]]:
+async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
     """Return a set of effect name/value pairs for the given item ID."""
     result = await asyncSession.execute(
         select(ItemEffectAssociation)
@@ -81,12 +80,11 @@ async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession
         (effectAssociationRow.c.item_id, effectAssociationRow.c.value)
         for effectAssociationRow in result.scalars().all()
     )
-    effectDicts: Set[Dict[str, int | float]] = set()
+    effectDicts: Dict[str, int | float] = {}
     for effectTuple in effectsIdValue:
         effectName: str | None = await getEffectNameWithId(asyncSession, effectTuple[0])
         if effectName:
-            effectDict: Dict[str, int | float] = {effectName: effectTuple[1]}
-            effectDicts.add(effectDict)
+            effectDicts[effectName] = effectTuple[1]
     return effectDicts
 
 
