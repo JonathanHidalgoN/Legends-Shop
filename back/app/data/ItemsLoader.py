@@ -37,26 +37,25 @@ from app.logger import logger
 
 
 class ItemsLoader:
-    #I know this class has a lot of code duplication where stats/effects are involved,
-    #maybe is worth to abastract but for now I decided to create indivial functions because 
-    #in the future some different functionality will be added 
+    # I know this class has a lot of code duplication where stats/effects are involved,
+    # maybe is worth to abastract but for now I decided to create indivial functions because
+    # in the future some different functionality will be added
     """
     This class is responsible to fetch the items from ITEMS_URL, then parse
     that json into a collection representing the items, with those items update the database.
 
     The only method to be used is 'updateItems'
     """
-    VERSION_URL : str = "https://ddragon.leagueoflegends.com/api/versions.json"
+    VERSION_URL: str = "https://ddragon.leagueoflegends.com/api/versions.json"
 
     def __init__(self, dbSession: AsyncSession):
         self.dbSession = dbSession
-        self.items_url : str = ""
-        self.version : str = "" 
-        self.itemsUrl : str = "" 
+        self.items_url: str = ""
+        self.version: str = ""
+        self.itemsUrl: str = ""
         pass
 
-
-    async def getJson(self, url:str, entitiesName:str) -> dict | list:
+    async def getJson(self, url: str, entitiesName: str) -> dict | list:
         """
         This method gets the json from url and returns it.
         Raise a JSONFetchError when an error occurs
@@ -70,7 +69,9 @@ class ItemsLoader:
                 logger.debug("Fetched json successfully")
                 return data
         except (json.JSONDecodeError, httpx.RequestError) as e:
-            logger.exception(f"Json decode error fetching {entitiesName} json in {url}, exception: {e}")
+            logger.exception(
+                f"Json decode error fetching {entitiesName} json in {url}, exception: {e}"
+            )
             raise JsonFetchError from e
         except Exception as e:
             logger.exception(
@@ -81,32 +82,34 @@ class ItemsLoader:
     async def getLastVersion(self) -> str:
         """
         This functions gets the version list from VERSION_URL and get the first element that is the last version
-        Raises JsonParseError when the version list is empty or exceptions raised by getJson method 
+        Raises JsonParseError when the version list is empty or exceptions raised by getJson method
         """
-        #This is a list, use union to avoid typing error
+        # This is a list, use union to avoid typing error
         logger.debug("Getting current game version")
-        versionJson : list | dict = await self.getJson(self.VERSION_URL, "versions")
+        versionJson: list | dict = await self.getJson(self.VERSION_URL, "versions")
         if not versionJson:
             logger.error("Version json is empty")
             raise JsonParseError("Version json is empty")
         logger.debug(f"Current game version is {versionJson[0]}")
-        return versionJson[0] 
+        return versionJson[0]
 
-    def makeItemsUlr(self, version : str) -> str: 
+    def makeItemsUlr(self, version: str) -> str:
         """
         Makes the items url with the current version of the game
         """
         logger.debug("Making items url")
-        itemsUrl : str = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/item.json"
+        itemsUrl: str = (
+            f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/item.json"
+        )
         logger.debug(f"Items url is {itemsUrl}")
         return itemsUrl
 
     async def updateItems(self) -> None:
         """
         This method :
-        -2 - Gets the last version of the game and store 
+        -2 - Gets the last version of the game and store
         -1 - Updates metadata version in database
-        0 - Builds the items url and store 
+        0 - Builds the items url and store
         1 - Gets the json with items.
         2 - Parses the json with items into a list of items.
         3 - Updates the tags table.
@@ -125,7 +128,7 @@ class ItemsLoader:
         self.version = await self.getLastVersion()
         await self.updateDbVersion(self.version)
         self.itemsUrl = self.makeItemsUlr(self.version)
-        itemsJson: dict | list = await self.getJson(self.itemsUrl,"items")
+        itemsJson: dict | list = await self.getJson(self.itemsUrl, "items")
         if not itemsJson:
             logger.error("Items Json is empty")
             raise ItemsLoaderError("Items Json is empty!")
@@ -145,18 +148,19 @@ class ItemsLoader:
         await self.updateEffectsInDataBase(uniqueEffects)
         await self.updateItemsInDataBase(itemsList)
 
-    async def updateDbVersion(self, version:str) -> None:
+    async def updateDbVersion(self, version: str) -> None:
         """
         Updates version in MetaDataTable
         Raises JsonParseError if version is None or error
         """
         try:
-            await updateVersion(self.dbSession,version)
+            await updateVersion(self.dbSession, version)
         except Exception as e:
             await self.dbSession.rollback()
-            logger.error(f"An error occurred while updating the version in MetaDataTable, exception: {e}")
+            logger.error(
+                f"An error occurred while updating the version in MetaDataTable, exception: {e}"
+            )
             raise JsonParseError() from e
-
 
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
         """
@@ -299,7 +303,9 @@ class ItemsLoader:
         logger.debug("Updating effects table")
         try:
             logger.debug("Getting existing effects from the database")
-            existingEffectNames: Set[str] = await getAllEffectsTableNames(self.dbSession)
+            existingEffectNames: Set[str] = await getAllEffectsTableNames(
+                self.dbSession
+            )
             logger.debug(f"Got {len(existingEffectNames)} from database")
         except SQLAlchemyError as e:
             logger.error(
@@ -307,7 +313,9 @@ class ItemsLoader:
             )
             raise UpdateEffectsError() from e
 
-        logger.debug(f"Adding {len(effectsToAdd)} effects, only new effects will be added")
+        logger.debug(
+            f"Adding {len(effectsToAdd)} effects, only new effects will be added"
+        )
         newAdditions: int = 0
         for effect in effectsToAdd:
             isNew: bool = self.addEffectInDataBaseIfNew(effect, existingEffectNames)
@@ -319,10 +327,13 @@ class ItemsLoader:
             logger.error(f"An error occurred while committing effects update: {e}")
             await self.dbSession.rollback()
             raise UpdateEffectsError() from e
-        logger.debug(f"Updated effects table successfully, {newAdditions} new effects added")
+        logger.debug(
+            f"Updated effects table successfully, {newAdditions} new effects added"
+        )
 
-
-    def addEffectInDataBaseIfNew(self, effect: str, existingEffectNames: Set[str]) -> bool:
+    def addEffectInDataBaseIfNew(
+        self, effect: str, existingEffectNames: Set[str]
+    ) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
         Updates the database with effect, if it does not exist.
@@ -338,7 +349,6 @@ class ItemsLoader:
         except Exception as e:
             logger.error(f"Error while updating effect {effect}, exception: {e}")
             raise UpdateEffectsError() from e
-
 
     def addStatInDataBaseIfNew(self, stat: str, existingstatNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
@@ -453,14 +463,15 @@ class ItemsLoader:
                         "Could not insert a relation item-stat"
                     ) from e
 
-
     async def addItemEffectsRelations(self, itemId: int, effects: Effects) -> None:
         """
         This function inserts the relations given the itemId and effects.
         Raises UpdateItemsError when something fails.
         """
         for effect, effectValue in effects.root.items():
-            effectId: int | None = await getEffectIdWithEffectName(self.dbSession, effect)
+            effectId: int | None = await getEffectIdWithEffectName(
+                self.dbSession, effect
+            )
             if effectId is None:
                 logger.error(f"Effect with name {effect} was not found in the database")
                 raise UpdateItemsError("Effect was not found in the database")
@@ -480,7 +491,6 @@ class ItemsLoader:
                     raise UpdateItemsError(
                         "Could not insert a relation item-effect"
                     ) from e
-
 
     async def addItemTagsRelations(self, itemId: int, tags: Set[str]) -> None:
         """
@@ -537,7 +547,6 @@ class ItemsLoader:
             )
             raise UpdateItemsError("Error while deleting stats associations for item")
 
-
     async def deleteItemEffectsExistingRelations(self, itemId) -> None:
         """
         This function deletes the many-to-many relation of an item with
@@ -554,7 +563,6 @@ class ItemsLoader:
                 f"Error while deleting effects associations for item id {itemId}: {e}"
             )
             raise UpdateItemsError("Error while deleting effects associations for item")
-
 
     async def insertOrUpdateGoldTable(
         self, createNewGoldTable: bool, gold: Gold, itemId: int | None = None

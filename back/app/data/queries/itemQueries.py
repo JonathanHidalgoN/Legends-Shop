@@ -20,10 +20,13 @@ async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
     return existingTags
 
-async def getItemTableByItemId(asyncSession : AsyncSession, itemId : int) -> ItemTable | None:
+
+async def getItemTableByItemId(
+    asyncSession: AsyncSession, itemId: int
+) -> ItemTable | None:
     """Retrun itemTable with the item ID"""
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.id == itemId))
-    itemTable : ItemTable = result.scalars().first()
+    itemTable: ItemTable = result.scalars().first()
     if itemTable:
         return itemTable
     else:
@@ -31,13 +34,16 @@ async def getItemTableByItemId(asyncSession : AsyncSession, itemId : int) -> Ite
         return None
 
 
-async def getAllTagNamesAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Set[str]:
+async def getAllTagNamesAssociatedByItemId(
+    asyncSession: AsyncSession, itemId: int
+) -> Set[str]:
     """Return all tag names linked to the specified item ID."""
     result = await asyncSession.execute(
-        select(ItemTagsAssociation.c.tags_id)
-        .where(ItemTagsAssociation.c.item_id == itemId)
+        select(ItemTagsAssociation.c.tags_id).where(
+            ItemTagsAssociation.c.item_id == itemId
+        )
     )
-    #Here can use scalars because just getting tags_id from select
+    # Here can use scalars because just getting tags_id from select
     tagsId: Set[int] = set(tagId for tagId in result.scalars().all())
     tagNames: Set[str] = set()
     for tagId in tagsId:
@@ -60,17 +66,20 @@ async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None
         return None
 
 
-async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
+async def getAllStatNamesAndValueAssociatedByItemId(
+    asyncSession: AsyncSession, itemId: int
+) -> Dict[str, int | float]:
     """Return a set of stat name/value pairs for the given item ID."""
     result = await asyncSession.execute(
-        select(ItemStatAssociation.c.stat_id, ItemStatAssociation.c.value)
-        .where(ItemStatAssociation.c.item_id == itemId)
+        select(ItemStatAssociation.c.stat_id, ItemStatAssociation.c.value).where(
+            ItemStatAssociation.c.item_id == itemId
+        )
     )
-    #Here can´t use scalars because it is a Table, not an ORM model
+    # Here can´t use scalars because it is a Table, not an ORM model
     statsIdValue: Set[Row[Tuple[int, int | float]]] = set(result.all())
-    statDicts : Dict[str, int | float] = {}
+    statDicts: Dict[str, int | float] = {}
     for statTuple in statsIdValue:
-        statName : str | None = await getStatNameWithId(asyncSession, statTuple[0])
+        statName: str | None = await getStatNameWithId(asyncSession, statTuple[0])
         if statName:
             statDicts[statName] = statTuple[1]
     return statDicts
@@ -89,13 +98,16 @@ async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | No
         return None
 
 
-async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, itemId: int) -> Dict[str, int | float]:
+async def getAllEffectNamesAndValueAssociatedByItemId(
+    asyncSession: AsyncSession, itemId: int
+) -> Dict[str, int | float]:
     """Return a set of effect name/value pairs for the given item ID."""
     result = await asyncSession.execute(
-        select(ItemEffectAssociation.c.effect_id, ItemEffectAssociation.c.value)
-        .where(ItemEffectAssociation.c.item_id == itemId)
+        select(ItemEffectAssociation.c.effect_id, ItemEffectAssociation.c.value).where(
+            ItemEffectAssociation.c.item_id == itemId
+        )
     )
-    #Here can´t use scalars because it is a Table, not an ORM model
+    # Here can´t use scalars because it is a Table, not an ORM model
     effectsIdValue: Set[Row[Tuple[int, int | float]]] = set(result.all())
     effectDicts: Dict[str, int | float] = {}
     for effectTuple in effectsIdValue:
@@ -112,7 +124,7 @@ async def getEffectNameWithId(asyncSession: AsyncSession, effectId: int) -> str 
     )
     effectName = result.scalars().first()
     if effectName:
-        return effectName 
+        return effectName
     else:
         logger.warning(f"Tried to get effectName with id {effectId} but None was found")
         return None
@@ -153,14 +165,18 @@ async def getAllEffectsTableNames(asyncSession: AsyncSession) -> Set[str]:
     return existingEffects
 
 
-async def getItemTableGivenItemName(asyncSession: AsyncSession, name: str) -> ItemTable | None:
+async def getItemTableGivenItemName(
+    asyncSession: AsyncSession, name: str
+) -> ItemTable | None:
     """Retrieve an item from the ItemTable by its name."""
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.name == name))
     itemTable = result.scalars().first()
     if itemTable:
-        return itemTable 
+        return itemTable
     else:
-        logger.warning(f"Tried to get itemTable with item name {name} but None was found")
+        logger.warning(
+            f"Tried to get itemTable with item name {name} but None was found"
+        )
         return None
 
 
@@ -171,20 +187,26 @@ async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
     return items
 
 
-async def getStatIdWithStatName(asyncSession: AsyncSession, statName: str) -> int | None:
+async def getStatIdWithStatName(
+    asyncSession: AsyncSession, statName: str
+) -> int | None:
     """Get the ID of a stat based on its name."""
     result = await asyncSession.execute(
         select(StatsTable.id).where(StatsTable.name == statName)
     )
     stat = result.scalars().first()
     if stat:
-        return stat 
+        return stat
     else:
-        logger.warning(f"Tried to get stat id item  stat name {statName} but None was found")
+        logger.warning(
+            f"Tried to get stat id item  stat name {statName} but None was found"
+        )
         return None
 
 
-async def getEffectIdWithEffectName(asyncSession: AsyncSession, effectName: str) -> int | None:
+async def getEffectIdWithEffectName(
+    asyncSession: AsyncSession, effectName: str
+) -> int | None:
     """Retrieve the ID of an effect by its name."""
     result = await asyncSession.execute(
         select(EffectsTable.id).where(EffectsTable.name == effectName)
@@ -206,11 +228,11 @@ async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | 
         return None
 
 
-async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTable | None:
+async def getGoldTableWithId(
+    asyncSession: AsyncSession, goldId: int
+) -> GoldTable | None:
     """Retrieve gold details by gold ID."""
-    result = await asyncSession.execute(
-        select(GoldTable).where(GoldTable.id == goldId)
-    )
+    result = await asyncSession.execute(select(GoldTable).where(GoldTable.id == goldId))
     goldTable = result.scalars().first()
     if goldTable:
         return goldTable
@@ -219,7 +241,9 @@ async def getGoldTableWithId(asyncSession: AsyncSession, goldId: int) -> GoldTab
         return None
 
 
-async def getGoldTableWithItemId(asyncSession: AsyncSession, itemId: int) -> GoldTable | None:
+async def getGoldTableWithItemId(
+    asyncSession: AsyncSession, itemId: int
+) -> GoldTable | None:
     """Get gold information for a given item by its item ID."""
     goldId: int | None = await getGoldIdWithItemId(asyncSession, itemId)
     if goldId is None:
@@ -230,7 +254,9 @@ async def getGoldTableWithItemId(asyncSession: AsyncSession, itemId: int) -> Gol
     if goldTable:
         return goldTable
     else:
-        logger.warning(f"Tried to get gold table with item id {itemId} but None was found")
+        logger.warning(
+            f"Tried to get gold table with item id {itemId} but None was found"
+        )
         return None
 
 

@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
 
+
 # This function gets the databaseUrl
 def getDatabaseUrl() -> str:
     load_dotenv()

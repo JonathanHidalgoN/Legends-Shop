@@ -2,14 +2,15 @@ from fastapi import Depends, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data import database
 from app.data.ItemsLoader import ItemsLoader
-from app.data.utils import getDatabaseUrl
+from app.routes import items
 
 app = FastAPI()
+app.include_router(items.router, prefix="/items")
 
 
 @app.get("/")
 async def root(db: AsyncSession = Depends(database.getDbSession)):
-    return {"message": getDatabaseUrl()}
+    return {"message": database.getDatabaseUrl()}
 
 
 @app.get("/testUpdateTagsTable")

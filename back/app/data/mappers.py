@@ -34,9 +34,16 @@ def mapItemToItemTable(item: Item, goldId: int, updated: bool = True) -> ItemTab
     )
     return itemTable
 
-def mapItemTableToItem(itemTable: ItemTable, gold : Gold, tags : Set[str], stats: Stats,
-                       effects:Effects, image : Image) -> Item:
-    item : Item = Item(
+
+def mapItemTableToItem(
+    itemTable: ItemTable,
+    gold: Gold,
+    tags: Set[str],
+    stats: Stats,
+    effects: Effects,
+    image: Image,
+) -> Item:
+    item: Item = Item(
         name=itemTable.name,
         colloq="",
         plaintext=itemTable.plain_text,
@@ -45,6 +52,6 @@ def mapItemTableToItem(itemTable: ItemTable, gold : Gold, tags : Set[str], stats
         stats=stats,
         effect=effects,
         id=0,
-        image=image
+        image=image,
     )
     return item
