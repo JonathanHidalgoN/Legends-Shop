@@ -19,11 +19,6 @@ async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     existingTags: List[TagsTable] = [tag for tag in result.scalars().all()]
     return existingTags
 
-# async def getImageByItemId(asyncSession, itemId:int)->ImageTable | None:
-#     result = 
-#     result = await asyncSession.execute(select(ImageTable.id))
-#
-
 async def getItemTableByItemId(asyncSession : AsyncSession, itemId : int) -> ItemTable | None:
     """Retrun itemTable with the item ID"""
     result = await asyncSession.execute(select(ItemTable).where(ItemTable.id == itemId))
@@ -61,7 +56,7 @@ async def getAllStatNamesAndValueAssociatedByItemId(asyncSession: AsyncSession, 
         select(ItemStatAssociation)
         .where(ItemStatAssociation.c.item_id == itemId)
     )
-    statsIdValue: Set[Tuple[int, int]] = set(
+    statsIdValue: Set[Tuple[int, int | float]] = set(
         (statAssociationRow.c.item_id, statAssociationRow.c.value)
         for statAssociationRow in result.scalars().all()
     )
@@ -88,7 +83,7 @@ async def getAllEffectNamesAndValueAssociatedByItemId(asyncSession: AsyncSession
         select(ItemEffectAssociation)
         .where(ItemEffectAssociation.c.item_id == itemId)
     )
-    effectsIdValue: Set[Tuple[int, int]] = set(
+    effectsIdValue: Set[Tuple[int, int | float]] = set(
         (effectAssociationRow.c.item_id, effectAssociationRow.c.value)
         for effectAssociationRow in result.scalars().all()
     )

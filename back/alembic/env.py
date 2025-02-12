@@ -6,8 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from app.data.utils import getDatabaseUrl
-from app.data.database import base
+from app.data.database import base, getDatabaseUrl
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ImageTable import ImageTable
 from app.data.models.ItemTable import ItemTable
