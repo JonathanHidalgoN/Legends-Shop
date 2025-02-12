@@ -11,7 +11,7 @@ from app.data.queries.itemQueries import (
     getGoldTableWithId,
     getItems,
 )
-from app.schemas.Item import Effects, Gold, Image, Item, Stats
+from app.schemas.Item import Effects, Gold, Item, Stats
 
 
 async def getAllItemTableRowsAnMapToItems(asyncSession: AsyncSession) -> List[Item]:
@@ -46,5 +46,4 @@ async def convertItemTableIntoItem(
     )
     stats: Stats = Stats(root=statsData)
     effects: Effects = Effects(root=effectsData)
-    image: Image = Image(full=itemTable.image, sprite="", group="")
-    return mapItemTableToItem(itemTable, gold, tags, stats, effects, image)
+    return mapItemTableToItem(itemTable, gold, tags, stats, effects, itemTable.image)

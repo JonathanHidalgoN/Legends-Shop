@@ -1,13 +1,6 @@
 from pydantic import BaseModel, RootModel
 from typing import List, Dict, Set, Union
 
-
-class Image(BaseModel):
-    full: str
-    sprite: str
-    group: str
-
-
 class Gold(BaseModel):
     base: int
     purchasable: bool
@@ -27,7 +20,7 @@ class Item(BaseModel):
     name: str
     colloq: str
     plaintext: str
-    image: Image
+    image: str 
     gold: Gold
     tags: Set[str]
     stats: Stats

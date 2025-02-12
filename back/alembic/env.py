@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from app.data.database import base, getDatabaseUrl
 from app.data.models.GoldTable import GoldTable
-from app.data.models.ImageTable import ImageTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import TagsTable
