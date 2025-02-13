@@ -213,6 +213,7 @@ class ItemsLoader:
                 return None
             #We don't want all the image info, just the name
             itemData["image"] = itemData["image"]["full"]
+            itemData["imageUrl"] = self.buildImageUrl(itemData["image"])
             fullItem = {"id": itemId, **itemData}
             item: Item = Item(**fullItem)
             return item
@@ -221,6 +222,12 @@ class ItemsLoader:
                 f"Error, the item with id {itemId} and item data {itemData} had a problem while parsing the json into an Item, this item will be ingnore, exception : {e}"
             )
             return None
+
+    def buildImageUrl(self, imageName : str) -> str:
+        """
+        Build the image url given the version and image name
+        """
+        return f"https://ddragon.leagueoflegends.com/cdn/{self.version}/img/item/{imageName}"
 
     async def updateTagsInDataBase(self, tagsToAdd: Set[str]) -> None:
         """
@@ -425,7 +432,7 @@ class ItemsLoader:
             itemTable = mapItemToItemTable(item, goldTableId, True)
             itemTable.id = existingItem.id
         try:
-            await self.dbSession.merge(itemTable)
+            itemTable = await self.dbSession.merge(itemTable)
             await self.dbSession.flush()
             await self.addItemStatsRelations(itemTable.id, item.stats)
             await self.addItemEffectsRelations(itemTable.id, item.effect)
@@ -590,7 +597,7 @@ class ItemsLoader:
                 raise UpdateItemsError("Tried to update a gold row that do not exist")
             newGoldTable.id = existingGoldTableId
         try:
-            await self.dbSession.merge(newGoldTable)
+            newGoldTable = await self.dbSession.merge(newGoldTable)
             await self.dbSession.flush()
             return newGoldTable.id
         except Exception as e:
