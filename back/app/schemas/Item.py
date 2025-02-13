@@ -1,5 +1,5 @@
-from pydantic import BaseModel, RootModel
-from typing import List, Dict, Set, Union
+from pydantic import BaseModel, Field, RootModel
+from typing import List, Dict, Optional, Set, Union
 
 class Gold(BaseModel):
     base: int
@@ -23,8 +23,8 @@ class Item(BaseModel):
     image: str 
     imageUrl: str
     gold: Gold
-    tags: Set[str]
-    stats: Stats
-    effect: Effects
+    tags: Optional[Set[str]] = Field(default_factory=set)
+    stats: Optional[Stats] = Field(default_factory=lambda: Stats.model_construct(root={}))
+    effect: Optional[Effects] = Field(default_factory=lambda: Effects.model_construct(root={}))
     id: int
     description: str
