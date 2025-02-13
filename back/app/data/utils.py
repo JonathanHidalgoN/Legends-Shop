@@ -46,4 +46,4 @@ async def convertItemTableIntoItem(
     )
     stats: Stats = Stats(root=statsData)
     effects: Effects = Effects(root=effectsData)
-    return mapItemTableToItem(itemTable, gold, tags, stats, effects, itemTable.image)
+    return mapItemTableToItem(itemTable, gold, tags, stats, effects)
