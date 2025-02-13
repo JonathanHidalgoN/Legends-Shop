@@ -30,6 +30,8 @@ def mapItemToItemTable(item: Item, goldId: int, updated: bool = True) -> ItemTab
         image=item.image,
         gold_id=goldId,
         updated=updated,
+        imageUrl = item.imageUrl,
+        description = item.description
     )
     return itemTable
 
@@ -40,7 +42,6 @@ def mapItemTableToItem(
     tags: Set[str],
     stats: Stats,
     effects: Effects,
-    image: str,
 ) -> Item:
     item: Item = Item(
         name=itemTable.name,
@@ -51,6 +52,9 @@ def mapItemTableToItem(
         stats=stats,
         effect=effects,
         id=0,
-        image=image,
+        image=itemTable.image,
+        imageUrl=itemTable.imageUrl,
+        description=itemTable.description
+
     )
     return item
