@@ -21,8 +21,10 @@ class Item(BaseModel):
     colloq: str
     plaintext: str
     image: str 
+    imageUrl: str
     gold: Gold
     tags: Set[str]
     stats: Stats
     effect: Effects
     id: int
+    description: str
