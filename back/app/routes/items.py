@@ -12,9 +12,11 @@ router = APIRouter()
 
 @router.get("/all")
 async def getAllItems(db: AsyncSession = Depends(database.getDbSession)):
+    logger.debug("Request to items/all, getting all items in database")
     items: List[Item] = []
     try:
         items = await getAllItemTableRowsAnMapToItems(db)
+        logger.debug("Request to items/all completed successfully")
     except Exception as e:
         logger.error(f"Error while trying to query all items from database: {e}")
         raise HTTPException(
