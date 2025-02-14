@@ -6,13 +6,14 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from app.data.database import base, getDatabaseUrl
+from app.data.database import base
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import TagsTable
 from app.data.models.EffectsTable import EffectsTable
 from app.data.models.MetaDataTable import MetaDataTable
+from app.envVariables import DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,7 +24,6 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-DATABASE_URL = getDatabaseUrl()
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 # -------------------------------------------------------------
 # add your model's MetaData object here

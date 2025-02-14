@@ -4,17 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
+from app.envVariables import DATABASE_URL
 
 
-# This function gets the databaseUrl
-def getDatabaseUrl() -> str:
-    load_dotenv()
-    databaseUrl = os.getenv("DATABASE_URL", "Empty")
-    return databaseUrl
-
-
-load_dotenv()
-DATABASE_URL: str = getDatabaseUrl()
 # Modules are singletons, first import will create this object and the subsequent imports
 # will use the same instance
 # Docs: https://docs.sqlalchemy.org/en/20/tutorial/engine.html#tutorial-engine
