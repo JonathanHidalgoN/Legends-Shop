@@ -18,13 +18,13 @@ cp "$SRC" "$DEST" || {
 
 if [ "$ENV" = "local" ]; then
   echo "Running docker db service (has to be named db on Dockerfile)..."
-  docker compose up db -d || {
+  docker compose up db frontend -d --build || {
     echo "Error running docker db"
     exit 1
   }
 elif [ "$ENV" = "docker" ]; then
   echo "Running docker compose up..."
-  docker compose up -d || {
+  docker compose up -d --build || {
     echo "Error running docker compose up"
     exit 1
   }
