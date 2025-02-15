@@ -1,4 +1,4 @@
-from typing import List, Set, Union
+from typing import Dict, List, Set, Union
 import json
 import httpx
 
@@ -18,6 +18,7 @@ from app.customExceptions import (
 from app.data.mappers import mapGoldToGoldTable, mapItemToItemTable
 from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 from app.data.models.GoldTable import GoldTable
+from app.data.models.StatsMappingTable import StatsMappingTable
 from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import ItemTagsAssociation, TagsTable
 from app.data.models.ItemTable import ItemTable
@@ -29,6 +30,8 @@ from app.data.queries.itemQueries import (
     getGoldIdWithItemId,
     getItemTableGivenItemName,
     getStatIdWithStatName,
+    getStatNameWithId,
+    getStatsMappingTable,
     getTagIdWithtTagName,
     updateVersion,
 )
@@ -53,7 +56,6 @@ class ItemsLoader:
         self.items_url: str = ""
         self.version: str = ""
         self.itemsUrl: str = ""
-        pass
 
     async def getJson(self, url: str, entitiesName: str) -> dict | list:
         """
@@ -136,6 +138,8 @@ class ItemsLoader:
         if not itemsList:
             logger.error("Items list is empty")
             raise ItemsLoaderError("Items Json is empty!")
+        #Here again linter gives an error but the pidantic default constructor is an empty container 
+        #not none, I think this will be fine
         uniqueTags: Set[str] = set(tag for item in itemsList for tag in item.tags)
         await self.updateTagsInDataBase(uniqueTags)
         uniqueStats: Set[str] = set(
@@ -177,6 +181,9 @@ class ItemsLoader:
         itemNames: Set[str] = set()
         noneCounter: int = 0
         parsedItems: int = 0
+        mappingStatsDict : Dict[str, str] = self.createMappingStatsDict((
+            await getStatsMappingTable(self.dbSession)
+        ))
         for itemId, itemData in itemsData.items():
             item: Item | None = await self.parseDataNodeIntoItem(
                 itemId, itemData, itemNames
@@ -191,6 +198,17 @@ class ItemsLoader:
             f"Parsed items Json successfully, with {parsedItems} parsed items and {noneCounter} items that could not be parsed"
         )
         return itemsList
+
+    #This could be static but for now its ok
+    def createMappingStatsDict(self, statsMappingTable:List[StatsMappingTable]) -> Dict[str,str]:
+        """
+        Create a dict to map stats names from riot api to "better names"(IMO) using a table in the database 
+        called StatsMappingTable, it just has two rows one with the riot stat name and another with the custom name 
+        """
+        mapping : Dict[str,str] = {}
+        for row in statsMappingTable:
+            mapping[row.original_name] = row.mapped_name
+        return mapping
 
     async def parseDataNodeIntoItem(
         self, itemId: int, itemData, itemNames: Set[str]
@@ -211,7 +229,6 @@ class ItemsLoader:
                     f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database"
                 )
                 return None
-            #We don't want all the image info, just the name
             itemData["image"] = itemData["image"]["full"]
             itemData["imageUrl"] = self.buildImageUrl(itemData["image"])
             fullItem = {"id": itemId, **itemData}
@@ -282,7 +299,7 @@ class ItemsLoader:
         """
         logger.debug("Updating stats table")
         try:
-            logger.debug("Getting existing gats in the database")
+            logger.debug("Getting existing tags in the database")
             existingStatNames: Set[str] = await getAllStatsTableNames(self.dbSession)
             logger.debug(f"Got {len(existingStatNames)} from database")
         except SQLAlchemyError as e:
@@ -434,6 +451,8 @@ class ItemsLoader:
         try:
             itemTable = await self.dbSession.merge(itemTable)
             await self.dbSession.flush()
+            #Here the linter gives an error because stats, effects or tags can be None but in reality 
+            #the default constructor is empty so I think its fine
             await self.addItemStatsRelations(itemTable.id, item.stats)
             await self.addItemEffectsRelations(itemTable.id, item.effect)
             await self.addItemTagsRelations(itemTable.id, item.tags)
@@ -537,7 +556,6 @@ class ItemsLoader:
                 f"Error while deleting tags associations for item id {itemId}: {e}"
             )
             raise UpdateItemsError("Error while deleting tags associations for item")
-        pass
 
     async def deleteItemStatsExistingRelations(self, itemId) -> None:
         """
