@@ -19,6 +19,7 @@ class StatsTable(base):
         primary_key=True, autoincrement=True, nullable=False
     )
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    kind: Mapped[str] = mapped_column(unique=False, nullable=False)
     items: Mapped[list["ItemTable"]] = relationship(
         "ItemTable", secondary=ItemStatAssociation
     )
