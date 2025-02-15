@@ -231,6 +231,12 @@ class ItemsLoader:
                 return None
             itemData["image"] = itemData["image"]["full"]
             itemData["imageUrl"] = self.buildImageUrl(itemData["image"])
+            if "stats" not in itemData:
+                itemData["stats"] = {}
+            if "effects" not in itemData:
+                itemData["effects"] = {}
+            if "tags" not in itemData:
+                itemData["tags"] = set()
             fullItem = {"id": itemId, **itemData}
             item: Item = Item(**fullItem)
             return item
