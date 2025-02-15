@@ -276,7 +276,7 @@ async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int 
 async def getVersion(asyncSession: AsyncSession) -> str | None:
     """Retrieve the application version from the metadata."""
     result = await asyncSession.execute(
-        select(MetaDataTable.value).where(MetaDataTable.name == "version")
+        select(MetaDataTable.value).where(MetaDataTable.field_name == "version")
     )
     version = result.scalars().first()
     if version:
