@@ -13,7 +13,8 @@ from app.data.models.StatsTable import StatsTable
 from app.data.models.TagsTable import TagsTable
 from app.data.models.EffectsTable import EffectsTable
 from app.data.models.MetaDataTable import MetaDataTable
-from app.envVariables import DATABASE_URL
+from app.data.models.StatsMappingTable import StatsMappingTable
+from app.envVariables import DATABASE_ALEMBIC_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,7 +25,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", DATABASE_ALEMBIC_URL)
 # -------------------------------------------------------------
 # add your model's MetaData object here
 # for 'autogenerate' support
