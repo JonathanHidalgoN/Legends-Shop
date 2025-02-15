@@ -15,7 +15,6 @@ class Stats(RootModel):
 class Effects(RootModel):
     root: Dict[str, Union[int, float]]
 
-
 class Item(BaseModel):
     name: str
     colloq: str
@@ -23,8 +22,8 @@ class Item(BaseModel):
     image: str 
     imageUrl: str
     gold: Gold
-    tags: Optional[Set[str]] = Field(default_factory=set)
-    stats: Optional[Stats] = Field(default_factory=lambda: Stats.model_construct(root={}))
-    effect: Optional[Effects] = Field(default_factory=lambda: Effects.model_construct(root={}))
+    tags: Set[str] 
+    stats: Stats
+    effect: Effects
     id: int
     description: str
