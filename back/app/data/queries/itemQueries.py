@@ -6,6 +6,7 @@ from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
+from app.data.models.StatsMappingTable import StatsMappingTable
 from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from app.data.models.TagsTable import (
     ItemTagsAssociation,
@@ -291,3 +292,12 @@ async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
     async with asyncSession.begin():
         versionRow: MetaDataTable = MetaDataTable(field_name="version", value=version)
         await asyncSession.merge(versionRow)
+
+async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingTable]:
+    """Get the stats mapping table"""
+    result = await asyncSession.execute(
+        select(StatsMappingTable)
+    )
+    statsMappingTable : List[StatsMappingTable] = [row for row in result.scalars().all()] 
+    return statsMappingTable 
+
