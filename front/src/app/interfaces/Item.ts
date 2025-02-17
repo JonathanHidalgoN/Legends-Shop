@@ -5,25 +5,25 @@ export interface Gold {
   sell: number
 }
 
-export enum StatType {
+export enum StatKind {
   Flat,
   Percentage
 }
 
-export enum EffectType {
+export enum EffectKind {
   effect1,
   effect2
 }
 
 export interface Stat {
   name: string,
-  type: StatType,
+  kind: StatKind,
   value: number
 }
 
 export interface Effect {
   name: string,
-  type: EffectType,
+  kind: EffectKind,
   value: number
 }
 
