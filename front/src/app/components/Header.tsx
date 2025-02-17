@@ -1,6 +1,6 @@
-// components/Header.jsx
 import { useState } from "react";
 import Link from "next/link";
+import { sigmar } from "../fonts";
 
 const Header = ({
   user = null,
@@ -11,14 +11,14 @@ const Header = ({
   return (
     <header
       className="w-full flex items-center justify-between p-4"
-      style={{ backgroundColor: 'var(--white)', color: "white" }}
+      style={{ backgroundColor: 'var(--white2)', color: "white2" }}
     >
       <div
-        className="text-xl font-legens-shop"
-        style={{ backgroundColor: 'var(--white)', color: 'var(--foreground)' }}
+        className={`text-xl ${sigmar.className}`}
+        style={{ backgroundColor: 'var(--white2)', color: 'var(--orange)' }}
       >
         <Link href="/">
-          Legens Shop
+          Legends Shop
         </Link>
       </div>
 
@@ -27,7 +27,7 @@ const Header = ({
           type="text"
           placeholder="Search..."
           className="w-full p-2 rounded focus:outline-none"
-          style={{ backgroundColor: 'var(--white2)', color: 'var(--foreground)' }}
+          style={{ backgroundColor: 'var(--white)', color: 'var(--orange)' }}
         />
       </div>
 
@@ -36,7 +36,7 @@ const Header = ({
           <button
             onClick={() => setShowLoginDropdown((prev) => !prev)}
             className="p-2 rounded hover:opacity-80 transition"
-            style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
+            style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
           >
             {user && user.name ? user.name : "Login"}
           </button>
@@ -50,7 +50,7 @@ const Header = ({
           <button
             onClick={() => setShowCartDropdown((prev) => !prev)}
             className="p-2 rounded flex items-center hover:opacity-80 transition"
-            style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
+            style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
           >
             Cart
             <svg
