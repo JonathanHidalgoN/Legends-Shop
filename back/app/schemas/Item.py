@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, RootModel
-from typing import List, Dict, Optional, Set, Union
+from pydantic import BaseModel, RootModel
+from typing import Dict, Literal, Set, Union
 
 class Gold(BaseModel):
     base: int
@@ -8,22 +8,25 @@ class Gold(BaseModel):
     sell: int
 
 
-class Stats(RootModel):
-    root: Dict[str, Union[int, float]]
-
+class Stat(BaseModel):
+    name: str
+    kind : Literal["flat", "percentage"] 
+    value : float | int
+    #Makes hashable to use in the set
+    class Config:
+        frozen = True
 
 class Effects(RootModel):
     root: Dict[str, Union[int, float]]
 
 class Item(BaseModel):
     name: str
-    colloq: str
     plaintext: str
     image: str 
     imageUrl: str
     gold: Gold
     tags: Set[str] 
-    stats: Stats
+    stats: Set[Stat] 
     effect: Effects
     id: int
     description: str

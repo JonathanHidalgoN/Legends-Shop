@@ -13,6 +13,7 @@ from app.data.models.TagsTable import (
     TagsTable,
 )
 from app.logger import logger
+from app.schemas.Item import Stat
 
 
 async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
@@ -67,10 +68,10 @@ async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None
         return None
 
 
-async def getAllStatNamesAndValueAssociatedByItemId(
+async def getStatSetByItemId(
     asyncSession: AsyncSession, itemId: int
-) -> Dict[str, int | float]:
-    """Return a set of stat name/value pairs for the given item ID."""
+) -> Set[Stat]:
+    """Return a set of stats pairs for the given item ID."""
     result = await asyncSession.execute(
         select(ItemStatAssociation.c.stat_id, ItemStatAssociation.c.value).where(
             ItemStatAssociation.c.item_id == itemId
@@ -78,22 +79,24 @@ async def getAllStatNamesAndValueAssociatedByItemId(
     )
     # Here can´t use scalars because it is a Table, not an ORM model
     statsIdValue: Set[Row[Tuple[int, int | float]]] = set(result.all())
-    statDicts: Dict[str, int | float] = {}
+    stats: Set[Stat] = set() 
     for statTuple in statsIdValue:
-        statName: str | None = await getStatNameWithId(asyncSession, statTuple[0])
-        if statName:
-            statDicts[statName] = statTuple[1]
-    return statDicts
+        statTable: StatsTable | None = await getStatTableWithId(asyncSession, statTuple[0])
+        if statTable:
+            #Linter error but kind must be percentage or flat so ignore it
+            stat: Stat = Stat(name=statTable.name, kind=statTable.kind, value = statTuple[1])  
+            stats.add(stat)
+    return stats 
 
 
-async def getStatNameWithId(asyncSession: AsyncSession, statId: int) -> str | None:
-    """Retrieve the name of a stat given its ID."""
+async def getStatTableWithId(asyncSession: AsyncSession, statId: int) -> StatsTable | None:
+    """Retrieve the stat table of a stat given its ID."""
     result = await asyncSession.execute(
-        select(StatsTable.name).where(StatsTable.id == statId)
+        select(StatsTable).where(StatsTable.id == statId)
     )
-    statName = result.scalars().first()
-    if statName:
-        return statName
+    stat = result.scalars().first()
+    if stat:
+        return stat
     else:
         logger.warning(f"Tried to get statName with id {statId} but None was found")
         return None

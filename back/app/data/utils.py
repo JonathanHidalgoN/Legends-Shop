@@ -6,12 +6,12 @@ from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.queries.itemQueries import (
     getAllEffectNamesAndValueAssociatedByItemId,
-    getAllStatNamesAndValueAssociatedByItemId,
     getAllTagNamesAssociatedByItemId,
     getGoldTableWithId,
     getItems,
+    getStatSetByItemId,
 )
-from app.schemas.Item import Effects, Gold, Item, Stats
+from app.schemas.Item import Effects, Gold, Item, Stat
 
 
 async def getAllItemTableRowsAnMapToItems(asyncSession: AsyncSession) -> List[Item]:
@@ -38,12 +38,11 @@ async def convertItemTableIntoItem(
     )
     gold: Gold = mapGoldTableToGold(goldTable)
     tags: Set[str] = await getAllTagNamesAssociatedByItemId(asyncSession, itemTable.id)
-    statsData: Dict[str, int | float] = await getAllStatNamesAndValueAssociatedByItemId(
+    stats: Set[Stat] = await getStatSetByItemId(
         asyncSession, itemTable.id
     )
     effectsData: Dict[str, int | float] = (
         await getAllEffectNamesAndValueAssociatedByItemId(asyncSession, itemTable.id)
     )
-    stats: Stats = Stats(root=statsData)
     effects: Effects = Effects(root=effectsData)
     return mapItemTableToItem(itemTable, gold, tags, stats, effects)

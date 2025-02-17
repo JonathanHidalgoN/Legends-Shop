@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Union
+from typing import Dict, List, Set
 import json
 import httpx
 
@@ -30,12 +30,11 @@ from app.data.queries.itemQueries import (
     getGoldIdWithItemId,
     getItemTableGivenItemName,
     getStatIdWithStatName,
-    getStatNameWithId,
     getStatsMappingTable,
     getTagIdWithtTagName,
     updateVersion,
 )
-from app.schemas.Item import Effects, Gold, Item, Stats
+from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
 
 
@@ -142,15 +141,30 @@ class ItemsLoader:
         #not none, I think this will be fine
         uniqueTags: Set[str] = set(tag for item in itemsList for tag in item.tags)
         await self.updateTagsInDataBase(uniqueTags)
-        uniqueStats: Set[str] = set(
-            stat for item in itemsList for stat in item.stats.root
-        )
+        uniqueStats: Set[Stat] = self.getUniqueStats(itemsList) 
         await self.updateStatsInDataBase(uniqueStats)
+        #TODO: we dont like nested loops in python ):
         uniqueEffects: Set[str] = set(
             effect for item in itemsList for effect in item.effect.root
         )
         await self.updateEffectsInDataBase(uniqueEffects)
         await self.updateItemsInDataBase(itemsList)
+
+    def getUniqueStats(self, items: List[Item]) -> Set[Stat]:
+        #I dont like this function because the stats are store as a catalog in the database,
+        #the objective of this function is to get the unique stats in the list of items to update that catalog
+        #The thing is that Stat object has a value attribute, so we have to check if stat is unique just by its name 
+        """
+        Given a list of items returns a list of unique stats, we only care about the name and kind
+        """
+        uniqueStats : Set[Stat] = set() 
+        #TODO: we dont like nested loops in python ):
+        for item in items:
+            for stat in item.stats:
+                #Have to get the list of names
+                if stat.name not in [stat.name for stat in uniqueStats]:
+                    uniqueStats.add(stat)
+        return uniqueStats
 
     async def updateDbVersion(self, version: str) -> None:
         """
@@ -186,7 +200,7 @@ class ItemsLoader:
         ))
         for itemId, itemData in itemsData.items():
             item: Item | None = await self.parseDataNodeIntoItem(
-                itemId, itemData, itemNames
+                itemId, itemData, itemNames, mappingStatsDict
             )
             if item is None:
                 noneCounter += 1
@@ -211,7 +225,7 @@ class ItemsLoader:
         return mapping
 
     async def parseDataNodeIntoItem(
-        self, itemId: int, itemData, itemNames: Set[str]
+        self, itemId: int, itemData, itemNames: Set[str], statMapping:Dict[str,str]
     ) -> Item | None:
         # TODO: CHECK ASYNC
         """
@@ -229,22 +243,43 @@ class ItemsLoader:
                     f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database"
                 )
                 return None
-            itemData["image"] = itemData["image"]["full"]
-            itemData["imageUrl"] = self.buildImageUrl(itemData["image"])
-            if "stats" not in itemData:
-                itemData["stats"] = {}
-            if "effects" not in itemData:
-                itemData["effects"] = {}
-            if "tags" not in itemData:
-                itemData["tags"] = set()
-            fullItem = {"id": itemId, **itemData}
-            item: Item = Item(**fullItem)
-            return item
+            return Item(
+                name=itemData["name"],
+                id=itemId,
+                plaintext=itemData["plaintext"],
+                image=itemData["image"]["full"],
+                imageUrl=self.buildImageUrl(itemData["image"]["full"]),
+                gold=Gold(**itemData["gold"]) if "gold" in itemData else Gold(base=0, purchasable=False, total=0, sell=0),
+                tags=set(itemData["tags"]) if "tags" in itemData else set(),
+                stats=self.parseStatsNodeIntoStats(itemData["stats"], statMapping) if "stats" in itemData else set(),
+                description=itemData["description"],
+                effect=Effects(root=itemData["effect"]) if "effect" in itemData else Effects(root={}),
+            )
         except Exception as e:
             logger.exception(
                 f"Error, the item with id {itemId} and item data {itemData} had a problem while parsing the json into an Item, this item will be ingnore, exception : {e}"
             )
             return None
+
+    def parseStatsNodeIntoStats(self, statsNode:Dict[str,int | float], statMappingDict : Dict[str,str]) -> Set[Stat]:
+        """
+        Parse the stat node into a stat list 
+        Raises nothing
+        """
+        stats:Set[Stat] = set()
+        for statOriginalName, statValue in statsNode.items():
+            statKind : str = "flat"
+            if "Flat" not in statOriginalName or "Percent" not in statOriginalName:
+                logger.warning(f"Stat mapping error, stat with original name {statOriginalName} has no flat or percent in the name, cant decide the kind of stat, default is flat")
+            if "Percent" in statOriginalName:
+                statKind = "percentage"
+            statMappedName : str = statOriginalName
+            if statOriginalName in statMappingDict:
+                statMappedName = statMappingDict[statOriginalName]
+            stat:Stat= Stat(name = statMappedName, value = statValue, kind=statKind)
+            stats.add(stat)
+        return stats
+    
 
     def buildImageUrl(self, imageName : str) -> str:
         """
@@ -298,14 +333,14 @@ class ItemsLoader:
             logger.error(f"Error while updating tag {tag}, exception: {e}")
             raise UpdateTagsError() from e
 
-    async def updateStatsInDataBase(self, statsToAdd: Set[str]) -> None:
+    async def updateStatsInDataBase(self, statsToAdd: Set[Stat]) -> None:
         """
         Given a set of unique stats, iterate over them and update the stats table
         Raise UpdateStatsError
         """
         logger.debug("Updating stats table")
         try:
-            logger.debug("Getting existing tags in the database")
+            logger.debug("Getting existing stats in the database")
             existingStatNames: Set[str] = await getAllStatsTableNames(self.dbSession)
             logger.debug(f"Got {len(existingStatNames)} from database")
         except SQLAlchemyError as e:
@@ -382,21 +417,21 @@ class ItemsLoader:
             logger.error(f"Error while updating effect {effect}, exception: {e}")
             raise UpdateEffectsError() from e
 
-    def addStatInDataBaseIfNew(self, stat: str, existingstatNames: Set[str]) -> bool:
+    def addStatInDataBaseIfNew(self, stat: Stat, existingstatNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
         Updates the database with stat, if it do not exist.
         Raises UpdatestatsError
         """
         try:
-            if stat not in existingstatNames:
-                newStat: StatsTable = StatsTable(name=stat)
+            if stat.name not in existingstatNames:
+                newStat: StatsTable = StatsTable(name=stat.name, kind=stat.kind)
                 self.dbSession.add(newStat)
                 return True
             else:
                 return False
         except Exception as e:
-            logger.error(f"Error while updating stat {stat}, exception: {e}")
+            logger.error(f"Error while updating stat {stat.name}, kind {stat.kind}, exception: {e}")
             raise UpdateStatsError() from e
 
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
@@ -470,13 +505,13 @@ class ItemsLoader:
             )
             raise UpdateItemsError() from e
 
-    async def addItemStatsRelations(self, itemId: int, stats: Stats) -> None:
+    async def addItemStatsRelations(self, itemId: int, stats: Set[Stat]) -> None:
         """
         This function inserts the relations given the itemId and stats
         Raises UpdateItemsError when something fails
         """
-        for stat, statValue in stats.root.items():
-            statId: int | None = await getStatIdWithStatName(self.dbSession, stat)
+        for stat in stats:
+            statId: int | None = await getStatIdWithStatName(self.dbSession, stat.name)
             if statId is None:
                 logger.error(f"Stat with name {stat} was not found in the dabatase")
                 raise UpdateItemsError("Stat was not found in the database")
@@ -484,7 +519,7 @@ class ItemsLoader:
                 itemStatValues: dict = {
                     "item_id": itemId,
                     "stat_id": statId,
-                    "value": statValue,
+                    "value": stat.value,
                 }
                 try:
                     ins = insert(ItemStatAssociation).values(**itemStatValues)
