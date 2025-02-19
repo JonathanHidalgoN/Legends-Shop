@@ -1,0 +1,26 @@
+/* For WebKit browsers (Chrome, Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar {
+  opacity: 1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
