@@ -79,7 +79,8 @@ function parseItemNodeIntoItem(itemNode: Record<string, any>): Item {
  * @throws An error if the fetch fails or the response format is invalid.
  */
 export async function fetchItems(): Promise<Item[]> {
-  const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/all`);
+  // const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/all`);
+  const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/some`);
   if (!response.ok) {
     throw new Error(`Failed to fetch items: ${response.status} ${response.statusText}`);
   }
@@ -90,3 +91,17 @@ export async function fetchItems(): Promise<Item[]> {
   const items: Item[] = itemsJson.items.map(parseItemNodeIntoItem);
   return items;
 }
+
+export async function fetchTags(): Promise<string[]> {
+  const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/uniqueTags`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch unique tags: ${response.status} ${response.statusText}`);
+  }
+  const tagsJson = await response.json();
+  if (!("tagNames" in tagsJson) || !Array.isArray(tagsJson.tagNames)) {
+    throw new Error("Invalid response format: expected an 'tagNames' array");
+  }
+  console.log(tagsJson);
+  return tagsJson.tagNames;
+}
+
