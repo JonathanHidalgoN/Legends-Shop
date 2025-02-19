@@ -4,14 +4,14 @@
 
 :root {
   --black:#000000;  
-  --white: #E3E2DF; 
-  --white2: #FFFFFF; 
+  --white: #FFFFFF; 
+  --white2:#EBE9E1;
   /*60%*/
-  --foreground: #5D001E;
+  --orange: #E43D12;
   /*30%*/
-  --background2: #E3AFBC;
-  --extra: #9A1750;
-  --extra2: #EE4C7C;
+  --pink1:#D6536D;
+  --pink2:#FFA2B6;
+  --yellow:#EFB11D;
   /*10%*/
 }
 
