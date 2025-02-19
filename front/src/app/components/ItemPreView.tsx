@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Item } from "../interfaces/Item";
 import { kanit, sigmar } from "../fonts";
+import DescriptionTextMapper from "./DescriptionTextMapper";
 
 export default function ItemPreView({ item }: { item: Item }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -31,14 +32,14 @@ export default function ItemPreView({ item }: { item: Item }) {
           {/* Price below the image */}
           <div className="mt-2 text-center">
             <span className={`text-xl text-[var(--yellow)] ${kanit.className}`}>
-              {item.gold.base}</span>
+              {item.gold.base} g</span>
           </div>
         </div>
       </Link>
 
       {isHovered && (
         <div
-          className="border border-black absolute left-full w-80 z-10 p-4 rounded bg-[var(--white)] transition-opacity duration-300"
+          className="border border-black absolute left-full w-80 z-10 p-4 rounded bg-[var(--white2)] transition-opacity duration-300"
           style={{ top: 0 }}
         >
           {/* Item Name at the top of the hover panel */}
@@ -51,7 +52,7 @@ export default function ItemPreView({ item }: { item: Item }) {
           <div className="text-[var(--extra)]">
             <span className="font-bold text-[var(--black)]">Cost: </span>
             <span className={`text-[var(--yellow)] text-xl ${kanit.className}`}>
-              {item.gold.base}
+              {item.gold.base} g
             </span>
           </div>
 
@@ -92,7 +93,7 @@ export default function ItemPreView({ item }: { item: Item }) {
           {/* Description */}
           <div className="mt-2 text-[var(--black)]">
             <span className="font-bold">Description:</span>
-            {item.description}
+            <DescriptionTextMapper description={item.description} />
           </div>
         </div>
       )}
