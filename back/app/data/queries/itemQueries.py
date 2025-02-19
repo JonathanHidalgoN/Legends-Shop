@@ -190,6 +190,12 @@ async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
     items: List[ItemTable] = [item for item in result.scalars().all()]
     return items
 
+async def getSomeItems(asyncSession: AsyncSession) -> List[ItemTable]:
+    """Fetch some items from the ItemTable."""
+    result = await asyncSession.execute(select(ItemTable).limit(20))
+    items: List[ItemTable] = [item for item in result.scalars().all()]
+    return items
+
 
 async def getStatIdWithStatName(
     asyncSession: AsyncSession, statName: str

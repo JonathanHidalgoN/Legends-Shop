@@ -9,6 +9,7 @@ from app.data.queries.itemQueries import (
     getAllTagNamesAssociatedByItemId,
     getGoldTableWithId,
     getItems,
+    getSomeItems,
     getStatSetByItemId,
 )
 from app.schemas.Item import Effects, Gold, Item, Stat
@@ -20,6 +21,18 @@ async def getAllItemTableRowsAnMapToItems(asyncSession: AsyncSession) -> List[It
     """
     items: List[Item] = []
     itemTableRows: List[ItemTable] = await getItems(asyncSession)
+    for itemTable in itemTableRows:
+        item: Item = await convertItemTableIntoItem(asyncSession, itemTable)
+        items.append(item)
+    return items
+
+
+async def getSomeItemTableRowsAnMapToItems(asyncSession: AsyncSession) -> List[Item]:
+    """
+    Get some itemTable rows and map to Item objects
+    """
+    items: List[Item] = []
+    itemTableRows: List[ItemTable] = await getSomeItems(asyncSession)
     for itemTable in itemTableRows:
         item: Item = await convertItemTableIntoItem(asyncSession, itemTable)
         items.append(item)
