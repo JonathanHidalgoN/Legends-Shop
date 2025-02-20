@@ -66,7 +66,7 @@ function parseItemNodeIntoItem(itemNode: Record<string, any>): Item {
     gold: gold,
     description: itemNode.description,
     stats: stats,
-    tag: tags,
+    tags: tags,
     effects: effects,
     img: itemNode.imageUrl,
   };
