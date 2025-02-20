@@ -1,4 +1,3 @@
-"use client"
 import Header from "./components/Header";
 import "./styles.css"
 import "./globals.css";
