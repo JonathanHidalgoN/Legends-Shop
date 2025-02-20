@@ -2,10 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { sigmar } from "../fonts";
+import SearchBar from "./SearchBar";
+import { Item } from "../interfaces/Item";
 
-const Header = ({
-  user = null,
-}) => {
+export default function Header({ userName, items }:
+  { userName: string | null; items: Item[] }) {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
 
@@ -23,13 +24,10 @@ const Header = ({
         </Link>
       </div>
 
+
+
       <div className="flex-1 mx-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-full p-2 rounded focus:outline-none"
-          style={{ backgroundColor: 'var(--white)', color: 'var(--orange)' }}
-        />
+        <SearchBar items={items} />
       </div>
 
       <div className="flex items-center space-x-4">
@@ -39,7 +37,7 @@ const Header = ({
             className="p-2 rounded hover:opacity-80 transition"
             style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
           >
-            {user && user.name ? user.name : "Login"}
+            {userName ? userName : "Login"}
           </button>
           {showLoginDropdown && (
             <div className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
@@ -86,4 +84,3 @@ const Header = ({
   );
 };
 
-export default Header;
