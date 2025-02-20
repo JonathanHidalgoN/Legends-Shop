@@ -24,7 +24,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <StaticDataContextProvider items={items} tags={tags}>
-          <Header />
+          <Header userName={null} items={items} />
           {children}
         </StaticDataContextProvider>
       </body>
