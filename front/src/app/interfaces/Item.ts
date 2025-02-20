@@ -23,8 +23,8 @@ export interface Stat {
 
 export interface Effect {
   name: string,
-  kind: EffectKind,
-  value: number
+  value: number,
+  kind: EffectKind
 }
 
 export interface Item {
@@ -32,7 +32,7 @@ export interface Item {
   gold: Gold,
   description: string,
   stats: Stat[]
-  tag: string[]
+  tags: string[]
   effects: Effect[]
   img: string
 }
