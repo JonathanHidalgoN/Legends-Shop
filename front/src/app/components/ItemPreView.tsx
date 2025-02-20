@@ -18,7 +18,6 @@ export default function ItemPreView({ item }: { item: Item }) {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* The square container with the item image */}
           <div className="relative w-40 h-40 rounded overflow-hidden shadow-md">
             <Image
               src={item.img}
@@ -29,7 +28,6 @@ export default function ItemPreView({ item }: { item: Item }) {
             />
           </div>
 
-          {/* Price below the image */}
           <div className="mt-2 text-center">
             <span className={`text-xl text-[var(--yellow)] ${kanit.className}`}>
               {item.gold.base} g</span>
@@ -42,13 +40,11 @@ export default function ItemPreView({ item }: { item: Item }) {
           className="border border-black absolute left-full w-80 z-10 p-4 rounded bg-[var(--white2)] transition-opacity duration-300"
           style={{ top: 0 }}
         >
-          {/* Item Name at the top of the hover panel */}
           <div className="mb-2">
             <span className={`text-[var(--orange)] text-xl ${sigmar.className}`}>
               {item.name}</span>
           </div>
 
-          {/* Gold Information */}
           <div className="text-[var(--extra)]">
             <span className="font-bold text-[var(--black)]">Cost: </span>
             <span className={`text-[var(--yellow)] text-xl ${kanit.className}`}>
@@ -56,7 +52,6 @@ export default function ItemPreView({ item }: { item: Item }) {
             </span>
           </div>
 
-          {/* Stats List */}
           {item.stats && item.stats.length > 0 && (
             <div className="mt-2">
               <span className="font-bold text-[var(--black)]">Stats:</span>
@@ -73,7 +68,6 @@ export default function ItemPreView({ item }: { item: Item }) {
             </div>
           )}
 
-          {/* Effects List */}
           {item.effects && item.effects.length > 0 && (
             <div className="mt-2">
               <span className="font-bold text-black">Effects:</span>
@@ -90,7 +84,6 @@ export default function ItemPreView({ item }: { item: Item }) {
             </div>
           )}
 
-          {/* Description */}
           <div className="mt-2 text-[var(--black)]">
             <span className="font-bold">Description:</span>
             <DescriptionTextMapper description={item.description} />
