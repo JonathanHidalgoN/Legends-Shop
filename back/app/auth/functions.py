@@ -2,11 +2,9 @@ from fastapi import Depends
 from passlib.context import CryptContext
 from jose import JWSError, jwt
 from datetime import datetime, timedelta, timezone
+from app.envVariables import SECRET_KEY,ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES 
 
 pwdContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY : str = "b8281551b3bc6382348db701e6d33a4cc8644c179714dda69e29ba574e7f7bf7"
-ALGORITHM : str = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def verifyPassword(plainPassword: str, hashedPassword:str) -> bool:
     return pwdContext.verify(plainPassword, hashedPassword)
