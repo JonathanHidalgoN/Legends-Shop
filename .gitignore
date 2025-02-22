@@ -20,7 +20,8 @@ Dockerfile.dev
 # FastAPI
 # (Add any specific FastAPI-related files or folders you may want to exclude)
 *.env
-*.env.*
+*.env.docker
+*.env.local
 .env.local
 .env.production
 *.log
