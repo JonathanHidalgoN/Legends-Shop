@@ -1,6 +1,8 @@
 from typing import Set
+from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
+from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Item import Effects, Gold, Item, Stat
 
 def mapGoldToGoldTable(gold: Gold) -> GoldTable:
@@ -57,3 +59,15 @@ def mapItemTableToItem(
 
     )
     return item
+
+def mapUserInDBToUserTable(userInDB:UserInDB) -> UserTable:
+    userTable: UserTable = UserTable(userName=userInDB.userName,
+                                     password= userInDB.hashedPassword)
+    return userTable 
+
+def mapUserTableToUserInDB(userTable:UserTable) -> UserInDB:
+    userInDB: UserInDB = UserInDB(
+        userName=userTable.userName,
+        hashedPassword=userTable.password
+    )
+    return userInDB
