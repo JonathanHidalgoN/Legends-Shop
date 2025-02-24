@@ -8,10 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 
 app = FastAPI()
-app.include_router(items.router, prefix="/items")
-app.include_router(auth.router, prefix="/auth")
-
-origins = [f"http://{FRONTEND_HOST}:{FRONTEND_PORT}"]
+origins = [f"http://{FRONTEND_HOST}:{FRONTEND_PORT}"
+           #TODO: add env variable to website that host the frontend client
+           ,f"http://localhost:{FRONTEND_PORT}"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(items.router, prefix="/items")
+app.include_router(auth.router, prefix="/auth")
 
 
 @app.get("/")
