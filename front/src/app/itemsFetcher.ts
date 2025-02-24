@@ -1,5 +1,5 @@
 import { Effect, EffectKind, Gold, Item, Stat, StatKind } from "./interfaces/Item";
-import { BACKEND_PORT, BACKEND_HOST } from "./envVariables";
+import { allTagsRequet, someItemsRequest } from "./request";
 
 /**
  * Parses a JSON node into a Gold object.
@@ -79,8 +79,7 @@ function parseItemNodeIntoItem(itemNode: Record<string, any>): Item {
  * @throws An error if the fetch fails or the response format is invalid.
  */
 export async function fetchItems(): Promise<Item[]> {
-  // const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/all`);
-  const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/some`);
+  const response = await someItemsRequest();
   if (!response.ok) {
     throw new Error(`Failed to fetch items: ${response.status} ${response.statusText}`);
   }
@@ -93,7 +92,7 @@ export async function fetchItems(): Promise<Item[]> {
 }
 
 export async function fetchTags(): Promise<string[]> {
-  const response = await fetch(`http://${BACKEND_HOST}:${BACKEND_PORT}/items/uniqueTags`);
+  const response = await allTagsRequet();
   if (!response.ok) {
     throw new Error(`Failed to fetch unique tags: ${response.status} ${response.statusText}`);
   }
