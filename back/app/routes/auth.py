@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.functions import (
     createAccessToken,
@@ -31,6 +31,7 @@ def getCurrentUser(token: Annotated[str, Depends(oauth2Scheme)]):
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token", response_model=Token)
 async def getToken(
+    response:Response,
     dataForm: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(database.getDbSession),
 ):
@@ -45,13 +46,21 @@ async def getToken(
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     accessToken = createAccessToken(data={"sub": matchUser.userName})
+    response.set_cookie(
+        key="accessToken",
+        value=accessToken,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=60*30,
+        path="/"
+    )
     return {"access_token": accessToken, "token_type": "bearer"}
 
 
 @router.get("/test")
 async def protectTest(user: Annotated[str, Depends(getCurrentUser)]):
     return {"message": user}
-
 
 @router.post("/singUp")
 async def singUp(
