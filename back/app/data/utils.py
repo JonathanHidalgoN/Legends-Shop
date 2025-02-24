@@ -51,9 +51,7 @@ async def convertItemTableIntoItem(
     )
     gold: Gold = mapGoldTableToGold(goldTable)
     tags: Set[str] = await getAllTagNamesAssociatedByItemId(asyncSession, itemTable.id)
-    stats: Set[Stat] = await getStatSetByItemId(
-        asyncSession, itemTable.id
-    )
+    stats: Set[Stat] = await getStatSetByItemId(asyncSession, itemTable.id)
     effectsData: Dict[str, int | float] = (
         await getAllEffectNamesAndValueAssociatedByItemId(asyncSession, itemTable.id)
     )

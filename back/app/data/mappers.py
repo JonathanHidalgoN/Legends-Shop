@@ -5,6 +5,7 @@ from app.data.models.GoldTable import GoldTable
 from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Item import Effects, Gold, Item, Stat
 
+
 def mapGoldToGoldTable(gold: Gold) -> GoldTable:
     goldTable = GoldTable(
         base_cost=gold.base,
@@ -32,8 +33,8 @@ def mapItemToItemTable(item: Item, goldId: int, updated: bool = True) -> ItemTab
         image=item.image,
         gold_id=goldId,
         updated=updated,
-        imageUrl = item.imageUrl,
-        description = item.description
+        imageUrl=item.imageUrl,
+        description=item.description,
     )
     return itemTable
 
@@ -55,19 +56,20 @@ def mapItemTableToItem(
         id=0,
         image=itemTable.image,
         imageUrl=itemTable.imageUrl,
-        description=itemTable.description
-
+        description=itemTable.description,
     )
     return item
 
-def mapUserInDBToUserTable(userInDB:UserInDB) -> UserTable:
-    userTable: UserTable = UserTable(userName=userInDB.userName,
-                                     password= userInDB.hashedPassword)
-    return userTable 
 
-def mapUserTableToUserInDB(userTable:UserTable) -> UserInDB:
+def mapUserInDBToUserTable(userInDB: UserInDB) -> UserTable:
+    userTable: UserTable = UserTable(
+        userName=userInDB.userName, password=userInDB.hashedPassword
+    )
+    return userTable
+
+
+def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
     userInDB: UserInDB = UserInDB(
-        userName=userTable.userName,
-        hashedPassword=userTable.password
+        userName=userTable.userName, hashedPassword=userTable.password
     )
     return userInDB

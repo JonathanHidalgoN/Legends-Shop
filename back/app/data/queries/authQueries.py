@@ -5,18 +5,22 @@ from app.data.mappers import mapUserInDBToUserTable
 from app.data.models.UserTable import UserTable
 from app.schemas.AuthSchemas import UserInDB
 
+
 async def getUserInDB(asyncSession: AsyncSession, userName: str) -> UserInDB | None:
     """
     Retrieve the user from the database if they exist.
     """
     result = await asyncSession.execute(
-        select(UserTable.userName, UserTable.password).where(UserTable.userName == userName)
+        select(UserTable.userName, UserTable.password).where(
+            UserTable.userName == userName
+        )
     )
-    row = result.first()  
+    row = result.first()
     if row is None:
         return None
     username, hashed_password = row
     return UserInDB(userName=username, hashedPassword=hashed_password)
+
 
 async def checkUserExistInDB(asyncSession: AsyncSession, userName: str) -> bool:
     """
@@ -25,12 +29,13 @@ async def checkUserExistInDB(asyncSession: AsyncSession, userName: str) -> bool:
     result = await asyncSession.execute(
         select(UserTable.userName).where(UserTable.userName == userName)
     )
-    row = result.first()  
+    row = result.first()
     if row is None:
-        return False 
+        return False
     return True
 
-async def insertUser(asyncSession: AsyncSession, userInDB: UserInDB)->None:
+
+async def insertUser(asyncSession: AsyncSession, userInDB: UserInDB) -> None:
     """
     Insert a new user into the database.
     """

@@ -18,6 +18,6 @@ class ItemTable(base):
     def __repr__(self) -> str:
         return (
             f"<ItemTable(id={self.id}, name={self.name!r}, plain_text={self.plain_text!r}, "
-            f"image={self.image!r}, imageUrl={self.imageUrl!r}, " 
+            f"image={self.image!r}, imageUrl={self.imageUrl!r}, "
             f"updated={self.updated}, gold_id={self.gold_id})>"
         )

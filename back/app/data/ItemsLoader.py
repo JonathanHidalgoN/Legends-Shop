@@ -137,13 +137,13 @@ class ItemsLoader:
         if not itemsList:
             logger.error("Items list is empty")
             raise ItemsLoaderError("Items Json is empty!")
-        #Here again linter gives an error but the pidantic default constructor is an empty container 
-        #not none, I think this will be fine
+        # Here again linter gives an error but the pidantic default constructor is an empty container
+        # not none, I think this will be fine
         uniqueTags: Set[str] = set(tag for item in itemsList for tag in item.tags)
         await self.updateTagsInDataBase(uniqueTags)
-        uniqueStats: Set[Stat] = self.getUniqueStats(itemsList) 
+        uniqueStats: Set[Stat] = self.getUniqueStats(itemsList)
         await self.updateStatsInDataBase(uniqueStats)
-        #TODO: we dont like nested loops in python ):
+        # TODO: we dont like nested loops in python ):
         uniqueEffects: Set[str] = set(
             effect for item in itemsList for effect in item.effect.root
         )
@@ -151,17 +151,17 @@ class ItemsLoader:
         await self.updateItemsInDataBase(itemsList)
 
     def getUniqueStats(self, items: List[Item]) -> Set[Stat]:
-        #I dont like this function because the stats are store as a catalog in the database,
-        #the objective of this function is to get the unique stats in the list of items to update that catalog
-        #The thing is that Stat object has a value attribute, so we have to check if stat is unique just by its name 
+        # I dont like this function because the stats are store as a catalog in the database,
+        # the objective of this function is to get the unique stats in the list of items to update that catalog
+        # The thing is that Stat object has a value attribute, so we have to check if stat is unique just by its name
         """
         Given a list of items returns a list of unique stats, we only care about the name and kind
         """
-        uniqueStats : Set[Stat] = set() 
-        #TODO: we dont like nested loops in python ):
+        uniqueStats: Set[Stat] = set()
+        # TODO: we dont like nested loops in python ):
         for item in items:
             for stat in item.stats:
-                #Have to get the list of names
+                # Have to get the list of names
                 if stat.name not in [stat.name for stat in uniqueStats]:
                     uniqueStats.add(stat)
         return uniqueStats
@@ -195,9 +195,9 @@ class ItemsLoader:
         itemNames: Set[str] = set()
         noneCounter: int = 0
         parsedItems: int = 0
-        mappingStatsDict : Dict[str, str] = self.createMappingStatsDict((
-            await getStatsMappingTable(self.dbSession)
-        ))
+        mappingStatsDict: Dict[str, str] = self.createMappingStatsDict(
+            (await getStatsMappingTable(self.dbSession))
+        )
         for itemId, itemData in itemsData.items():
             item: Item | None = await self.parseDataNodeIntoItem(
                 itemId, itemData, itemNames, mappingStatsDict
@@ -213,19 +213,21 @@ class ItemsLoader:
         )
         return itemsList
 
-    #This could be static but for now its ok
-    def createMappingStatsDict(self, statsMappingTable:List[StatsMappingTable]) -> Dict[str,str]:
+    # This could be static but for now its ok
+    def createMappingStatsDict(
+        self, statsMappingTable: List[StatsMappingTable]
+    ) -> Dict[str, str]:
         """
-        Create a dict to map stats names from riot api to "better names"(IMO) using a table in the database 
-        called StatsMappingTable, it just has two rows one with the riot stat name and another with the custom name 
+        Create a dict to map stats names from riot api to "better names"(IMO) using a table in the database
+        called StatsMappingTable, it just has two rows one with the riot stat name and another with the custom name
         """
-        mapping : Dict[str,str] = {}
+        mapping: Dict[str, str] = {}
         for row in statsMappingTable:
             mapping[row.original_name] = row.mapped_name
         return mapping
 
     async def parseDataNodeIntoItem(
-        self, itemId: int, itemData, itemNames: Set[str], statMapping:Dict[str,str]
+        self, itemId: int, itemData, itemNames: Set[str], statMapping: Dict[str, str]
     ) -> Item | None:
         # TODO: CHECK ASYNC
         """
@@ -249,11 +251,23 @@ class ItemsLoader:
                 plaintext=itemData["plaintext"],
                 image=itemData["image"]["full"],
                 imageUrl=self.buildImageUrl(itemData["image"]["full"]),
-                gold=Gold(**itemData["gold"]) if "gold" in itemData else Gold(base=0, purchasable=False, total=0, sell=0),
+                gold=(
+                    Gold(**itemData["gold"])
+                    if "gold" in itemData
+                    else Gold(base=0, purchasable=False, total=0, sell=0)
+                ),
                 tags=set(itemData["tags"]) if "tags" in itemData else set(),
-                stats=self.parseStatsNodeIntoStats(itemData["stats"], statMapping) if "stats" in itemData else set(),
+                stats=(
+                    self.parseStatsNodeIntoStats(itemData["stats"], statMapping)
+                    if "stats" in itemData
+                    else set()
+                ),
                 description=itemData["description"],
-                effect=Effects(root=itemData["effect"]) if "effect" in itemData else Effects(root={}),
+                effect=(
+                    Effects(root=itemData["effect"])
+                    if "effect" in itemData
+                    else Effects(root={})
+                ),
             )
         except Exception as e:
             logger.exception(
@@ -261,27 +275,30 @@ class ItemsLoader:
             )
             return None
 
-    def parseStatsNodeIntoStats(self, statsNode:Dict[str,int | float], statMappingDict : Dict[str,str]) -> Set[Stat]:
+    def parseStatsNodeIntoStats(
+        self, statsNode: Dict[str, int | float], statMappingDict: Dict[str, str]
+    ) -> Set[Stat]:
         """
-        Parse the stat node into a stat list 
+        Parse the stat node into a stat list
         Raises nothing
         """
-        stats:Set[Stat] = set()
+        stats: Set[Stat] = set()
         for statOriginalName, statValue in statsNode.items():
-            statKind : str = "flat"
+            statKind: str = "flat"
             if "Flat" not in statOriginalName or "Percent" not in statOriginalName:
-                logger.warning(f"Stat mapping error, stat with original name {statOriginalName} has no flat or percent in the name, cant decide the kind of stat, default is flat")
+                logger.warning(
+                    f"Stat mapping error, stat with original name {statOriginalName} has no flat or percent in the name, cant decide the kind of stat, default is flat"
+                )
             if "Percent" in statOriginalName:
                 statKind = "percentage"
-            statMappedName : str = statOriginalName
+            statMappedName: str = statOriginalName
             if statOriginalName in statMappingDict:
                 statMappedName = statMappingDict[statOriginalName]
-            stat:Stat= Stat(name = statMappedName, value = statValue, kind=statKind)
+            stat: Stat = Stat(name=statMappedName, value=statValue, kind=statKind)
             stats.add(stat)
         return stats
-    
 
-    def buildImageUrl(self, imageName : str) -> str:
+    def buildImageUrl(self, imageName: str) -> str:
         """
         Build the image url given the version and image name
         """
@@ -431,7 +448,9 @@ class ItemsLoader:
             else:
                 return False
         except Exception as e:
-            logger.error(f"Error while updating stat {stat.name}, kind {stat.kind}, exception: {e}")
+            logger.error(
+                f"Error while updating stat {stat.name}, kind {stat.kind}, exception: {e}"
+            )
             raise UpdateStatsError() from e
 
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
@@ -492,8 +511,8 @@ class ItemsLoader:
         try:
             itemTable = await self.dbSession.merge(itemTable)
             await self.dbSession.flush()
-            #Here the linter gives an error because stats, effects or tags can be None but in reality 
-            #the default constructor is empty so I think its fine
+            # Here the linter gives an error because stats, effects or tags can be None but in reality
+            # the default constructor is empty so I think its fine
             await self.addItemStatsRelations(itemTable.id, item.stats)
             await self.addItemEffectsRelations(itemTable.id, item.effect)
             await self.addItemTagsRelations(itemTable.id, item.tags)

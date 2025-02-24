@@ -1,18 +1,23 @@
 from pydantic import BaseModel
 
+
 class User(BaseModel):
-    userName:str
+    userName: str
+
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
-    userName:str | None = None
+    userName: str | None = None
+
 
 class UserInDB(User):
     hashedPassword: str
 
+
 class singUpRequest(BaseModel):
-    username:str
-    password:str
+    username: str
+    password: str

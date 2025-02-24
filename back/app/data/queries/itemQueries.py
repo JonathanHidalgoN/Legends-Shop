@@ -68,9 +68,7 @@ async def getTagNameWithId(asyncSession: AsyncSession, tagId: int) -> str | None
         return None
 
 
-async def getStatSetByItemId(
-    asyncSession: AsyncSession, itemId: int
-) -> Set[Stat]:
+async def getStatSetByItemId(asyncSession: AsyncSession, itemId: int) -> Set[Stat]:
     """Return a set of stats pairs for the given item ID."""
     result = await asyncSession.execute(
         select(ItemStatAssociation.c.stat_id, ItemStatAssociation.c.value).where(
@@ -79,17 +77,23 @@ async def getStatSetByItemId(
     )
     # Here can´t use scalars because it is a Table, not an ORM model
     statsIdValue: Set[Row[Tuple[int, int | float]]] = set(result.all())
-    stats: Set[Stat] = set() 
+    stats: Set[Stat] = set()
     for statTuple in statsIdValue:
-        statTable: StatsTable | None = await getStatTableWithId(asyncSession, statTuple[0])
+        statTable: StatsTable | None = await getStatTableWithId(
+            asyncSession, statTuple[0]
+        )
         if statTable:
-            #Linter error but kind must be percentage or flat so ignore it
-            stat: Stat = Stat(name=statTable.name, kind=statTable.kind, value = statTuple[1])  
+            # Linter error but kind must be percentage or flat so ignore it
+            stat: Stat = Stat(
+                name=statTable.name, kind=statTable.kind, value=statTuple[1]
+            )
             stats.add(stat)
-    return stats 
+    return stats
 
 
-async def getStatTableWithId(asyncSession: AsyncSession, statId: int) -> StatsTable | None:
+async def getStatTableWithId(
+    asyncSession: AsyncSession, statId: int
+) -> StatsTable | None:
     """Retrieve the stat table of a stat given its ID."""
     result = await asyncSession.execute(
         select(StatsTable).where(StatsTable.id == statId)
@@ -189,6 +193,7 @@ async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
     result = await asyncSession.execute(select(ItemTable))
     items: List[ItemTable] = [item for item in result.scalars().all()]
     return items
+
 
 async def getSomeItems(asyncSession: AsyncSession) -> List[ItemTable]:
     """Fetch some items from the ItemTable."""
@@ -302,11 +307,9 @@ async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
         versionRow: MetaDataTable = MetaDataTable(field_name="version", value=version)
         await asyncSession.merge(versionRow)
 
+
 async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingTable]:
     """Get the stats mapping table"""
-    result = await asyncSession.execute(
-        select(StatsMappingTable)
-    )
-    statsMappingTable : List[StatsMappingTable] = [row for row in result.scalars().all()] 
-    return statsMappingTable 
-
+    result = await asyncSession.execute(select(StatsMappingTable))
+    statsMappingTable: List[StatsMappingTable] = [row for row in result.scalars().all()]
+    return statsMappingTable
