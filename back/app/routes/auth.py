@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.functions import createAccessToken, verifyPassword, verifyToken, hashPassword
 from app.data import database
 from app.data.queries.authQueries import checkUserExistInDB, getUserInDB, insertUser
-from app.schemas.AuthSchemas import Token, UserInDB 
+from app.schemas.AuthSchemas import Token, UserInDB, singUpRequest 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 #Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
@@ -40,15 +40,16 @@ async def getToken(dataForm: Annotated[OAuth2PasswordRequestForm,  Depends()],
 async def protectTest(user:Annotated[str, Depends(getCurrentUser)]):
     return {"message":user}
 
-@router.get("/singUp")
-async def singUp(db: AsyncSession = Depends(database.getDbSession)):
+@router.post("/singUp")
+async def singUp(userData:singUpRequest, db: AsyncSession = Depends(database.getDbSession)):
     try:
-        userExist : bool = await checkUserExistInDB(db, "user")
+        userExist : bool = await checkUserExistInDB(db, userData.username)
     except Exception:
         raise HTTPException(status_code=400, detail="Error retriving the user from the server")
     if userExist:
         raise HTTPException(status_code=500, detail="Username exist, change it")
-    userInDB: UserInDB = UserInDB(userName="user", hashedPassword=hashPassword("password"))
+    userInDB: UserInDB = UserInDB(userName=userData.username,
+                                  hashedPassword=hashPassword(userData.password))
     try:
         await insertUser(db,userInDB)
         return {"message":"nice"}
