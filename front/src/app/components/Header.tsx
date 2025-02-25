@@ -6,17 +6,18 @@ import SearchBar from "./SearchBar";
 import { Item } from "../interfaces/Item";
 import { useAuth } from "./AuthContext";
 import { useRouter } from "next/navigation";
+import { logoutRequest } from "../request";
 
 export default function Header({ items }:
   { items: Item[] }) {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const { userName } = useAuth();
+  const { userName, setUserName } = useAuth();
   const router = useRouter();
   const containerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
 
 
-  //This is a compy of a function? Can I create a general one?
+  //This is a compy of a function Can I create a general one?
   // Hide suggestions when clicking outside
   // source: https://stackoverflow.com/questions/32553158/detect-click-outside-react-component
   useEffect(() => {
@@ -34,6 +35,19 @@ export default function Header({ items }:
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  async function handleLogout() {
+    try {
+      const response = await logoutRequest("client");
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+      setUserName(null);
+      router.push("/");
+    } catch (error) {
+      console.log("Error");
+    }
+  }
 
   return (
     <header
@@ -82,7 +96,7 @@ export default function Header({ items }:
               </button>
               <button
                 onClick={() => {
-                  // handleLogout();
+                  handleLogout();
                   setShowLoginDropdown(false);
                 }}
                 className="block w-full text-left px-2 py-1 hover:bg-gray-100"
