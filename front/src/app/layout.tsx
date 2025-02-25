@@ -6,6 +6,10 @@ import { fetchItems, fetchTags } from "./itemsFetcher";
 import { StaticDataContextProvider } from "./components/StaticDataContext";
 import { AuthContextProvider } from "./components/AuthContext";
 
+export const metadata = {
+  title: "Legends Shop",
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{

@@ -1,5 +1,6 @@
 import { logInRequest } from "../request";
 
+//TODO: move this
 export async function signup(userName: string, password: string) {
   const response = await logInRequest(userName, password, "client");
   if (!response.ok) {
