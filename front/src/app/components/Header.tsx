@@ -4,11 +4,13 @@ import Link from "next/link";
 import { sigmar } from "../fonts";
 import SearchBar from "./SearchBar";
 import { Item } from "../interfaces/Item";
+import { useAuth } from "./AuthContext";
 
-export default function Header({ userName, items }:
-  { userName: string | null; items: Item[] }) {
+export default function Header({ items }:
+  { items: Item[] }) {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
+  const { userName } = useAuth();
 
   return (
     <header
@@ -37,7 +39,7 @@ export default function Header({ userName, items }:
             className="p-2 rounded hover:opacity-80 transition"
             style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
           >
-            {userName ? userName : "Login"}
+            {userName ? "Welcome " + userName : "Login"}
           </button>
           {showLoginDropdown && (
             <div className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">

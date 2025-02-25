@@ -4,6 +4,7 @@ import "./globals.css";
 import { Item } from "./interfaces/Item";
 import { fetchItems, fetchTags } from "./itemsFetcher";
 import { StaticDataContextProvider } from "./components/StaticDataContext";
+import { AuthContextProvider } from "./components/AuthContext";
 
 export default async function RootLayout({
   children,
@@ -23,10 +24,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StaticDataContextProvider items={items} tags={tags}>
-          <Header userName={null} items={items} />
-          {children}
-        </StaticDataContextProvider>
+        <AuthContextProvider>
+          <StaticDataContextProvider items={items} tags={tags}>
+            <Header items={items} />
+            {children}
+          </StaticDataContextProvider>
+        </AuthContextProvider>
       </body>
     </html>
   );

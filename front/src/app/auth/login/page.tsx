@@ -3,18 +3,21 @@
 import { useState } from "react"
 import { signup } from "../functions";
 import { useRouter } from "next/navigation";
-import { allTagsRequet } from "@/app/request";
+import { useAuth } from "@/app/components/AuthContext";
 
 export default function LogInPage() {
-  const [userName, setUserName] = useState<string>("");
+  const [formUserName, setFormUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const router = useRouter();
+  const { setUserName } = useAuth();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-      signup(userName, password);
+      signup(formUserName, password);
+      setUserName(formUserName);
+      router.push("/");
     } catch (error: unknown) {
       //This way linter wont complain ):
       if (error instanceof Error) {
@@ -25,8 +28,6 @@ export default function LogInPage() {
         console.error("An unknown error occurred");
       }
     }
-    console.log("nice");
-    // router.push("/");
   }
 
   return (
@@ -43,8 +44,8 @@ export default function LogInPage() {
             id="username"
             name="username"
             placeholder="Username"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
+            value={formUserName}
+            onChange={(e) => setFormUserName(e.target.value)}
             className="border p-2 rounded"
           />
         </div>
