@@ -1,25 +1,22 @@
 import { BACKEND_PORT, BACKEND_HOST } from "./envVariables";
 
-/**
- * Endpoint URL for user login.
- * This endpoint accepts POST requests with a JSON body containing { userName, password }.
- */
-export const ENDPOINT_LOGIN: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/auth/logIn`;
+//TODO: how to improve this solution?
+export const SERVER_DOMAIN: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/`
+export const CLIENT_DOMAIN: string = `http://localhost:${BACKEND_PORT}/`
+export const ENDPOINT_LOGIN: string = `auth/token`;
+export const ENDPOINT_ITEMS_ALL: string = `items/all`;
+export const ENDPOINT_SOME_ITEMS: string = `items/some`;
+export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 
-/**
- * Endpoint URL to fetch all items.
- */
-export const ENDPOINT_ITEMS_ALL: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/items/all`;
-
-/**
- * Endpoint URL to fetch a subset of items.
- */
-export const ENDPOINT_SOME_ITEMS: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/items/some`;
-
-/**
- * Endpoint URL to fetch all unique tags.
- */
-export const ENDPOINT_ALL_TAGS: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/items/uniqueTags`;
+function makeUrl(from: string, endpoint: string): string {
+  let url: string;
+  if (from === "server") {
+    url = SERVER_DOMAIN + endpoint;
+  } else {
+    url = CLIENT_DOMAIN + endpoint;
+  }
+  return url;
+}
 
 /**
  * Makes a POST request to the login endpoint with the provided username and password.
@@ -28,11 +25,17 @@ export const ENDPOINT_ALL_TAGS: string = `http://${BACKEND_HOST}:${BACKEND_PORT}
  * @param password - The password for the user.
  * @returns A Promise that resolves with the response from the login request.
  */
-export async function logInRequest(userName: string, password: string) {
-  return await fetch(ENDPOINT_LOGIN, {
+export async function logInRequest(userName: string, password: string, from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_LOGIN);
+  const formData = new URLSearchParams();
+  formData.append("username", userName);
+  formData.append("password", password);
+  return await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userName, password }),
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formData.toString(),
   });
 }
 
@@ -41,8 +44,9 @@ export async function logInRequest(userName: string, password: string) {
  *
  * @returns A Promise that resolves with the response from the request.
  */
-export async function someItemsRequest() {
-  return await fetch(ENDPOINT_SOME_ITEMS);
+export async function someItemsRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_SOME_ITEMS);
+  return await fetch(url);
 }
 
 /**
@@ -50,8 +54,9 @@ export async function someItemsRequest() {
  *
  * @returns A Promise that resolves with the response from the request.
  */
-export async function allItemsRequest() {
-  return await fetch(ENDPOINT_ITEMS_ALL);
+export async function allItemsRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_ITEMS_ALL);
+  return await fetch(url);
 }
 
 /**
@@ -59,6 +64,7 @@ export async function allItemsRequest() {
  *
  * @returns A Promise that resolves with the response from the request.
  */
-export async function allTagsRequet() {
-  return await fetch(ENDPOINT_ALL_TAGS);
+export async function allTagsRequet(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_ALL_TAGS);
+  return await fetch(url);
 }
