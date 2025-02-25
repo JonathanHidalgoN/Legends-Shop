@@ -31,7 +31,7 @@ def getCurrentUser(token: Annotated[str, Depends(oauth2Scheme)]):
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token", response_model=Token)
 async def getToken(
-    response:Response,
+    response: Response,
     dataForm: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(database.getDbSession),
 ):
@@ -52,8 +52,8 @@ async def getToken(
         httponly=True,
         secure=True,
         samesite="lax",
-        max_age=60*30,
-        path="/"
+        max_age=60 * 30,
+        path="/",
     )
     return {"access_token": accessToken, "token_type": "bearer"}
 
@@ -61,6 +61,7 @@ async def getToken(
 @router.get("/test")
 async def protectTest(user: Annotated[str, Depends(getCurrentUser)]):
     return {"message": user}
+
 
 @router.post("/singUp")
 async def singUp(
