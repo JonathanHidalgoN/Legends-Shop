@@ -4,6 +4,7 @@ import { BACKEND_PORT, BACKEND_HOST } from "./envVariables";
 export const SERVER_DOMAIN: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/`
 export const CLIENT_DOMAIN: string = `http://localhost:${BACKEND_PORT}/`
 export const ENDPOINT_LOGIN: string = `auth/token`;
+export const ENDPOINT_LOGIN_OUT: string = `auth/logout`;
 export const ENDPOINT_ITEMS_ALL: string = `items/all`;
 export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
@@ -67,4 +68,12 @@ export async function allItemsRequest(from: string = "server") {
 export async function allTagsRequet(from: string = "server") {
   const url: string = makeUrl(from, ENDPOINT_ALL_TAGS);
   return await fetch(url);
+}
+
+export async function logoutRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_LOGIN_OUT);
+  return await fetch(url, {
+    method: "POST",
+    credentials: "include",
+  });
 }

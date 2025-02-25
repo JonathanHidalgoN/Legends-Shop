@@ -82,3 +82,12 @@ async def singUp(
         return {"message": "nice"}
     except Exception:
         raise HTTPException(status_code=500, detail="Server error inserting the user")
+
+
+@router.post("/logout")
+async def logoutRequest(response: Response):
+    try:
+        response.delete_cookie("access_token", path="/")
+        return {"detail": "Logged out successfully"}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error login out")
