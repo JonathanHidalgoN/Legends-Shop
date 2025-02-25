@@ -15,6 +15,8 @@ from app.data.models.EffectsTable import EffectsTable
 from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.UserTable import UserTable
 from app.data.models.StatsMappingTable import StatsMappingTable
+from app.data.models.OrderTable import OrderTable 
+
 from app.envVariables import DATABASE_ALEMBIC_URL
 
 # this is the Alembic Config object, which provides
