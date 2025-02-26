@@ -3,18 +3,40 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { sigmar } from "../fonts";
 import SearchBar from "./SearchBar";
-import { Item } from "../interfaces/Item";
+import { Gold, Item } from "../interfaces/Item";
 import { useAuth } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import { logoutRequest } from "../request";
+import { useCarContext } from "./CarContext";
 
 export default function Header({ items }:
   { items: Item[] }) {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const { userName, setUserName } = useAuth();
-  const router = useRouter();
   const containerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { carItems, setCarItems } = useCarContext();
+
+  // const gold: Gold = {
+  //   base: 0,
+  //   purchaseable: false,
+  //   total: 0,
+  //   sell: 0
+  // };
+  // const demo: Item = {
+  //   name: "",
+  //   gold: gold,
+  //   description: "",
+  //   stats: [],
+  //   tags: [],
+  //   effects: [],
+  //   img: null
+  // }
+  // const demo2: Item[] = [demo];
+  // useEffect(() => {
+  //   setCarItems(demo2);
+  // }, []);
 
 
   //This is a compy of a function Can I create a general one?
@@ -136,7 +158,28 @@ export default function Header({ items }:
           </button>
           {showCartDropdown && (
             <div className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
-              {/* Cart dropdown */}
+              {carItems.length > 0 ? (
+                carItems.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <img
+                        src={item.img}
+                        alt={item.name}
+                        className="w-6 h-6 object-cover mr-2"
+                      />
+                      <span className="text-xs">{item.name}</span>
+                    </div>
+                    <button
+                      // onClick={() => removeItem(index)}
+                      className="text-red-500 text-xs focus:outline-none"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-xs">Cart is empty</div>
+              )}
             </div>
           )}
         </div>
