@@ -71,6 +71,13 @@ export default function Header({ items }:
     }
   }
 
+  function deleteOneItemFromCartDropDown(item: Item) {
+    const index = carItems.findIndex(cartItem => cartItem.name === item.name);
+    if (index !== -1) {
+      setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
+    }
+  }
+
   return (
     <header
       className="w-full flex items-center justify-between p-4"
@@ -170,7 +177,7 @@ export default function Header({ items }:
                       <span className="text-xs">{item.name}</span>
                     </div>
                     <button
-                      // onClick={() => removeItem(index)}
+                      onClick={() => deleteOneItemFromCartDropDown(item)}
                       className="text-red-500 text-xs focus:outline-none"
                     >
                       &times;
