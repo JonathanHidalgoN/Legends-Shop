@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Item } from "../interfaces/Item";
 import { kanit, sigmar } from "../fonts";
 import DescriptionTextMapper from "./DescriptionTextMapper";
-import BuyButton from "./BuyButton";
+import AddToCarButton from "./AddToCarButton";
 
 export default function ItemPreView({ item }: { item: Item }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -90,7 +90,7 @@ export default function ItemPreView({ item }: { item: Item }) {
             <span className="font-bold">Description:</span>
             <DescriptionTextMapper description={item.description} />
           </div>
-          <BuyButton item={item} />
+          <AddToCarButton item={item} />
         </div>
       )}
     </div>

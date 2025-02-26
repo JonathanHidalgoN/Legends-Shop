@@ -1,7 +1,7 @@
 import { Item } from "../interfaces/Item";
 import { useCarContext } from "./CarContext";
 
-export default function BuyButton({ item }: { item: Item }) {
+export default function AddToCarButton({ item }: { item: Item }) {
   const { carItems, setCarItems } = useCarContext();
 
   function handleBuyClick() {

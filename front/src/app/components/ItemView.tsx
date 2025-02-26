@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Item } from "../interfaces/Item";
 import DescriptionTextMapper from "./DescriptionTextMapper";
-import BuyButton from "./BuyButton";
+import AddToCarButton from "./AddToCarButton";
 import { useStaticData } from "./StaticDataContext";
 
 export default function ItemView({ itemName }: { itemName: string }) {
@@ -77,7 +77,7 @@ export default function ItemView({ itemName }: { itemName: string }) {
         )}
 
         {/* Buy Button */}
-        <BuyButton item={item} />
+        <AddToCarButton item={item} />
 
       </div>
     </div>
