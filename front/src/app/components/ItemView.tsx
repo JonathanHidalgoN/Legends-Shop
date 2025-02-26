@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Item } from "../interfaces/Item";
 import DescriptionTextMapper from "./DescriptionTextMapper";
+import BuyButton from "./BuyButton";
 import { useStaticData } from "./StaticDataContext";
 
 export default function ItemView({ itemName }: { itemName: string }) {
@@ -76,12 +77,7 @@ export default function ItemView({ itemName }: { itemName: string }) {
         )}
 
         {/* Buy Button */}
-        <button
-          className="mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition-colors"
-          onClick={() => alert("Buy functionality coming soon!")}
-        >
-          Buy Now
-        </button>
+        <BuyButton item={item} />
 
       </div>
     </div>
