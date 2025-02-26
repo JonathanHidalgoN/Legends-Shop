@@ -5,6 +5,7 @@ import { Item } from "./interfaces/Item";
 import { fetchItems, fetchTags } from "./itemsFetcher";
 import { StaticDataContextProvider } from "./components/StaticDataContext";
 import { AuthContextProvider } from "./components/AuthContext";
+import { CarContextProvider } from "./components/CarContext";
 
 export const metadata = {
   title: "Legends Shop",
@@ -30,8 +31,10 @@ export default async function RootLayout({
       <body>
         <AuthContextProvider>
           <StaticDataContextProvider items={items} tags={tags}>
-            <Header items={items} />
-            {children}
+            <CarContextProvider>
+              <Header items={items} />
+              {children}
+            </CarContextProvider>
           </StaticDataContextProvider>
         </AuthContextProvider>
       </body>
