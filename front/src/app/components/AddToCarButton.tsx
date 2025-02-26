@@ -10,7 +10,8 @@ export default function AddToCarButton({ item }: { item: Item }) {
 
   return (<div>
     <button
-      className="mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition-colors"
+      className="mt-6 bg-[var(--orange)] text-[var(--white)] 
+      px-6 py-3 rounded hover:bg-[var(--pink1)] transition-colors"
       onClick={handleBuyClick}
     >
       Add to Car
