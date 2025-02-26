@@ -150,26 +150,39 @@ export default function Header({ items }:
             </svg>
           </button>
           {showCartDropdown && (
-            <div ref={carDropDownRef} className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
+            <div
+              ref={carDropDownRef}
+              className="absolute right-0 mt-2 w-60 p-2 rounded shadow-lg bg-white z-10"
+            >
               {carItems.length > 0 ? (
-                carItems.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <img
-                        src={item.img}
-                        alt={item.name}
-                        className="w-6 h-6 object-cover mr-2"
-                      />
-                      <span className="text-xs">{item.name}</span>
+                <>
+                  {carItems.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <img
+                          src={item.img}
+                          alt={item.name}
+                          className="w-10 h-10 object-cover mr-2"
+                        />
+                        <span className="text-m">{item.name}</span>
+                      </div>
+                      <button
+                        onClick={() => deleteOneItemFromCartDropDown(item)}
+                        className="text-red-500 text-m focus:outline-none"
+                      >
+                        &times;
+                      </button>
                     </div>
-                    <button
-                      onClick={() => deleteOneItemFromCartDropDown(item)}
-                      className="text-red-500 text-xs focus:outline-none"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))
+                  ))}
+                  <button
+                    className="mt-2 bg-[var(--orange)] 
+                    text-[var(--white)] rounded hover:bg-[var(--pink1)] 
+                    transition-colors w-full"
+                    onClick={() => router.push("/order")}
+                  >
+                    Order now!
+                  </button>
+                </>
               ) : (
                 <div className="text-center text-xs">Cart is empty</div>
               )}
@@ -181,4 +194,3 @@ export default function Header({ items }:
     </header >
   );
 };
-
