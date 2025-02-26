@@ -17,8 +17,14 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 router = APIRouter()
 oauth2Scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-
-def getCurrentUser(token: Annotated[str, Depends(oauth2Scheme)]):
+def getCurrentUserTokenFlow(request: Request):
+    token : str | None = request.headers.get("access_token")
+    if token is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+            headers={"WW-Authenticate": "Bearer"},
+        )
     userName: str | None = verifyToken(token)
     if not userName:
         raise HTTPException(
@@ -27,7 +33,6 @@ def getCurrentUser(token: Annotated[str, Depends(oauth2Scheme)]):
             headers={"WW-Authenticate": "Bearer"},
         )
     return userName
-
 
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token", response_model=Token)
@@ -69,11 +74,6 @@ async def getToken(
     )
     logger.debug(f"Request to {request.url.path} completed successfully, token in response")
     return {"access_token": accessToken, "token_type": "bearer"}
-
-
-@router.get("/test")
-async def protectTest(user: Annotated[str, Depends(getCurrentUser)]):
-    return {"message": user}
 
 
 @router.post("/singUp")
