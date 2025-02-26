@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.data import database
 from app.data.ItemsLoader import ItemsLoader
 from app.data.queries.itemQueries import getVersion
-from app.routes import items, auth
+from app.routes import items, auth, orders
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 
@@ -25,6 +25,7 @@ app.add_middleware(
 
 app.include_router(items.router, prefix="/items")
 app.include_router(auth.router, prefix="/auth")
+app.include_router(orders.router, prefix="/orders")
 
 
 @app.get("/")
