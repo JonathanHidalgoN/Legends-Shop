@@ -5,8 +5,6 @@ export default function BuyButton({ item }: { item: Item }) {
   const { carItems, setCarItems } = useCarContext();
 
   function handleBuyClick() {
-    console.log("here");
-    console.log([...carItems, item]);
     setCarItems([...carItems, item]);
   }
 
@@ -15,7 +13,7 @@ export default function BuyButton({ item }: { item: Item }) {
       className="mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition-colors"
       onClick={handleBuyClick}
     >
-      Buy Now
+      Add to Car
     </button>
 
   </div>);
