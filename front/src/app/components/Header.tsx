@@ -14,30 +14,10 @@ export default function Header({ items }:
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const { userName, setUserName } = useAuth();
-  const containerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { carItems, setCarItems } = useCarContext();
-
-  // const gold: Gold = {
-  //   base: 0,
-  //   purchaseable: false,
-  //   total: 0,
-  //   sell: 0
-  // };
-  // const demo: Item = {
-  //   name: "",
-  //   gold: gold,
-  //   description: "",
-  //   stats: [],
-  //   tags: [],
-  //   effects: [],
-  //   img: null
-  // }
-  // const demo2: Item[] = [demo];
-  // useEffect(() => {
-  //   setCarItems(demo2);
-  // }, []);
-
 
   //This is a compy of a function Can I create a general one?
   // Hide suggestions when clicking outside
@@ -45,10 +25,16 @@ export default function Header({ items }:
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        loginDropDownRef.current &&
+        !loginDropDownRef.current.contains(event.target as Node)
       ) {
         setShowLoginDropdown(false);
+      }
+      if (
+        carDropDownRef.current &&
+        !carDropDownRef.current.contains(event.target as Node)
+      ) {
+        setShowCartDropdown(false);
       }
     }
 
@@ -112,7 +98,7 @@ export default function Header({ items }:
             {userName ? "Welcome " + userName : "Login"}
           </button>
           {userName && showLoginDropdown && (
-            <div ref={containerRef}
+            <div ref={loginDropDownRef}
               className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
               <button
                 onClick={() => {
@@ -164,7 +150,7 @@ export default function Header({ items }:
             </svg>
           </button>
           {showCartDropdown && (
-            <div className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
+            <div ref={carDropDownRef} className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
               {carItems.length > 0 ? (
                 carItems.map((item, index) => (
                   <div key={index} className="flex items-center justify-between mb-2">
