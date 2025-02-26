@@ -128,7 +128,7 @@ export default function Header({ items }:
             className="p-2 rounded flex items-center hover:opacity-80 transition"
             style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
           >
-            Cart
+            Car
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="gold"
