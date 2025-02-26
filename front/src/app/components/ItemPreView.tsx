@@ -12,13 +12,13 @@ export default function ItemPreView({ item }: { item: Item }) {
   const targetLink = `/items/${item.name}`;
 
   return (
-    <div className="m-6 relative border border-[var(--yellow)]">
+    <div
+      className="m-6 relative border border-[var(--yellow)]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Link href={targetLink}>
-        <div
-          className="block cursor-pointer"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+        <div className="block cursor-pointer">
           <div className="relative w-40 h-40 rounded overflow-hidden shadow-md">
             <Image
               src={item.img}
@@ -28,10 +28,10 @@ export default function ItemPreView({ item }: { item: Item }) {
               quality={100}
             />
           </div>
-
           <div className="mt-2 text-center">
             <span className={`text-xl text-[var(--yellow)] ${kanit.className}`}>
-              {item.gold.base} g</span>
+              {item.gold.base} g
+            </span>
           </div>
         </div>
       </Link>
@@ -43,7 +43,8 @@ export default function ItemPreView({ item }: { item: Item }) {
         >
           <div className="mb-2">
             <span className={`text-[var(--orange)] text-xl ${sigmar.className}`}>
-              {item.name}</span>
+              {item.name}
+            </span>
           </div>
 
           <div className="text-[var(--extra)]">
