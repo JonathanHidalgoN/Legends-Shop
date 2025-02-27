@@ -4,7 +4,7 @@ import Link from "next/link";
 import { sigmar } from "../fonts";
 import SearchBar from "./SearchBar";
 import { Gold, Item } from "../interfaces/Item";
-import { useAuth } from "./AuthContext";
+import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import { logoutRequest } from "../request";
 import { useCarContext } from "./CarContext";
@@ -14,7 +14,7 @@ export default function Header({ items }:
   { items: Item[] }) {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const { userName, setUserName } = useAuth();
+  const { userName, setUserName } = useAuthContext();
   const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const router = useRouter();

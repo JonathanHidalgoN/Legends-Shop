@@ -3,14 +3,14 @@
 import { useState } from "react"
 import { signup } from "../functions";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/components/AuthContext";
+import { useAuthContext } from "@/app/components/AuthContext";
 
 export default function LogInPage() {
   const [formUserName, setFormUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const router = useRouter();
-  const { setUserName } = useAuth();
+  const { setUserName } = useAuthContext();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
