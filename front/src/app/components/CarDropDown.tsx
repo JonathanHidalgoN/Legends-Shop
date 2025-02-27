@@ -11,9 +11,10 @@ type ItemSummary = {
 }
 
 export default function CarDropDown({ tiny }: { tiny: boolean }) {
-  const { carItems, setCarItems } = useCarContext();
+  const { carItems, setCarItems, deleteOneItemFromCar, deleteAllItemFromCar,
+    addOneItemToCar, getTotalCost } = useCarContext();
   let itemCount: Record<string, ItemSummary> = {};
-  const totalPrice = carItems.reduce((total, item) => total + item.gold.base, 0);
+  const totalCost: number = getTotalCost();
 
   carItems.forEach((item: Item) => {
     if (item.name in itemCount) {
@@ -28,20 +29,6 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
     }
   });
 
-  function deleteOneItemFromCar(item: Item) {
-    const index = carItems.findIndex(cartItem => cartItem.name === item.name);
-    if (index !== -1) {
-      setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
-    }
-  }
-
-  function deleteAllItemFromCar(item: Item) {
-    setCarItems(carItems.filter((carItem: Item) => carItem.name !== item.name));
-  }
-  // Dupliacate in AddToCarButton
-  function addOneTiemToCar(item: Item) {
-    setCarItems([...carItems, item]);
-  }
 
 
   return (
@@ -76,7 +63,7 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
             </div>
             <div className="flex items-center space-x-3">
               <button
-                onClick={() => addOneTiemToCar(summary.itemSample)}
+                onClick={() => addOneItemToCar(summary.itemSample)}
                 className={!tiny ? `w-12 bg-green-500 text-white py-2 rounded 
                            hover:bg-green-700 transition-colors`:
                   `w-6 bg-green-500 text-white py-2 rounded 
@@ -106,7 +93,7 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
         <div className="mt-6 border-t pt-4">
           <div className="flex justify-between mb-4">
             <span className="font-bold">Total:</span>
-            <span className="font-bold text-[var(--yellow)]">{totalPrice} g</span>
+            <span className="font-bold text-[var(--yellow)]">{totalCost} g</span>
           </div>
         </div>
       )}
