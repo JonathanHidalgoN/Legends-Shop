@@ -27,6 +27,11 @@ interface CarContextType {
    * @returns The total cost.
    */
   getTotalCost: () => number;
+
+  /**
+   * Deletes all car items 
+   */
+  cleanCar: () => void;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -71,6 +76,13 @@ export function CarContextProvider({ children }: { children: React.ReactNode }) 
     return carItems.reduce((total, item) => total + item.gold.base, 0);
   }
 
+  /**
+   * Deletes all car items 
+   */
+  function cleanCar(): void {
+    setCarItems([]);
+  }
+
   return (
     <CarContext.Provider value={{
       carItems,
@@ -78,7 +90,8 @@ export function CarContextProvider({ children }: { children: React.ReactNode }) 
       deleteOneItemFromCar,
       deleteAllItemFromCar,
       addOneItemToCar,
-      getTotalCost
+      getTotalCost,
+      cleanCar,
     }}>
       {children}
     </CarContext.Provider>
