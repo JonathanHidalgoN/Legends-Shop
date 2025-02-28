@@ -64,10 +64,12 @@ async def getToken(
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     accessToken = createAccessToken(data={"sub": matchUser.userName})
     response.set_cookie(
-        key="accessToken",
+        key="access_token",
         value=accessToken,
         httponly=True,
-        secure=True,
+        #TODO: change this to true when working on https
+        secure=False,
+        # secure=True,
         samesite="lax",
         max_age=60 * 30,
         path="/",
