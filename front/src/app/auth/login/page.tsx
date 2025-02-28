@@ -1,33 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import { signup } from "../functions";
-import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/app/components/AuthContext";
+import { useState } from "react"
 
 export default function LogInPage() {
   const [formUserName, setFormUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const router = useRouter();
-  const { setUserName } = useAuthContext();
+  const { logIn } = useAuthContext();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    try {
-      signup(formUserName, password);
-      setUserName(formUserName);
-      router.push("/");
-    } catch (error: unknown) {
-      //This way linter wont complain ):
-      if (error instanceof Error) {
-        setError(error.message)
-        console.error(error.message);
-      } else {
-        setError("An unknown error occurred");
-        console.error("An unknown error occurred");
-      }
-    }
+    logIn(formUserName, password);
   }
 
   return (
@@ -63,7 +46,7 @@ export default function LogInPage() {
             className="border p-2 rounded"
           />
         </div>
-        {error && <p className="text-red-500">{error}</p>}
+        {<p className="text-red-500">error</p>}
         <button
           type="submit"
           className="w-full bg-[var(--orange)] text-white py-2 rounded hover:bg-blue-700 transition"
