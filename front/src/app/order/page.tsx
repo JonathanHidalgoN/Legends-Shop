@@ -1,17 +1,39 @@
 "use client";
+import { useAuthContext } from "../components/AuthContext";
 import { useCarContext } from "../components/CarContext";
 import CarDropDown from "../components/CarDropDown";
+import { Order } from "../interfaces/Order";
+import { orderRequest } from "../request";
 
 export default function OrderPage() {
-  const { carItems, setCarItems } = useCarContext();
+  const { carItems, setCarItems, getTotalCost, cleanCar } = useCarContext();
+  const { userName } = useAuthContext();
 
 
-  function handleBuy() {
-    console.log("Buy button clicked");
+  async function handleBuy() {
+    if (!userName) {
+      //Null userName handle
+      console.log("Null userName");
+    } else {
+      const order: Order = {
+        items: carItems,
+        total: getTotalCost(),
+        userName: userName,
+        date: new Date(""),
+        id: 0,
+        status: ""
+      };
+      const response = await orderRequest(order, "client");
+      if (!response.ok) {
+        throw new Error(``);
+      }
+      console.log("Nice");
+
+    }
   }
 
   function handleCancel() {
-    setCarItems([]);
+    cleanCar();
   }
 
   return (

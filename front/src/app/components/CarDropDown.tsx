@@ -29,8 +29,6 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
     }
   });
 
-
-
   return (
     <div>
       <div className="space-y-4">
