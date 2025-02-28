@@ -3,7 +3,7 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { sigmar } from "../fonts";
 import SearchBar from "./SearchBar";
-import { Gold, Item } from "../interfaces/Item";
+import { Item } from "../interfaces/Item";
 import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import { logoutRequest } from "../request";
@@ -14,11 +14,11 @@ export default function Header({ items }:
   { items: Item[] }) {
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const { userName, setUserName } = useAuthContext();
+  const { userName, logOut } = useAuthContext();
   const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { carItems, setCarItems } = useCarContext();
+  const { carItems } = useCarContext();
 
   //This is a compy of a function Can I create a general one?
   // Hide suggestions when clicking outside
@@ -45,38 +45,18 @@ export default function Header({ items }:
     };
   }, []);
 
-  async function handleLogout() {
-    try {
-      const response = await logoutRequest("client");
-      if (!response.ok) {
-        throw new Error("Logout failed");
-      }
-      setUserName(null);
-      router.push("/");
-    } catch (error) {
-      console.log("Error");
-    }
-  }
-
-  function deleteOneItemFromCartDropDown(item: Item) {
-    const index = carItems.findIndex(cartItem => cartItem.name === item.name);
-    if (index !== -1) {
-      setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
-    }
-  }
-
   return (
     <header
-      className="w-full flex items-center justify-between p-4"
-      style={{ backgroundColor: 'var(--white2)', color: "white2" }}
+      className="w-full flex items-center justify-between p-4 
+      bg-[var(--white2)]"
     >
       <div
-        className={`text-xl ${sigmar.className}`}
-        style={{ backgroundColor: 'var(--white2)', color: 'var(--orange)' }}
+        className={`text-xl ${sigmar.className} 
+                    bg-[var(--white2)] text-[var(--orange)]`}
       >
         <Link href="/">
-          Legends Shop
         </Link>
+        Legends Shop
       </div>
       <div className="flex-1 mx-4">
         <SearchBar items={items} />
@@ -93,8 +73,8 @@ export default function Header({ items }:
                 router.push("/auth/login");
               }
             }}
-            className="p-2 rounded hover:opacity-80 transition"
-            style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
+            className="p-2 rounded hover:opacity-80 transition
+            bg-[var(--orange)] text-[var(--white)]"
           >
             {userName ? "Welcome " + userName : "Login"}
           </button>
@@ -112,7 +92,7 @@ export default function Header({ items }:
               </button>
               <button
                 onClick={() => {
-                  handleLogout();
+                  logOut();
                   setShowLoginDropdown(false);
                 }}
                 className="block w-full text-left px-2 py-1 hover:bg-gray-100"
@@ -126,9 +106,8 @@ export default function Header({ items }:
         <div className="relative">
           <button
             onClick={() => setShowCartDropdown((prev) => !prev)}
-            className="p-2 rounded flex items-center hover:opacity-80 transition"
-            style={{ backgroundColor: 'var(--orange)', color: 'var(--white)' }}
-          >
+            className="p-2 rounded flex items-center hover:opacity-80 transition
+            bg-[var(--orange)] text-[var(--white)]">
             Car
             <svg
               xmlns="http://www.w3.org/2000/svg"
