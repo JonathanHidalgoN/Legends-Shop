@@ -7,7 +7,20 @@ SELECT * FROM pg_settings WHERE name = 'port';
 
 To run normally :uvicorn app.main:app 
 
-To attach debbuger :python -m debugpy --listen 5679 --wait-for-client -m uvicorn app.main:app --host 127.0.0.1 --port 8000 
+To attach debbuger :
+python -m debugpy --listen 5679 --wait-for-client -m uvicorn app.main:app --host 127.0.0.1 --port 8000 
 
 To use alembic -> Create a table in models folder -> import that table to alembic/env.py file ->
 use alembic revision --autogenerate -m "comment here" -> use alembic upgrade head
+
+What npm install <package_name> does: 
+Reads package.json and package-lock.json to determine dependencies.
+Checks the cache to avoid unnecessary downloads.
+Resolves versions and ensures compatibility.
+Downloads packages from the npm registry.
+Verifies package integrity for security.
+Installs dependencies in node_modules/.
+Runs scripts (if defined in the package).
+Updates package-lock.json if necessary.
+Checks for peer dependencies and shows warnings.
+Finishes installation, and your project is ready to use.
