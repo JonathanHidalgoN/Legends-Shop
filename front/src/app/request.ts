@@ -1,4 +1,5 @@
 import { BACKEND_PORT, BACKEND_HOST } from "./envVariables";
+import { Order } from "./interfaces/Order";
 
 //TODO: how to improve this solution?
 export const SERVER_DOMAIN: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/`
@@ -8,6 +9,7 @@ export const ENDPOINT_LOGIN_OUT: string = `auth/logout`;
 export const ENDPOINT_ITEMS_ALL: string = `items/all`;
 export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
+export const ENDPOINT_ORDER: string = `orders/order`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -36,6 +38,7 @@ export async function logInRequest(userName: string, password: string, from: str
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
+    credentials: "include",
     body: formData.toString(),
   });
 }
@@ -77,3 +80,16 @@ export async function logoutRequest(from: string = "server") {
     credentials: "include",
   });
 }
+
+export async function orderRequest(order: Order, from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_ORDER);
+  return await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(order),
+  });
+}
+
