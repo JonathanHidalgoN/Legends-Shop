@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { logInRequest, logoutRequest } from "../request";
 import { useRouter } from "next/navigation";
+import toast from 'react-hot-toast';
 
 interface AuthContextType {
   userName: string | null;
@@ -30,8 +31,9 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       }
       setUserName(userName);
       router.push("/");
+      toast.success(`Welcome ${userName}!`)
     } catch (error) {
-      console.error("Error");
+      toast.error("Error in the login process")
     }
   }
 
@@ -43,6 +45,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       }
       setUserName(null);
       router.push("/");
+      toast.success(`Logout succesfully`)
     } catch (error) {
       console.log("Error");
     }

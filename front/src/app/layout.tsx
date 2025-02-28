@@ -6,6 +6,7 @@ import { fetchItems, fetchTags } from "./itemsFetcher";
 import { StaticDataContextProvider } from "./components/StaticDataContext";
 import { AuthContextProvider } from "./components/AuthContext";
 import { CarContextProvider } from "./components/CarContext";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "Legends Shop",
@@ -33,6 +34,7 @@ export default async function RootLayout({
           <StaticDataContextProvider items={items} tags={tags}>
             <CarContextProvider>
               <Header items={items} />
+              <Toaster position="top-left" />
               {children}
             </CarContextProvider>
           </StaticDataContextProvider>

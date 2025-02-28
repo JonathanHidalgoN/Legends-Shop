@@ -3,11 +3,10 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { sigmar } from "../fonts";
 import SearchBar from "./SearchBar";
+import { useCarContext } from "./CarContext";
 import { Item } from "../interfaces/Item";
 import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
-import { logoutRequest } from "../request";
-import { useCarContext } from "./CarContext";
 import CarDropDown from "./CarDropDown";
 
 export default function Header({ items }:
@@ -51,12 +50,12 @@ export default function Header({ items }:
       bg-[var(--white2)]"
     >
       <div
-        className={`text-xl ${sigmar.className} 
+        className={`text-xl ${sigmar.className} ml-12 mr-12
                     bg-[var(--white2)] text-[var(--orange)]`}
       >
         <Link href="/">
+          Legends Shop
         </Link>
-        Legends Shop
       </div>
       <div className="flex-1 mx-4">
         <SearchBar items={items} />
@@ -141,7 +140,10 @@ export default function Header({ items }:
                     className="mt-2 bg-[var(--orange)] 
                     text-[var(--white)] rounded hover:bg-[var(--pink1)] 
                     transition-colors w-full"
-                    onClick={() => router.push("/order")}
+                    onClick={() => {
+                      router.push("/order")
+                      setShowCartDropdown(false);
+                    }}
                   >
                     Order now!
                   </button>

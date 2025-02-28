@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { Item } from "../interfaces/Item";
 import { useCarContext } from "./CarContext";
 
@@ -6,6 +7,7 @@ export default function AddToCarButton({ item }: { item: Item }) {
 
   function handleBuyClick() {
     setCarItems([...carItems, item]);
+    toast.success(`Added ${item.name} to car`);
   }
 
   return (<div>

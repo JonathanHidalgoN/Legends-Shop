@@ -46,7 +46,6 @@ export default function LogInPage() {
             className="border p-2 rounded"
           />
         </div>
-        {<p className="text-red-500">error</p>}
         <button
           type="submit"
           className="w-full bg-[var(--orange)] text-white py-2 rounded hover:bg-blue-700 transition"
