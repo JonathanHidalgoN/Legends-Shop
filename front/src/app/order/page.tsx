@@ -6,7 +6,7 @@ import { Order } from "../interfaces/Order";
 import { orderRequest } from "../request";
 
 export default function OrderPage() {
-  const { carItems, setCarItems, getTotalCost, cleanCar } = useCarContext();
+  const { carItems, getTotalCost, cleanCar } = useCarContext();
   const { userName } = useAuthContext();
 
 
