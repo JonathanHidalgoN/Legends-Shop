@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useAuthContext } from "../components/AuthContext";
 import { useCarContext } from "../components/CarContext";
 import CarDropDown from "../components/CarDropDown";
-import mapItemToOrderItem, { Order } from "../interfaces/Order";
+import { Order } from "../interfaces/Order";
 import { orderRequest } from "../request";
 import { useRouter } from "next/navigation";
 
@@ -17,7 +17,7 @@ export default function OrderPage() {
       toast.error("Login to order");
     } else {
       const order: Order = {
-        items: carItems.map(item => mapItemToOrderItem(item)),
+        itemNames: carItems.map(item => item.name),
         total: getTotalCost(),
         userName: userName,
         date: new Date(),
