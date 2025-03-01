@@ -1,9 +1,11 @@
 from typing import Set
+from app.data.models.OrderTable import OrderTable
 from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
 from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Item import Effects, Gold, Item, Stat
+from app.schemas.Order import Order
 
 
 def mapGoldToGoldTable(gold: Gold) -> GoldTable:
@@ -73,3 +75,11 @@ def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
         userName=userTable.userName, hashedPassword=userTable.password
     )
     return userInDB
+
+def mapOrderToOrderTable(order:Order, userId:int)-> OrderTable:
+    orderTable:OrderTable = OrderTable(
+        user_id=userId,
+        total=order.total,
+        order_date = order.date
+    )
+    return orderTable
