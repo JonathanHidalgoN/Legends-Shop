@@ -55,7 +55,7 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
               value={price}
               onChange={(e) => {
                 setPrice(Number(e.target.value));
-                setCurrentPage(1); // Reset page when price filter changes
+                setCurrentPage(1);
               }}
               className="flex-grow"
             />
@@ -66,14 +66,17 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
         <div className="flex-grow overflow-y-auto custom-scrollbar">
           <ul className="space-y-2">
             {tags.map((tag, index) => (
-              <li key={index} className="flex items-center">
+              <li
+                key={index}
+                className="flex items-center p-2 rounded hover:bg-gray-200 transition-colors"
+              >
                 <input
                   type="checkbox"
-                  className="w-5 h-5 mr-2"
+                  className="w-5 h-5 mr-2 hover:cursor-pointer"
                   onChange={() => handleTagToggle(tag)}
                   checked={selectedTags.includes(tag)}
                 />
-                <span>{tag}</span>
+                <span className="hover:text-orange-500 transition-colors">{tag}</span>
               </li>
             ))}
           </ul>
