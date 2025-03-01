@@ -35,6 +35,13 @@ async def getItemTableByItemId(
         logger.warning(f"Tried to get itemTable with id {itemId} but None was found")
         return None
 
+async def getItemIdByItemName(
+    asyncSession: AsyncSession, itemName:str 
+) -> int | None:
+    """Retrun item id with the item name"""
+    result = await asyncSession.execute(select(ItemTable.id).where(ItemTable.name == itemName))
+    itemId: int | None = result.scalars().first()
+    return itemId 
 
 async def getAllTagNamesAssociatedByItemId(
     asyncSession: AsyncSession, itemId: int
@@ -229,7 +236,6 @@ async def getEffectIdWithEffectName(
     effect = result.scalars().first()
     return effect if effect else None
 
-
 async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | None:
     """Fetch the gold ID associated with a given item ID."""
     result = await asyncSession.execute(
@@ -265,7 +271,6 @@ async def getGoldTableWithItemId(
         return None
     result = await asyncSession.execute(select(GoldTable).where(GoldTable.id == goldId))
     goldTable = result.scalars().first()
-    goldTable = result.scalars().first()
     if goldTable:
         return goldTable
     else:
@@ -273,7 +278,6 @@ async def getGoldTableWithItemId(
             f"Tried to get gold table with item id {itemId} but None was found"
         )
         return None
-
 
 async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
     """Fetch the ID of a tag using its name."""
