@@ -44,3 +44,13 @@ async def insertUser(asyncSession: AsyncSession, userInDB: UserInDB) -> None:
     asyncSession.add(userTable)
     await asyncSession.commit()
     await asyncSession.refresh(userTable)
+
+async def getUserIdWithUserName(asyncSession: AsyncSession, userName: str) -> int | None:
+    """
+    Get the user id with userName.
+    """
+    result = await asyncSession.execute(
+        select(UserTable.id).where(UserTable.userName == userName)
+    )
+    userId = result.scalars().first()
+    return userId
