@@ -7,7 +7,7 @@ export default function AddToCarButton({ item }: { item: Item }) {
 
   function handleBuyClick() {
     setCarItems([...carItems, item]);
-    toast.success(`Added ${item.name} to car`);
+    toast.success(`${item.name} added to car`);
   }
 
   return (<div>
