@@ -8,8 +8,15 @@ export interface OrderItem {
 export interface Order {
   id: number,
   status: string
-  items: Item[],
+  items: OrderItem[],
   total: number,
   userName: string,
   date: Date
+}
+
+export default function mapItemToOrderItem(item: Item): OrderItem {
+  return {
+    name: item.name,
+    cost: item.gold.base
+  };
 }
