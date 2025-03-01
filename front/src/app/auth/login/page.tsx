@@ -8,16 +8,14 @@ export default function LogInPage() {
   const [password, setPassword] = useState<string>("");
   const { logIn } = useAuthContext();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    logIn(formUserName, password);
-  }
-
   return (
     <div className="bg-[var(--white)] 
       min-h-screen flex flex-col items-center justify-center p-4">
       <h1 className="text-3xl text-[var(--orange)] font-bold mb-6">Login</h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        logIn(formUserName, password);
+      }} className="w-full max-w-md space-y-4">
         <div className="flex flex-col">
           <label htmlFor="username" className="mb-1 font-bold 
             text-[var(--orange)]">

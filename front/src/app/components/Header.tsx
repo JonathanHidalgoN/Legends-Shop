@@ -8,6 +8,7 @@ import { Item } from "../interfaces/Item";
 import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
+import HeaderLogInForm from "./HeaderLogInForm";
 
 export default function Header({ items }:
   { items: Item[] }) {
@@ -65,12 +66,7 @@ export default function Header({ items }:
         <div className="relative">
           <button
             onClick={() => {
-              if (userName) {
-                setShowLoginDropdown((prev) => !prev)
-              }
-              else {
-                router.push("/auth/login");
-              }
+              setShowLoginDropdown((prev) => !prev);
             }}
             className="p-2 rounded hover:opacity-80 transition
             bg-[var(--orange)] text-[var(--white)]"
@@ -98,6 +94,11 @@ export default function Header({ items }:
               >
                 Logout
               </button>
+            </div>
+          )}
+          {!userName && showLoginDropdown && (
+            <div ref={loginDropDownRef}>
+              <HeaderLogInForm />
             </div>
           )}
         </div>
