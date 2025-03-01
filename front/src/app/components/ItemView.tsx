@@ -40,7 +40,7 @@ export default function ItemView({ itemName }: { itemName: string }) {
         {/* Description */}
         <div className="mt-4 text-gray-700">
           <span className="font-bold">Description: </span>
-          <DescriptionTextMapper description={item.description} />
+          <DescriptionTextMapper description={item.description} maxLen={999999} />
         </div>
 
         {/* Stats */}

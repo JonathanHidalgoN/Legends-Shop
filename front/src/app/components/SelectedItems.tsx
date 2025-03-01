@@ -63,7 +63,7 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
         </div>
       </aside>
 
-      <div className="p-4 m-6 flex flex-wrap gap-x-10">
+      <div className="p-4 m-6 flex flex-col gap-y-10">
         {filteredItems.map((item, index) => (
           <ItemPreView key={index} item={item} />
         ))}
