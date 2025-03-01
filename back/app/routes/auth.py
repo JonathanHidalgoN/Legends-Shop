@@ -18,8 +18,10 @@ router = APIRouter()
 oauth2Scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 def getCurrentUserTokenFlow(request: Request):
-    token : str | None = request.headers.get("access_token")
+    logger.debug(f"Request to {request.url.path}, checking token...")
+    token : str | None = request.cookies.get("access_token")
     if token is None:
+        logger.error(f"Error in {request.url.path} token is None")
         raise HTTPException(
             status_code=401,
             detail="Invalid token",
@@ -27,11 +29,13 @@ def getCurrentUserTokenFlow(request: Request):
         )
     userName: str | None = verifyToken(token)
     if not userName:
+        logger.error(f"Error in {request.url.path} invalid token")
         raise HTTPException(
             status_code=401,
             detail="Invalid credentials",
             headers={"WW-Authenticate": "Bearer"},
         )
+    logger.debug(f"Request to {request.url.path}, authenticated")
     return userName
 
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
