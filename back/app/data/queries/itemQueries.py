@@ -313,3 +313,12 @@ async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingT
     result = await asyncSession.execute(select(StatsMappingTable))
     statsMappingTable: List[StatsMappingTable] = [row for row in result.scalars().all()]
     return statsMappingTable
+
+async def checkItemExist(asyncSession: AsyncSession, itemName:str):
+    result = await asyncSession.execute(
+        select(ItemTable.name).where(ItemTable.name == itemName)
+    )
+    if not result:
+        return False
+    return True
+
