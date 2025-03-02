@@ -15,6 +15,8 @@ from app.data.models.TagsTable import (
 from app.logger import logger
 from app.schemas.Item import Stat
 
+# TODO: CHECK QUERYS THAT CAN BE SIMPLIFY with a join
+
 
 async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     """Fetch all tags from the TagsTable."""
@@ -35,13 +37,15 @@ async def getItemTableByItemId(
         logger.warning(f"Tried to get itemTable with id {itemId} but None was found")
         return None
 
-async def getItemIdByItemName(
-    asyncSession: AsyncSession, itemName:str 
-) -> int | None:
+
+async def getItemIdByItemName(asyncSession: AsyncSession, itemName: str) -> int | None:
     """Retrun item id with the item name"""
-    result = await asyncSession.execute(select(ItemTable.id).where(ItemTable.name == itemName))
+    result = await asyncSession.execute(
+        select(ItemTable.id).where(ItemTable.name == itemName)
+    )
     itemId: int | None = result.scalars().first()
-    return itemId 
+    return itemId
+
 
 async def getAllTagNamesAssociatedByItemId(
     asyncSession: AsyncSession, itemId: int
@@ -236,6 +240,7 @@ async def getEffectIdWithEffectName(
     effect = result.scalars().first()
     return effect if effect else None
 
+
 async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | None:
     """Fetch the gold ID associated with a given item ID."""
     result = await asyncSession.execute(
@@ -247,6 +252,16 @@ async def getGoldIdWithItemId(asyncSession: AsyncSession, itemId: int) -> int | 
     else:
         logger.warning(f"Tried to get gold if with item id {itemId} but None was found")
         return None
+
+
+async def getGoldBaseWithItemId(asyncSession: AsyncSession, itemId: int) -> int | None:
+    stmt = (
+        select(GoldTable.base_cost)
+        .join(ItemTable, GoldTable.id == ItemTable.gold_id)
+        .where(ItemTable.id == itemId)
+    )
+    result = await asyncSession.execute(stmt)
+    return result.scalars().first()
 
 
 async def getGoldTableWithId(
@@ -278,6 +293,7 @@ async def getGoldTableWithItemId(
             f"Tried to get gold table with item id {itemId} but None was found"
         )
         return None
+
 
 async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int | None:
     """Fetch the ID of a tag using its name."""
@@ -318,11 +334,11 @@ async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingT
     statsMappingTable: List[StatsMappingTable] = [row for row in result.scalars().all()]
     return statsMappingTable
 
-async def checkItemExist(asyncSession: AsyncSession, itemName:str):
+
+async def checkItemExist(asyncSession: AsyncSession, itemName: str):
     result = await asyncSession.execute(
         select(ItemTable.name).where(ItemTable.name == itemName)
     )
     if not result:
         return False
     return True
-

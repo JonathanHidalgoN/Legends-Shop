@@ -45,7 +45,10 @@ async def insertUser(asyncSession: AsyncSession, userInDB: UserInDB) -> None:
     await asyncSession.commit()
     await asyncSession.refresh(userTable)
 
-async def getUserIdWithUserName(asyncSession: AsyncSession, userName: str) -> int | None:
+
+async def getUserIdWithUserName(
+    asyncSession: AsyncSession, userName: str
+) -> int | None:
     """
     Get the user id with userName.
     """

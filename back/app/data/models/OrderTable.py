@@ -8,8 +8,9 @@ OrderItemAssociation = Table(
     base.metadata,
     Column("order_id", ForeignKey("order_table.id"), primary_key=True),
     Column("item_id", ForeignKey("item_table.id"), primary_key=True),
-    Column("quantity", Integer, nullable=False)
+    Column("quantity", Integer, nullable=False),
 )
+
 
 class OrderTable(base):
     __tablename__ = "order_table"
