@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.customExceptions import UserIdNotFound
 from app.logger import logger
 from app.auth.functions import (
     createAccessToken,
@@ -9,7 +10,12 @@ from app.auth.functions import (
     hashPassword,
 )
 from app.data import database
-from app.data.queries.authQueries import checkUserExistInDB, getUserInDB, insertUser
+from app.data.queries.authQueries import (
+    checkUserExistInDB,
+    getUserIdWithUserName,
+    getUserInDB,
+    insertUser,
+)
 from app.schemas.AuthSchemas import Token, UserInDB, singUpRequest
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
@@ -17,9 +23,10 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 router = APIRouter()
 oauth2Scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
+
 def getCurrentUserTokenFlow(request: Request):
     logger.debug(f"Request to {request.url.path}, checking token...")
-    token : str | None = request.cookies.get("access_token")
+    token: str | None = request.cookies.get("access_token")
     if token is None:
         logger.error(f"Error in {request.url.path} token is None")
         raise HTTPException(
@@ -38,6 +45,17 @@ def getCurrentUserTokenFlow(request: Request):
     logger.debug(f"Request to {request.url.path}, authenticated")
     return userName
 
+
+async def getUserIdFromName(
+    userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
+    db: AsyncSession = Depends(database.getDbSession),
+) -> int:
+    userId: int | None = await getUserIdWithUserName(db, userName)
+    if userId is None:
+        raise UserIdNotFound(userName, f"User {userName} not found in database")
+    return userId
+
+
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token", response_model=Token)
 async def getToken(
@@ -50,16 +68,12 @@ async def getToken(
         logger.debug(f"Request to {request.url.path}, authenticating...")
         matchUser: UserInDB | None = await getUserInDB(db, dataForm.username)
     except Exception as e:
-        logger.error(
-            f"Error in {request.url.path}, unexpected exception: {e}"
-        )
+        logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
             status_code=500, detail="Error retriving the user from the server"
         )
     if not matchUser:
-        logger.error(
-            f"Error in {request.url.path}, {dataForm.username} do not exit"
-        )
+        logger.error(f"Error in {request.url.path}, {dataForm.username} do not exit")
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         logger.error(
@@ -71,29 +85,30 @@ async def getToken(
         key="access_token",
         value=accessToken,
         httponly=True,
-        #TODO: change this to true when working on https
+        # TODO: change this to true when working on https
         secure=False,
         # secure=True,
         samesite="lax",
         max_age=60 * 30,
         path="/",
     )
-    logger.debug(f"Request to {request.url.path} completed successfully, token in response")
+    logger.debug(
+        f"Request to {request.url.path} completed successfully, token in response"
+    )
     return {"access_token": accessToken, "token_type": "bearer"}
 
 
 @router.post("/singUp")
 async def singUp(
     request: Request,
-    userData: singUpRequest, db: AsyncSession = Depends(database.getDbSession)
+    userData: singUpRequest,
+    db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
         logger.debug(f"Request to {request.url.path}")
         userExist: bool = await checkUserExistInDB(db, userData.username)
     except Exception as e:
-        logger.error(
-            f"Error in {request.url.path}, unexpected exception: {e}"
-        )
+        logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
             status_code=400, detail="Error retriving the user from the server"
         )
@@ -117,14 +132,12 @@ async def singUp(
 
 
 @router.post("/logout")
-async def logoutRequest(request:Request, response: Response):
+async def logoutRequest(request: Request, response: Response):
     try:
         logger.debug(f"Request to {request.url.path}")
         response.delete_cookie("access_token", path="/")
         logger.debug(f"Request to {request.url.path} completed successfully")
         return {"detail": "Logged out successfully"}
     except Exception as e:
-        logger.error(
-            f"Error in {request.url.path}, unexpected error {e}"
-        )
+        logger.error(f"Error in {request.url.path}, unexpected error {e}")
         raise HTTPException(status_code=500, detail="Error login out")
