@@ -43,10 +43,12 @@ class ItemsLoader:
     # maybe is worth to abastract but for now I decided to create indivial functions because
     # in the future some different functionality will be added
     """
-    This class is responsible to fetch the items from ITEMS_URL, then parse
-    that json into a collection representing the items, with those items update the database.
+    Handles fetching, parsing, and updating item data from the League of Legends API.
 
-    The only method to be used is 'updateItems'
+    This class fetches item data from the `ITEMS_URL`, parses the JSON into item objects, 
+    and updates the database accordingly.
+
+    The main method to be used is `updateItems()`.
     """
     VERSION_URL: str = "https://ddragon.leagueoflegends.com/api/versions.json"
 
@@ -58,8 +60,17 @@ class ItemsLoader:
 
     async def getJson(self, url: str, entitiesName: str) -> dict | list:
         """
-        This method gets the json from url and returns it.
-        Raise a JSONFetchError when an error occurs
+        Fetches JSON data from the provided URL.
+
+        Args:
+            url (str): The URL from which to fetch the JSON data.
+            entitiesName (str): The name of the entities being fetched (used for logging).
+
+        Returns:
+            dict | list: The fetched JSON data.
+
+        Raises:
+            JsonFetchError: If an error occurs while fetching or parsing the JSON.
         """
         logger.debug(f"Getting {entitiesName} json in {url}")
         try:
@@ -82,8 +93,13 @@ class ItemsLoader:
 
     async def getLastVersion(self) -> str:
         """
-        This functions gets the version list from VERSION_URL and get the first element that is the last version
-        Raises JsonParseError when the version list is empty or exceptions raised by getJson method
+        Retrieves the latest version of the game from the version list.
+
+        Returns:
+            str: The latest game version.
+
+        Raises:
+            JsonParseError: If the version list is empty or if fetching the JSON fails.
         """
         # This is a list, use union to avoid typing error
         logger.debug("Getting current game version")
@@ -96,7 +112,13 @@ class ItemsLoader:
 
     def makeItemsUlr(self, version: str) -> str:
         """
-        Makes the items url with the current version of the game
+        Constructs the item data URL based on the provided game version.
+
+        Args:
+            version (str): The game version to construct the URL for.
+
+        Returns:
+            str: The constructed item data URL.
         """
         logger.debug("Making items url")
         itemsUrl: str = (
@@ -107,24 +129,19 @@ class ItemsLoader:
 
     async def updateItems(self) -> None:
         """
-        This method :
-        -2 - Gets the last version of the game and store
-        -1 - Updates metadata version in database
-        0 - Builds the items url and store
-        1 - Gets the json with items.
-        2 - Parses the json with items into a list of items.
-        3 - Updates the tags table.
-        4 - Updates the stats table.
-        5 - Updates the effects table.
-        6 - Updates/inserts the items in the database
+        Updates the database with the latest game items.
 
-        Raises ItemsLoaderError in the following flavors
-        - JSONFetchError.
-        - JsonParseError.
-        - UpdateTagsError.
-        - UpdateStatsError.
-        - UpdateItemsError.
-        - UpdateEffectsError.
+        This method performs the following steps:
+        - Fetches the latest game version.
+        - Updates the metadata version in the database.
+        - Builds the item data URL.
+        - Fetches item JSON data.
+        - Parses item JSON data into a list of item objects.
+        - Updates the tags, stats, and effects tables.
+        - Inserts or updates items in the database.
+
+        Raises:
+            ItemsLoaderError: If any error occurs during the update process.
         """
         self.version = await self.getLastVersion()
         await self.updateDbVersion(self.version)
@@ -155,7 +172,15 @@ class ItemsLoader:
         # the objective of this function is to get the unique stats in the list of items to update that catalog
         # The thing is that Stat object has a value attribute, so we have to check if stat is unique just by its name
         """
-        Given a list of items returns a list of unique stats, we only care about the name and kind
+        Extracts unique stats from the given list of items.
+
+        This function ensures uniqueness by checking only the stat name and kind.
+
+        Args:
+            items (List[Item]): The list of items containing stats.
+
+        Returns:
+            Set[Stat]: A set of unique stats.
         """
         uniqueStats: Set[Stat] = set()
         # TODO: we dont like nested loops in python ):
@@ -168,8 +193,13 @@ class ItemsLoader:
 
     async def updateDbVersion(self, version: str) -> None:
         """
-        Updates version in MetaDataTable
-        Raises JsonParseError if version is None or error
+        Updates the metadata version in the database.
+
+        Args:
+            version (str): The game version to store in the metadata.
+
+        Raises:
+            JsonParseError: If updating the version fails.
         """
         try:
             await updateVersion(self.dbSession, version)
@@ -306,8 +336,13 @@ class ItemsLoader:
 
     async def updateTagsInDataBase(self, tagsToAdd: Set[str]) -> None:
         """
-        Given a set of unique tags, iterate over them and update the tags table
-        Raise UpdateTagsError
+        Updates the tags table by adding new unique tags.
+
+        Args:
+            tagsToAdd (Set[str]): The set of unique tags to be added.
+
+        Raises:
+            UpdateTagsError: If fetching or updating tags fails.
         """
         logger.debug("Updating tags table")
         try:
@@ -336,8 +371,17 @@ class ItemsLoader:
     def addTagInDataBaseIfNew(self, tag: str, existingTagNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
-        Updates the database with tag, if it do not exist.
-        Raises UpdateTagsError
+        Adds a tag to the database if it does not already exist.
+
+        Args:
+            tag (str): The tag to be added.
+            existingTagNames (Set[str]): The set of existing tag names.
+
+        Returns:
+            bool: True if the tag was added, False if it already existed.
+
+        Raises:
+            UpdateTagsError: If an error occurs while adding the tag.
         """
         try:
             if tag not in existingTagNames:
