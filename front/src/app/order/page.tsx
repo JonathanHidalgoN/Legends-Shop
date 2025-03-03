@@ -6,9 +6,13 @@ import CarDropDown from "../components/CarDropDown";
 import { Order } from "../interfaces/Order";
 import { orderRequest } from "../request";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import OrderSuccessModal from "../components/OrderSuccessModal";
 
 export default function OrderPage() {
   const { carItems, getTotalCost, cleanCar } = useCarContext();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
   const router = useRouter();
 
@@ -28,8 +32,10 @@ export default function OrderPage() {
       if (!response.ok) {
         throw new Error(``);
       }
-      console.log("Nice");
 
+      const data = await response.json();
+      setOrderId(data.order_id);
+      setShowModal(true);
     }
   }
 
@@ -51,6 +57,12 @@ export default function OrderPage() {
             >
               Buy
             </button>
+          )}
+          {showModal && (
+            <OrderSuccessModal
+              orderId={orderId}
+              onClose={() => setShowModal(false)}
+            />
           )}
           {!userName && (
             <button
