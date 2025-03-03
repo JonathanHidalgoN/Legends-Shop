@@ -38,6 +38,7 @@ from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
 
 
+#TODO: remove commits just one needed
 class ItemsLoader:
     # I know this class has a lot of code duplication where stats/effects are involved,
     # maybe is worth to abastract but for now I decided to create indivial functions because
