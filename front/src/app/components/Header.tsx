@@ -18,7 +18,10 @@ export default function Header({ items }:
   const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { carItems } = useCarContext();
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []); const { carItems } = useCarContext();
 
   //This is a compy of a function Can I create a general one?
   // Hide suggestions when clicking outside
@@ -142,7 +145,7 @@ export default function Header({ items }:
                     text-[var(--white)] rounded hover:bg-[var(--pink1)] 
                     transition-colors w-full"
                     onClick={() => {
-                      router.push("/order")
+                      router.push("order/make_order/")
                       setShowCartDropdown(false);
                     }}
                   >
@@ -155,6 +158,19 @@ export default function Header({ items }:
             </div>
           )}
         </div>
+
+        {userName && (
+          <div className="relative">
+            {isMounted ? (
+              <Link href={`order/order_history/${userName}`}>
+                <button className="p-2 rounded hover:opacity-80 transition bg-[var(--orange)] text-[var(--white)]">
+                  Orders
+                </button>
+              </Link>
+            ) : null}
+          </div>
+
+        )}
 
       </div>
     </header >
