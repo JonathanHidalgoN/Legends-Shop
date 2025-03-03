@@ -9,7 +9,7 @@ from app.customExceptions import (
 )
 from app.logger import logger
 from app.data import database
-from app.orders import OrderProcessor
+from app.orders.OrderProcessor import OrderProcessor
 from app.routes.auth import getUserIdFromName
 from app.schemas.Order import Order
 
