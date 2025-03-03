@@ -1,13 +1,13 @@
 "use client";
 import toast from "react-hot-toast";
-import { useAuthContext } from "../components/AuthContext";
-import { useCarContext } from "../components/CarContext";
-import CarDropDown from "../components/CarDropDown";
-import { Order } from "../interfaces/Order";
-import { orderRequest } from "../request";
+import { useAuthContext } from "@/app/components/AuthContext";
+import { useCarContext } from "@/app/components/CarContext";
+import CarDropDown from "@/app/components/CarDropDown";
+import { Order } from "@/app/interfaces/Order";
+import { orderRequest } from "@/app/request";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import OrderSuccessModal from "../components/OrderSuccessModal";
+import OrderSuccessModal from "@/app/components/OrderSuccessModal";
 
 export default function OrderPage() {
   const { carItems, getTotalCost, cleanCar } = useCarContext();
@@ -36,6 +36,7 @@ export default function OrderPage() {
       const data = await response.json();
       setOrderId(data.order_id);
       setShowModal(true);
+      cleanCar();
     }
   }
 
