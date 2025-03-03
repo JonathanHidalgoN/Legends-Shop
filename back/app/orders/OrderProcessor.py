@@ -35,28 +35,41 @@ class OrderProcessor:
             ProcessOrderException: If the order cannot be processed or if there is a database error.
         """
         try:
-            orderTable: OrderTable = mapOrderToOrderTable(order, userId)
-            orderTable = await self.dbSession.merge(orderTable)
+            orderId:int = await self.addOrder(order,userId)
             orderDataPerItem: List[OrderDataPerItem] = await self.getOrderDataPerItem(
-                order, orderTable.id
+                order,orderId 
             )
             self.comparePrices(orderDataPerItem, order.total)
-            await self.registerOrder(orderTable, orderDataPerItem)
-            return orderTable.id
+            await self.insertItemOrderData(orderId, orderDataPerItem)
+            return orderId
         except ProcessOrderException as e:
             raise e
         except SQLAlchemyError as e:
-            await self.dbSession.rollback()
             logger.error(f"Error in database processing order {e}")
-            raise ProcessOrderException("Internal server error")
+            await self.dbSession.rollback()
+            raise ProcessOrderException("Internal server error") from e
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            raise ProcessOrderException("Internal server error") from e
 
-    async def registerOrder(
-        self, orderTable: OrderTable, orderDataPerItem: List[OrderDataPerItem]
+    async def addOrder(self, order:Order, userId:int)->int:
+        try:
+            orderTable: OrderTable = mapOrderToOrderTable(order, userId)
+            self.dbSession.add(orderTable)
+            await self.dbSession.flush()
+            return orderTable.id
+        except SQLAlchemyError as e:
+            logger.error(f"Error adding order table {e}")
+            raise ProcessOrderException(f"Internal server error")
+
+
+    async def insertItemOrderData(
+        self, orderId: int, orderDataPerItem: List[OrderDataPerItem]
     ):
         """
-        Registers an order and its associated items in the database.
+        Registersassociated items in the database.
 
-        This function adds the order record to the session and then iteratively inserts
+        This function iteratively inserts
         order item associations for each item in the order. If any database error occurs,
         the function logs the error and raises a ProcessOrderException.
 
@@ -67,14 +80,9 @@ class OrderProcessor:
         Raises:
             ProcessOrderException: If a database error occurs when adding the order or its items.
         """
-        try:
-            self.dbSession.add(orderTable)
-        except SQLAlchemyError as e:
-            logger.error(f"Error adding order table {e}")
-            raise ProcessOrderException(f"Internal server error")
         for data in orderDataPerItem:
             val: dict = {
-                "order_id": orderTable.id,
+                "order_id": orderId,
                 "item_id": data.itemId,
                 "quantity": data.quantity,
             }
