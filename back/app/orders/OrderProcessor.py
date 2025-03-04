@@ -1,3 +1,5 @@
+import random
+from datetime import datetime, timedelta
 from typing import List, Set
 from sqlalchemy import insert
 from app.data.mappers import mapOrderToOrderTable
@@ -9,7 +11,7 @@ from app.customExceptions import (
     ProcessOrderException,
 )
 from app.data.queries.itemQueries import getGoldBaseWithItemId, getItemIdByItemName
-from app.schemas.Order import Order, OrderDataPerItem
+from app.schemas.Order import Order, OrderDataPerItem, OrderStatus
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -54,8 +56,14 @@ class OrderProcessor:
             logger.error(f"Unexpected error: {e}")
             raise ProcessOrderException("Internal server error") from e
 
+    def creteaRandomDate(self, ref:datetime)->datetime:
+        days = random.randint(1,14)
+        return ref + timedelta(days=days) 
+
     async def addOrder(self, order:Order, userId:int)->int:
         try:
+            order.status = OrderStatus.PENDING
+            order.deliveryDate = self.creteaRandomDate(order.orderDate)
             orderTable: OrderTable = mapOrderToOrderTable(order, userId)
             self.dbSession.add(orderTable)
             await self.dbSession.flush()
@@ -64,7 +72,6 @@ class OrderProcessor:
         except SQLAlchemyError as e:
             logger.error(f"Error adding order table {e}")
             raise ProcessOrderException(f"Internal server error")
-
 
     async def insertItemOrderData(
         self, orderId: int, orderDataPerItem: List[OrderDataPerItem]
