@@ -10,6 +10,7 @@ export const ENDPOINT_ITEMS_ALL: string = `items/all`;
 export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 export const ENDPOINT_ORDER: string = `orders/order`;
+export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -93,3 +94,12 @@ export async function orderRequest(order: Order, from: string = "server") {
   });
 }
 
+/**
+ * Makes a GET request to fetch user history.
+ */
+export async function getUserHistoryRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_ORDER_HISTORY);
+  return await fetch(url, {
+    credentials: "include",
+  });
+}
