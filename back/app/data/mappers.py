@@ -76,12 +76,13 @@ def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
     )
     return userInDB
 
-def mapOrderToOrderTable(order:Order, userId:int)-> OrderTable:
-    orderTable:OrderTable = OrderTable(
+
+def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
+    orderTable: OrderTable = OrderTable(
         user_id=userId,
         total=order.total,
-        order_date = order.orderDate,
-        delivery_date = order.deliveryDate,
-        status = order.status
+        order_date=order.orderDate,
+        delivery_date=order.deliveryDate,
+        status=order.status,
     )
     return orderTable

@@ -38,7 +38,7 @@ from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
 
 
-#TODO: remove commits just one needed
+# TODO: remove commits just one needed
 class ItemsLoader:
     # I know this class has a lot of code duplication where stats/effects are involved,
     # maybe is worth to abastract but for now I decided to create indivial functions because
@@ -46,7 +46,7 @@ class ItemsLoader:
     """
     Handles fetching, parsing, and updating item data from the League of Legends API.
 
-    This class fetches item data from the `ITEMS_URL`, parses the JSON into item objects, 
+    This class fetches item data from the `ITEMS_URL`, parses the JSON into item objects,
     and updates the database accordingly.
 
     The main method to be used is `updateItems()`.

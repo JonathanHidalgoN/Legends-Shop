@@ -10,7 +10,12 @@ from app.auth.functions import (
     hashPassword,
 )
 from app.data import database
-from app.data.queries.authQueries import checkUserExistInDB, getUserIdWithUserName, getUserInDB, insertUser
+from app.data.queries.authQueries import (
+    checkUserExistInDB,
+    getUserIdWithUserName,
+    getUserInDB,
+    insertUser,
+)
 from app.schemas.AuthSchemas import Token, UserInDB, singUpRequest
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
@@ -40,12 +45,16 @@ def getCurrentUserTokenFlow(request: Request):
     logger.debug(f"Request to {request.url.path}, authenticated")
     return userName
 
-async def getUserIdFromName(userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
-                          db: AsyncSession = Depends(database.getDbSession))->int:
-    userId : int | None = await getUserIdWithUserName(db, userName)
+
+async def getUserIdFromName(
+    userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
+    db: AsyncSession = Depends(database.getDbSession),
+) -> int:
+    userId: int | None = await getUserIdWithUserName(db, userName)
     if userId is None:
         raise UserIdNotFound(userName, f"User {userName} not found in database")
     return userId
+
 
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token", response_model=Token)

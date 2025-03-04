@@ -3,11 +3,13 @@ from enum import Enum
 from typing import List
 from pydantic import BaseModel
 
+
 class OrderStatus(str, Enum):
     PENDING = "PENDING"
     SHIPPED = "SHIPPED"
     DELIVERED = "DELIVERED"
     CANCELED = "CANCELED"
+
 
 class Order(BaseModel):
     id: int
@@ -16,7 +18,7 @@ class Order(BaseModel):
     total: int
     orderDate: datetime
     deliveryDate: datetime
-    status: OrderStatus 
+    status: OrderStatus
 
 
 class OrderDataPerItem(BaseModel):

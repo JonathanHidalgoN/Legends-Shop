@@ -42,15 +42,16 @@ async def order(
     logger.debug(f"Request to {request.url.path} completed")
     return {"order_id": f"{orderId}"}
 
+
 @router.get("/order_history", response_model=List[Order])
 async def getOrderHistory(
-    request:Request,
+    request: Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
         logger.debug(f"Request to {request.url.path}")
-        orders: List[Order] = await getOrderHistoryQuery(db,userId) 
+        orders: List[Order] = await getOrderHistoryQuery(db, userId)
         logger.debug(f"Request to {request.url.path} completed")
         return orders
     except Exception as e:

@@ -38,9 +38,9 @@ class OrderProcessor:
         """
         try:
             logger.debug(f"Making order userId:{userId}")
-            orderId:int = await self.addOrder(order,userId)
+            orderId: int = await self.addOrder(order, userId)
             orderDataPerItem: List[OrderDataPerItem] = await self.getOrderDataPerItem(
-                order,orderId 
+                order, orderId
             )
             self.comparePrices(orderDataPerItem, order.total)
             await self.insertItemOrderData(orderId, orderDataPerItem)
@@ -57,18 +57,20 @@ class OrderProcessor:
             logger.error(f"Unexpected error: {e}")
             raise ProcessOrderException("Internal server error") from e
 
-    def creteaRandomDate(self, ref:datetime)->datetime:
-        days = random.randint(1,14)
-        return ref + timedelta(days=days) 
+    def creteaRandomDate(self, ref: datetime) -> datetime:
+        days = random.randint(1, 14)
+        return ref + timedelta(days=days)
 
-    async def addOrder(self, order:Order, userId:int)->int:
+    async def addOrder(self, order: Order, userId: int) -> int:
         try:
             order.status = OrderStatus.PENDING
             order.deliveryDate = self.creteaRandomDate(order.orderDate)
             orderTable: OrderTable = mapOrderToOrderTable(order, userId)
             self.dbSession.add(orderTable)
             await self.dbSession.flush()
-            logger.debug(f"Added a new record to order table userId:{userId}, orderId:{orderTable.id}")
+            logger.debug(
+                f"Added a new record to order table userId:{userId}, orderId:{orderTable.id}"
+            )
             return orderTable.id
         except SQLAlchemyError as e:
             logger.error(f"Error adding order table {e}")
