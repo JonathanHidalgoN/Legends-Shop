@@ -15,6 +15,8 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int)->List[Or
             OrderTable.id,
             OrderTable.total,
             OrderTable.order_date,
+            OrderTable.delivery_date,
+            OrderTable.status,
             ItemTable.name,
             UserTable.userName
         )
@@ -25,14 +27,16 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int)->List[Or
     )
     rows = result.all()
     orders_dict = {}
-    for order_id, total, order_date, item_name, user_name in rows:
+    for order_id, total, order_date, delivery_date, status, item_name, user_name in rows:
         if order_id not in orders_dict:
             orders_dict[order_id] = {
                 "id": order_id,
                 "itemNames": [item_name],
                 "userName": user_name,
                 "total": total,
-                "date": order_date
+                "orderDate": order_date,
+                "deliveryDate": delivery_date,
+                "status": status,
             }
         else:
             orders_dict[order_id]["itemNames"].append(item_name)
