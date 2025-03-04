@@ -44,6 +44,7 @@ class OrderProcessor:
             )
             self.comparePrices(orderDataPerItem, order.total)
             await self.insertItemOrderData(orderId, orderDataPerItem)
+            await self.dbSession.commit()
             logger.debug(f"Orded processed successfully{userId}")
             return orderId
         except ProcessOrderException as e:
