@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Table, Date, ForeignKey, Integer
+from sqlalchemy import Column, String, Table, Date, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.data.models.ItemTable import ItemTable
 from app.data.database import base
@@ -19,6 +19,8 @@ class OrderTable(base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user_table.id"), nullable=False)
     total: Mapped[int] = mapped_column(nullable=False)
     order_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    delivery_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(String(30), nullable=False)
 
     items: Mapped[list["ItemTable"]] = relationship(
         "ItemTable",
