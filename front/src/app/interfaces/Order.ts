@@ -4,5 +4,6 @@ export interface Order {
   itemNames: string[],
   total: number,
   userName: string,
-  date: Date
+  orderDate: Date,
+  deliveryDate: Date,
 }
