@@ -35,12 +35,14 @@ class OrderProcessor:
             ProcessOrderException: If the order cannot be processed or if there is a database error.
         """
         try:
+            logger.debug(f"Making order userId:{userId}")
             orderId:int = await self.addOrder(order,userId)
             orderDataPerItem: List[OrderDataPerItem] = await self.getOrderDataPerItem(
                 order,orderId 
             )
             self.comparePrices(orderDataPerItem, order.total)
             await self.insertItemOrderData(orderId, orderDataPerItem)
+            logger.debug(f"Orded processed successfully{userId}")
             return orderId
         except ProcessOrderException as e:
             raise e
@@ -57,6 +59,7 @@ class OrderProcessor:
             orderTable: OrderTable = mapOrderToOrderTable(order, userId)
             self.dbSession.add(orderTable)
             await self.dbSession.flush()
+            logger.debug(f"Added a new record to order table userId:{userId}, orderId:{orderTable.id}")
             return orderTable.id
         except SQLAlchemyError as e:
             logger.error(f"Error adding order table {e}")
@@ -80,6 +83,7 @@ class OrderProcessor:
         Raises:
             ProcessOrderException: If a database error occurs when adding the order or its items.
         """
+        logger.debug(f"Inseting order item relations")
         for data in orderDataPerItem:
             val: dict = {
                 "order_id": orderId,
@@ -92,6 +96,7 @@ class OrderProcessor:
             except SQLAlchemyError as e:
                 logger.error(f"Error adding order item association data: {val}, {e}")
                 raise ProcessOrderException("Internal server error")
+        logger.debug(f"Inserted {len(orderDataPerItem)} order item relations")
 
     async def getOrderDataPerItem(
         self, order: Order, orderTableId

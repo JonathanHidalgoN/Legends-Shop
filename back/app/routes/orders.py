@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
@@ -7,6 +7,7 @@ from app.customExceptions import (
     ProcessOrderException,
     UserIdNotFound,
 )
+from app.data.queries.orderQueries import getOrderHistoryQuery
 from app.logger import logger
 from app.data import database
 from app.orders.OrderProcessor import OrderProcessor
@@ -40,3 +41,18 @@ async def order(
         raise HTTPException(status_code=500, detail="Unexpected exception")
     logger.debug(f"Request to {request.url.path} completed")
     return {"order_id": f"{orderId}"}
+
+@router.get("/order_history", response_model=List[Order])
+async def getOrderHistory(
+    request:Request,
+    userId: Annotated[int, Depends(getUserIdFromName)],
+    db: AsyncSession = Depends(database.getDbSession),
+):
+    try:
+        logger.debug(f"Request to {request.url.path}")
+        orders: List[Order] = await getOrderHistoryQuery(db,userId) 
+        logger.debug(f"Request to {request.url.path} completed")
+        return orders
+    except Exception as e:
+        logger.error(f"Request to {request.url.path} caused exception: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
