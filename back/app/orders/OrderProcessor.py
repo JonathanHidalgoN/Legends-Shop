@@ -1,13 +1,17 @@
+from os import SCHED_IDLE
 import random
 from datetime import datetime, timedelta
 from typing import List, Set
+from fastapi import status
 from sqlalchemy import insert
 from app.data.mappers import mapOrderToOrderTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
+from app.data.queries.orderQueries import getOrderWithId
 from app.logger import logger
 from app.customExceptions import (
     DifferentTotal,
     InvalidItemException,
+    OrderNotFoundException,
     ProcessOrderException,
 )
 from app.data.queries.itemQueries import getGoldBaseWithItemId, getItemIdByItemName
@@ -186,3 +190,24 @@ class OrderProcessor:
             raise DifferentTotal(
                 orderPrice, totalPrice, "Total in order is not correct"
             )
+
+    async def cancelOrder(self, userId:int, orderId:int):
+        orderTable = await getOrderWithId(self.dbSession, orderId)
+        if orderTable is None:
+            logger.error(f"Order with order id {orderId} and user id {userId} does not exist")
+            raise OrderNotFoundException("Order not found")
+        if orderTable.user_id != userId:
+            logger.error(f"User with id {userId} tried to cancel an order that correspond to user {orderTable.user_id} with orderId {orderTable.id}")
+            raise ProcessOrderException("The user can't edit this order")
+        if orderTable.status not in (OrderStatus.PENDING, OrderStatus.SHIPPED):
+            logger.error(f"User with id {userId} tried to cancel order {orderTable.id} with status {orderTable.status}")
+            raise ProcessOrderException(f"An order with status {orderTable.status} can't be cancelled")
+        orderTable.status = OrderStatus.CANCELED
+        try:
+            await self.dbSession.commit()
+        except SQLAlchemyError as e:
+            logger.error(f"Error updating canceling the order with id {orderTable.id}")
+            raise ProcessOrderException("Internal server error") from e
+        except Exception as e:
+            logger.error(f"Unexpected exception while canceling the order table with id {orderTable.id}, exception: {e}")
+            raise ProcessOrderException("Internal server error") from e
