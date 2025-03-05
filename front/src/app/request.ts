@@ -11,6 +11,7 @@ export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 export const ENDPOINT_ORDER: string = `orders/order`;
 export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
+export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -100,6 +101,17 @@ export async function orderRequest(order: Order, from: string = "server") {
 export async function getUserHistoryRequest(from: string = "server") {
   const url: string = makeUrl(from, ENDPOINT_ORDER_HISTORY);
   return await fetch(url, {
+    credentials: "include",
+  });
+}
+
+/**
+ * Cancel the order requet with id
+ */
+export async function cancelOrderRequest(orderId: number, from: string = "server") {
+  const url: string = makeUrl(from, `${ENDPOINT_ORDER_CANCEL}/${orderId}`);
+  return await fetch(url, {
+    method: "PUT",
     credentials: "include",
   });
 }
