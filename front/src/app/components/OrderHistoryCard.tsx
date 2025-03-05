@@ -2,6 +2,8 @@
 import React from "react";
 import { Order } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
+import { cancelOrderRequest } from "../request";
+import toast from "react-hot-toast/headless";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
   const { items } = useStaticData();
@@ -12,9 +14,18 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
     return item?.img || "";
   });
 
-  const extraCount = order.itemNames.length - 4;
+  async function cancelOrder(orderId: number, orderStatus: string) {
+    if (orderStatus !== "PENDING" && orderStatus !== "SHIPPED") {
+      toast.error("Error canceling order")
+      return;
+    }
+    const response = await cancelOrderRequest(orderId, "client");
+    if (!response.ok) {
+      toast.error("Error canceling order")
+    }
+  }
 
-  const status = "ok";
+  const extraCount = order.itemNames.length - 4;
 
   return (
     <div className="flex flex-col md:flex-row border rounded shadow overflow-hidden max-w-2xl w-full">
@@ -50,23 +61,19 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
             {extraCount > 0 && " ..."}
           </h2>
           <p className="mt-1 text-sm">
-            Order Date: {new Date(order.date).toLocaleDateString()}
+            Order Date: {new Date(order.orderDate).toLocaleDateString()}
           </p>
           <p className="mt-1 text-sm">Total: ${order.total}</p>
-          <p className="mt-1 text-sm">Status: {status}</p>
+          <p className="mt-1 text-sm">Status: {order.status}</p>
         </div>
         <div className="mt-4">
           <button
-            className={`px-4 py-2 rounded transition-colors w-full md:w-auto ${status === "ok"
+            className={`px-4 py-2 rounded transition-colors w-full md:w-auto ${order.status === "PENDING"
               ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
-            onClick={() => {
-              if (status === "ok") {
-                console.log("Cancel order:", order.id);
-              }
-            }}
-            disabled={status !== "ok"}
+            onClick={() => cancelOrder(order.id, order.status)}
+            disabled={order.status !== "PENDING"}
           >
             Cancel Order
           </button>
