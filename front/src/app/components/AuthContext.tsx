@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { logInRequest, logoutRequest, refreshTokenRequest } from "../request";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
@@ -56,6 +56,14 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       console.log("Error");
     }
   }
+
+  useEffect(() => {
+    if (!userName) return;
+    const refreshInterval = setInterval(() => {
+      refreshToken();
+    }, 29 * 60 * 1000);
+    return () => clearInterval(refreshInterval);
+  }, [userName])
 
   return (
     <AuthContext.Provider value={{ userName, setUserName, logOut, logIn, refreshToken }}>
