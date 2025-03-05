@@ -2,7 +2,6 @@ from os import SCHED_IDLE
 import random
 from datetime import datetime, timedelta
 from typing import List, Set
-from fastapi import status
 from sqlalchemy import insert
 from app.data.mappers import mapOrderToOrderTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
