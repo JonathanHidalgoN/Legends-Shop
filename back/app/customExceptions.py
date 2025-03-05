@@ -50,3 +50,6 @@ class DifferentTotal(ProcessOrderException):
         super().__init__(message)
 
     pass
+
+class OrderNotFoundException(ProcessOrderException):
+    pass
