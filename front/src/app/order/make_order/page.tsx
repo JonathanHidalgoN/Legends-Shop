@@ -24,9 +24,10 @@ export default function OrderPage() {
         itemNames: carItems.map(item => item.name),
         total: getTotalCost(),
         userName: userName,
-        date: new Date(),
+        orderDate: new Date(),
         id: 0,
-        status: ""
+        status: "PENDING",
+        deliveryDate: new Date(),
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
