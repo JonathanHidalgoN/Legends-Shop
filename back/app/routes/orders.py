@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     DifferentTotal,
     InvalidItemException,
-    OrderNotFoundException,
     ProcessOrderException,
     UserIdNotFound,
 )
@@ -32,7 +31,7 @@ async def order(
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path}")
+        logger.debug(f"Request to {request.url.path} from user {userId}")
         orderId: int = await orderProcessor.makeOrder(order, userId)
     except (InvalidItemException, DifferentTotal) as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -51,7 +50,7 @@ async def getOrderHistory(
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
-        logger.debug(f"Request to {request.url.path}")
+        logger.debug(f"Request to {request.url.path} from user {userId}")
         orders: List[Order] = await getOrderHistoryQuery(db, userId)
         logger.debug(f"Request to {request.url.path} completed")
         return orders
@@ -59,12 +58,14 @@ async def getOrderHistory(
         logger.error(f"Request to {request.url.path} caused exception: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @router.put("/cancel_order")
-async def cancelOrder(request: Request,
+async def cancelOrder(
+    request: Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
-                      ):
-    logger.debug(f"Request to {request.url.path}")
+):
+    logger.debug(f"Request to {request.url.path} from user {userId}")
     orderId = 1
     try:
         await orderProcessor.cancelOrder(userId, orderId)

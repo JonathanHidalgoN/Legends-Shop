@@ -51,7 +51,9 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int) -> List[
             orders_dict[order_id]["itemNames"].append(item_name)
     return [Order(**order_data) for order_data in orders_dict.values()]
 
-async def getOrderWithId(asyncSession: AsyncSession,orderId:int) -> None:
-    result = await asyncSession.execute(select(OrderTable)
-                                        .where(OrderTable.id == orderId))
+
+async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> None:
+    result = await asyncSession.execute(
+        select(OrderTable).where(OrderTable.id == orderId)
+    )
     return result.scalars().first()

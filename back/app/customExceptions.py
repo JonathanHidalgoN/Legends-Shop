@@ -51,5 +51,6 @@ class DifferentTotal(ProcessOrderException):
 
     pass
 
+
 class OrderNotFoundException(ProcessOrderException):
     pass
