@@ -48,7 +48,7 @@ def getCurrentUserTokenFlow(request: Request):
 
 async def getUserIdFromName(
     userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
-    db: AsyncSession = Depends(database.getDbSession),
+    db: AsyncSession = Depends(database.getDbSession)
 ) -> int:
     userId: int | None = await getUserIdWithUserName(db, userName)
     if userId is None:
@@ -57,7 +57,7 @@ async def getUserIdFromName(
 
 
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
-@router.post("/token", response_model=Token)
+@router.post("/token")
 async def getToken(
     request: Request,
     response: Response,
@@ -93,10 +93,40 @@ async def getToken(
         path="/",
     )
     logger.debug(
+        f"Request to {request.url.path} completed successfully"
+    )
+
+@router.get("/token_refresh")
+async def tokenRefresh(request: Request,
+                       userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
+                       response: Response,
+                        db: AsyncSession = Depends(database.getDbSession)
+                       ):
+    try:
+        logger.debug(f"Request to {request.url.path}")
+        matchUser: UserInDB | None = await getUserInDB(db, userName)
+        if not matchUser:
+            logger.error(f"Error in {request.url.path}, {userName} do not exit")
+            raise HTTPException(status_code=400, detail="Incorrect username or password")
+        logger.debug(f"Request to {request.url.path} completed successfully")
+    except Exception as e:
+        logger.error(f"Error in {request.url.path}, unexpected error {e}")
+        raise HTTPException(status_code=500, detail="Error login out")
+    accessToken = createAccessToken(data={"sub": matchUser.userName})
+    response.set_cookie(
+        key="access_token",
+        value=accessToken,
+        httponly=True,
+        # TODO: change this to true when working on https
+        secure=False,
+        # secure=True,
+        samesite="lax",
+        max_age=60 * 30,
+        path="/",
+    )
+    logger.debug(
         f"Request to {request.url.path} completed successfully, token in response"
     )
-    return {"access_token": accessToken, "token_type": "bearer"}
-
 
 @router.post("/singUp")
 async def singUp(
@@ -131,7 +161,7 @@ async def singUp(
         raise HTTPException(status_code=500, detail="Server error inserting the user")
 
 
-@router.post("/logout")
+@router.get("/logout")
 async def logoutRequest(request: Request, response: Response):
     try:
         logger.debug(f"Request to {request.url.path}")

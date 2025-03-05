@@ -5,6 +5,7 @@ import { Order } from "./interfaces/Order";
 export const SERVER_DOMAIN: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/`
 export const CLIENT_DOMAIN: string = `http://localhost:${BACKEND_PORT}/`
 export const ENDPOINT_LOGIN: string = `auth/token`;
+export const ENDPOINT_REFRESH_TOKEN: string = `auth/refresh_token`;
 export const ENDPOINT_LOGIN_OUT: string = `auth/logout`;
 export const ENDPOINT_ITEMS_ALL: string = `items/all`;
 export const ENDPOINT_SOME_ITEMS: string = `items/some`;
@@ -45,6 +46,13 @@ export async function logInRequest(userName: string, password: string, from: str
   });
 }
 
+export async function refreshTokenRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_REFRESH_TOKEN);
+  return await fetch(url, {
+    credentials: "include",
+  });
+}
+
 /**
  * Makes a GET request to fetch a subset of items.
  *
@@ -78,7 +86,7 @@ export async function allTagsRequet(from: string = "server") {
 export async function logoutRequest(from: string = "server") {
   const url: string = makeUrl(from, ENDPOINT_LOGIN_OUT);
   return await fetch(url, {
-    method: "POST",
+    method: "GET",
     credentials: "include",
   });
 }

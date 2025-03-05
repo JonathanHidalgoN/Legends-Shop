@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState } from "react";
-import { logInRequest, logoutRequest } from "../request";
+import { logInRequest, logoutRequest, refreshTokenRequest } from "../request";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
 
@@ -10,6 +10,7 @@ interface AuthContextType {
   setUserName: (userName: string | null) => void;
   logIn: (userName: string, password: string) => Promise<boolean>;
   logOut: () => void;
+  refreshToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,15 +25,22 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       toast.error("Login error");
       return false;
     }
-    const data = await response.json()
-    if (!("access_token" in data) || !("token_type" in data) ||
-      data.token_type !== "bearer") {
-      toast.error("Login error");
-      return false;
-    }
     setUserName(userName);
     toast.success(`Welcome ${userName}!`)
     return true;
+  }
+
+  async function refreshToken(): Promise<void> {
+    try {
+      const response = await refreshTokenRequest("client");
+      if (!response.ok) {
+        logOut();
+        return;
+      }
+      await response.json();
+    } catch (error) {
+      toast.error("Internal server error refreshing token");
+    }
   }
 
   async function logOut() {
@@ -50,7 +58,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AuthContext.Provider value={{ userName, setUserName, logOut, logIn }}>
+    <AuthContext.Provider value={{ userName, setUserName, logOut, logIn, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );
