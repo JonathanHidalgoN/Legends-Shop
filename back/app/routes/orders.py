@@ -59,16 +59,16 @@ async def getOrderHistory(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.put("/cancel_order")
+@router.put("/cancel_order/{order_id}")
 async def cancelOrder(
     request: Request,
+    order_id: int,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
     logger.debug(f"Request to {request.url.path} from user {userId}")
-    orderId = 1
     try:
-        await orderProcessor.cancelOrder(userId, orderId)
+        await orderProcessor.cancelOrder(userId, order_id)
         logger.debug(f"Request to {request.url.path} completed")
     except ProcessOrderException as e:
         raise HTTPException(status_code=400, detail=str(e))
