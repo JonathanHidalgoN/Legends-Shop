@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     DifferentTotal,
     InvalidItemException,
+    OrderNotFoundException,
     ProcessOrderException,
     UserIdNotFound,
 )
@@ -56,4 +57,19 @@ async def getOrderHistory(
         return orders
     except Exception as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.put("/cancel_order")
+async def cancelOrder(request: Request,
+    userId: Annotated[int, Depends(getUserIdFromName)],
+    orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
+                      ):
+    logger.debug(f"Request to {request.url.path}")
+    orderId = 1
+    try:
+        await orderProcessor.cancelOrder(userId, orderId)
+        logger.debug(f"Request to {request.url.path} completed")
+    except ProcessOrderException as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
