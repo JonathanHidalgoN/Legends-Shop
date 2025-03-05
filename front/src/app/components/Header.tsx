@@ -9,6 +9,7 @@ import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import HeaderLogInForm from "./HeaderLogInForm";
+import { handleClickOutside } from "../functions";
 
 export default function Header({ items }:
   { items: Item[] }) {
@@ -19,32 +20,17 @@ export default function Header({ items }:
   const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
+  const { carItems } = useCarContext();
+
   useEffect(() => {
     setIsMounted(true);
-  }, []); const { carItems } = useCarContext();
-
-  //This is a compy of a function Can I create a general one?
-  // Hide suggestions when clicking outside
-  // source: https://stackoverflow.com/questions/32553158/detect-click-outside-react-component
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        loginDropDownRef.current &&
-        !loginDropDownRef.current.contains(event.target as Node)
-      ) {
-        setShowLoginDropdown(false);
-      }
-      if (
-        carDropDownRef.current &&
-        !carDropDownRef.current.contains(event.target as Node)
-      ) {
-        setShowCartDropdown(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
+    const handleClick = (event: MouseEvent) => {
+      handleClickOutside(event, loginDropDownRef, setShowLoginDropdown);
+      handleClickOutside(event, carDropDownRef, setShowCartDropdown);
+    };
+    document.addEventListener("mousedown", handleClick);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClick);
     };
   }, []);
 
