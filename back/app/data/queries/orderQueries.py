@@ -2,10 +2,11 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.customExceptions import OrderNotFoundException
 from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
-from app.schemas.Order import Order
+from app.schemas.Order import Order, OrderStatus
 
 
 async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int) -> List[Order]:
@@ -49,3 +50,8 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int) -> List[
         else:
             orders_dict[order_id]["itemNames"].append(item_name)
     return [Order(**order_data) for order_data in orders_dict.values()]
+
+async def getOrderWithId(asyncSession: AsyncSession,orderId:int) -> None:
+    result = await asyncSession.execute(select(OrderTable)
+                                        .where(OrderTable.id == orderId))
+    return result.scalars().first()
