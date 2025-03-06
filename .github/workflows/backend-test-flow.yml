@@ -1,4 +1,4 @@
-name: Python
+name: Backend test 
 on: [push]
 
 jobs:
@@ -7,7 +7,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up Python
         # This is the version of the action for setting up Python, not the Python version.
         uses: actions/setup-python@v5
