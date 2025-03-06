@@ -1,5 +1,5 @@
 export default function OrderSuccessModal({ orderId, onClose }: {
-  orderId: number, onClose: any
+  orderId: number | null, onClose: () => void
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
