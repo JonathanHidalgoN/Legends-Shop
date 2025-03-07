@@ -39,6 +39,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       }
       await response.json();
     } catch (error) {
+      console.log(error);
       toast.error("Internal server error refreshing token");
     }
   }
@@ -53,6 +54,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       router.push("/");
       toast.success(`Logout succesfully`)
     } catch (error) {
+      console.log(error);
       console.log("Error");
     }
   }

@@ -1,4 +1,5 @@
 import { Effect, EffectKind, Gold, Item, Stat, StatKind } from "./interfaces/Item";
+import { EffectsNode, GoldNode, ItemNode, StatNode } from "./interfaces/ItemRequest";
 import { allTagsRequet, someItemsRequest } from "./request";
 
 /**
@@ -7,10 +8,10 @@ import { allTagsRequet, someItemsRequest } from "./request";
  * @param goldNode - The JSON object representing gold data.
  * @returns A Gold object containing base, purchaseable, total, and sell values.
  */
-function parseGoldNodeIntoGold(goldNode: Record<string, any>): Gold {
+function parseGoldNodeIntoGold(goldNode: GoldNode): Gold {
   return {
     base: goldNode.base,
-    purchaseable: goldNode.boolean, // consider renaming goldNode.boolean to goldNode.purchaseable if appropriate
+    purchaseable: goldNode.boolean,
     total: goldNode.total,
     sell: goldNode.sell,
   };
@@ -22,8 +23,8 @@ function parseGoldNodeIntoGold(goldNode: Record<string, any>): Gold {
  * @param statsNode - The array of JSON objects representing stat data.
  * @returns An array of Stat objects.
  */
-function parseStatNodeIntoStats(statsNode: any[]): Stat[] {
-  return statsNode.map(statNode => ({
+function parseStatNodeIntoStats(statsNodes: StatNode[]): Stat[] {
+  return statsNodes.map(statNode => ({
     name: statNode.name,
     kind: statNode.kind === "flat" ? StatKind.Flat : StatKind.Percentage,
     value: statNode.value,
@@ -36,13 +37,14 @@ function parseStatNodeIntoStats(statsNode: any[]): Stat[] {
  * @param effectsNode - The JSON object where keys are effect names and values are effect values.
  * @returns An array of Effect objects.
  */
-function parseEffectsNodeIntoEffects(effectsNode: Record<string, any>): Effect[] {
+function parseEffectsNodeIntoEffects(effectsNode: EffectsNode): Effect[] {
   const effects: Effect[] = [];
   for (const key in effectsNode) {
     if (Object.prototype.hasOwnProperty.call(effectsNode, key)) {
       effects.push({
         name: key,
         value: effectsNode[key],
+        // TODO: change this to take effects
         kind: EffectKind.effect1,
       });
     }
@@ -56,11 +58,12 @@ function parseEffectsNodeIntoEffects(effectsNode: Record<string, any>): Effect[]
  * @param itemNode - The JSON object representing an item.
  * @returns An Item object.
  */
-function parseItemNodeIntoItem(itemNode: Record<string, any>): Item {
+function parseItemNodeIntoItem(itemNode: ItemNode): Item {
   const tags: string[] = itemNode.tags ?? [];
   const gold: Gold = parseGoldNodeIntoGold(itemNode.gold);
   const effects: Effect[] = parseEffectsNodeIntoEffects(itemNode.effect);
   const stats: Stat[] = parseStatNodeIntoStats(itemNode.stats);
+
   return {
     name: itemNode.name,
     gold: gold,

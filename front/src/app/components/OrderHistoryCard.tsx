@@ -4,6 +4,7 @@ import { Order } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
 import { cancelOrderRequest } from "../request";
 import toast from "react-hot-toast/headless";
+import Image from "next/image";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
   const { items } = useStaticData();
@@ -35,10 +36,12 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
             {itemImages.map((img, idx) => (
               <div key={idx} className="relative w-16 h-16">
                 {img ? (
-                  <img
+
+                  <Image
                     src={img}
                     alt={`Item ${displayedItemNames[idx]}`}
-                    className="object-cover w-full h-full rounded"
+                    fill
+                    className="object-cover rounded"
                   />
                 ) : (
                   <div className="bg-gray-200 w-full h-full rounded" />

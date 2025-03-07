@@ -4,10 +4,8 @@ import { Order } from "@/app/interfaces/Order";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
 import { getUserHistoryRequest } from "@/app/request";
 import toast from "react-hot-toast/headless";
-import { useAuthContext } from "@/app/components/AuthContext";
 
 export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
-  const { userName } = useAuthContext();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,6 +20,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
         const data = await response.json();
         setOrders(data);
       } catch (error) {
+        console.log(error);
         toast.error("An unexpected error occurred");
       } finally {
         setLoading(false);

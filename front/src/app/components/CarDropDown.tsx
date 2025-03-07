@@ -11,9 +11,9 @@ type ItemSummary = {
 }
 
 export default function CarDropDown({ tiny }: { tiny: boolean }) {
-  const { carItems, setCarItems, deleteOneItemFromCar, deleteAllItemFromCar,
+  const { carItems, deleteOneItemFromCar, deleteAllItemFromCar,
     addOneItemToCar, getTotalCost } = useCarContext();
-  let itemCount: Record<string, ItemSummary> = {};
+  const itemCount: Record<string, ItemSummary> = {};
   const totalCost: number = getTotalCost();
 
   carItems.forEach((item: Item) => {

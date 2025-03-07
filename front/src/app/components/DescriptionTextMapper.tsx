@@ -1,5 +1,3 @@
-import { text } from "stream/consumers"
-
 export interface TagTransformation {
   openerTag: string,
   endingTag: string,
@@ -254,7 +252,7 @@ export default function DescriptionTextMapper({ description, maxLen = 700 }: {
   description: string,
   maxLen: number
 }) {
-  let trimmedDescription: string = description.length > maxLen ?
+  const trimmedDescription: string = description.length > maxLen ?
     description.substring(0, maxLen) + "..." : description;
   const mappedDescription: string = descriptionMapper(trimmedDescription);
   return <div dangerouslySetInnerHTML={{ __html: mappedDescription }} />;
