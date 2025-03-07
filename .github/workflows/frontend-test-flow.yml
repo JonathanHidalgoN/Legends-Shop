@@ -18,5 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          ls
           cd front
+          ls
           npm ci
