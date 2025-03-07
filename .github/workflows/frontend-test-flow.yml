@@ -16,13 +16,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-
-      - name: Check files 
-        run: |
-          ls
-          cd front
-          ls
-
       - name: Install dependencies
+        working-directory: front
         run: |
           npm ci
