@@ -34,9 +34,9 @@ jobs:
           pip install -r requirements.lock
 
       - name: Run unit test 
-        working-directory: test 
+        working-directory: back 
         run: |
-          python -m pytest .
+          python -m pytest test/
 
       - name: Format code
         working-directory: back
