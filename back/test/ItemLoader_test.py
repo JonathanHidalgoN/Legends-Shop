@@ -25,11 +25,12 @@ def test_getUniqueStatsNameAndKind(loader):
     unique_stats = loader.getUniqueStats(items)
     assert isinstance(unique_stats, Set)
     assert len(unique_stats) == 3, "There should be four unique stats"
-    expected_stats = {Stat(name="Damage", kind="flat", value=20),
-                      Stat(name="Health", kind="percentage", value=10),
-                      Stat(name="Armor", kind="percentage", value=5)}
-    assert unique_stats == expected_stats, "The sets of stats do not match"
-
-# def test_parseItemsJsonIntoItemsList(loader):
-
+    stat1 : Stat = Stat(name="Damage", kind="flat", value=20)
+    stat2 : Stat = Stat(name="Health", kind="percentage", value=10)
+    stat3 : Stat = Stat(name="Armor", kind="percentage", value=5)
+    expectedStats = set()
+    expectedStats.add(stat1)
+    expectedStats.add(stat2)
+    expectedStats.add(stat3)
+    assert unique_stats == expectedStats, "The sets of stats do not match"
 
