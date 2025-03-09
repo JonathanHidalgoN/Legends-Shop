@@ -55,7 +55,6 @@ class ItemsLoader:
 
     def __init__(self, dbSession: AsyncSession):
         self.dbSession = dbSession
-        self.items_url: str = ""
         self.version: str = ""
         self.itemsUrl: str = ""
 

@@ -1,4 +1,3 @@
-from os import SCHED_IDLE
 import random
 from datetime import datetime, timedelta
 from typing import List, Set
