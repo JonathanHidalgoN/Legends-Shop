@@ -9,5 +9,5 @@ FRONTEND_PORT: str = os.getenv("FRONTEND_PORT", "Empty")
 SECRET_KEY: str = os.getenv("SECRET_KEY", "Empty")
 ALGORITHM: str = os.getenv("ALGORITHM", "Empty")
 ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "Empty")
+    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
 )
