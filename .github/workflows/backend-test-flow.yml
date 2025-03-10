@@ -18,8 +18,11 @@ jobs:
   push-test-format:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
-      DATABASE_ALEMBIC_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+      #This is not possible for now, have to define two times the variables
+      # DATABASE_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+      # DATABASE_ALEMBIC_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+      DATABASE_ALEMBIC_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
     services:
       postgres:
         image: postgres:14
@@ -28,7 +31,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
-          - ${{ env.POSTGRES_PORT }}:${{ env.POSTGRES_PORT }}
+          - "5432:5432"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
