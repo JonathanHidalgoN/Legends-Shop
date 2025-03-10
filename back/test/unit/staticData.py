@@ -1,4 +1,6 @@
+from datetime import datetime
 from app.schemas.Item import Effects, Gold, Item, Stat
+from app.schemas.Order import Order, OrderStatus
 
 STATIC_DATA_ITEMS_JSON: dict = {
     "type": "item",
@@ -217,4 +219,25 @@ STATIC_DATA_ITEM2: Item = Item(
     effect=Effects(root={"effect2": 3}),
     id=2,
     description="Protective gear.",
+)
+
+STATIC_DATA_ORDER1: Order = Order(
+    id=1,
+    itemNames=["item1","item2"],
+    userName="test1",
+    total=100,
+    orderDate=datetime(2025,1,1,12,0,0),
+    deliveryDate=datetime(2026,1,1,12,0,0),
+    status=OrderStatus.PENDING,
+)
+
+
+STATIC_DATA_ORDER2: Order = Order(
+    id=2,
+    itemNames=["item2","item3"],
+    userName="test2",
+    total=200,
+    orderDate=datetime(2025,1,1,12,0,0),
+    deliveryDate=datetime(2026,1,1,12,0,0),
+    status=OrderStatus.CANCELED,
 )
