@@ -2,7 +2,7 @@ name: Backend test
 on: [push]
 
 jobs:
-  build:
+  push-test-format:
 
     runs-on: ubuntu-latest
 
@@ -32,16 +32,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.lock
-  
-  unit-testing:
-    steps:
+
       - name: Run unit test 
         working-directory: back 
         run: |
-          python -m pytest -v test/unit
+          python -m pytest -v test/
 
-  code-formating:
-    steps:
       - name: Format code
         working-directory: back
         run: |
