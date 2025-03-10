@@ -13,11 +13,13 @@ env:
   FRONTEND_HOST: frontend
   FRONTEND_PORT: 3000
   BACKEND_PORT: 8000 
-  DATABASE_URL: postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}
 
 jobs:
   push-test-format:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}
+      DATABASE_ALEMBIC_URL: postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}
 
     services:
       postgres:
@@ -67,6 +69,11 @@ jobs:
       - name: Run unit test 
         working-directory: back 
         run: python -m pytest -v test/unit
+
+      - name: Aply database schema
+        working-directory: back
+        run: |
+          alembic upgrade head
 
       - name: Start backend server
         working-directory: back
