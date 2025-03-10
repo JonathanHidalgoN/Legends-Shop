@@ -219,3 +219,32 @@ async def test_addItemEffectsRelations_execute_failure(loader):
         loader.dbSession.execute = AsyncMock(side_effect=Exception("DB error"))
         with pytest.raises(UpdateItemsError):
             await loader.addItemEffectsRelations(itemId, effects)
+
+@pytest.mark.asyncio
+async def test_addItemStatsRelations_success(loader):
+    itemId = 101
+    stats = {
+        Stat(name="Damage", kind="flat", value=20),
+        Stat(name="Health", kind="percentage", value=10)
+    }
+    with patch("app.data.ItemsLoader.getStatIdWithStatName", return_value=1):
+        loader.dbSession.execute = AsyncMock(return_value=None)
+        await loader.addItemStatsRelations(itemId, stats)
+        assert loader.dbSession.execute.call_count == len(stats)
+
+@pytest.mark.asyncio
+async def test_addItemStatsRelations_missing_stat(loader):
+    itemId = 101
+    stats = {Stat(name="Damage", kind="flat", value=20)}
+    with patch("app.data.ItemsLoader.getStatIdWithStatName", return_value=None):
+        with pytest.raises(UpdateItemsError, match="Stat was not found in the database"):
+            await loader.addItemStatsRelations(itemId, stats)
+
+@pytest.mark.asyncio
+async def test_addItemStatsRelations_execute_failure(loader):
+    itemId = 101
+    stats = {Stat(name="Damage", kind="flat", value=20)}
+    with patch("app.data.ItemsLoader.getStatIdWithStatName", return_value=1):
+        loader.dbSession.execute = AsyncMock(side_effect=Exception("DB error"))
+        with pytest.raises(UpdateItemsError, match="Could not insert a relation item-stat"):
+            await loader.addItemStatsRelations(itemId, stats)
