@@ -1,8 +1,9 @@
 import pytest
 from typing import List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.customExceptions import UpdateItemsError
 from app.data.ItemsLoader import ItemsLoader
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from staticData import STATIC_DATA_ITEMS_JSON,STATIC_DATA_ITEM2, STATIC_DATA_ITEM1 
 
 from app.schemas.Item import Item, Stat
@@ -116,3 +117,26 @@ def test_addEffectInDataBaseIfNew_existing_effect(loader):
     result = loader.addEffectInDataBaseIfNew(effect, existingEffectNames)
     assert result is False
     loader.dbSession.add.assert_not_called()
+
+@pytest.mark.asyncio
+async def test_updateItemsInDataBase_success(loader):
+    items_list = [STATIC_DATA_ITEM1, STATIC_DATA_ITEM2]
+    loader.insertOrUpdateItemTable = AsyncMock(return_value=None)
+    #Patch will change the object method for a mock taht return None temporally
+    #Second patch on the query function to return None, this means that the item is new 
+    with patch.object(loader, 'insertOrUpdateItemTable', new=AsyncMock(return_value=None)) as mock_insert, \
+            patch("app.data.ItemsLoader.getItemTableGivenItemName", new=AsyncMock(return_value=None)):
+        await loader.updateItemsInDataBase(items_list)
+        loader.dbSession.commit.assert_called_once()
+        assert mock_insert.call_count == len(items_list)
+
+@pytest.mark.asyncio
+async def test_updateItemsInDataBase_failure(loader):
+    items_list = [STATIC_DATA_ITEM1]
+    #Patch will change the object method and raise an exception
+    #Second patch on the query function to return None, this means that the item is new 
+    with patch.object(loader, 'insertOrUpdateItemTable', new=AsyncMock(side_effect=Exception("Simulated error"))) as mock_insert, \
+            patch("app.data.ItemsLoader.getItemTableGivenItemName", new=AsyncMock(return_value=None)):
+        with pytest.raises(UpdateItemsError):
+                await loader.updateItemsInDataBase(items_list)
+                loader.dbSession.rollback.assert_called_once()
