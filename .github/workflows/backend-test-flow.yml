@@ -12,7 +12,7 @@ env:
   ACCESS_TOKEN_EXPIRE_MINUTES: 30
   FRONTEND_HOST: frontend
   FRONTEND_PORT: 3000
-  BACKEND_PORT: 8000 
+  BACKEND_PORT: 8000
 
 jobs:
   push-test-format:
@@ -20,7 +20,6 @@ jobs:
     env:
       DATABASE_URL: postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}
       DATABASE_ALEMBIC_URL: postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}
-
     services:
       postgres:
         image: postgres:14
