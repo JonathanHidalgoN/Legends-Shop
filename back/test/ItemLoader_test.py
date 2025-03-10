@@ -2,7 +2,7 @@ import pytest
 from typing import List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.ItemsLoader import ItemsLoader
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from staticData import STATIC_DATA_ITEMS_JSON,STATIC_DATA_ITEM2, STATIC_DATA_ITEM1 
 
 from app.schemas.Item import Item, Stat
@@ -68,3 +68,35 @@ async def test_parseDataNodeIntoItem_no_name(loader, caplog):
     with caplog.at_level("WARNING"):
         result = await loader.parseDataNodeIntoItem(itemId, itemData, itemNames, statMapping)
     assert result is None
+
+# def test_parseStatsNodeIntoStats(loader):
+#     statsNode = {
+#         "FlatMovementSpeedMod": 25,
+#         "PercentBonusDamage": 15,
+#     }
+#     statMappingDict = {
+#         "FlatMovementSpeedMod": "MovementSpeed",
+#         "PercentBonusDamage": "BonusDamage",
+#     }
+#     stats = loader.parseStatsNodeIntoStats(statsNode, statMappingDict)
+#     expected_stats = {
+#         Stat(name="MovementSpeed", value=25, kind="flat"),
+#         Stat(name="BonusDamage", value=15, kind="percentage"),
+#     }
+#     assert stats == expected_stats
+
+def test_addTagInDataBaseIfNew_new_tag(loader):
+    tag = "new-tag"
+    existingTagNames = {"existing1", "existing2"}
+    result = loader.addTagInDataBaseIfNew(tag, existingTagNames)
+    assert result is True
+    loader.dbSession.add.assert_called_once()
+    added_tag = loader.dbSession.add.call_args[0][0]
+    assert added_tag.name == tag
+
+def test_addTagInDataBaseIfNew_existing_tag(loader):
+    tag = "existing-tag"
+    existingTagNames = {"existing-tag", "another-tag"}
+    result = loader.addTagInDataBaseIfNew(tag, existingTagNames)
+    assert result is False
+    loader.dbSession.add.assert_not_called()
