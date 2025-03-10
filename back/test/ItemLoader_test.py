@@ -100,3 +100,19 @@ def test_addTagInDataBaseIfNew_existing_tag(loader):
     result = loader.addTagInDataBaseIfNew(tag, existingTagNames)
     assert result is False
     loader.dbSession.add.assert_not_called()
+
+def test_addEffecctInDataBaseIfNew_new_effect(loader):
+    effect = "new-effect"
+    existingEffectNames = {"existing1", "existing2"}
+    result = loader.addEffectInDataBaseIfNew(effect, existingEffectNames)
+    assert result is True
+    loader.dbSession.add.assert_called_once()
+    added_tag = loader.dbSession.add.call_args[0][0]
+    assert added_tag.name == effect
+
+def test_addEffectInDataBaseIfNew_existing_effect(loader):
+    effect = "existing-tag"
+    existingEffectNames = {"existing-tag", "another-tag"}
+    result = loader.addEffectInDataBaseIfNew(effect, existingEffectNames)
+    assert result is False
+    loader.dbSession.add.assert_not_called()
