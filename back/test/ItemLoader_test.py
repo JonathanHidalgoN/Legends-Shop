@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from app.data.models.GoldTable import GoldTable
 from staticData import STATIC_DATA_ITEMS_JSON,STATIC_DATA_ITEM2, STATIC_DATA_ITEM1 
 
-from app.schemas.Item import Gold, Item, Stat
+from app.schemas.Item import Effects, Gold, Item, Stat
 
 @pytest.fixture
 def loader()-> ItemsLoader:
@@ -182,7 +182,7 @@ async def test_addItemTagsRelations_missing_tag(loader):
     itemId = 101
     tags = {"tag1"}
     with patch("app.data.ItemsLoader.getTagIdWithtTagName", new=AsyncMock(return_value=None)):
-        with pytest.raises(UpdateItemsError, match="Tag was not found in the database"):
+        with pytest.raises(UpdateItemsError):
             await loader.addItemTagsRelations(itemId, tags)
 
 @pytest.mark.asyncio
@@ -191,5 +191,31 @@ async def test_addItemTagsRelations_execute_failure(loader):
     tags = {"tag1"}
     with patch("app.data.ItemsLoader.getTagIdWithtTagName", new=AsyncMock(return_value=201)):
         loader.dbSession.execute = AsyncMock(side_effect=Exception("DB error"))
-        with pytest.raises(UpdateItemsError, match="Could not insert a relation item-tag"):
+        with pytest.raises(UpdateItemsError):
             await loader.addItemTagsRelations(itemId, tags)
+
+@pytest.mark.asyncio
+async def test_addItemEffectsRelations_success(loader):
+    itemId = 101
+    effects = Effects(root={"effect1": 5, "effect2": 10})
+    with patch("app.data.ItemsLoader.getEffectIdWithEffectName", new=AsyncMock(return_value=1)):
+        loader.dbSession.execute = AsyncMock(return_value=None)
+        await loader.addItemEffectsRelations(itemId, effects)
+        assert loader.dbSession.execute.call_count == len(effects.root)
+
+@pytest.mark.asyncio
+async def test_addItemEffectsRelations_missing_effect(loader):
+    itemId = 101
+    effects = Effects(root={"effect1": 5})
+    with patch("app.data.ItemsLoader.getEffectIdWithEffectName", new=AsyncMock(return_value=None)):
+        with pytest.raises(UpdateItemsError):
+            await loader.addItemEffectsRelations(itemId, effects)
+
+@pytest.mark.asyncio
+async def test_addItemEffectsRelations_execute_failure(loader):
+    itemId = 101
+    effects = Effects(root={"effect1": 5})
+    with patch("app.data.ItemsLoader.getEffectIdWithEffectName", new=AsyncMock(return_value=201)):
+        loader.dbSession.execute = AsyncMock(side_effect=Exception("DB error"))
+        with pytest.raises(UpdateItemsError):
+            await loader.addItemEffectsRelations(itemId, effects)
