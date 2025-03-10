@@ -69,21 +69,21 @@ async def test_parseDataNodeIntoItem_no_name(loader, caplog):
         result = await loader.parseDataNodeIntoItem(itemId, itemData, itemNames, statMapping)
     assert result is None
 
-# def test_parseStatsNodeIntoStats(loader):
-#     statsNode = {
-#         "FlatMovementSpeedMod": 25,
-#         "PercentBonusDamage": 15,
-#     }
-#     statMappingDict = {
-#         "FlatMovementSpeedMod": "MovementSpeed",
-#         "PercentBonusDamage": "BonusDamage",
-#     }
-#     stats = loader.parseStatsNodeIntoStats(statsNode, statMappingDict)
-#     expected_stats = {
-#         Stat(name="MovementSpeed", value=25, kind="flat"),
-#         Stat(name="BonusDamage", value=15, kind="percentage"),
-#     }
-#     assert stats == expected_stats
+def test_parseStatsNodeIntoStats(loader):
+    statsNode = {
+        "FlatMovementSpeedMod": 25,
+        "PercentBonusDamage": 15,
+    }
+    statMappingDict = {
+        "FlatMovementSpeedMod": "MovementSpeed",
+        "PercentBonusDamage": "BonusDamage",
+    }
+    stats = loader.parseStatsNodeIntoStats(statsNode, statMappingDict)
+    expected_stats = {
+        Stat(name="MovementSpeed", value=25, kind="flat"),
+        Stat(name="BonusDamage", value=15, kind="percentage"),
+    }
+    assert stats == expected_stats
 
 def test_addTagInDataBaseIfNew_new_tag(loader):
     tag = "new-tag"
