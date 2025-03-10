@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.orders.OrderProcessor import OrderProcessor
-from app.schemas.Order import OrderStatus
+from app.schemas.Order import OrderDataPerItem, OrderStatus
 from app.customExceptions import ProcessOrderException
 from staticData import STATIC_DATA_ORDER1
 
@@ -50,3 +50,26 @@ async def test_addOrder_failure(processor):
             with pytest.raises(ProcessOrderException):
                 await processor.addOrder(dummyOrder, userId)
 
+
+@pytest.mark.asyncio
+async def test_insertItemOrderData_success(processor):
+    orderId = 101
+    orderDataPerItem = [
+        OrderDataPerItem(itemId=1, quantity=2, total=100, orderId=1),
+        OrderDataPerItem(itemId=2, quantity=3, total=200, orderId=2)
+    ]
+    with patch.object(processor.dbSession, "execute", return_value=None):
+        await processor.insertItemOrderData(orderId, orderDataPerItem)
+        assert processor.dbSession.execute.call_count == len(orderDataPerItem)
+
+@pytest.mark.asyncio
+async def test_insertItemOrderData_failure(processor):
+    orderId = 101
+    orderDataPerItem = [
+        OrderDataPerItem(itemId=1, quantity=2, total=100, orderId=1),
+    ]
+    processor.dbSession.execute = AsyncMock(side_effect=SQLAlchemyError("DB error"))
+    executeMock = AsyncMock(side_effect = SQLAlchemyError("DB error"))
+    with patch.object(processor.dbSession, "execute", new = executeMock):
+        with pytest.raises(ProcessOrderException, match="Internal server error"):
+            await processor.insertItemOrderData(orderId, orderDataPerItem)
