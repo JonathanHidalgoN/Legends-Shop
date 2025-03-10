@@ -2,7 +2,7 @@ import pytest
 from typing import List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.ItemsLoader import ItemsLoader
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from staticData import STATIC_DATA_ITEMS_JSON,STATIC_DATA_ITEM2, STATIC_DATA_ITEM1 
 
 from app.schemas.Item import Item, Stat
@@ -13,6 +13,7 @@ def loader()-> ItemsLoader:
     loader = ItemsLoader(mockSession)
     loader.VERSION_URL = "test_url"
     loader.itemsUrl="test_url"
+    loader.version = "test"
     return loader
 
 def test_makeItemsUrl(loader):
@@ -34,3 +35,36 @@ def test_getUniqueStatsNameAndKind(loader):
     expectedStats.add(stat3)
     assert unique_stats == expectedStats, "The sets of stats do not match"
 
+# @patch.object(ItemsLoader, 'updateDbVersion', return_value=None)
+# @patch.object(ItemsLoader, 'createMappingStatsDict', return_value=None)
+# def test_parseItemsJsonIntoItemList(loader):
+
+@pytest.mark.asyncio
+async def test_parseDataNodeIntoItem(loader):
+    itemsData = STATIC_DATA_ITEMS_JSON.get("data")
+    if itemsData is None:
+        #To make the linter happy
+        return
+    itemNames = set()
+    statMapping = {"FlatMovementSpeedMod": "FlatMovementSpeedMod"}
+    itemData = itemsData["1001"]
+    item = await loader.parseDataNodeIntoItem(1001, itemData, itemNames, statMapping)
+    assert item is not None
+    assert item.name == "Boots"
+    assert item.id == 1001
+    assert item.plaintext == "Slightly increases Move Speed"
+    assert item.gold.base == 300
+    assert item.imageUrl == "https://ddragon.leagueoflegends.com/cdn/test/img/item/1001.png"
+    expected_stat = Stat(name="FlatMovementSpeedMod", kind="flat", value=25)
+    assert expected_stat in item.stats
+    assert item.effect.root == {}
+
+@pytest.mark.asyncio
+async def test_parseDataNodeIntoItem_no_name(loader, caplog):
+    itemData = {}
+    itemId = 123
+    itemNames = set()
+    statMapping = {"FlatStat": "flat"}
+    with caplog.at_level("WARNING"):
+        result = await loader.parseDataNodeIntoItem(itemId, itemData, itemNames, statMapping)
+    assert result is None
