@@ -2,17 +2,17 @@ name: Backend test
 on: [push]
 
 env:
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: postgres
-  POSTGRES_DB: test_db
-  POSTGRES_HOST: localhost
-  POSTGRES_PORT: 5432
-  SECRET_KEY: testKey
-  ALGORITHM: HS256
-  ACCESS_TOKEN_EXPIRE_MINUTES: 30
-  FRONTEND_HOST: frontend
-  FRONTEND_PORT: 3000
-  BACKEND_PORT: 8000
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_DB: "test_db"
+  POSTGRES_HOST: "localhost"
+  POSTGRES_PORT: "5432"
+  SECRET_KEY: "testKey"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  FRONTEND_HOST: "frontend"
+  FRONTEND_PORT: "3000"
+  BACKEND_PORT: "8000"
 
 jobs:
   push-test-format:
@@ -28,7 +28,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
-          - 5432:5432
+          - ${{ env.POSTGRES_PORT }}:${{ env.POSTGRES_PORT }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
