@@ -5,10 +5,10 @@ from app.customExceptions import UpdateItemsError
 from app.data.ItemsLoader import ItemsLoader
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.data.models.GoldTable import GoldTable
-from staticData import STATIC_DATA_ITEMS_JSON, STATIC_DATA_ITEM2, STATIC_DATA_ITEM1
+from staticData import *
+
 
 from app.schemas.Item import Effects, Gold, Item, Stat
-
 
 @pytest.fixture
 def loader() -> ItemsLoader:

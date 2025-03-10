@@ -36,7 +36,7 @@ jobs:
       - name: Run unit test 
         working-directory: back 
         run: |
-          python -m pytest -v test/
+          python -m pytest -v test/unit
 
       - name: Format code
         working-directory: back
