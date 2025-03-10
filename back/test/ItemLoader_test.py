@@ -4,9 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import UpdateItemsError
 from app.data.ItemsLoader import ItemsLoader
 from unittest.mock import AsyncMock, MagicMock, patch
+from app.data.models.GoldTable import GoldTable
 from staticData import STATIC_DATA_ITEMS_JSON,STATIC_DATA_ITEM2, STATIC_DATA_ITEM1 
 
-from app.schemas.Item import Item, Stat
+from app.schemas.Item import Gold, Item, Stat
 
 @pytest.fixture
 def loader()-> ItemsLoader:
@@ -124,19 +125,52 @@ async def test_updateItemsInDataBase_success(loader):
     loader.insertOrUpdateItemTable = AsyncMock(return_value=None)
     #Patch will change the object method for a mock taht return None temporally
     #Second patch on the query function to return None, this means that the item is new 
-    with patch.object(loader, 'insertOrUpdateItemTable', new=AsyncMock(return_value=None)) as mock_insert, \
+    with patch.object(loader, "insertOrUpdateItemTable", new=AsyncMock(return_value=None)) as mockInsert, \
             patch("app.data.ItemsLoader.getItemTableGivenItemName", new=AsyncMock(return_value=None)):
         await loader.updateItemsInDataBase(items_list)
         loader.dbSession.commit.assert_called_once()
-        assert mock_insert.call_count == len(items_list)
+        assert mockInsert.call_count == len(items_list)
 
 @pytest.mark.asyncio
 async def test_updateItemsInDataBase_failure(loader):
     items_list = [STATIC_DATA_ITEM1]
     #Patch will change the object method and raise an exception
     #Second patch on the query function to return None, this means that the item is new 
-    with patch.object(loader, 'insertOrUpdateItemTable', new=AsyncMock(side_effect=Exception("Simulated error"))) as mock_insert, \
+    with patch.object(loader, "insertOrUpdateItemTable", new=AsyncMock(side_effect=Exception("Simulated error"))) as mockInsert, \
             patch("app.data.ItemsLoader.getItemTableGivenItemName", new=AsyncMock(return_value=None)):
         with pytest.raises(UpdateItemsError):
                 await loader.updateItemsInDataBase(items_list)
-                loader.dbSession.rollback.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_insertOrUpdateGoldTable_insert_success(loader):
+    itemId = None
+    gold:Gold = Gold(base=0,purchasable=True,total=0,sell=0)
+    createNewGoldTable = True 
+    expectedId : int = 0
+    goldTable: GoldTable = GoldTable()
+    goldTable.id = expectedId
+    mergeMock:AsyncMock = AsyncMock(return_value = goldTable)
+    with patch.object(loader.dbSession, "merge",new=mergeMock) as mockMege:
+        itemId = await loader.insertOrUpdateGoldTable(createNewGoldTable,gold,itemId)
+        assert itemId == expectedId
+
+@pytest.mark.asyncio
+async def test_insertOrUpdateGoldTable_error_NoneId_NoNewGoldTable(loader):
+    itemId = None
+    gold:Gold = Gold(base=0,purchasable=True,total=0,sell=0)
+    createNewGoldTable = False 
+    with pytest.raises(UpdateItemsError):
+        await loader.insertOrUpdateGoldTable(createNewGoldTable, gold, itemId)
+
+@pytest.mark.asyncio
+async def test_insertOrUpdateGoldTable_error_GoldTableDoesNotExist(loader):
+    itemId = 1
+    gold:Gold = Gold(base=0,purchasable=True,total=0,sell=0)
+    createNewGoldTable = False 
+    idMock:AsyncMock = AsyncMock(return_value = None)
+    with patch("app.data.ItemsLoader.getGoldIdWithItemId",new=idMock):
+        with pytest.raises(UpdateItemsError):
+            await loader.insertOrUpdateGoldTable(createNewGoldTable, gold, itemId)
+
+
+
