@@ -37,10 +37,6 @@ def test_getUniqueStatsNameAndKind(loader):
     expectedStats.add(stat3)
     assert unique_stats == expectedStats, "The sets of stats do not match"
 
-# @patch.object(ItemsLoader, 'updateDbVersion', return_value=None)
-# @patch.object(ItemsLoader, 'createMappingStatsDict', return_value=None)
-# def test_parseItemsJsonIntoItemList(loader):
-
 @pytest.mark.asyncio
 async def test_parseDataNodeIntoItem(loader):
     itemsData = STATIC_DATA_ITEMS_JSON.get("data")
@@ -172,5 +168,28 @@ async def test_insertOrUpdateGoldTable_error_GoldTableDoesNotExist(loader):
         with pytest.raises(UpdateItemsError):
             await loader.insertOrUpdateGoldTable(createNewGoldTable, gold, itemId)
 
+@pytest.mark.asyncio
+async def test_addItemTagsRelations_success(loader):
+    itemId = 101
+    tags = {"tag1", "tag2"}
+    with patch("app.data.ItemsLoader.getTagIdWithtTagName", return_value=1):
+        loader.dbSession.execute = AsyncMock(return_value=None)
+        await loader.addItemTagsRelations(itemId, tags)
+        assert loader.dbSession.execute.call_count == len(tags)
 
+@pytest.mark.asyncio
+async def test_addItemTagsRelations_missing_tag(loader):
+    itemId = 101
+    tags = {"tag1"}
+    with patch("app.data.ItemsLoader.getTagIdWithtTagName", new=AsyncMock(return_value=None)):
+        with pytest.raises(UpdateItemsError, match="Tag was not found in the database"):
+            await loader.addItemTagsRelations(itemId, tags)
 
+@pytest.mark.asyncio
+async def test_addItemTagsRelations_execute_failure(loader):
+    itemId = 101
+    tags = {"tag1"}
+    with patch("app.data.ItemsLoader.getTagIdWithtTagName", new=AsyncMock(return_value=201)):
+        loader.dbSession.execute = AsyncMock(side_effect=Exception("DB error"))
+        with pytest.raises(UpdateItemsError, match="Could not insert a relation item-tag"):
+            await loader.addItemTagsRelations(itemId, tags)
