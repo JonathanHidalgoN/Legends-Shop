@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Order, OrderStatus } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
 import { cancelOrderRequest } from "../request";
-import toast from "react-hot-toast/headless";
+import toast from "react-hot-toast";
 import Image from "next/image";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
@@ -33,51 +33,93 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
   const extraCount = order.itemNames.length - 4;
 
   return (
-    <div className="flex flex-col md:flex-row border rounded shadow overflow-hidden max-w-2xl w-full">
-      <div className="w-full md:w-1/3 bg-gray-100 flex items-center justify-center p-2">
-        <div className="relative">
-          <div className="grid grid-cols-2 grid-rows-2 gap-1">
-            {itemImages.map((img, idx) => (
-              <div key={idx} className="relative w-16 h-16">
-                {img ? (
-
+    <div className="flex flex-col md:flex-row 
+      border rounded shadow overflow-hidden max-w-2xl w-full
+      border border-black">
+      <div className="w-full md:w-1/3 bg-gray-100 flex items-center justify-center p-2"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 2px, #fb923c 2px, #fb923c 4px)"
+        }}
+      >
+        <div
+          className={
+            itemImages.length === 1
+              ? "relative w-28 h-28"
+              : "relative w-32 h-32"
+          }
+        >
+          {itemImages.length === 1 ? (
+            <div className="flex items-center justify-center w-full h-full">
+              <Image
+                src={itemImages[0]}
+                alt={`Item ${displayedItemNames[0]}`}
+                fill
+                className="object-cover rounded"
+              />
+            </div>
+          ) : itemImages.length === 2 ? (
+            <div className="grid grid-cols-2 gap-1 w-full h-full">
+              {itemImages.map((img, idx) => (
+                <div key={idx} className="relative">
                   <Image
                     src={img}
                     alt={`Item ${displayedItemNames[idx]}`}
                     fill
                     className="object-cover rounded"
                   />
-                ) : (
-                  <div className="bg-gray-200 w-full h-full rounded" />
-                )}
-                {idx === 3 && extraCount > 0 && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-lg rounded">
-                    +{extraCount}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 grid-rows-2 gap-1 w-full h-full">
+              {itemImages.map((img, idx) => (
+                <div key={idx} className="relative">
+                  <Image
+                    src={img}
+                    alt={`Item ${displayedItemNames[idx]}`}
+                    fill
+                    className="object-cover rounded"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {itemImages.length === 4 && extraCount > 0 && (
+            <div className="absolute inset-0 
+              bg-black bg-opacity-35 flex 
+              items-center justify-center text-white text-lg rounded">
+              +{extraCount}
+            </div>
+          )}
         </div>
-      </div>
 
+      </div>
       <div className="w-full md:w-2/3 p-4 flex flex-col justify-between">
         <div>
           <h2 className="font-bold text-lg">
-            You ordered {displayedItemNames.join(", ")}
-            {extraCount > 0 && " ..."}
+            You ordered{" "}
+            <span className="text-[var(--orange)]">
+              {displayedItemNames.join(", ")}
+              {extraCount > 0 && " ..."}
+            </span>
           </h2>
-          <p className="mt-1 text-sm">
+          <p className="mt-1 text-sm font-bold">
             Order Date: {new Date(order.orderDate).toLocaleDateString()}
           </p>
-          <p className="mt-1 text-sm">Total: ${order.total}</p>
-          <p className="mt-1 text-sm">Status: {orderStatus}</p>
+          <p className="mt-1 text-sm font-bold">Total:
+            <span>
+              ${order.total}
+            </span>
+          </p>
+          <p className="mt-1 text-sm font-bold">Status: {orderStatus}</p>
         </div>
         <div className="mt-4">
           <button
-            className={`px-4 py-2 rounded transition-colors w-full md:w-auto ${orderStatus === "PENDING"
-              ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            className={`px-4 py-2 rounded transition-colors 
+                       w-full md:w-auto ${orderStatus === "PENDING"
+                ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             onClick={cancelOrder}
             disabled={orderStatus !== "PENDING"}
