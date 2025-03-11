@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { Order } from "@/app/interfaces/Order";
+import React, { useState } from "react";
+import { Order, OrderStatus } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
 import { cancelOrderRequest } from "../request";
 import toast from "react-hot-toast/headless";
@@ -8,6 +8,7 @@ import Image from "next/image";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
   const { items } = useStaticData();
+  const [orderStatus, setOrderStatus] = useState<string>(order.status)
 
   const displayedItemNames = order.itemNames.slice(0, 4);
   const itemImages = displayedItemNames.map(name => {
@@ -15,15 +16,18 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
     return item?.img || "";
   });
 
-  async function cancelOrder(orderId: number, orderStatus: string) {
-    if (orderStatus !== "PENDING" && orderStatus !== "SHIPPED") {
+  async function cancelOrder() {
+    if (order.status !== "PENDING" && order.status !== "SHIPPED") {
       toast.error("Error canceling order")
       return;
     }
-    const response = await cancelOrderRequest(orderId, "client");
+    const response = await cancelOrderRequest(order.id, "client");
     if (!response.ok) {
       toast.error("Error canceling order")
     }
+    order.status = OrderStatus.CANCELED;
+    setOrderStatus(order.status);
+    toast.success("Order cancelled succesfully")
   }
 
   const extraCount = order.itemNames.length - 4;
@@ -67,16 +71,16 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
             Order Date: {new Date(order.orderDate).toLocaleDateString()}
           </p>
           <p className="mt-1 text-sm">Total: ${order.total}</p>
-          <p className="mt-1 text-sm">Status: {order.status}</p>
+          <p className="mt-1 text-sm">Status: {orderStatus}</p>
         </div>
         <div className="mt-4">
           <button
-            className={`px-4 py-2 rounded transition-colors w-full md:w-auto ${order.status === "PENDING"
+            className={`px-4 py-2 rounded transition-colors w-full md:w-auto ${orderStatus === "PENDING"
               ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
-            onClick={() => cancelOrder(order.id, order.status)}
-            disabled={order.status !== "PENDING"}
+            onClick={cancelOrder}
+            disabled={orderStatus !== "PENDING"}
           >
             Cancel Order
           </button>
