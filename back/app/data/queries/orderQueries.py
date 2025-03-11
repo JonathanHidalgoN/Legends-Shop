@@ -20,6 +20,7 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int) -> List[
             OrderTable.status,
             ItemTable.name,
             UserTable.userName,
+            OrderItemAssociation.c.quantity
         )
         .join(OrderItemAssociation, OrderTable.id == OrderItemAssociation.c.order_id)
         .join(ItemTable, OrderItemAssociation.c.item_id == ItemTable.id)
@@ -36,11 +37,12 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int) -> List[
         status,
         item_name,
         user_name,
+        quantity
     ) in rows:
         if order_id not in orders_dict:
             orders_dict[order_id] = {
                 "id": order_id,
-                "itemNames": [item_name],
+                "itemNames": [item_name for _ in range(quantity)],
                 "userName": user_name,
                 "total": total,
                 "orderDate": order_date,
