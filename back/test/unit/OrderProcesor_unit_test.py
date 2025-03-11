@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.orders.OrderProcessor import OrderProcessor
 from app.schemas.Order import OrderDataPerItem, OrderStatus
-from app.customExceptions import ProcessOrderException
+from app.customExceptions import DifferentTotal, ProcessOrderException
 from staticData import STATIC_DATA_ORDER1, STATIC_DATA_ORDER2
 
 
@@ -138,3 +138,57 @@ async def test_getOrderDataPerItem_failure_itemIdNone(processor: OrderProcessor)
     ):
         with pytest.raises(ProcessOrderException):
             await processor.getOrderDataPerItem(dummyOrder, orderTableId)
+
+
+@pytest.mark.asyncio
+async def test_getOrderDataPerItem_failure_baseCostNone(processor: OrderProcessor):
+    dummyOrder = STATIC_DATA_ORDER2
+    orderTableId = 101
+    with patch(
+        "app.orders.OrderProcessor.getItemIdByItemName", new=AsyncMock(return_value=1)
+    ):
+        with patch(
+            "app.orders.OrderProcessor.getGoldBaseWithItemId",
+            new=AsyncMock(return_value=None),
+        ):
+            with pytest.raises(ProcessOrderException):
+                await processor.getOrderDataPerItem(dummyOrder, orderTableId)
+
+
+@pytest.mark.parametrize(
+    "orderData, providedTotal",
+    [
+        (
+            [
+                OrderDataPerItem(itemId=1, orderId=101, quantity=1, total=40),
+                OrderDataPerItem(itemId=2, orderId=101, quantity=1, total=60),
+            ],
+            100,
+        ),
+        (
+            [
+                OrderDataPerItem(itemId=1, orderId=101, quantity=2, total=80),
+                OrderDataPerItem(itemId=2, orderId=101, quantity=1, total=60),
+            ],
+            140,
+        ),
+        (
+            [
+                OrderDataPerItem(itemId=1, orderId=101, quantity=1, total=10),
+                OrderDataPerItem(itemId=2, orderId=101, quantity=1, total=20),
+                OrderDataPerItem(itemId=3, orderId=101, quantity=1, total=30),
+            ],
+            60,
+        ),
+    ],
+)
+def test_comparePrices_success(processor, orderData, providedTotal):
+    processor.comparePrices(orderData, providedTotal)
+
+
+def test_comparePrices_failure(processor):
+    item1 = OrderDataPerItem(itemId=1, orderId=101, quantity=1, total=40)
+    item2 = OrderDataPerItem(itemId=2, orderId=101, quantity=1, total=60)
+    orderData = [item1, item2]
+    with pytest.raises(DifferentTotal):
+        processor.comparePrices(orderData, 110)
