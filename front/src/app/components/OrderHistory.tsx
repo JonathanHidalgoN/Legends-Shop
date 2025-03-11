@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Order } from "@/app/interfaces/Order";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
 import { getUserHistoryRequest } from "@/app/request";
-import toast from "react-hot-toast/headless";
+import toast from "react-hot-toast";
 
 export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -32,7 +32,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-4">
+    <div className="flex flex-col justify-center items-center gap-4 p-4">
       {orders.length > 0 ? (
         orders.map(order => (
           <OrderHistoryCard key={order.id} order={order} />
