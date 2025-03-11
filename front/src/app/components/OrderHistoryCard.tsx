@@ -10,8 +10,16 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
   const { items } = useStaticData();
   const [orderStatus, setOrderStatus] = useState<string>(order.status)
 
-  const displayedItemNames = order.itemNames.slice(0, 4);
-  const itemImages = displayedItemNames.map(name => {
+  let itemCount: Record<string, number> = {};
+  const uniqueNames: string[] = [...new Set(order.itemNames)];
+  uniqueNames.forEach((name: string) => {
+    itemCount[name] = order.itemNames.filter((itemName: string) => itemName === name).length;
+  });
+
+  const displayedItemNames = uniqueNames.slice(0, 4).map(name =>
+    itemCount[name] > 1 ? `${itemCount[name]} ${name}` : name
+  );
+  const itemImages = uniqueNames.map(name => {
     const item = items.find(i => i.name === name);
     return item?.img || "";
   });
@@ -30,7 +38,7 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
     toast.success("Order cancelled succesfully")
   }
 
-  const extraCount = order.itemNames.length - 4;
+  const extraCount = uniqueNames.length - 4;
 
   return (
     <div className="flex flex-col md:flex-row 
@@ -53,7 +61,7 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
             <div className="flex items-center justify-center w-full h-full">
               <Image
                 src={itemImages[0]}
-                alt={`Item ${displayedItemNames[0]}`}
+                alt={`Item ${uniqueNames[0]}`}
                 fill
                 className="object-cover rounded"
               />
@@ -64,7 +72,7 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
                 <div key={idx} className="relative">
                   <Image
                     src={img}
-                    alt={`Item ${displayedItemNames[idx]}`}
+                    alt={`Item ${uniqueNames[idx]}`}
                     fill
                     className="object-cover rounded"
                   />
@@ -77,7 +85,7 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
                 <div key={idx} className="relative">
                   <Image
                     src={img}
-                    alt={`Item ${displayedItemNames[idx]}`}
+                    alt={`Item ${uniqueNames[idx]}`}
                     fill
                     className="object-cover rounded"
                   />
