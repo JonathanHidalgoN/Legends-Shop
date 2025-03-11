@@ -24,8 +24,7 @@ async def test_addOrder_success(processor):
 
     deliveryDate = datetime(2025, 1, 2)
     processor.creteaRandomDate = MagicMock(return_value=deliveryDate)
-
-    addMock = AsyncMock(return_value=None)
+    addMock = MagicMock(return_value=None)
     flushMock = AsyncMock(return_value=None)
     flushMock.side_effect = lambda: setattr(
         addMock.call_args[0][0], "id", expectedOrderId
@@ -45,7 +44,7 @@ async def test_addOrder_failure(processor):
     userId = 123
     fixed_delivery_date = datetime(2023, 1, 2)
     processor.creteaRandomDate = MagicMock(return_value=fixed_delivery_date)
-    with patch.object(processor.dbSession, "add", new=AsyncMock(return_value=None)):
+    with patch.object(processor.dbSession, "add", return_value=None):
         with patch.object(
             processor.dbSession, "flush", side_effect=SQLAlchemyError("DB error")
         ):
