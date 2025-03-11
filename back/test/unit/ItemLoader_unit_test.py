@@ -10,6 +10,7 @@ from staticData import *
 
 from app.schemas.Item import Effects, Gold, Item, Stat
 
+
 @pytest.fixture
 def loader() -> ItemsLoader:
     mockSession = MagicMock(spec=AsyncSession)
