@@ -68,7 +68,7 @@ class OrderProcessor:
             order.status = OrderStatus.PENDING
             order.deliveryDate = self.creteaRandomDate(order.orderDate)
             orderTable: OrderTable = mapOrderToOrderTable(order, userId)
-            await self.dbSession.add(orderTable)
+            self.dbSession.add(orderTable)
             await self.dbSession.flush()
             logger.debug(
                 f"Added a new record to order table userId:{userId}, orderId:{orderTable.id}"
