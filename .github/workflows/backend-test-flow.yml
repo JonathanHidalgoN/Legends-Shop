@@ -1,10 +1,42 @@
 name: Backend test 
 on: [push]
 
-jobs:
-  build:
+env:
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_DB: "test_db"
+  POSTGRES_HOST: "localhost"
+  POSTGRES_PORT: "5432"
+  SECRET_KEY: "testKey"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  FRONTEND_HOST: "frontend"
+  FRONTEND_PORT: "3000"
+  BACKEND_PORT: "8000"
 
+jobs:
+  push-test-format:
     runs-on: ubuntu-latest
+    env:
+      #This is not possible for now, have to define two times the variables
+      # DATABASE_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+      # DATABASE_ALEMBIC_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+      DATABASE_ALEMBIC_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -15,17 +47,20 @@ jobs:
         with:
           python-version: '3.12.2'
           architecture: 'x64'
+          
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
 
       - name: Cache pip dependencies
         uses: actions/cache@v3
         with:
+          #Where pip cache
           path: ~/.cache/pip
+          #Cache for different OS also if the .lock changes the hash does and wont use same cache
           key: ${{ runner.os }}-pip-${{ hashFiles('back/requirements.lock') }}
+          #Default if no cache
           restore-keys: |
             ${{ runner.os }}-pip-
-
 
       - name: Install dependencies
         working-directory: back
@@ -35,8 +70,21 @@ jobs:
 
       - name: Run unit test 
         working-directory: back 
+        run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/
+
+      - name: Aply database schema
+        working-directory: back
         run: |
-          python -m pytest test/
+          alembic upgrade head
+
+      - name: Start backend server
+        working-directory: back
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port $BACKEND_PORT &
+          sleep 10 
+
+      - name: Stop backend server
+        run: pkill uvicorn
 
       - name: Format code
         working-directory: back
