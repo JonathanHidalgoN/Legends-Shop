@@ -25,10 +25,10 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filterOrderStatus, setFilterOrderStatus] = useState<string>("ALL");
-  const [minOrderDate, setMinOrderDate] = useState<Date>(new Date(2025, 0, 1));
-  const [maxOrderDate, setMaxOrderDate] = useState<Date>(new Date());
-  const [minDeliveryDate, setMinDeliveryDate] = useState<Date>(new Date(2025, 0, 1));
-  const [maxDeliveryDate, setMaxDeliveryDate] = useState<Date>(new Date());
+  const [filterMinOrderDate, setFilterMinOrderDate] = useState<Date>(new Date(2025, 0, 1));
+  const [filterMaxOrderDate, setFilterMaxOrderDate] = useState<Date>(new Date());
+  const [filterMinDeliveryDate, setFilterMinDeliveryDate] = useState<Date>(new Date(2025, 0, 1));
+  const [filterMaxDeliveryDate, setFilterMaxDeliveryDate] = useState<Date>(new Date());
   const [sortField, setSortField] = useState<SortField>('price');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
@@ -49,7 +49,16 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   useEffect(() => {
     async function fetchUserHistory() {
       try {
-        const response = await getUserHistoryRequest(urlUserName);
+        const response = await getUserHistoryRequest(urlUserName, {
+          orderStatus: filterOrderStatus,
+          minOrderDate: filterMinOrderDate,
+          maxOrderDate: filterMaxOrderDate,
+          minDeliveryDate: filterMinDeliveryDate,
+          maxDeliveryDate: filterMaxDeliveryDate,
+          sortField,
+          sortOrder,
+          filterItemNames: filterItemNames || [],
+        });
         if (!response.ok) {
           toast.error("Error fetching order history");
           return;
@@ -64,8 +73,17 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
       }
     }
     fetchUserHistory();
-  }, [urlUserName]);
-
+  }, [
+    urlUserName,
+    filterOrderStatus,
+    filterMinOrderDate,
+    filterMaxOrderDate,
+    filterMinDeliveryDate,
+    filterMaxDeliveryDate,
+    sortField,
+    sortOrder,
+    filterItemNames
+  ]);
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -174,8 +192,8 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
             <input
               className="border rounded bg-[var(--white)] p-1"
               type="date"
-              value={minOrderDate.toISOString().substring(0, 10)}
-              onChange={(e) => setMinOrderDate(new Date(e.target.value))}
+              value={filterMinOrderDate.toISOString().substring(0, 10)}
+              onChange={(e) => setFilterMinOrderDate(new Date(e.target.value))}
             />
           </div>
           <div>
@@ -183,8 +201,8 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
             <input
               className="border rounded bg-[var(--white)] p-1"
               type="date"
-              value={maxOrderDate.toISOString().substring(0, 10)}
-              onChange={(e) => setMaxOrderDate(new Date(e.target.value))}
+              value={filterMaxOrderDate.toISOString().substring(0, 10)}
+              onChange={(e) => setFilterMaxOrderDate(new Date(e.target.value))}
             />
           </div>
         </div>
@@ -196,8 +214,8 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
             <input
               className="border rounded bg-[var(--white)] p-1"
               type="date"
-              value={minDeliveryDate.toISOString().substring(0, 10)}
-              onChange={(e) => setMinDeliveryDate(new Date(e.target.value))}
+              value={filterMinDeliveryDate.toISOString().substring(0, 10)}
+              onChange={(e) => setFilterMinDeliveryDate(new Date(e.target.value))}
             />
           </div>
           <div>
@@ -205,8 +223,8 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
             <input
               className="border rounded bg-[var(--white)] p-1"
               type="date"
-              value={maxDeliveryDate.toISOString().substring(0, 10)}
-              onChange={(e) => setMaxDeliveryDate(new Date(e.target.value))}
+              value={filterMaxDeliveryDate.toISOString().substring(0, 10)}
+              onChange={(e) => setFilterMaxDeliveryDate(new Date(e.target.value))}
             />
           </div>
         </div>
