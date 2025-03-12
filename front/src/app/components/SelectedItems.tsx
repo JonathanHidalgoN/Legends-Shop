@@ -4,7 +4,7 @@ import ItemPreView from "./ItemPreView";
 import { Item } from "../interfaces/Item";
 
 export default function SelectedItems({ items, tags }: { items: Item[]; tags: string[] }) {
-  const maxPrice = 10000;
+  const maxPrice = Math.max(...items.map(item => item.gold.base));
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(maxPrice);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -83,7 +83,7 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
         </div>
       </aside>
 
-      <div className="p-4 flex flex-col gap-y-10">
+      <div className="p-4 flex flex-col gap-y-2">
         {paginatedItems.map((item, index) => (
           <ItemPreView key={index} item={item} />
         ))}

@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)
 streamHandler = logging.StreamHandler()
 fileHandler = logging.FileHandler(logFile)
 formatter = logging.Formatter(
-    "%(asctime)s- %(name)s - %(filename)s - %(funcName)s - %(levelname)s - %(message)s"
+    "%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s"
 )
 streamHandler.setFormatter(formatter)
 fileHandler.setFormatter(formatter)

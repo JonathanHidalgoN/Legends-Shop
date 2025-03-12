@@ -106,8 +106,57 @@ export async function orderRequest(order: Order, from: string = "server") {
 /**
  * Makes a GET request to fetch user history.
  */
-export async function getUserHistoryRequest(from: string = "server") {
-  const url: string = makeUrl(from, ENDPOINT_ORDER_HISTORY);
+export async function getUserHistoryRequest(from: string = "server",
+  filters: {
+    orderStatus?: string;
+    minOrderDate?: Date;
+    maxOrderDate?: Date;
+    minDeliveryDate?: Date;
+    maxDeliveryDate?: Date;
+    sortField?: string;
+    sortOrder?: string;
+    filterItemNames?: string[];
+  } = {}
+) {
+  const queryParams = new URLSearchParams();
+
+  if (filters.orderStatus) {
+    queryParams.append("orderStatus", filters.orderStatus);
+  }
+  if (filters.minOrderDate) {
+    queryParams.append(
+      "minOrderDate",
+      filters.minOrderDate.toISOString().substring(0, 10)
+    );
+  }
+  if (filters.maxOrderDate) {
+    queryParams.append(
+      "maxOrderDate",
+      filters.maxOrderDate.toISOString().substring(0, 10)
+    );
+  }
+  if (filters.minDeliveryDate) {
+    queryParams.append(
+      "minDeliveryDate",
+      filters.minDeliveryDate.toISOString().substring(0, 10)
+    );
+  }
+  if (filters.maxDeliveryDate) {
+    queryParams.append(
+      "maxDeliveryDate",
+      filters.maxDeliveryDate.toISOString().substring(0, 10)
+    );
+  }
+  if (filters.sortField) {
+    queryParams.append("sortField", filters.sortField);
+  }
+  if (filters.sortOrder) {
+    queryParams.append("sortOrder", filters.sortOrder);
+  }
+  if (filters.filterItemNames && filters.filterItemNames.length > 0) {
+    queryParams.append("filterItemNames", filters.filterItemNames.join(","));
+  }
+  const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}?${queryParams.toString()}`;
   return await fetch(url, {
     credentials: "include",
   });

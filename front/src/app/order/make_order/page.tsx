@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useAuthContext } from "@/app/components/AuthContext";
 import { useCarContext } from "@/app/components/CarContext";
 import CarDropDown from "@/app/components/CarDropDown";
-import { Order } from "@/app/interfaces/Order";
+import { Order, OrderStatus } from "@/app/interfaces/Order";
 import { orderRequest } from "@/app/request";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,7 +26,7 @@ export default function OrderPage() {
         userName: userName,
         orderDate: new Date(),
         id: 0,
-        status: "PENDING",
+        status: OrderStatus.PENDING,
         deliveryDate: new Date(),
       };
       const response = await orderRequest(order, "client");
