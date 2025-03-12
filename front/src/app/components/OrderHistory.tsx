@@ -22,13 +22,19 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
     value: item.name,
     label: item.name
   }));
+
+  const TODAY = new Date();
+  const MIN_DATE = new Date(2025, 0, 1);
+  const TODAY_2WEEKS = new Date(TODAY);
+  TODAY_2WEEKS.setDate(TODAY.getDate() + 14);
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filterOrderStatus, setFilterOrderStatus] = useState<string>("ALL");
-  const [filterMinOrderDate, setFilterMinOrderDate] = useState<Date>(new Date(2025, 0, 1));
-  const [filterMaxOrderDate, setFilterMaxOrderDate] = useState<Date>(new Date());
-  const [filterMinDeliveryDate, setFilterMinDeliveryDate] = useState<Date>(new Date(2025, 0, 1));
-  const [filterMaxDeliveryDate, setFilterMaxDeliveryDate] = useState<Date>(new Date());
+  const [filterMinOrderDate, setFilterMinOrderDate] = useState<Date>(MIN_DATE);
+  const [filterMaxOrderDate, setFilterMaxOrderDate] = useState<Date>(TODAY);
+  const [filterMinDeliveryDate, setFilterMinDeliveryDate] = useState<Date>(MIN_DATE);
+  const [filterMaxDeliveryDate, setFilterMaxDeliveryDate] = useState<Date>(TODAY_2WEEKS);
   const [sortField, setSortField] = useState<SortField>('price');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
