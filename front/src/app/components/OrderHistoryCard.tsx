@@ -115,6 +115,9 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
           <p className="mt-1 text-sm font-bold">
             Order Date: {new Date(order.orderDate).toLocaleDateString()}
           </p>
+          <p className="mt-1 text-sm font-bold">
+            Delivery Date: {new Date(order.deliveryDate).toLocaleDateString()}
+          </p>
           <p className="mt-1 text-sm font-bold">Total:
             <span>
               ${order.total}
