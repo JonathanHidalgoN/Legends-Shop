@@ -8,7 +8,6 @@ import { Item } from "../interfaces/Item";
 import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
-import HeaderLogInForm from "./HeaderLogInForm";
 import { handleClickOutside } from "../functions";
 
 export default function Header({ items }:
@@ -21,6 +20,16 @@ export default function Header({ items }:
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const { carItems } = useCarContext();
+  const [formUserName, setFormUserName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const { logIn } = useAuthContext();
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const success = await logIn(formUserName, password);
+    if (success) {
+      setShowLoginDropdown(false);
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -87,11 +96,52 @@ export default function Header({ items }:
           )}
           {!userName && showLoginDropdown && (
             <div ref={loginDropDownRef}>
-              <HeaderLogInForm />
+              <div className="absolute right-0 mt-2 w-40 p-2 
+              rounded shadow-lg bg-[var(--white)] z-10">
+                <div className=" flex flex-col items-center justify-center p-4">
+                  <form onSubmit={handleSubmit}
+                    className="w-full max-w-md space-y-4">
+                    <div className="flex flex-col">
+                      <label htmlFor="username" className="mb-1 font-bold 
+            text-[var(--orange)]">
+                        Username
+                      </label>
+                      <input
+                        id="username"
+                        placeholder="Username"
+                        name="username"
+                        value={formUserName}
+                        onChange={(e) => setFormUserName(e.target.value)}
+                        className="border p-2 rounded"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
+                        Password
+                      </label>
+                      <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="border p-2 rounded"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-[var(--orange)] text-white 
+                    py-1 rounded hover:bg-orange-700 transition"
+                    >
+                      Log In
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           )}
         </div>
-
         <div className="relative">
           <button
             onClick={() => setShowCartDropdown((prev) => !prev)}
