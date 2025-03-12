@@ -3,11 +3,10 @@ from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.customExceptions import OrderNotFoundException
 from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
-from app.schemas.Order import Order, OrderStatus
+from app.schemas.Order import Order
 
 
 async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int,
@@ -21,7 +20,36 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int,
     filterItemNames: Optional[List[str]] = None 
 
                                ) -> List[Order]:
-    """"""
+    """
+        Retrieves a filtered and sorted list of orders for a given user.
+
+        This function dynamically builds and executes a SQL query using the provided asynchronous
+        session. It filters the order history based on the user's ID and optional criteria such as 
+        order status, order date range, delivery date range, sorting preferences, and a list of item 
+        names to filter by. The query joins multiple tables to retrieve relevant order details.
+
+        Args:
+            asyncSession (AsyncSession): The SQLAlchemy asynchronous session to execute the query.
+            userId (int): The ID of the user whose order history is being queried.
+            orderStatus (str, optional): The order status filter. Defaults to "ALL" for no filtering.
+            minOrderDate (Optional[date], optional): The earliest order date (inclusive) to include.
+            maxOrderDate (Optional[date], optional): The latest order date (inclusive) to include.
+            minDeliveryDate (Optional[date], optional): The earliest delivery date (inclusive) to include.
+            maxDeliveryDate (Optional[date], optional): The latest delivery date (inclusive) to include.
+            sortField (Optional[str], optional): The field by which to sort the orders. For example, 'price',
+                'orderDate', 'deliveryDate', or 'quantity'. If not provided, a default sort may be applied.
+            sortOrder (Optional[str], optional): The sort order; typically "asc" for ascending or "desc" 
+                for descending. Defaults to ascending if not provided.
+            filterItemNames (Optional[List[str]], optional): A list of item names to filter orders by.
+                Only orders containing these items will be returned. If omitted, no filtering on item names occurs.
+
+        Returns:
+            List[Order]: A list of Order objects matching the specified filters and sorting criteria.
+
+        Raises:
+            SQLAlchemyError: If an error occurs while executing the database query.
+            Exception: For any other errors encountered during query construction or execution.
+        """
     query = (
         select(
             OrderTable.id,
@@ -109,6 +137,22 @@ async def getOrderHistoryQuery(asyncSession: AsyncSession, userId: int,
 
 
 async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> None:
+    """
+    Retrieve a single order record by its ID.
+
+    This asynchronous function executes a database query using the provided 
+    asynchronous session to fetch an order record from the OrderTable that 
+    matches the specified orderId. It returns the first matching order record, 
+    or None if no such record exists.
+
+    Args:
+        asyncSession (AsyncSession): The asynchronous SQLAlchemy session to execute the query.
+        orderId (int): The unique identifier of the order to be retrieved.
+
+    Returns:
+        Optional[OrderTable]: The first OrderTable record that matches the orderId, 
+        or None if no record is found.
+    """
     result = await asyncSession.execute(
         select(OrderTable).where(OrderTable.id == orderId)
     )
