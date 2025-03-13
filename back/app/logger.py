@@ -4,7 +4,7 @@ from datetime import datetime
 
 logDirName: str = "backend_logs"
 os.makedirs(logDirName, exist_ok=True)
-logFile = os.path.join(logDirName, f"logs-{datetime.now().strftime("%Y-%m-%d")}.txt")
+logFile = os.path.join(logDirName, f"logs-{datetime.now().strftime('%Y-%m-%d')}.txt")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 streamHandler = logging.StreamHandler()
