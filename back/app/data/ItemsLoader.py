@@ -272,7 +272,7 @@ class ItemsLoader:
         try:
             if itemData["name"] in itemNames:
                 logger.warning(
-                    f"'name' node has the value {itemData["name"]} register multiple times, just one  (the first) will be register in the database"
+                    f"'name' node has the value {itemData['name']} register multiple times, just one (the first) will be register in the database"
                 )
                 return None
             return Item(
