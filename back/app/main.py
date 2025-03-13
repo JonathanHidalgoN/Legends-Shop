@@ -29,9 +29,8 @@ app.include_router(orders.router, prefix="/orders")
 
 
 @app.get("/")
-async def root(db: AsyncSession = Depends(database.getDbSession)):
-    version: str | None = await getVersion(db)
-    return {"message": version}
+async def root():
+    return {"message": "up"}
 
 
 @app.get("/testUpdateTagsTable")
