@@ -6,7 +6,7 @@ import { getUserHistoryRequest } from "@/app/request";
 import toast from "react-hot-toast";
 import { OrderStatus } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
-import Select from "react-select"
+import Select, { ActionMeta, MultiValue } from "react-select"
 
 interface OptionType {
   value: string;
@@ -39,8 +39,11 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
 
-  function handleItemNameFilterChange(selectedNames: OptionType[] | null) {
-    const itemNames = selectedNames ? selectedNames.map(option => option.value) : [];
+  function handleItemNameFilterChange(
+    selectedNames: MultiValue<OptionType>,
+    _actionMeta: ActionMeta<OptionType>
+  ) {
+    const itemNames = selectedNames.map(option => option.value);
     setFilterItemName(itemNames);
   }
 
