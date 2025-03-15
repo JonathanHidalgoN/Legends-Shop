@@ -1,9 +1,7 @@
-import { BACKEND_PORT, BACKEND_HOST } from "./envVariables";
+import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
 import { Order } from "./interfaces/Order";
 
 //TODO: how to improve this solution?
-export const SERVER_DOMAIN: string = `http://${BACKEND_HOST}:${BACKEND_PORT}/`
-export const CLIENT_DOMAIN: string = `http://localhost:${BACKEND_PORT}/`
 export const ENDPOINT_LOGIN: string = `auth/token`;
 export const ENDPOINT_REFRESH_TOKEN: string = `auth/refresh_token`;
 export const ENDPOINT_LOGIN_OUT: string = `auth/logout`;
@@ -16,6 +14,8 @@ export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
+  console.log(SERVER_DOMAIN);
+  console.log(CLIENT_DOMAIN);
   if (from === "server") {
     url = SERVER_DOMAIN + endpoint;
   } else {

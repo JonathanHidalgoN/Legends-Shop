@@ -1,2 +1,2 @@
-export const BACKEND_HOST = process.env.NEXT_PUBLIC_BACKEND_HOST
-export const BACKEND_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT
+export const CLIENT_DOMAIN = process.env.NEXT_PUBLIC_CLIENT_DOMAIN
+export const SERVER_DOMAIN = process.env.NEXT_PUBLIC_SERVER_DOMAIN
