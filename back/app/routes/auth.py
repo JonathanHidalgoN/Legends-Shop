@@ -74,12 +74,12 @@ async def getToken(
         )
     if not matchUser:
         logger.error(f"Error in {request.url.path}, {dataForm.username} do not exit")
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         logger.error(
             f"Error in {request.url.path}, incorrect password for user {dataForm.username}"
         )
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     accessToken = createAccessToken(data={"sub": matchUser.userName})
     response.set_cookie(
         key="access_token",
