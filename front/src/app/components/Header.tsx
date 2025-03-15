@@ -12,22 +12,25 @@ import { handleClickOutside } from "../functions";
 
 export default function Header({ items }:
   { items: Item[] }) {
+
+  const { userName, logOut, login, loginError, setLoginError } = useAuthContext();
+  const { carItems } = useCarContext();
+
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const { userName, logOut } = useAuthContext();
-  const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
-  const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-  const { carItems } = useCarContext();
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
-  const { logIn } = useAuthContext();
-  const [loginError, setLoginError] = useState(false);
+
+
+  const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+
+  const router = useRouter();
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const responseStatus = await logIn(formUserName, formPassword);
+    const responseStatus = await login(formUserName, formPassword);
     if (responseStatus === 200) {
       setShowLoginDropdown(false);
       setFormUserName("");

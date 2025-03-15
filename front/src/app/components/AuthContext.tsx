@@ -8,7 +8,9 @@ import toast from 'react-hot-toast';
 interface AuthContextType {
   userName: string | null;
   setUserName: (userName: string | null) => void;
-  logIn: (userName: string, password: string) => Promise<number>;
+  login: (userName: string, password: string) => Promise<number>;
+  loginError: boolean;
+  setLoginError: (error: boolean) => void;
   logOut: () => void;
   refreshToken: () => Promise<void>;
 }
@@ -17,9 +19,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const [userName, setUserName] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<boolean>(false);
   const router = useRouter();
 
-  async function logIn(userName: string, password: string): Promise<number> {
+  async function login(userName: string, password: string): Promise<number> {
     const response = await logInRequest(userName, password, "client");
     if (!response.ok) {
       if (response.status == 401) {
@@ -73,7 +76,10 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   }, [userName])
 
   return (
-    <AuthContext.Provider value={{ userName, setUserName, logOut, logIn, refreshToken }}>
+    <AuthContext.Provider value={{
+      userName, setUserName, logOut,
+      login, loginError, setLoginError, refreshToken
+    }}>
       {children}
     </AuthContext.Provider>
   );
