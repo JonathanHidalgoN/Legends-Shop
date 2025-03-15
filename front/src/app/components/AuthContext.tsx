@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { logInRequest, logoutRequest, refreshTokenRequest } from "../request";
+import { logInRequest, logoutRequest, refreshTokenRequest, singupRequest } from "../request";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (userName: string, password: string) => Promise<number>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
+  singup: (userName: string, password: string) => Promise<number>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,6 +38,23 @@ export function AuthContextProvider({
     }
     setUserName(userName);
     toast.success(`Welcome ${userName}!`);
+    return response.status;
+  }
+
+  async function singup(userName: string, password: string): Promise<number> {
+    const response = await singupRequest(userName, password, "client");
+    if (!response.ok) {
+      if (response.status == 400) {
+        toast.error("The username already exist, chose other");
+      } else if (response.status == 500) {
+        toast.error("Internal server error login");
+      } else {
+        toast.error("Unexpected error");
+      }
+      return response.status;
+    }
+    toast.success(`Singup succesfully ${userName}!`);
+    await login(userName, password);
     return response.status;
   }
 
@@ -87,6 +105,7 @@ export function AuthContextProvider({
         logOut,
         login,
         refreshToken,
+        singup
       }}
     >
       {children}
