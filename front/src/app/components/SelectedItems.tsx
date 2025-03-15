@@ -51,7 +51,7 @@ export default function SelectedItems({
   }, [filteredItems, totalPages, currentPage]);
 
   return (
-    <div className="grid grid-cols-2 grid-cols-[13%_auto] gap-4 h-full">
+    <div className="grid grid-cols-2 grid-cols-[13%_80%] gap-4 h-full">
       <aside className="p-2 flex flex-col shadow-lg bg-[var(--white)] text-[var(--black)]">
         <div className="mb-6">
           <h2 className="font-bold mb-2">Price</h2>
@@ -94,7 +94,7 @@ export default function SelectedItems({
         </div>
       </aside>
 
-      <div className="p-4 flex flex-col gap-y-2">
+      <div className="p-4 ml-8 flex items-center flex-col gap-y-2">
         {paginatedItems.map((item, index) => (
           <ItemPreView key={index} item={item} />
         ))}

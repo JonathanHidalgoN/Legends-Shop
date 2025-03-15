@@ -12,9 +12,11 @@ export default function ItemPreView({ item }: { item: Item }) {
 
   return (
     <div
-      className="flex flex-col 
-      md:flex-row items-start p-4 border border-black items-center
-      rounded-lg shadow-sm my-4 hover:shadow-md transition-shadow"
+      className="flex flex-col w-full
+  md:flex-row items-start p-8 border border-black items-center
+  rounded-lg shadow-sm my-4 
+  hover:shadow-xl hover:scale-105 hover:border-gold 
+      hover:bg-gray-50 transition-all duration-300 ease-in-out"
     >
       <div className="flex-shrink-0 ">
         <Link href={targetLink}>
@@ -41,7 +43,8 @@ export default function ItemPreView({ item }: { item: Item }) {
             {item.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2 mt-1"
+                className="inline-block bg-orange-200 
+                text-black text-xs px-2 py-1 rounded mr-2 mt-1"
               >
                 {tag}
               </span>
@@ -55,7 +58,8 @@ export default function ItemPreView({ item }: { item: Item }) {
             {item.effects.map((effect, index) => (
               <span
                 key={index}
-                className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mr-2 mt-1"
+                className="inline-block bg-[var(--pink2)]
+                text-black text-xs px-2 py-1 rounded mr-2 mt-1"
               >
                 {effect.name} ({effect.value})
               </span>
