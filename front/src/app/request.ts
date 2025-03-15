@@ -3,6 +3,7 @@ import { Order } from "./interfaces/Order";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
+export const ENDPOINT_SINGUP: string = `auth/singup`;
 export const ENDPOINT_REFRESH_TOKEN: string = `auth/refresh_token`;
 export const ENDPOINT_LOGIN_OUT: string = `auth/logout`;
 export const ENDPOINT_ITEMS_ALL: string = `items/all`;
@@ -44,6 +45,24 @@ export async function logInRequest(
       "Content-Type": "application/x-www-form-urlencoded",
     },
     credentials: "include",
+    body: formData.toString(),
+  });
+}
+
+export async function singupRequest(
+  userName: string,
+  password: string,
+  from: string = "server",
+) {
+  const url: string = makeUrl(from, ENDPOINT_SINGUP);
+  const formData = new URLSearchParams();
+  formData.append("username", userName);
+  formData.append("password", password);
+  return await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
     body: formData.toString(),
   });
 }
