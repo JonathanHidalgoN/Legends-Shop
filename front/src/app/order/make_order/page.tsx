@@ -57,7 +57,7 @@ export default function OrderPage() {
             <button
               onClick={handleBuy}
               className="flex-1 bg-[var(--orange)] text-white py-2 
-                 rounded hover:bg-orange-700 transition-colors"
+                 rounded hover:opacity-80 transition-colors"
             >
               Buy
             </button>
@@ -74,7 +74,7 @@ export default function OrderPage() {
                 router.push("/auth/login");
               }}
               className="flex-1 bg-[var(--orange)] text-white py-2 
-                 rounded hover:bg-orange-700 transition-colors"
+                 rounded hover:opacity-80 transition-colors"
             >
               Login
             </button>

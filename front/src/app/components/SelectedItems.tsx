@@ -85,7 +85,7 @@ export default function SelectedItems({
                   onChange={() => handleTagToggle(tag)}
                   checked={selectedTags.includes(tag)}
                 />
-                <span className="hover:text-orange-500 transition-colors">
+                <span className="hover:opacity-80 transition-colors">
                   {tag}
                 </span>
               </li>

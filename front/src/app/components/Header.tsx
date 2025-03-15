@@ -28,7 +28,6 @@ export default function Header({ items }: { items: Item[] }) {
     useRef<HTMLDivElement>(null);
 
   const router = useRouter();
-
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
     const responseStatus = await login(formUserName, formPassword);
