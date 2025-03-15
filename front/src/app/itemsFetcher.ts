@@ -1,5 +1,17 @@
-import { Effect, EffectKind, Gold, Item, Stat, StatKind } from "./interfaces/Item";
-import { EffectsNode, GoldNode, ItemNode, StatNode } from "./interfaces/ItemRequest";
+import {
+  Effect,
+  EffectKind,
+  Gold,
+  Item,
+  Stat,
+  StatKind,
+} from "./interfaces/Item";
+import {
+  EffectsNode,
+  GoldNode,
+  ItemNode,
+  StatNode,
+} from "./interfaces/ItemRequest";
 import { allTagsRequet, someItemsRequest } from "./request";
 
 /**
@@ -24,7 +36,7 @@ function parseGoldNodeIntoGold(goldNode: GoldNode): Gold {
  * @returns An array of Stat objects.
  */
 function parseStatNodeIntoStats(statsNodes: StatNode[]): Stat[] {
-  return statsNodes.map(statNode => ({
+  return statsNodes.map((statNode) => ({
     name: statNode.name,
     kind: statNode.kind === "flat" ? StatKind.Flat : StatKind.Percentage,
     value: statNode.value,
@@ -84,7 +96,9 @@ function parseItemNodeIntoItem(itemNode: ItemNode): Item {
 export async function fetchItems(): Promise<Item[]> {
   const response = await someItemsRequest();
   if (!response.ok) {
-    throw new Error(`Failed to fetch items: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch items: ${response.status} ${response.statusText}`,
+    );
   }
   const itemsJson = await response.json();
   if (!("items" in itemsJson) || !Array.isArray(itemsJson.items)) {
@@ -97,7 +111,9 @@ export async function fetchItems(): Promise<Item[]> {
 export async function fetchTags(): Promise<string[]> {
   const response = await allTagsRequet();
   if (!response.ok) {
-    throw new Error(`Failed to fetch unique tags: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch unique tags: ${response.status} ${response.statusText}`,
+    );
   }
   const tagsJson = await response.json();
   if (!("tagNames" in tagsJson) || !Array.isArray(tagsJson.tagNames)) {
@@ -105,4 +121,3 @@ export async function fetchTags(): Promise<string[]> {
   }
   return tagsJson.tagNames;
 }
-

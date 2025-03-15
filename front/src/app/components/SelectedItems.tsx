@@ -3,8 +3,14 @@ import { useState, useEffect } from "react";
 import ItemPreView from "./ItemPreView";
 import { Item } from "../interfaces/Item";
 
-export default function SelectedItems({ items, tags }: { items: Item[]; tags: string[] }) {
-  const maxPrice = Math.max(...items.map(item => item.gold.base));
+export default function SelectedItems({
+  items,
+  tags,
+}: {
+  items: Item[];
+  tags: string[];
+}) {
+  const maxPrice = Math.max(...items.map((item) => item.gold.base));
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(maxPrice);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -15,7 +21,7 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
     setSelectedTags((tagList) =>
       tagList.includes(tag)
         ? tagList.filter((tagToRemove) => tagToRemove !== tag)
-        : [...tagList, tag]
+        : [...tagList, tag],
     );
     //Reset the page
     setCurrentPage(1);
@@ -28,11 +34,14 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
     })
     .filter((item) => item.gold.base <= price);
 
-  //For example 20 items on pages of six need 4 pages ceil(20/6) = 4 
+  //For example 20 items on pages of six need 4 pages ceil(20/6) = 4
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   //Takes items from the list based on the page
-  const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedItems = filteredItems.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   //Check if reset when changing items, pages o current page
   useEffect(() => {
@@ -76,7 +85,9 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
                   onChange={() => handleTagToggle(tag)}
                   checked={selectedTags.includes(tag)}
                 />
-                <span className="hover:text-orange-500 transition-colors">{tag}</span>
+                <span className="hover:text-orange-500 transition-colors">
+                  {tag}
+                </span>
               </li>
             ))}
           </ul>
@@ -101,7 +112,9 @@ export default function SelectedItems({ items, tags }: { items: Item[]; tags: st
               Page {currentPage} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
               className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
             >

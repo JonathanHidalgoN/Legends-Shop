@@ -21,7 +21,7 @@ export default function OrderPage() {
       toast.error("Login to order");
     } else {
       const order: Order = {
-        itemNames: carItems.map(item => item.name),
+        itemNames: carItems.map((item) => item.name),
         total: getTotalCost(),
         userName: userName,
         orderDate: new Date(),
@@ -47,7 +47,9 @@ export default function OrderPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-[var(--orange)]">Your Order</h1>
+      <h1 className="text-2xl font-bold mb-4 text-[var(--orange)]">
+        Your Order
+      </h1>
       <CarDropDown tiny={false} />
       <div className="mt-6 border-t pt-4">
         <div className="flex space-x-4">

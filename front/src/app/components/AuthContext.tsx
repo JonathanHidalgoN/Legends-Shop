@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { logInRequest, logoutRequest, refreshTokenRequest } from "../request";
 import { useRouter } from "next/navigation";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 interface AuthContextType {
   userName: string | null;
@@ -17,7 +17,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
+export function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [userName, setUserName] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<boolean>(false);
   const router = useRouter();
@@ -35,7 +39,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       return response.status;
     }
     setUserName(userName);
-    toast.success(`Welcome ${userName}!`)
+    toast.success(`Welcome ${userName}!`);
     return response.status;
   }
 
@@ -61,7 +65,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       }
       setUserName(null);
       router.push("/");
-      toast.success(`Logout succesfully`)
+      toast.success(`Logout succesfully`);
     } catch (error) {
       console.log("Error");
     }
@@ -69,17 +73,27 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!userName) return;
-    const refreshInterval = setInterval(() => {
-      refreshToken();
-    }, 29 * 60 * 1000);
+    const refreshInterval = setInterval(
+      () => {
+        refreshToken();
+      },
+      29 * 60 * 1000,
+    );
     return () => clearInterval(refreshInterval);
-  }, [userName])
+  }, [userName]);
 
   return (
-    <AuthContext.Provider value={{
-      userName, setUserName, logOut,
-      login, loginError, setLoginError, refreshToken
-    }}>
+    <AuthContext.Provider
+      value={{
+        userName,
+        setUserName,
+        logOut,
+        login,
+        loginError,
+        setLoginError,
+        refreshToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

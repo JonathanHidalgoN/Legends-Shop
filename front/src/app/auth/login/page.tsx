@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
-import { useState } from "react"
+import { useState } from "react";
 
 export default function LogInPage() {
   const [formUserName, setFormUserName] = useState<string>("");
@@ -21,14 +21,18 @@ export default function LogInPage() {
   }
 
   return (
-    <div className="bg-[var(--white)] 
-      min-h-screen flex flex-col items-center justify-center p-4">
+    <div
+      className="bg-[var(--white)] 
+      min-h-screen flex flex-col items-center justify-center p-4"
+    >
       <h1 className="text-3xl text-[var(--orange)] font-bold mb-6">Login</h1>
-      <form onSubmit={handleLoginSubmit}
-        className="w-full max-w-md space-y-4">
+      <form onSubmit={handleLoginSubmit} className="w-full max-w-md space-y-4">
         <div className="flex flex-col">
-          <label htmlFor="username" className="mb-1 font-bold 
-            text-[var(--orange)]">
+          <label
+            htmlFor="username"
+            className="mb-1 font-bold 
+            text-[var(--orange)]"
+          >
             Username
           </label>
           <input
@@ -41,7 +45,10 @@ export default function LogInPage() {
           />
         </div>
         <div className="flex flex-col">
-          <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
+          <label
+            htmlFor="password"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
             Password
           </label>
           <input

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { RefObject, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { sigmar } from "../fonts";
@@ -10,10 +10,9 @@ import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 
-export default function Header({ items }:
-  { items: Item[] }) {
-
-  const { userName, logOut, login, loginError, setLoginError } = useAuthContext();
+export default function Header({ items }: { items: Item[] }) {
+  const { userName, logOut, login, loginError, setLoginError } =
+    useAuthContext();
   const { carItems } = useCarContext();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
@@ -22,9 +21,10 @@ export default function Header({ items }:
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
 
-
-  const loginDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
-  const carDropDownRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const loginDropDownRef: RefObject<HTMLDivElement | null> =
+    useRef<HTMLDivElement>(null);
+  const carDropDownRef: RefObject<HTMLDivElement | null> =
+    useRef<HTMLDivElement>(null);
 
   const router = useRouter();
 
@@ -62,9 +62,7 @@ export default function Header({ items }:
         className={`text-xl ${sigmar.className} ml-12 mr-12
                     bg-[var(--white2)] text-[var(--orange)]`}
       >
-        <Link href="/">
-          Legends Shop
-        </Link>
+        <Link href="/">Legends Shop</Link>
       </div>
       <div className="flex-1 mx-4">
         <SearchBar items={items} />
@@ -82,8 +80,10 @@ export default function Header({ items }:
             {userName ? "Welcome " + userName : "Login"}
           </button>
           {userName && showLoginDropdown && (
-            <div ref={loginDropDownRef}
-              className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10">
+            <div
+              ref={loginDropDownRef}
+              className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10"
+            >
               <button
                 onClick={() => {
                   router.push("/profile");
@@ -106,14 +106,21 @@ export default function Header({ items }:
           )}
           {!userName && showLoginDropdown && (
             <div ref={loginDropDownRef}>
-              <div className="absolute right-0 mt-2 w-40 p-2 
-              rounded shadow-lg bg-[var(--white)] z-10">
+              <div
+                className="absolute right-0 mt-2 w-40 p-2 
+              rounded shadow-lg bg-[var(--white)] z-10"
+              >
                 <div className=" flex flex-col items-center justify-center p-4">
-                  <form onSubmit={handleLoginSubmit}
-                    className="w-full max-w-md space-y-4">
+                  <form
+                    onSubmit={handleLoginSubmit}
+                    className="w-full max-w-md space-y-4"
+                  >
                     <div className="flex flex-col">
-                      <label htmlFor="username" className="mb-1 font-bold 
-            text-[var(--orange)]">
+                      <label
+                        htmlFor="username"
+                        className="mb-1 font-bold 
+            text-[var(--orange)]"
+                      >
                         Username
                       </label>
                       <input
@@ -126,7 +133,10 @@ export default function Header({ items }:
                       />
                     </div>
                     <div className="flex flex-col">
-                      <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
+                      <label
+                        htmlFor="password"
+                        className="mb-1 font-bold text-[var(--orange)]"
+                      >
                         Password
                       </label>
                       <input
@@ -168,7 +178,8 @@ export default function Header({ items }:
           <button
             onClick={() => setShowCartDropdown((prev) => !prev)}
             className="p-2 rounded flex items-center hover:opacity-80 transition
-            bg-[var(--orange)] text-[var(--white)]">
+            bg-[var(--orange)] text-[var(--white)]"
+          >
             Car
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +214,7 @@ export default function Header({ items }:
                     text-[var(--white)] rounded hover:bg-[var(--pink1)] 
                     transition-colors w-full"
                     onClick={() => {
-                      router.push("/order/make_order/")
+                      router.push("/order/make_order/");
                       setShowCartDropdown(false);
                     }}
                   >
@@ -227,9 +238,8 @@ export default function Header({ items }:
               </Link>
             ) : null}
           </div>
-
         )}
       </div>
-    </header >
+    </header>
   );
-};
+}

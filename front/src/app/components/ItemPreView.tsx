@@ -10,9 +10,11 @@ export default function ItemPreView({ item }: { item: Item }) {
   const targetLink = `/items/${item.name}`;
 
   return (
-    <div className="flex flex-col 
+    <div
+      className="flex flex-col 
       md:flex-row items-start p-4 border border-black
-      rounded-lg shadow-sm my-4 hover:shadow-md transition-shadow">
+      rounded-lg shadow-sm my-4 hover:shadow-md transition-shadow"
+    >
       <div className="flex-shrink-0">
         <Link href={targetLink}>
           <div className="relative w-32 h-32 md:w-40 md:h-40">

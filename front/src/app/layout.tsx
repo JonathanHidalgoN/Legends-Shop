@@ -1,5 +1,5 @@
 import Header from "./components/Header";
-import "./styles.css"
+import "./styles.css";
 import "./globals.css";
 import { Item } from "./interfaces/Item";
 import { fetchItems, fetchTags } from "./itemsFetcher";
@@ -17,7 +17,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   let items: Item[] = [];
   let tags: string[] = [];
   try {

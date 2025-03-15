@@ -26,16 +26,15 @@ export default function ItemView({ itemName }: { itemName: string }) {
       </div>
 
       <div className="md:w-1/2 md:ml-6 mt-4 md:mt-0">
-        <h1 className="text-4xl font-bold text-[var(--orange)]">
-          {item.name}
-        </h1>
-        <p className="mt-2 text-2xl text-[var(--yellow)]">
-          {item.gold.base} g
-        </p>
+        <h1 className="text-4xl font-bold text-[var(--orange)]">{item.name}</h1>
+        <p className="mt-2 text-2xl text-[var(--yellow)]">{item.gold.base} g</p>
 
         <div className="mt-4 text-gray-700">
           <span className="font-bold">Description: </span>
-          <DescriptionTextMapper description={item.description} maxLen={999999} />
+          <DescriptionTextMapper
+            description={item.description}
+            maxLen={999999}
+          />
         </div>
 
         {item.stats && item.stats.length > 0 && (
@@ -70,7 +69,6 @@ export default function ItemView({ itemName }: { itemName: string }) {
         )}
 
         <AddToCarButton item={item} />
-
       </div>
     </div>
   );
