@@ -21,15 +21,22 @@ export default function Header({ items }:
   const [isMounted, setIsMounted] = useState(false);
   const { carItems } = useCarContext();
   const [formUserName, setFormUserName] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [formPassword, setFormPassword] = useState<string>("");
   const { logIn } = useAuthContext();
-  const handleSubmit = async (e: any) => {
+  const [loginError, setLoginError] = useState(false);
+
+  async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const success = await logIn(formUserName, password);
-    if (success) {
+    const responseStatus = await logIn(formUserName, formPassword);
+    if (responseStatus === 200) {
       setShowLoginDropdown(false);
+      setFormUserName("");
+      setFormPassword("");
+      setLoginError(false);
+    } else if (responseStatus === 401) {
+      setLoginError(true);
     }
-  };
+  }
 
   useEffect(() => {
     setIsMounted(true);
@@ -99,7 +106,7 @@ export default function Header({ items }:
               <div className="absolute right-0 mt-2 w-40 p-2 
               rounded shadow-lg bg-[var(--white)] z-10">
                 <div className=" flex flex-col items-center justify-center p-4">
-                  <form onSubmit={handleSubmit}
+                  <form onSubmit={handleLoginSubmit}
                     className="w-full max-w-md space-y-4">
                     <div className="flex flex-col">
                       <label htmlFor="username" className="mb-1 font-bold 
@@ -112,7 +119,7 @@ export default function Header({ items }:
                         name="username"
                         value={formUserName}
                         onChange={(e) => setFormUserName(e.target.value)}
-                        className="border p-2 rounded"
+                        className={`border p-2 rounded ${loginError ? "border-red-500" : ""}`}
                       />
                     </div>
                     <div className="flex flex-col">
@@ -124,18 +131,30 @@ export default function Header({ items }:
                         name="password"
                         type="password"
                         placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="border p-2 rounded"
+                        value={formPassword}
+                        onChange={(e) => setFormPassword(e.target.value)}
+                        className={`border p-2 rounded ${loginError ? "border-red-500" : ""}`}
                       />
+                      {loginError && (
+                        <span className="text-red-500 text-sm mt-1">
+                          Incorrect user or password
+                        </span>
+                      )}
                     </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-[var(--orange)] text-white 
-                    py-1 rounded hover:bg-orange-700 transition"
-                    >
-                      Log In
-                    </button>
+                    <div className="flex flex-col items-center w-full">
+                      <button
+                        type="submit"
+                        className="w-full max-w-md bg-[var(--orange)] text-white py-1 rounded hover:opacity-80 transition"
+                      >
+                        Log In
+                      </button>
+                      <div className="my-2 text-center">Are you new?</div>
+                      <Link className="w-full max-w-md " href={`/auth/singup/`}>
+                        <button className="w-full bg-[var(--orange)] text-white py-1 rounded hover:opacity-80 transition">
+                          Sign Up
+                        </button>
+                      </Link>
+                    </div>
                   </form>
                 </div>
               </div>

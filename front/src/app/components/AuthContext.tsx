@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 interface AuthContextType {
   userName: string | null;
   setUserName: (userName: string | null) => void;
-  logIn: (userName: string, password: string) => Promise<boolean>;
+  logIn: (userName: string, password: string) => Promise<number>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
 }
@@ -19,15 +19,21 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
 
-  async function logIn(userName: string, password: string): Promise<boolean> {
+  async function logIn(userName: string, password: string): Promise<number> {
     const response = await logInRequest(userName, password, "client");
     if (!response.ok) {
-      toast.error("Login error");
-      return false;
+      if (response.status == 401) {
+        toast.error("Incorrect username or password");
+      } else if (response.status == 500) {
+        toast.error("Internal server error login");
+      } else {
+        toast.error("Unexpected error");
+      }
+      return response.status;
     }
     setUserName(userName);
     toast.success(`Welcome ${userName}!`)
-    return true;
+    return response.status;
   }
 
   async function refreshToken(): Promise<void> {
@@ -54,7 +60,6 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       router.push("/");
       toast.success(`Logout succesfully`)
     } catch (error) {
-      console.log(error);
       console.log("Error");
     }
   }
