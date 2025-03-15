@@ -103,7 +103,6 @@ export async function fetchTags(): Promise<string[]> {
   if (!("tagNames" in tagsJson) || !Array.isArray(tagsJson.tagNames)) {
     throw new Error("Invalid response format: expected an 'tagNames' array");
   }
-  console.log(tagsJson);
   return tagsJson.tagNames;
 }
 

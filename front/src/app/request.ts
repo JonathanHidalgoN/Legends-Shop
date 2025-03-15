@@ -14,8 +14,6 @@ export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
-  console.log(SERVER_DOMAIN);
-  console.log(CLIENT_DOMAIN);
   if (from === "server") {
     url = SERVER_DOMAIN + endpoint;
   } else {
