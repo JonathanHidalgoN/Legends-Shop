@@ -16,8 +16,3 @@ class TokenData(BaseModel):
 
 class UserInDB(User):
     hashedPassword: str
-
-
-class singUpRequest(BaseModel):
-    username: str
-    password: str
