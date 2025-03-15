@@ -10,7 +10,7 @@ from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 
 app = FastAPI()
 origins = [
-    f"http://{FRONTEND_HOST}:{FRONTEND_PORT}"
+    FRONTEND_HOST
     # TODO: add env variable to website that host the frontend client
     ,
     f"http://localhost:{FRONTEND_PORT}",
