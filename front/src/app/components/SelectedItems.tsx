@@ -55,7 +55,7 @@ export default function SelectedItems({
       <aside className="p-2 flex flex-col shadow-lg bg-[var(--white)] text-[var(--black)]">
         <div className="mb-6">
           <h2 className="font-bold mb-2">Price</h2>
-          <div className="flex items-center">
+          <div className="flex items-center flex-col md:flex-row items-center">
             <span className="mr-2">0</span>
             <input
               type="range"
@@ -66,7 +66,7 @@ export default function SelectedItems({
                 setPrice(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="flex-grow"
+              className="flex-grow accent-[var(--yellow)] h-2 rounded-lg bg-yellow-100 outline-none transition-all duration-300 cursor-pointer"
             />
             <span className="ml-2">{price}</span>
           </div>
@@ -77,7 +77,9 @@ export default function SelectedItems({
             {tags.map((tag, index) => (
               <li
                 key={index}
-                className="flex items-center p-2 rounded hover:bg-gray-200 transition-colors"
+                className="flex items-center p-2 rounded hover:bg-orange-100
+                hover:text-orange-500
+                transition-colors"
               >
                 <input
                   type="checkbox"
