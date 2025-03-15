@@ -5,6 +5,7 @@ import { Item } from "../interfaces/Item";
 import DescriptionTextMapper from "./DescriptionTextMapper";
 import AddToCarButton from "./AddToCarButton";
 import Image from "next/image";
+import EpicLegendMap from "./EpicLegendMap";
 
 export default function ItemPreView({ item }: { item: Item }) {
   const targetLink = `/items/${item.name}`;
@@ -12,10 +13,10 @@ export default function ItemPreView({ item }: { item: Item }) {
   return (
     <div
       className="flex flex-col 
-      md:flex-row items-start p-4 border border-black
+      md:flex-row items-start p-4 border border-black items-center
       rounded-lg shadow-sm my-4 hover:shadow-md transition-shadow"
     >
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 ">
         <Link href={targetLink}>
           <div className="relative w-32 h-32 md:w-40 md:h-40">
             <Image
@@ -30,10 +31,10 @@ export default function ItemPreView({ item }: { item: Item }) {
 
       <div className="flex-1 md:ml-4 mt-4 md:mt-0">
         <h3 className={`text-xl font-bold text-[var(--black)]`}>{item.name}</h3>
-        <div className="mt-2">
-          <DescriptionTextMapper description={item.description} maxLen={700} />
+        <div className="m-2">
+          <EpicLegendMap itemName={item.name} />
         </div>
-
+        <DescriptionTextMapper description={item.description} maxLen={300} />
         {item.tags.length > 0 && (
           <div className="mt-3">
             <span className="text-sm font-medium text-gray-700">Tags: </span>
