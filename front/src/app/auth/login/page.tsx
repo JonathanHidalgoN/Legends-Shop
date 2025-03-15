@@ -4,9 +4,12 @@ import { useAuthContext } from "@/app/components/AuthContext";
 import { useState } from "react";
 
 export default function LogInPage() {
+
+  const { login } = useAuthContext();
+
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
-  const { login, loginError, setLoginError } = useAuthContext();
+  const [loginError, setLoginError] = useState<boolean>(false);
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();

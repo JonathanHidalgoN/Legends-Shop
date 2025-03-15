@@ -9,8 +9,6 @@ interface AuthContextType {
   userName: string | null;
   setUserName: (userName: string | null) => void;
   login: (userName: string, password: string) => Promise<number>;
-  loginError: boolean;
-  setLoginError: (error: boolean) => void;
   logOut: () => void;
   refreshToken: () => Promise<void>;
 }
@@ -23,7 +21,6 @@ export function AuthContextProvider({
   children: React.ReactNode;
 }) {
   const [userName, setUserName] = useState<string | null>(null);
-  const [loginError, setLoginError] = useState<boolean>(false);
   const router = useRouter();
 
   async function login(userName: string, password: string): Promise<number> {
@@ -89,8 +86,6 @@ export function AuthContextProvider({
         setUserName,
         logOut,
         login,
-        loginError,
-        setLoginError,
         refreshToken,
       }}
     >

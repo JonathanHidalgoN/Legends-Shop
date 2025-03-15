@@ -11,7 +11,7 @@ import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 
 export default function Header({ items }: { items: Item[] }) {
-  const { userName, logOut, login, loginError, setLoginError } =
+  const { userName, logOut, login } =
     useAuthContext();
   const { carItems } = useCarContext();
 
@@ -20,6 +20,7 @@ export default function Header({ items }: { items: Item[] }) {
   const [isMounted, setIsMounted] = useState(false);
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
+  const [loginError, setLoginError] = useState<boolean>(false);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
