@@ -6,11 +6,11 @@ export enum OrderStatus {
 }
 
 export interface Order {
-  id: number,
-  status: OrderStatus
-  itemNames: string[],
-  total: number,
-  userName: string,
-  orderDate: Date,
-  deliveryDate: Date,
+  id: number;
+  status: OrderStatus;
+  itemNames: string[];
+  total: number;
+  userName: string;
+  orderDate: Date;
+  deliveryDate: Date;
 }

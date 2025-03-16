@@ -7,7 +7,7 @@ import Image from "next/image";
 function getItemMatches(query: string, items: Item[]): Item[] {
   if (query.length > 0) {
     return items.filter((item: Item) =>
-      item.name.toLowerCase().includes(query.toLowerCase())
+      item.name.toLowerCase().includes(query.toLowerCase()),
     );
   } else {
     return [];
@@ -17,8 +17,8 @@ function getItemMatches(query: string, items: Item[]): Item[] {
 export default function SearchBar({ items }: { items: Item[] }) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Item[]>([]);
-  const containerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
-
+  const containerRef: RefObject<HTMLDivElement | null> =
+    useRef<HTMLDivElement>(null);
 
   // Update suggestions based on the query and items
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function SearchBar({ items }: { items: Item[] }) {
   function handleFocus() {
     if (query.length > 0) {
       const matches = items.filter((item: Item) =>
-        item.name.toLowerCase().includes(query.toLowerCase())
+        item.name.toLowerCase().includes(query.toLowerCase()),
       );
       setSuggestions(matches);
     }

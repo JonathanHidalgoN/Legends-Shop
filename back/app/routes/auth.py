@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import UserIdNotFound
 from app.logger import logger
@@ -16,7 +16,7 @@ from app.data.queries.authQueries import (
     getUserInDB,
     insertUser,
 )
-from app.schemas.AuthSchemas import Token, UserInDB, singUpRequest
+from app.schemas.AuthSchemas import UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 # Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
@@ -74,12 +74,12 @@ async def getToken(
         )
     if not matchUser:
         logger.error(f"Error in {request.url.path}, {dataForm.username} do not exit")
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         logger.error(
             f"Error in {request.url.path}, incorrect password for user {dataForm.username}"
         )
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     accessToken = createAccessToken(data={"sub": matchUser.userName})
     response.set_cookie(
         key="access_token",
@@ -131,27 +131,29 @@ async def tokenRefresh(
     )
 
 
-@router.post("/singUp")
+@router.post("/singup")
 async def singUp(
     request: Request,
-    userData: singUpRequest,
+    #This ... makes required in fastapi
+    username:str = Form(...),
+    password:str = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
         logger.debug(f"Request to {request.url.path}")
-        userExist: bool = await checkUserExistInDB(db, userData.username)
+        userExist: bool = await checkUserExistInDB(db, username)
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
-            status_code=400, detail="Error retriving the user from the server"
+            status_code=500, detail="Error retriving the user from the server"
         )
     if userExist:
         logger.error(
-            f"Error in {request.url.path}, the {userData.username} already exist"
+            f"Error in {request.url.path}, the {username} already exist"
         )
-        raise HTTPException(status_code=500, detail="Username exist, change it")
+        raise HTTPException(status_code=400, detail="Username exist, change it")
     userInDB: UserInDB = UserInDB(
-        userName=userData.username, hashedPassword=hashPassword(userData.password)
+        userName=username, hashedPassword=hashPassword(password)
     )
     try:
         await insertUser(db, userInDB)
@@ -159,7 +161,7 @@ async def singUp(
         return {"message": "nice"}
     except Exception as e:
         logger.error(
-            f"Error in {request.url.path}, unexpected error inserting new user with userName {userData.username}, exception: {e}"
+            f"Error in {request.url.path}, unexpected error inserting new user with userName {username}, exception: {e}"
         )
         raise HTTPException(status_code=500, detail="Server error inserting the user")
 

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import SelectedItems from "./components/SelectedItems";
 import { useStaticData } from "./components/StaticDataContext";
 

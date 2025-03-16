@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --black:#000000;  
-  --white: #FFFFFF; 
-  --white2:#EBE9E1;
+  --black: #000000;
+  --white: #ffffff;
+  --white2: #ebe9e1;
   /*60%*/
-  --orange: #E43D12;
+  --orange: #e43d12;
   /*30%*/
-  --pink1:#D6536D;
-  --pink2:#FFA2B6;
-  --yellow:#EFB11D;
+  --pink1: #d6536d;
+  --pink2: #ffa2b6;
+  --yellow: #efb11d;
   /*10%*/
 }
 

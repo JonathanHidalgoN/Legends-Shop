@@ -8,6 +8,7 @@ import { orderRequest } from "@/app/request";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import OrderSuccessModal from "@/app/components/OrderSuccessModal";
+import { usePathname } from 'next/navigation'
 
 export default function OrderPage() {
   const { carItems, getTotalCost, cleanCar } = useCarContext();
@@ -15,13 +16,14 @@ export default function OrderPage() {
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname()
 
   async function handleBuy() {
     if (!userName) {
       toast.error("Login to order");
     } else {
       const order: Order = {
-        itemNames: carItems.map(item => item.name),
+        itemNames: carItems.map((item) => item.name),
         total: getTotalCost(),
         userName: userName,
         orderDate: new Date(),
@@ -47,7 +49,9 @@ export default function OrderPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-[var(--orange)]">Your Order</h1>
+      <h1 className="text-2xl font-bold mb-4 text-[var(--orange)]">
+        Your Order
+      </h1>
       <CarDropDown tiny={false} />
       <div className="mt-6 border-t pt-4">
         <div className="flex space-x-4">
@@ -55,7 +59,7 @@ export default function OrderPage() {
             <button
               onClick={handleBuy}
               className="flex-1 bg-[var(--orange)] text-white py-2 
-                 rounded hover:bg-orange-700 transition-colors"
+                 rounded hover:opacity-80 transition-colors"
             >
               Buy
             </button>
@@ -69,10 +73,10 @@ export default function OrderPage() {
           {!userName && (
             <button
               onClick={() => {
-                router.push("/auth/login");
+                router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
               }}
               className="flex-1 bg-[var(--orange)] text-white py-2 
-                 rounded hover:bg-orange-700 transition-colors"
+                 rounded hover:opacity-80 transition-colors"
             >
               Login
             </button>

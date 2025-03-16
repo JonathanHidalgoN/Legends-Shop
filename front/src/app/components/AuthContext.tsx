@@ -1,33 +1,61 @@
-"use client"
+"use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { logInRequest, logoutRequest, refreshTokenRequest } from "../request";
+import { logInRequest, logoutRequest, refreshTokenRequest, singupRequest } from "../request";
 import { useRouter } from "next/navigation";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 interface AuthContextType {
   userName: string | null;
   setUserName: (userName: string | null) => void;
-  logIn: (userName: string, password: string) => Promise<boolean>;
+  login: (userName: string, password: string) => Promise<number>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
+  singup: (userName: string, password: string) => Promise<number>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
+export function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
 
-  async function logIn(userName: string, password: string): Promise<boolean> {
+  async function login(userName: string, password: string): Promise<number> {
     const response = await logInRequest(userName, password, "client");
     if (!response.ok) {
-      toast.error("Login error");
-      return false;
+      if (response.status == 401) {
+        toast.error("Incorrect username or password");
+      } else if (response.status == 500) {
+        toast.error("Internal server error login");
+      } else {
+        toast.error("Unexpected error");
+      }
+      return response.status;
     }
     setUserName(userName);
-    toast.success(`Welcome ${userName}!`)
-    return true;
+    toast.success(`Welcome ${userName}!`);
+    return response.status;
+  }
+
+  async function singup(userName: string, password: string): Promise<number> {
+    const response = await singupRequest(userName, password, "client");
+    if (!response.ok) {
+      if (response.status == 400) {
+        toast.error("The username already exist, chose other");
+      } else if (response.status == 500) {
+        toast.error("Internal server error login");
+      } else {
+        toast.error("Unexpected error");
+      }
+      return response.status;
+    }
+    toast.success(`Singup succesfully ${userName}!`);
+    await login(userName, password);
+    return response.status;
   }
 
   async function refreshToken(): Promise<void> {
@@ -52,23 +80,34 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       }
       setUserName(null);
       router.push("/");
-      toast.success(`Logout succesfully`)
+      toast.success(`Logout succesfully`);
     } catch (error) {
-      console.log(error);
       console.log("Error");
     }
   }
 
   useEffect(() => {
     if (!userName) return;
-    const refreshInterval = setInterval(() => {
-      refreshToken();
-    }, 29 * 60 * 1000);
+    const refreshInterval = setInterval(
+      () => {
+        refreshToken();
+      },
+      29 * 60 * 1000,
+    );
     return () => clearInterval(refreshInterval);
-  }, [userName])
+  }, [userName]);
 
   return (
-    <AuthContext.Provider value={{ userName, setUserName, logOut, logIn, refreshToken }}>
+    <AuthContext.Provider
+      value={{
+        userName,
+        setUserName,
+        logOut,
+        login,
+        refreshToken,
+        singup
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

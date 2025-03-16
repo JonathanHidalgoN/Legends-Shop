@@ -1,5 +1,9 @@
-export default function OrderSuccessModal({ orderId, onClose }: {
-  orderId: number | null, onClose: () => void
+export default function OrderSuccessModal({
+  orderId,
+  onClose,
+}: {
+  orderId: number | null;
+  onClose: () => void;
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -13,7 +17,12 @@ export default function OrderSuccessModal({ orderId, onClose }: {
         </button>
         <div className="flex flex-col items-center">
           <div className="bg-green-500 text-white rounded-full h-16 w-16 flex items-center justify-center mb-4">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

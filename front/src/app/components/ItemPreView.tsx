@@ -5,15 +5,20 @@ import { Item } from "../interfaces/Item";
 import DescriptionTextMapper from "./DescriptionTextMapper";
 import AddToCarButton from "./AddToCarButton";
 import Image from "next/image";
+import EpicLegendMap from "./EpicLegendMap";
 
 export default function ItemPreView({ item }: { item: Item }) {
   const targetLink = `/items/${item.name}`;
 
   return (
-    <div className="flex flex-col 
-      md:flex-row items-start p-4 border border-black
-      rounded-lg shadow-sm my-4 hover:shadow-md transition-shadow">
-      <div className="flex-shrink-0">
+    <div
+      className="flex flex-col w-full
+  md:flex-row items-start p-8 border border-black items-center
+  rounded-lg shadow-sm my-4 
+  hover:shadow-xl hover:scale-105 hover:border-gold 
+      hover:bg-gray-50 transition-all duration-300 ease-in-out"
+    >
+      <div className="flex-shrink-0 ">
         <Link href={targetLink}>
           <div className="relative w-32 h-32 md:w-40 md:h-40">
             <Image
@@ -28,17 +33,18 @@ export default function ItemPreView({ item }: { item: Item }) {
 
       <div className="flex-1 md:ml-4 mt-4 md:mt-0">
         <h3 className={`text-xl font-bold text-[var(--black)]`}>{item.name}</h3>
-        <div className="mt-2">
-          <DescriptionTextMapper description={item.description} maxLen={700} />
+        <div className="m-2">
+          <EpicLegendMap itemName={item.name} />
         </div>
-
+        <DescriptionTextMapper description={item.description} maxLen={300} />
         {item.tags.length > 0 && (
           <div className="mt-3">
             <span className="text-sm font-medium text-gray-700">Tags: </span>
             {item.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2 mt-1"
+                className="inline-block bg-orange-200 
+                text-black text-xs px-2 py-1 rounded mr-2 mt-1"
               >
                 {tag}
               </span>
@@ -52,7 +58,8 @@ export default function ItemPreView({ item }: { item: Item }) {
             {item.effects.map((effect, index) => (
               <span
                 key={index}
-                className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mr-2 mt-1"
+                className="inline-block bg-[var(--pink2)]
+                text-black text-xs px-2 py-1 rounded mr-2 mt-1"
               >
                 {effect.name} ({effect.value})
               </span>

@@ -29,14 +29,18 @@ interface CarContextType {
   getTotalCost: () => number;
 
   /**
-   * Deletes all car items 
+   * Deletes all car items
    */
   cleanCar: () => void;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
 
-export function CarContextProvider({ children }: { children: React.ReactNode }) {
+export function CarContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [carItems, setCarItems] = useState<Item[]>([]);
 
   /**
@@ -45,7 +49,7 @@ export function CarContextProvider({ children }: { children: React.ReactNode }) 
    * @param item - The item to remove.
    */
   function deleteOneItemFromCar(item: Item): void {
-    const index = carItems.findIndex(cartItem => cartItem.name === item.name);
+    const index = carItems.findIndex((cartItem) => cartItem.name === item.name);
     if (index !== -1) {
       setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
     }
@@ -77,22 +81,24 @@ export function CarContextProvider({ children }: { children: React.ReactNode }) 
   }
 
   /**
-   * Deletes all car items 
+   * Deletes all car items
    */
   function cleanCar(): void {
     setCarItems([]);
   }
 
   return (
-    <CarContext.Provider value={{
-      carItems,
-      setCarItems,
-      deleteOneItemFromCar,
-      deleteAllItemFromCar,
-      addOneItemToCar,
-      getTotalCost,
-      cleanCar,
-    }}>
+    <CarContext.Provider
+      value={{
+        carItems,
+        setCarItems,
+        deleteOneItemFromCar,
+        deleteAllItemFromCar,
+        addOneItemToCar,
+        getTotalCost,
+        cleanCar,
+      }}
+    >
       {children}
     </CarContext.Provider>
   );

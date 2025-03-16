@@ -3,6 +3,7 @@ import { Order } from "./interfaces/Order";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
+export const ENDPOINT_SINGUP: string = `auth/singup`;
 export const ENDPOINT_REFRESH_TOKEN: string = `auth/refresh_token`;
 export const ENDPOINT_LOGIN_OUT: string = `auth/logout`;
 export const ENDPOINT_ITEMS_ALL: string = `items/all`;
@@ -14,8 +15,6 @@ export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
-  console.log(SERVER_DOMAIN);
-  console.log(CLIENT_DOMAIN);
   if (from === "server") {
     url = SERVER_DOMAIN + endpoint;
   } else {
@@ -31,17 +30,39 @@ function makeUrl(from: string, endpoint: string): string {
  * @param password - The password for the user.
  * @returns A Promise that resolves with the response from the login request.
  */
-export async function logInRequest(userName: string, password: string, from: string = "server") {
+export async function logInRequest(
+  userName: string,
+  password: string,
+  from: string = "server",
+) {
   const url: string = makeUrl(from, ENDPOINT_LOGIN);
   const formData = new URLSearchParams();
   formData.append("username", userName);
   formData.append("password", password);
   return await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     credentials: "include",
+    body: formData.toString(),
+  });
+}
+
+export async function singupRequest(
+  userName: string,
+  password: string,
+  from: string = "server",
+) {
+  const url: string = makeUrl(from, ENDPOINT_SINGUP);
+  const formData = new URLSearchParams();
+  formData.append("username", userName);
+  formData.append("password", password);
+  return await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
     body: formData.toString(),
   });
 }
@@ -106,7 +127,8 @@ export async function orderRequest(order: Order, from: string = "server") {
 /**
  * Makes a GET request to fetch user history.
  */
-export async function getUserHistoryRequest(from: string = "server",
+export async function getUserHistoryRequest(
+  from: string = "server",
   filters: {
     orderStatus?: string;
     minOrderDate?: Date;
@@ -116,7 +138,7 @@ export async function getUserHistoryRequest(from: string = "server",
     sortField?: string;
     sortOrder?: string;
     filterItemNames?: string[];
-  } = {}
+  } = {},
 ) {
   const queryParams = new URLSearchParams();
 
@@ -126,25 +148,25 @@ export async function getUserHistoryRequest(from: string = "server",
   if (filters.minOrderDate) {
     queryParams.append(
       "minOrderDate",
-      filters.minOrderDate.toISOString().substring(0, 10)
+      filters.minOrderDate.toISOString().substring(0, 10),
     );
   }
   if (filters.maxOrderDate) {
     queryParams.append(
       "maxOrderDate",
-      filters.maxOrderDate.toISOString().substring(0, 10)
+      filters.maxOrderDate.toISOString().substring(0, 10),
     );
   }
   if (filters.minDeliveryDate) {
     queryParams.append(
       "minDeliveryDate",
-      filters.minDeliveryDate.toISOString().substring(0, 10)
+      filters.minDeliveryDate.toISOString().substring(0, 10),
     );
   }
   if (filters.maxDeliveryDate) {
     queryParams.append(
       "maxDeliveryDate",
-      filters.maxDeliveryDate.toISOString().substring(0, 10)
+      filters.maxDeliveryDate.toISOString().substring(0, 10),
     );
   }
   if (filters.sortField) {
@@ -165,7 +187,10 @@ export async function getUserHistoryRequest(from: string = "server",
 /**
  * Cancel the order requet with id
  */
-export async function cancelOrderRequest(orderId: number, from: string = "server") {
+export async function cancelOrderRequest(
+  orderId: number,
+  from: string = "server",
+) {
   const url: string = makeUrl(from, `${ENDPOINT_ORDER_CANCEL}/${orderId}`);
   return await fetch(url, {
     method: "PUT",
