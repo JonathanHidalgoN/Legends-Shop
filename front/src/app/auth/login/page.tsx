@@ -2,10 +2,14 @@
 
 import { useAuthContext } from "@/app/components/AuthContext";
 import { useState } from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LogInPage() {
 
   const { login } = useAuthContext();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
 
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
@@ -18,6 +22,7 @@ export default function LogInPage() {
       setFormUserName("");
       setFormPassword("");
       setLoginError(false);
+      router.push(redirect);
     } else if (responseStatus === 401) {
       setLoginError(true);
     }
