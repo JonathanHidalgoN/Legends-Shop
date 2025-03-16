@@ -426,8 +426,9 @@ export default function EpicLegendMap({ itemName }: { itemName: string }) {
   const epicItemDesc: string = epicLegend[itemName]
   return (
     <div>
-      <span className={`text-xl font text-charcoal 
-  font-bold ${cormorant.className}`}>&quot;{epicItemDesc}&quot;</span>
+      <span className={`text-xl font text-charcoal font-bold ${cormorant.className}`}>
+        {`"${epicItemDesc}"`}
+      </span>
     </div>
   )
 }
