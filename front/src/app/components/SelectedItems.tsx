@@ -83,7 +83,16 @@ export default function SelectedItems({
               >
                 <input
                   type="checkbox"
-                  className="w-5 h-5 mr-2 hover:cursor-pointer"
+                  className="
+    w-5 h-5 mr-2 cursor-pointer 
+    appearance-none border border-black-300 rounded-sm
+    checked:bg-orange-200 checked:border-orange-200
+    flex items-center justify-center relative
+    checked:before:content-['x'] checked:before:text-white 
+    checked:before:absolute checked:before:text-m checked:before:font-bold
+    checked:before:inset-0 checked:before:flex 
+                  checked:before:items-center checked:before:justify-center
+  "
                   onChange={() => handleTagToggle(tag)}
                   checked={selectedTags.includes(tag)}
                 />
