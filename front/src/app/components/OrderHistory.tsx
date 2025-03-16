@@ -37,8 +37,8 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
     useState<Date>(MIN_DATE);
   const [filterMaxDeliveryDate, setFilterMaxDeliveryDate] =
     useState<Date>(TODAY_2WEEKS);
-  const [sortField, setSortField] = useState<SortField>("price");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [sortField, setSortField] = useState<SortField>("orderDate");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
 
   function handleItemNameFilterChange(
