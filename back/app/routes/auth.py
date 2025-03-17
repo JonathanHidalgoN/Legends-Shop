@@ -19,7 +19,7 @@ from app.data.queries.authQueries import (
     getUserInDB,
     insertUser,
 )
-from app.schemas.AuthSchemas import UserInDB
+from app.schemas.AuthSchemas import SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 # Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
@@ -111,7 +111,7 @@ async def tokenRefresh(
         if not matchUser:
             logger.error(f"Error in {request.url.path}, {userName} do not exit")
             raise HTTPException(
-                status_code=400, detail="Incorrect username or password"
+                status_code=401, detail="Incorrect username or password"
             )
         logger.debug(f"Request to {request.url.path} completed successfully")
     except Exception as e:
@@ -148,11 +148,19 @@ async def singUp(
     if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$',email):
         raise HTTPException(
             status_code=400, detail="Email has not a valid pattern"
+                            ,headers={"X-Error-Type": SingUpError.INVALIDEMAIL,
+                            "Access-Control-Expose-Headers":"X-Error-Type"
+                                      }
         )
     try:
         birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date value")
+        raise HTTPException(status_code=400, detail="Invalid date value"
+                            ,headers={
+                            "X-Error-Type": SingUpError.INVALIDDATE,
+                            "Access-Control-Expose-Headers":"X-Error-Type"
+                                      }
+                            )
     try:
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
@@ -165,12 +173,20 @@ async def singUp(
         logger.error(
             f"Error in {request.url.path}, the username {username} already exist"
         )
-        raise HTTPException(status_code=400, detail="Username exist, change it")
+        raise HTTPException(status_code=400, detail="Username exist, change it"
+                            ,headers={"X-Error-Type": SingUpError.USERNAMEEXIST,
+                            "Access-Control-Expose-Headers":"X-Error-Type"
+                                      }
+                            )
     if emailExist:
         logger.error(
             f"Error in {request.url.path}, the email {email} already exist"
         )
-        raise HTTPException(status_code=400, detail="Email exist, change it")
+        raise HTTPException(status_code=400, detail="Email exist, change it",
+                            headers={"X-Error-Type": SingUpError.EMAILEXIST,
+                            "Access-Control-Expose-Headers":"X-Error-Type"
+                                     }
+                            )
     userInDB: UserInDB = UserInDB(
         userName=username, hashedPassword=hashPassword(password), 
         created=datetime.now().date(),
@@ -185,7 +201,8 @@ async def singUp(
         logger.error(
             f"Error in {request.url.path}, unexpected error inserting new user with userName {username}, exception: {e}"
         )
-        raise HTTPException(status_code=500, detail="Server error inserting the user")
+        raise HTTPException(status_code=500, detail="Server error inserting the user"
+                            )
 
 
 @router.get("/logout")
