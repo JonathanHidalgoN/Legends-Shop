@@ -162,11 +162,15 @@ export default function Header({ items }: { items: Item[] }) {
                         Log In
                       </button>
                       <div className="my-2 text-center">Are you new?</div>
-                      <Link className="w-full max-w-md " href={`/auth/singup/`}>
-                        <button className="w-full bg-[var(--orange)] text-white py-1 rounded hover:opacity-80 transition">
-                          Sign Up
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => {
+                          setShowLoginDropdown(false);
+                          router.push("/auth/singup/");
+                        }}
+                        className="w-full max-w-md bg-[var(--orange)] text-white py-1 rounded hover:opacity-80 transition"
+                      >
+                        Sign Up
+                      </button>
                     </div>
                   </form>
                 </div>
