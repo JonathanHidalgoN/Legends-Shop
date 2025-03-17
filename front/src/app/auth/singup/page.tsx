@@ -38,8 +38,12 @@ export default function SingupPage() {
       setDifferentPassword(false);
     }
     const birthDate = new Date(formBirthDate);
-    const responseStatus: APIResponse = await singup(formUserName, formPassword1,
-      formEmail, birthDate);
+    const responseStatus: APIResponse = await singup(
+      formUserName,
+      formPassword1,
+      formEmail,
+      birthDate,
+    );
     if (responseStatus.status === 200) {
       router.push("/");
       setFormUserName("");
@@ -50,7 +54,7 @@ export default function SingupPage() {
       setSingupError(null);
     } else if (responseStatus.status === 400) {
       console.log("Here");
-      setSingupError(responseStatus.errorType)
+      setSingupError(responseStatus.errorType);
     }
   }
 
@@ -59,7 +63,10 @@ export default function SingupPage() {
       <h1 className="text-3xl text-[var(--orange)] font-bold mb-6">Sing up!</h1>
       <form onSubmit={handleSingupSubmit} className="w-full max-w-md space-y-4">
         <div className="flex flex-col">
-          <label htmlFor="username" className="mb-1 font-bold text-[var(--orange)]">
+          <label
+            htmlFor="username"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
             Username
           </label>
           <input
@@ -78,7 +85,10 @@ export default function SingupPage() {
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="email" className="mb-1 font-bold text-[var(--orange)]">
+          <label
+            htmlFor="email"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
             Email
           </label>
           <input
@@ -88,8 +98,9 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => checkEmailPattern(e.target.value)}
-            className={`border p-2 rounded ${singupError
-              ? "border-red-500" : ""}`}
+            className={`border p-2 rounded ${
+              singupError ? "border-red-500" : ""
+            }`}
           />
           {singupError === SingupError.INVALIDEMAIL && (
             <span className="text-red-500 text-sm mt-1">
@@ -104,7 +115,10 @@ export default function SingupPage() {
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
+          <label
+            htmlFor="password"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
             Password
           </label>
           <input
@@ -119,7 +133,10 @@ export default function SingupPage() {
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="confirm-password" className="mb-1 font-bold text-[var(--orange)]">
+          <label
+            htmlFor="confirm-password"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
             Confirm password
           </label>
           <input
@@ -139,7 +156,10 @@ export default function SingupPage() {
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="birthdate" className="mb-1 font-bold text-[var(--orange)]">
+          <label
+            htmlFor="birthdate"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
             Date of Birth
           </label>
           <input
@@ -148,8 +168,9 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${singupError
-              ? "border-red-500" : ""}`}
+            className={`border p-2 rounded ${
+              singupError ? "border-red-500" : ""
+            }`}
           />
           {singupError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">
@@ -160,8 +181,11 @@ export default function SingupPage() {
         <button
           type="submit"
           disabled={singupError === SingupError.INVALIDEMAIL}
-          className={`w-full bg-[var(--orange)] text-white py-2 rounded transition ${singupError === SingupError.INVALIDEMAIL ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"
-            }`}
+          className={`w-full bg-[var(--orange)] text-white py-2 rounded transition ${
+            singupError === SingupError.INVALIDEMAIL
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:opacity-80"
+          }`}
         >
           Submit
         </button>

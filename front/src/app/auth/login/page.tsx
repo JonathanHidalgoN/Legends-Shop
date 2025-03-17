@@ -2,10 +2,9 @@
 
 import { useAuthContext } from "@/app/components/AuthContext";
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LogInPage() {
-
   const { login } = useAuthContext();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,7 +34,10 @@ export default function LogInPage() {
       min-h-screen flex flex-col items-center justify-center p-4"
       >
         <h1 className="text-3xl text-[var(--orange)] font-bold mb-6">Login</h1>
-        <form onSubmit={handleLoginSubmit} className="w-full max-w-md space-y-4">
+        <form
+          onSubmit={handleLoginSubmit}
+          className="w-full max-w-md space-y-4"
+        >
           <div className="flex flex-col">
             <label
               htmlFor="username"

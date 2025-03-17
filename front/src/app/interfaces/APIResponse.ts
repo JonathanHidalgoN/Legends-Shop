@@ -2,7 +2,7 @@ export enum SingupError {
   USERNAMEEXIST = "USERNAMEEXIST",
   EMAILEXIST = "EMAILEXIST",
   INVALIDEMAIL = "INVALIDEMAIL",
-  INVALIDDATE = "INVALIDDATE"
+  INVALIDDATE = "INVALIDDATE",
 }
 
 export interface APIResponse {
@@ -10,4 +10,3 @@ export interface APIResponse {
   errorType: SingupError | null;
   message: string;
 }
-

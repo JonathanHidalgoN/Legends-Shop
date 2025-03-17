@@ -8,7 +8,7 @@ import { orderRequest } from "@/app/request";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import OrderSuccessModal from "@/app/components/OrderSuccessModal";
-import { usePathname } from 'next/navigation'
+import { usePathname } from "next/navigation";
 
 export default function OrderPage() {
   const { carItems, getTotalCost, cleanCar } = useCarContext();
@@ -16,7 +16,7 @@ export default function OrderPage() {
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
   const router = useRouter();
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   async function handleBuy() {
     if (!userName) {
@@ -73,7 +73,9 @@ export default function OrderPage() {
           {!userName && (
             <button
               onClick={() => {
-                router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
+                router.push(
+                  `/auth/login?redirect=${encodeURIComponent(pathname)}`,
+                );
               }}
               className="flex-1 bg-[var(--orange)] text-white py-2 
                  rounded hover:opacity-80 transition-colors"

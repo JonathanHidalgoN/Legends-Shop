@@ -1,7 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { logInRequest, logoutRequest, refreshTokenRequest, singupRequest } from "../request";
+import {
+  logInRequest,
+  logoutRequest,
+  refreshTokenRequest,
+  singupRequest,
+} from "../request";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { APIResponse, SingupError } from "../interfaces/APIResponse";
@@ -12,8 +17,12 @@ interface AuthContextType {
   login: (userName: string, password: string) => Promise<number>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
-  singup: (userName: string, password: string,
-    email: string, birthDate: Date) => Promise<APIResponse>;
+  singup: (
+    userName: string,
+    password: string,
+    email: string,
+    birthDate: Date,
+  ) => Promise<APIResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,43 +55,54 @@ export function AuthContextProvider({
   function createAPIResponseSingup(response: Response, data: any): APIResponse {
     if (!response.ok) {
       if (!data) {
-        throw new Error("You need the data to create the api response if the status is not ok");
+        throw new Error(
+          "You need the data to create the api response if the status is not ok",
+        );
       } else {
-        const errorTypeHeader: string | null = response.headers.get("X-Error-Type");
+        const errorTypeHeader: string | null =
+          response.headers.get("X-Error-Type");
         console.log("Here");
         let errorType: SingupError | null = null;
         if (errorTypeHeader === SingupError.EMAILEXIST) {
-          errorType = SingupError.EMAILEXIST
+          errorType = SingupError.EMAILEXIST;
         }
         if (errorTypeHeader === SingupError.INVALIDEMAIL) {
-          errorType = SingupError.INVALIDEMAIL
+          errorType = SingupError.INVALIDEMAIL;
         }
         if (errorTypeHeader === SingupError.USERNAMEEXIST) {
-          errorType = SingupError.USERNAMEEXIST
+          errorType = SingupError.USERNAMEEXIST;
         }
         if (errorTypeHeader === SingupError.INVALIDDATE) {
-          errorType = SingupError.INVALIDDATE
+          errorType = SingupError.INVALIDDATE;
         }
         return {
           status: response.status,
           errorType: errorType,
-          message: data.detail ? data.detail : "Error"
+          message: data.detail ? data.detail : "Error",
         };
       }
     } else {
       return {
         status: response.status,
         errorType: null,
-        message: "Success"
+        message: "Success",
       };
     }
   }
 
-  async function singup(userName: string, password: string,
-    email: string, birthDate: Date): Promise<APIResponse> {
-    const response = await singupRequest(userName, password,
-      email, birthDate,
-      "client");
+  async function singup(
+    userName: string,
+    password: string,
+    email: string,
+    birthDate: Date,
+  ): Promise<APIResponse> {
+    const response = await singupRequest(
+      userName,
+      password,
+      email,
+      birthDate,
+      "client",
+    );
     if (!response.ok) {
       const data = await response.json();
       const result: APIResponse = createAPIResponseSingup(response, data);
@@ -148,7 +168,7 @@ export function AuthContextProvider({
         logOut,
         login,
         refreshToken,
-        singup
+        singup,
       }}
     >
       {children}

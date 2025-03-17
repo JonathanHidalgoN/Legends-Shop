@@ -1,434 +1,802 @@
-import { cormorant } from "../fonts"
+import { cormorant } from "../fonts";
 
 const epicLegend: Record<string, string> = {
-  "Boots": "Worn by countless adventurers, these boots have traversed every corner of Runeterra.",
-  "Faerie Charm": "A delicate trinket infused with the mischievous magic of Bandle City's fae.",
-  "Rejuvenation Bead": "A bead crafted from Ionia's sacred trees, promoting rapid healing.",
-  "Giant's Belt": "Once belonging to a Freljordian giant, it now bolsters the wearer's vitality.",
-  "Cloak of Agility": "A Noxian assassin's cloak, granting swift and silent movements.",
-  "Blasting Wand": "A wand imbued with arcane energies from the heart of Piltover.",
-  "Sapphire Crystal": "A crystal mined from the depths of Shurima, radiating mana.",
+  Boots:
+    "Worn by countless adventurers, these boots have traversed every corner of Runeterra.",
+  "Faerie Charm":
+    "A delicate trinket infused with the mischievous magic of Bandle City's fae.",
+  "Rejuvenation Bead":
+    "A bead crafted from Ionia's sacred trees, promoting rapid healing.",
+  "Giant's Belt":
+    "Once belonging to a Freljordian giant, it now bolsters the wearer's vitality.",
+  "Cloak of Agility":
+    "A Noxian assassin's cloak, granting swift and silent movements.",
+  "Blasting Wand":
+    "A wand imbued with arcane energies from the heart of Piltover.",
+  "Sapphire Crystal":
+    "A crystal mined from the depths of Shurima, radiating mana.",
   "Ruby Crystal": "A gem from Mount Targon, pulsating with life essence.",
   "Cloth Armor": "Standard issue armor for Demacian foot soldiers.",
   "Chain Vest": "Forged in Zaun, this vest offers robust protection.",
   "Null-Magic Mantle": "An Ionian mantle that nullifies hostile magic.",
-  "Emberknife": "A blade favored by pyromancers, igniting with each strike.",
+  Emberknife: "A blade favored by pyromancers, igniting with each strike.",
   "Long Sword": "A classic weapon, symbolizing the honor of Demacian knights.",
-  "Pickaxe": "Essential for miners delving into the depths of Piltover's quarries.",
-  "B. F. Sword": "A massive sword, its initials lost to time, but its power undeniable.",
-  "Hailblade": "A blade that summons the icy winds of the Freljord with each swing.",
-  "Obsidian Edge": "A dagger crafted from Shadow Isles obsidian, whispering dark promises.",
-  "Phreakish Gusto": "An elixir named after the legendary summoner Phreak, invigorating champions.",
-  "Dagger": "A lightweight weapon, perfect for swift Ionian duelists.",
-  "Recurve Bow": "A bow favored by Vastayan hunters, known for its rapid shots.",
-  "Amplifying Tome": "A tome containing forbidden Zaunite knowledge, enhancing magical prowess.",
-  "Vampiric Scepter": "A cursed Noxian scepter that drains the life of its victims.",
-  "Doran's Shield": "Crafted by the renowned blacksmith Doran, offering protection to new warriors.",
-  "Doran's Blade": "Another masterpiece by Doran, this blade balances offense and defense.",
-  "Doran's Ring": "Doran's creation for mages, amplifying their spellcasting abilities.",
-  "Negatron Cloak": "A cloak that deflects magical attacks, origins shrouded in mystery.",
-  "Needlessly Large Rod": "A comically oversized rod, channeling immense magical power.",
-  "Dark Seal": "A Noxian artifact that binds the user's soul for greater power.",
-  "Cull": "A merchant's tool from Bilgewater, rewarding those who take risks.",
-  "Scorchclaw Pup": "A fiery companion from the jungles of Ixtal, aiding in battles.",
-  "Gustwalker Hatchling": "A swift creature from the Ionian forests, guiding its master.",
-  "Mosstomper Seedling": "A resilient plant from the Shadow Isles, protecting its caretaker.",
-  "Eye of the Herald": "The preserved eye of the Rift Herald, pulsating with void energy.",
-  "Hubris": "An artifact from Shurima, reminding warriors of the thin line between pride and downfall.",
-  "Penetrating Bullets": "Special ammunition crafted in Piltover, piercing the toughest armors.",
-  "Fortification": "A Demacian enchantment, reinforcing defenses against sieges.",
-  "Reinforced Armor": "Armor enhanced with petricite, nullifying magical threats.",
+  Pickaxe:
+    "Essential for miners delving into the depths of Piltover's quarries.",
+  "B. F. Sword":
+    "A massive sword, its initials lost to time, but its power undeniable.",
+  Hailblade:
+    "A blade that summons the icy winds of the Freljord with each swing.",
+  "Obsidian Edge":
+    "A dagger crafted from Shadow Isles obsidian, whispering dark promises.",
+  "Phreakish Gusto":
+    "An elixir named after the legendary summoner Phreak, invigorating champions.",
+  Dagger: "A lightweight weapon, perfect for swift Ionian duelists.",
+  "Recurve Bow":
+    "A bow favored by Vastayan hunters, known for its rapid shots.",
+  "Amplifying Tome":
+    "A tome containing forbidden Zaunite knowledge, enhancing magical prowess.",
+  "Vampiric Scepter":
+    "A cursed Noxian scepter that drains the life of its victims.",
+  "Doran's Shield":
+    "Crafted by the renowned blacksmith Doran, offering protection to new warriors.",
+  "Doran's Blade":
+    "Another masterpiece by Doran, this blade balances offense and defense.",
+  "Doran's Ring":
+    "Doran's creation for mages, amplifying their spellcasting abilities.",
+  "Negatron Cloak":
+    "A cloak that deflects magical attacks, origins shrouded in mystery.",
+  "Needlessly Large Rod":
+    "A comically oversized rod, channeling immense magical power.",
+  "Dark Seal":
+    "A Noxian artifact that binds the user's soul for greater power.",
+  Cull: "A merchant's tool from Bilgewater, rewarding those who take risks.",
+  "Scorchclaw Pup":
+    "A fiery companion from the jungles of Ixtal, aiding in battles.",
+  "Gustwalker Hatchling":
+    "A swift creature from the Ionian forests, guiding its master.",
+  "Mosstomper Seedling":
+    "A resilient plant from the Shadow Isles, protecting its caretaker.",
+  "Eye of the Herald":
+    "The preserved eye of the Rift Herald, pulsating with void energy.",
+  Hubris:
+    "An artifact from Shurima, reminding warriors of the thin line between pride and downfall.",
+  "Penetrating Bullets":
+    "Special ammunition crafted in Piltover, piercing the toughest armors.",
+  Fortification: "A Demacian enchantment, reinforcing defenses against sieges.",
+  "Reinforced Armor":
+    "Armor enhanced with petricite, nullifying magical threats.",
   "Warden's Eye": "An ancient Targonian relic, revealing hidden truths.",
-  "Vanguard": "A banner carried by the first soldiers into battle, inspiring allies.",
-  "Overcharged": "A Zaunite invention, pushing Hextech devices beyond their limits.",
-  "Anti-tower Socks": "A humorous creation from Bandle City, believed to weaken structures.",
-  "Gusto": "A tonic from Bilgewater, granting sailors the courage of the sea.",
-  "Super Mech Armor": "Piltover's latest Hextech suit, turning its wearer into a walking fortress.",
-  "Super Mech Power Field": "An energy field generated by Hextech cores, amplifying strength.",
-  "Turret Plating": "Reinforcements added to turrets, making them resilient against attacks.",
+  Vanguard:
+    "A banner carried by the first soldiers into battle, inspiring allies.",
+  Overcharged:
+    "A Zaunite invention, pushing Hextech devices beyond their limits.",
+  "Anti-tower Socks":
+    "A humorous creation from Bandle City, believed to weaken structures.",
+  Gusto: "A tonic from Bilgewater, granting sailors the courage of the sea.",
+  "Super Mech Armor":
+    "Piltover's latest Hextech suit, turning its wearer into a walking fortress.",
+  "Super Mech Power Field":
+    "An energy field generated by Hextech cores, amplifying strength.",
+  "Turret Plating":
+    "Reinforcements added to turrets, making them resilient against attacks.",
   "Structure Bounty": "Rewards offered for dismantling enemy fortifications.",
-  "OvererchargedHA": "An experimental Zaunite serum, heightening reflexes temporarily.",
-  "Tower Power-Up": "A Demacian spell, enhancing the offensive capabilities of turrets.",
-  "Health Potion": "A concoction brewed by Ionian healers, mending wounds swiftly.",
-  "Total Biscuit of Everlasting Will": "A treat from Bandle City, boosting morale and vigor.",
-  "Kircheis Shard": "A fragment from a Freljordian glacier, crackling with static energy.",
+  OvererchargedHA:
+    "An experimental Zaunite serum, heightening reflexes temporarily.",
+  "Tower Power-Up":
+    "A Demacian spell, enhancing the offensive capabilities of turrets.",
+  "Health Potion":
+    "A concoction brewed by Ionian healers, mending wounds swiftly.",
+  "Total Biscuit of Everlasting Will":
+    "A treat from Bandle City, boosting morale and vigor.",
+  "Kircheis Shard":
+    "A fragment from a Freljordian glacier, crackling with static energy.",
   "Steel Sigil": "A Demacian emblem, symbolizing unbreakable resolve.",
-  "The Brutalizer": "A Noxian weapon designed for maximum carnage on the battlefield.",
-  "Tunneler": "A device from Piltover, allowing swift underground movement.",
+  "The Brutalizer":
+    "A Noxian weapon designed for maximum carnage on the battlefield.",
+  Tunneler: "A device from Piltover, allowing swift underground movement.",
   "Glowing Mote": "A luminous particle from Mount Targon, guiding travelers.",
-  "Refillable Potion": "A Zaunite flask that refills over time, providing continuous sustenance.",
-  "Corrupting Potion": "A Shadow Isles brew, offering power at a sinister cost.",
-  "Guardian's Amulet": "An amulet blessed by Targonian priests, warding off evil.",
-  "Guardian's Shroud": "A cloak woven with celestial threads, concealing its wearer.",
-  "Guardian's Horn": "A horn that, when blown, summons the strength of ancient heroes.",
+  "Refillable Potion":
+    "A Zaunite flask that refills over time, providing continuous sustenance.",
+  "Corrupting Potion":
+    "A Shadow Isles brew, offering power at a sinister cost.",
+  "Guardian's Amulet":
+    "An amulet blessed by Targonian priests, warding off evil.",
+  "Guardian's Shroud":
+    "A cloak woven with celestial threads, concealing its wearer.",
+  "Guardian's Horn":
+    "A horn that, when blown, summons the strength of ancient heroes.",
   "Poro-Snax": "Delicious treats loved by poros across the Freljord.",
-  "Control Ward": "A device from Piltover, revealing hidden dangers in the vicinity.",
-  "Stealth Ward": "An Ionian charm that grants vision without revealing itself.",
-  "Shurelya's Battlesong": "An anthem from Shurima, invigorating allies for battle.",
-  "Elixir of Iron": "A potion from Demacia, fortifying the drinker's physical form.",
-  "Kaenic Rookern": "An ancient artifact from the Blessed Isles, its purpose long forgotten.",
-  "Elixir of Sorcery": "A potent mix enhancing magical abilities, favored by Noxian mages.",
-  "Elixir of Wrath": "A brew that ignites fury within, used by berserkers of the Freljord.",
-  "Cappa Juice": "A sweet beverage from Bandle City, rumored to grant temporary invisibility.",
-  "Juice of Power": "A potent concoction from Zaun, enhancing physical strength exponentially.",
+  "Control Ward":
+    "A device from Piltover, revealing hidden dangers in the vicinity.",
+  "Stealth Ward":
+    "An Ionian charm that grants vision without revealing itself.",
+  "Shurelya's Battlesong":
+    "An anthem from Shurima, invigorating allies for battle.",
+  "Elixir of Iron":
+    "A potion from Demacia, fortifying the drinker's physical form.",
+  "Kaenic Rookern":
+    "An ancient artifact from the Blessed Isles, its purpose long forgotten.",
+  "Elixir of Sorcery":
+    "A potent mix enhancing magical abilities, favored by Noxian mages.",
+  "Elixir of Wrath":
+    "A brew that ignites fury within, used by berserkers of the Freljord.",
+  "Cappa Juice":
+    "A sweet beverage from Bandle City, rumored to grant temporary invisibility.",
+  "Juice of Power":
+    "A potent concoction from Zaun, enhancing physical strength exponentially.",
   "Juice of Vitality": "An elixir from Ionia, rejuvenating the body and soul.",
-  "Juice of Haste": "A Bilgewater brew that quickens reflexes, favored by pirates.",
-  "Lucky Dice": "Gambler's tools from Piltover, believed to bring fortune in uncertain times.",
-  "Elixir of Skill": "A Demacian potion that sharpens the mind, improving combat techniques.",
-  "Elixir of Avarice": "A Noxian brew that increases greed, driving the desire for wealth.",
-  "Elixir of Force": "A Freljordian mixture that grants immense physical power temporarily.",
-  "Stat Bonus": "An ancient Targonian charm that enhances one's inherent abilities.",
-  "Legendary Fighter Item": "Forged in the fires of Mount Targon, empowering warriors with unmatched strength.",
-  "Legendary Marksman Item": "A precision-crafted weapon from Piltover, enhancing sharpshooting skills.",
-  "Legendary Assassin Item": "A shadowy blade from Ionia, perfect for swift eliminations.",
-  "Legendary Mage Item": "An arcane staff from the Shadow Isles, amplifying magical prowess.",
-  "Legendary Tank Item": "A shield from Demacia, rendering its bearer nearly indestructible.",
-  "Legendary Support Item": "A relic from Ixtal, enhancing the abilities of nearby allies.",
-  "Prismatic Item": "A shimmering artifact from Bandle City, reflecting all colors of magic.",
-  "Unending Despair": "A cursed object from the Shadow Isles, emanating eternal sorrow.",
-  "Blackfire Torch": "A torch from the Shadow Isles, its flames consuming both light and hope.",
-  "Evenshroud": "A mystical cloak from Ionia, balancing the forces of light and dark.",
-  "Trailblazer": "Boots from Piltover, leaving a path of innovation in their wake.",
-  "Archangel's Staff": "A celestial staff from Mount Targon, channeling divine energies.",
-  "Manamune": "A blade from Ionia, absorbing ambient mana to empower its wielder.",
-  "Ghostcrawlers": "Boots from the Shadow Isles, leaving ghostly trails with each step.",
-  "Berserker's Greaves": "Footwear from Freljord, inducing a frenzied state in battle.",
-  "Boots of Swiftness": "Lightweight boots from Ionia, allowing rapid movement.",
-  "Chemtech Putrifier": "A Zaunite device, emitting toxic fumes to weaken foes.",
-  "Sorcerer's Shoes": "Enchanted footwear from the Shadow Isles, enhancing magical abilities.",
-  "Guardian Angel": "A blessed armor from Demacia, reviving the fallen in battle.",
-  "Infinity Edge": "A blade from Noxus, its sharpness said to cut through reality itself.",
+  "Juice of Haste":
+    "A Bilgewater brew that quickens reflexes, favored by pirates.",
+  "Lucky Dice":
+    "Gambler's tools from Piltover, believed to bring fortune in uncertain times.",
+  "Elixir of Skill":
+    "A Demacian potion that sharpens the mind, improving combat techniques.",
+  "Elixir of Avarice":
+    "A Noxian brew that increases greed, driving the desire for wealth.",
+  "Elixir of Force":
+    "A Freljordian mixture that grants immense physical power temporarily.",
+  "Stat Bonus":
+    "An ancient Targonian charm that enhances one's inherent abilities.",
+  "Legendary Fighter Item":
+    "Forged in the fires of Mount Targon, empowering warriors with unmatched strength.",
+  "Legendary Marksman Item":
+    "A precision-crafted weapon from Piltover, enhancing sharpshooting skills.",
+  "Legendary Assassin Item":
+    "A shadowy blade from Ionia, perfect for swift eliminations.",
+  "Legendary Mage Item":
+    "An arcane staff from the Shadow Isles, amplifying magical prowess.",
+  "Legendary Tank Item":
+    "A shield from Demacia, rendering its bearer nearly indestructible.",
+  "Legendary Support Item":
+    "A relic from Ixtal, enhancing the abilities of nearby allies.",
+  "Prismatic Item":
+    "A shimmering artifact from Bandle City, reflecting all colors of magic.",
+  "Unending Despair":
+    "A cursed object from the Shadow Isles, emanating eternal sorrow.",
+  "Blackfire Torch":
+    "A torch from the Shadow Isles, its flames consuming both light and hope.",
+  Evenshroud:
+    "A mystical cloak from Ionia, balancing the forces of light and dark.",
+  Trailblazer:
+    "Boots from Piltover, leaving a path of innovation in their wake.",
+  "Archangel's Staff":
+    "A celestial staff from Mount Targon, channeling divine energies.",
+  Manamune:
+    "A blade from Ionia, absorbing ambient mana to empower its wielder.",
+  Ghostcrawlers:
+    "Boots from the Shadow Isles, leaving ghostly trails with each step.",
+  "Berserker's Greaves":
+    "Footwear from Freljord, inducing a frenzied state in battle.",
+  "Boots of Swiftness":
+    "Lightweight boots from Ionia, allowing rapid movement.",
+  "Chemtech Putrifier":
+    "A Zaunite device, emitting toxic fumes to weaken foes.",
+  "Sorcerer's Shoes":
+    "Enchanted footwear from the Shadow Isles, enhancing magical abilities.",
+  "Guardian Angel":
+    "A blessed armor from Demacia, reviving the fallen in battle.",
+  "Infinity Edge":
+    "A blade from Noxus, its sharpness said to cut through reality itself.",
   "Yun Tal Wildarrows": "Arrows from Ionia, guided by the spirits of the wild.",
-  "Mortal Reminder": "A Noxian weapon, ensuring enemies remember their mortality.",
-  "Lord Dominik's Regards": "A parting gift from a noble, piercing through the toughest defenses.",
-  "Atma's Reckoning": "A cursed blade from the Shadow Isles, feeding on the souls of its victims.",
-  "Seraph's Embrace": "A Targonian artifact, enveloping its bearer in protective light.",
-  "Muramana": "An Ionian relic, converting mana into raw physical power.",
-  "Phantom Dancer": "A spectral veil from the Shadow Isles, allowing the wearer to dance through attacks.",
-  "Plated Steelcaps": "Sturdy boots from Demacia, offering protection against physical assaults.",
-  "Zeke's Convergence": "A Zaunite invention, linking allies to amplify their power.",
-  "Sterak's Gage": "A gauntlet from Noxus, granting immense strength in dire moments.",
-  "Sheen": "A gemstone from Piltover, reflecting light to dazzle opponents.",
-  "Spirit Visage": "A mask from Ionia, connecting the wearer to the spiritual realm.",
-  "Kindlegem": "A gem from the Freljord, warming its bearer with inner fire.",
+  "Mortal Reminder":
+    "A Noxian weapon, ensuring enemies remember their mortality.",
+  "Lord Dominik's Regards":
+    "A parting gift from a noble, piercing through the toughest defenses.",
+  "Atma's Reckoning":
+    "A cursed blade from the Shadow Isles, feeding on the souls of its victims.",
+  "Seraph's Embrace":
+    "A Targonian artifact, enveloping its bearer in protective light.",
+  Muramana: "An Ionian relic, converting mana into raw physical power.",
+  "Phantom Dancer":
+    "A spectral veil from the Shadow Isles, allowing the wearer to dance through attacks.",
+  "Plated Steelcaps":
+    "Sturdy boots from Demacia, offering protection against physical assaults.",
+  "Zeke's Convergence":
+    "A Zaunite invention, linking allies to amplify their power.",
+  "Sterak's Gage":
+    "A gauntlet from Noxus, granting immense strength in dire moments.",
+  Sheen: "A gemstone from Piltover, reflecting light to dazzle opponents.",
+  "Spirit Visage":
+    "A mask from Ionia, connecting the wearer to the spiritual realm.",
+  Kindlegem: "A gem from the Freljord, warming its bearer with inner fire.",
   "Sunfire Aegis": "A shield from Targon, radiating the sun's burning wrath.",
   "Black Cleaver": "A brutal axe from Noxus, designed to rend armor asunder.",
-  "Bloodthirster": "A cursed blade from the Shadow Isles, drinking the lifeblood of foes.",
-  "Experimental Hexplate": "A prototype from Piltover, harnessing unstable Hextech energies.",
-  "Ravenous Hydra": "A weapon from Bilgewater, its multiple blades striking simultaneously.",
-  "Thornmail": "Armor from the Shadow Isles, reflecting damage back to attackers.",
+  Bloodthirster:
+    "A cursed blade from the Shadow Isles, drinking the lifeblood of foes.",
+  "Experimental Hexplate":
+    "A prototype from Piltover, harnessing unstable Hextech energies.",
+  "Ravenous Hydra":
+    "A weapon from Bilgewater, its multiple blades striking simultaneously.",
+  Thornmail:
+    "Armor from the Shadow Isles, reflecting damage back to attackers.",
   "Trinity Force": "A relic from Targon, combining strength, speed, and magic.",
-  "Heartsteel": "An enchanted metal from Demacia, bolstering the bearer's fortitude.",
-  "Runaan's Hurricane": "A bow from Ionia, releasing a storm of arrows upon foes.",
-  "Statikk Shiv": "A weapon from Piltover, discharging electric shocks with each strike.",
-  "Rabadon's Deathcap": "A hat from the Shadow Isles, vastly amplifying magical power.",
+  Heartsteel:
+    "An enchanted metal from Demacia, bolstering the bearer's fortitude.",
+  "Runaan's Hurricane":
+    "A bow from Ionia, releasing a storm of arrows upon foes.",
+  "Statikk Shiv":
+    "A weapon from Piltover, discharging electric shocks with each strike.",
+  "Rabadon's Deathcap":
+    "A hat from the Shadow Isles, vastly amplifying magical power.",
   "Wit's End": "A blade from Ionia, its strikes sapping the sanity of enemies.",
-  "Rapid Firecannon": "A Hextech cannon from Piltover, enabling swift and powerful shots.",
-  "Stormrazor": "A sword from Ionia, its blade crackling with lightning.",
-  "Lich Bane": "A cursed weapon from the Shadow Isles, dealing devastating magic damage.",
-  "Banshee's Veil": "A protective shroud from the Shadow Isles, blocking harmful spells.",
-  "Aegis of the Legion": "A shield from Demacia, symbolizing unity and strength.",
-  "Redemption": "A Targonian artifact, healing allies in their time of need.",
+  "Rapid Firecannon":
+    "A Hextech cannon from Piltover, enabling swift and powerful shots.",
+  Stormrazor: "A sword from Ionia, its blade crackling with lightning.",
+  "Lich Bane":
+    "A cursed weapon from the Shadow Isles, dealing devastating magic damage.",
+  "Banshee's Veil":
+    "A protective shroud from the Shadow Isles, blocking harmful spells.",
+  "Aegis of the Legion":
+    "A shield from Demacia, symbolizing unity and strength.",
+  Redemption: "A Targonian artifact, healing allies in their time of need.",
   "Knight's Vow": "An oath-bound armor from Demacia, protecting a chosen ally.",
-  "Frozen Heart": "An icy core from the Freljord, chilling the resolve of enemies.",
-  "Mercury's Treads": "Boots from Ionia, granting resistance against magical effects.",
+  "Frozen Heart":
+    "An icy core from the Freljord, chilling the resolve of enemies.",
+  "Mercury's Treads":
+    "Boots from Ionia, granting resistance against magical effects.",
   "Guardian's Orb": "A mystical sphere from Targon, safeguarding its bearer.",
-  "Nashor's Tooth": "A fang from a void beast, pulsating with otherworldly energy.",
-  "Rylai's Crystal Scepter": "A scepter from the Freljord, encasing enemies in ice.",
-  "Malignance": "A dark artifact from the Shadow Isles, spreading corruption.",
-  "Winter's Approach": "A Freljordian shield that grows stronger as the cold intensifies.",
-  "Fimbulwinter": "An ancient relic that embodies the eternal winter of the Freljord.",
-  "Guinsoo's Rageblade": "A cursed blade that fuels its wielder's fury with each strike.",
-  "Void Staff": "A staff infused with Void energy, capable of piercing any magical defense.",
-  "Cryptbloom": "A flower from the Shadow Isles, blooming only in the presence of death.",
-  "Mercurial Scimitar": "A blade that cleanses its wielder from all curses and restraints.",
-  "Youmuu's Ghostblade": "An assassin's blade that grants swift, ghost-like movements.",
-  "Randuin's Omen": "An ancient shield that dampens the force of incoming attacks.",
-  "Hextech Gunblade": "A hybrid weapon combining magic and technology for versatile combat.",
-  "Hextech Rocketbelt": "A device that propels its user forward, closing gaps in an instant.",
-  "Blade of The Ruined King": "The sword of a fallen king, thirsting for the life force of others.",
-  "Maw of Malmortius": "A protective maw that shields its bearer from lethal magic.",
-  "Zhonya's Hourglass": "A time-altering artifact that grants momentary invulnerability.",
-  "Ionian Boots of Lucidity": "Boots crafted in Ionia, enhancing the clarity of mind and speed.",
-  "Spear of Shojin": "A spear that awakens the dragon spirit within its wielder.",
-  "Morellonomicon": "A forbidden tome containing secrets of life-draining magic.",
-  "Zephyr": "A lightweight blade that grants agility akin to the wind.",
-  "Guardian's Blade": "A sword bestowed upon those who vow to protect the weak.",
-  "Hullbreaker": "A massive weapon designed to demolish fortifications and ships.",
-  "Guardian's Hammer": "A hammer symbolizing the strength and resolve of its bearer.",
-  "Guardian's Dirk": "A dagger that strikes swiftly to defend allies from threats.",
-  "Locket of the Iron Solari": "A medallion that emits a protective aura to shield allies.",
-  "Gargoyle Stoneplate": "Armor that hardens the skin, turning flesh into unyielding stone.",
-  "Mikael's Blessing": "A divine artifact that cleanses allies of debilitating effects.",
-  "Terminus": "A blade that marks the end for those it strikes.",
-  "Ardent Censer": "A ceremonial censer that invigorates allies with holy flames.",
-  "Essence Reaver": "A weapon that converts damage dealt into mana for its wielder.",
-  "Dead Man's Plate": "The armor of a relentless mariner, growing swifter as it moves.",
+  "Nashor's Tooth":
+    "A fang from a void beast, pulsating with otherworldly energy.",
+  "Rylai's Crystal Scepter":
+    "A scepter from the Freljord, encasing enemies in ice.",
+  Malignance: "A dark artifact from the Shadow Isles, spreading corruption.",
+  "Winter's Approach":
+    "A Freljordian shield that grows stronger as the cold intensifies.",
+  Fimbulwinter:
+    "An ancient relic that embodies the eternal winter of the Freljord.",
+  "Guinsoo's Rageblade":
+    "A cursed blade that fuels its wielder's fury with each strike.",
+  "Void Staff":
+    "A staff infused with Void energy, capable of piercing any magical defense.",
+  Cryptbloom:
+    "A flower from the Shadow Isles, blooming only in the presence of death.",
+  "Mercurial Scimitar":
+    "A blade that cleanses its wielder from all curses and restraints.",
+  "Youmuu's Ghostblade":
+    "An assassin's blade that grants swift, ghost-like movements.",
+  "Randuin's Omen":
+    "An ancient shield that dampens the force of incoming attacks.",
+  "Hextech Gunblade":
+    "A hybrid weapon combining magic and technology for versatile combat.",
+  "Hextech Rocketbelt":
+    "A device that propels its user forward, closing gaps in an instant.",
+  "Blade of The Ruined King":
+    "The sword of a fallen king, thirsting for the life force of others.",
+  "Maw of Malmortius":
+    "A protective maw that shields its bearer from lethal magic.",
+  "Zhonya's Hourglass":
+    "A time-altering artifact that grants momentary invulnerability.",
+  "Ionian Boots of Lucidity":
+    "Boots crafted in Ionia, enhancing the clarity of mind and speed.",
+  "Spear of Shojin":
+    "A spear that awakens the dragon spirit within its wielder.",
+  Morellonomicon: "A forbidden tome containing secrets of life-draining magic.",
+  Zephyr: "A lightweight blade that grants agility akin to the wind.",
+  "Guardian's Blade":
+    "A sword bestowed upon those who vow to protect the weak.",
+  Hullbreaker:
+    "A massive weapon designed to demolish fortifications and ships.",
+  "Guardian's Hammer":
+    "A hammer symbolizing the strength and resolve of its bearer.",
+  "Guardian's Dirk":
+    "A dagger that strikes swiftly to defend allies from threats.",
+  "Locket of the Iron Solari":
+    "A medallion that emits a protective aura to shield allies.",
+  "Gargoyle Stoneplate":
+    "Armor that hardens the skin, turning flesh into unyielding stone.",
+  "Mikael's Blessing":
+    "A divine artifact that cleanses allies of debilitating effects.",
+  Terminus: "A blade that marks the end for those it strikes.",
+  "Ardent Censer":
+    "A ceremonial censer that invigorates allies with holy flames.",
+  "Essence Reaver":
+    "A weapon that converts damage dealt into mana for its wielder.",
+  "Dead Man's Plate":
+    "The armor of a relentless mariner, growing swifter as it moves.",
   "Titanic Hydra": "A colossal weapon that unleashes devastating area attacks.",
-  "Edge of Night": "A shrouded blade that grants its wielder a protective veil.",
-  "Spectral Cutlass": "A ghostly sword that phases through armor to strike at the soul.",
+  "Edge of Night":
+    "A shrouded blade that grants its wielder a protective veil.",
+  "Spectral Cutlass":
+    "A ghostly sword that phases through armor to strike at the soul.",
   "Imperial Mandate": "A decree that empowers allies to punish marked enemies.",
-  "Force of Nature": "A cloak that harnesses natural energies to bolster resilience.",
-  "The Golden Spatula": "A mystical utensil rumored to flip the fate of battles.",
+  "Force of Nature":
+    "A cloak that harnesses natural energies to bolster resilience.",
+  "The Golden Spatula":
+    "A mystical utensil rumored to flip the fate of battles.",
   "Horizon Focus": "A crystal that amplifies damage against distant foes.",
-  "Cosmic Drive": "An artifact that attunes its bearer to the cosmic energies of the universe.",
-  "Riftmaker": "A tool that rends the fabric of reality, empowering sustained combat.",
-  "Night Harvester": "A scythe that reaps the souls of unwary victims under the cloak of night.",
+  "Cosmic Drive":
+    "An artifact that attunes its bearer to the cosmic energies of the universe.",
+  Riftmaker:
+    "A tool that rends the fabric of reality, empowering sustained combat.",
+  "Night Harvester":
+    "A scythe that reaps the souls of unwary victims under the cloak of night.",
   "Demonic Embrace": "A dark pact that engulfs enemies in hellish flames.",
-  "Crown of the Shattered Queen": "A broken crown that protects its wearer from fatal harm.",
-  "Shadowflame": "A tome that ignites the shadows themselves to consume foes.",
-  "Stormsurge": "An item that channels the fury of a storm into devastating attacks.",
-  "Silvermere Dawn": "An elixir that cleanses the mind and strengthens the body.",
-  "Death's Dance": "A cursed armor that defers pain, allowing its wearer to fight on.",
-  "Chempunk Chainsword": "A brutal weapon from Zaun, designed to grievously wound foes.",
+  "Crown of the Shattered Queen":
+    "A broken crown that protects its wearer from fatal harm.",
+  Shadowflame: "A tome that ignites the shadows themselves to consume foes.",
+  Stormsurge:
+    "An item that channels the fury of a storm into devastating attacks.",
+  "Silvermere Dawn":
+    "An elixir that cleanses the mind and strengthens the body.",
+  "Death's Dance":
+    "A cursed armor that defers pain, allowing its wearer to fight on.",
+  "Chempunk Chainsword":
+    "A brutal weapon from Zaun, designed to grievously wound foes.",
   "Sundered Sky": "A relic that rends the heavens, unleashing celestial wrath.",
-  "Staff of Flowing Water": "A staff that enhances the healing and shielding of allies.",
-  "Moonstone Renewer": "A gemstone that heals allies, drawing power from the moon.",
-  "Echoes of Helia": "A relic that converts healing into damaging waves against foes.",
-  "Dawncore": "An item that radiates the light of dawn, invigorating allies.",
-  "Goredrinker": "A weapon that drains the life essence from surrounding enemies.",
-  "Stridebreaker": "A weapon that enables its wielder to lunge forward, slowing foes.",
+  "Staff of Flowing Water":
+    "A staff that enhances the healing and shielding of allies.",
+  "Moonstone Renewer":
+    "A gemstone that heals allies, drawing power from the moon.",
+  "Echoes of Helia":
+    "A relic that converts healing into damaging waves against foes.",
+  Dawncore: "An item that radiates the light of dawn, invigorating allies.",
+  Goredrinker:
+    "A weapon that drains the life essence from surrounding enemies.",
+  Stridebreaker:
+    "A weapon that enables its wielder to lunge forward, slowing foes.",
   "Divine Sunderer": "A hammer that shatters the defenses of those it strikes.",
-  "Liandry's Anguish": "A mask that torments enemies with burning agony over time.",
-  "Luden's Companion": "A device that unleashes bursts of magical energy upon attacks.",
-  "Everfrost": "A staff that freezes enemies in place with chilling magic.",
+  "Liandry's Anguish":
+    "A mask that torments enemies with burning agony over time.",
+  "Luden's Companion":
+    "A device that unleashes bursts of magical energy upon attacks.",
+  Everfrost: "A staff that freezes enemies in place with chilling magic.",
   "Rod of Ages": "A staff that grows in power as time passes.",
   "Iceborn Gauntlet": "A glove that creates icy zones, slowing enemies within.",
-  "Hollow Radiance": "An item that emits a ghostly light, weakening nearby foes.",
-  "Jak'Sho, The Protean": "An evolving armor that adapts to incoming damage types.",
-  "Radiant Virtue": "An item that heals allies upon the wielder's ultimate usage.",
-  "Galeforce": "A lightweight weapon that allows its user to dash in a targeted direction.",
-  "Kraken Slayer": "Forged in the depths of Bilgewater, this blade cleaves through monstrous leviathans, ensuring no sea beast escapes its wrath.",
-  "Immortal Shieldbow": "Crafted by ancient protectors, this bow grants its wielder an unyielding shield, turning fatal blows into mere scratches.",
-  "Navori Quickblades": "Hailing from the Navori Brotherhood, these blades dance with unparalleled speed, allowing their master to strike with relentless precision.",
-  "The Collector": "A mercenary's prized possession, this weapon ensures that enemies fall swiftly, their wealth collected as trophies of conquest.",
-  "Duskblade of Draktharr": "Shrouded in perpetual twilight, this blade grants its bearer the power to vanish into shadows, striking unseen and unheard.",
-  "Eclipse": "Channeling the duality of sun and moon, this weapon empowers its wielder to unleash devastating bursts of power, eclipsing all foes.",
-  "Prowler's Claw": "Designed for the most cunning assassins, this claw allows its user to close in on prey with feline grace, ensuring a swift end.",
-  "Serylda's Grudge": "Once belonging to a betrayed queen, this weapon's icy touch pierces through defenses, exacting vengeance on those who stand in its path.",
-  "Serpent's Fang": "Infused with venomous power, this dagger nullifies protective magic, leaving enemies exposed to lethal strikes.",
-  "Axiom Arc": "A relic of ancient Shuriman technology, this device resets the flow of time upon successful eliminations, allowing for relentless aggression.",
-  "Profane Hydra": "This weapon embodies the essence of a multi-headed beast, each strike multiplying in ferocity, overwhelming all in its path.",
-  "Voltaic Cyclosword": "Charged with storm's fury, this sword unleashes electrifying spins, leaving enemies in a whirlwind of destruction.",
-  "Opportunity": "A gambler's favorite, this item turns the tides of battle on a whim, rewarding those who seize the moment with unmatched advantage.",
-  "Anathema's Chains": "These chains bind the soul of a chosen enemy, weakening their resolve and amplifying the bearer's dominance over them.",
-  "Wooglet's Witchcap": "A hat imbued with sorcerous energies, enhancing magical prowess while granting a fleeting escape from mortal peril.",
-  "Deathblade": "This cursed sword thirsts for blood, growing stronger with each kill, driving its wielder into an unstoppable frenzy.",
-  "Adaptive Helm": "Engineered to counter repetitive assaults, this helm adjusts its defenses, rendering successive attacks futile.",
-  "Obsidian Cleaver": "Carved from dark stone, this axe rends both flesh and armor, marking foes for inevitable demise.",
-  "Sanguine Blade": "This weapon drinks deep from the lifeblood of isolated targets, empowering its wielder with each solitary kill.",
-  "Runeglaive": "Inscribed with ancient runes, this glaive enhances spellcasters' melee strikes, merging magic with martial prowess.",
-  "Abyssal Mask": "Forged in the depths, this mask enhances the bearer's resilience against magic while amplifying nearby allies' arcane assaults.",
-  "Minion Dematerializer": "A device from Piltover that disintegrates minions instantly, aiding champions in controlling the battlefield's flow.",
-  "Seeker's Armguard": "Favored by mages, this armguard provides escalating protection against physical threats as battles prolong.",
-  "Shattered Armguard": "Once whole, this broken armguard still offers substantial defense, especially when facing relentless adversaries.",
-  "Slightly Magical Footwear": "Enchanted boots that, over time, enhance movement speed, allowing wearers to traverse the battlefield swiftly.",
-  "Overlord's Bloodmail": "Armor soaked in the blood of conquered foes, granting the wearer enhanced vitality and a fearsome presence.",
-  "Fated Ashes": "Remnants of a prophecy, these ashes empower the bearer, aligning their destiny with foretold greatness.",
-  "Symbiotic Soles": "Boots that bond with the wearer, adapting to their needs and enhancing their agility in unpredictable ways.",
-  "Chalice of Blessing": "A sacred cup that restores mana to its bearer, ensuring they remain a constant force in prolonged battles.",
-  "Synchronized Souls": "Twin relics that harmonize the bearer's spirit with allies, enhancing coordinated attacks and defenses.",
-  "Lifewell Pendant": "A necklace that taps into the life force of the land, granting regenerative properties to its wearer.",
-  "Glacial Buckler": "A shield carved from True Ice, providing robust defense and chilling attackers upon contact.",
-  "Last Whisper": "This item grants armor penetration, allowing attacks to bypass enemy defenses.",
-  "Mejai's Soulstealer": "A book that absorbs the souls of defeated foes, increasing the bearer's power with each kill.",
-  "Phage": "A weapon that grants increased health and movement speed upon dealing damage.",
-  "Hearthbound Axe": "An axe that increases attack speed and movement speed upon striking enemies.",
-  "Winged Moonplate": "Armor that enhances movement speed, allowing for swift repositioning in battles.",
-  "Tear of the Goddess": "A mystical artifact that increases mana capacity as spells are cast.",
-  "Bramble Vest": "Armor that reflects a portion of incoming damage back to attackers.",
-  "Tiamat": "A weapon that deals area-of-effect damage with basic attacks.",
+  "Hollow Radiance":
+    "An item that emits a ghostly light, weakening nearby foes.",
+  "Jak'Sho, The Protean":
+    "An evolving armor that adapts to incoming damage types.",
+  "Radiant Virtue":
+    "An item that heals allies upon the wielder's ultimate usage.",
+  Galeforce:
+    "A lightweight weapon that allows its user to dash in a targeted direction.",
+  "Kraken Slayer":
+    "Forged in the depths of Bilgewater, this blade cleaves through monstrous leviathans, ensuring no sea beast escapes its wrath.",
+  "Immortal Shieldbow":
+    "Crafted by ancient protectors, this bow grants its wielder an unyielding shield, turning fatal blows into mere scratches.",
+  "Navori Quickblades":
+    "Hailing from the Navori Brotherhood, these blades dance with unparalleled speed, allowing their master to strike with relentless precision.",
+  "The Collector":
+    "A mercenary's prized possession, this weapon ensures that enemies fall swiftly, their wealth collected as trophies of conquest.",
+  "Duskblade of Draktharr":
+    "Shrouded in perpetual twilight, this blade grants its bearer the power to vanish into shadows, striking unseen and unheard.",
+  Eclipse:
+    "Channeling the duality of sun and moon, this weapon empowers its wielder to unleash devastating bursts of power, eclipsing all foes.",
+  "Prowler's Claw":
+    "Designed for the most cunning assassins, this claw allows its user to close in on prey with feline grace, ensuring a swift end.",
+  "Serylda's Grudge":
+    "Once belonging to a betrayed queen, this weapon's icy touch pierces through defenses, exacting vengeance on those who stand in its path.",
+  "Serpent's Fang":
+    "Infused with venomous power, this dagger nullifies protective magic, leaving enemies exposed to lethal strikes.",
+  "Axiom Arc":
+    "A relic of ancient Shuriman technology, this device resets the flow of time upon successful eliminations, allowing for relentless aggression.",
+  "Profane Hydra":
+    "This weapon embodies the essence of a multi-headed beast, each strike multiplying in ferocity, overwhelming all in its path.",
+  "Voltaic Cyclosword":
+    "Charged with storm's fury, this sword unleashes electrifying spins, leaving enemies in a whirlwind of destruction.",
+  Opportunity:
+    "A gambler's favorite, this item turns the tides of battle on a whim, rewarding those who seize the moment with unmatched advantage.",
+  "Anathema's Chains":
+    "These chains bind the soul of a chosen enemy, weakening their resolve and amplifying the bearer's dominance over them.",
+  "Wooglet's Witchcap":
+    "A hat imbued with sorcerous energies, enhancing magical prowess while granting a fleeting escape from mortal peril.",
+  Deathblade:
+    "This cursed sword thirsts for blood, growing stronger with each kill, driving its wielder into an unstoppable frenzy.",
+  "Adaptive Helm":
+    "Engineered to counter repetitive assaults, this helm adjusts its defenses, rendering successive attacks futile.",
+  "Obsidian Cleaver":
+    "Carved from dark stone, this axe rends both flesh and armor, marking foes for inevitable demise.",
+  "Sanguine Blade":
+    "This weapon drinks deep from the lifeblood of isolated targets, empowering its wielder with each solitary kill.",
+  Runeglaive:
+    "Inscribed with ancient runes, this glaive enhances spellcasters' melee strikes, merging magic with martial prowess.",
+  "Abyssal Mask":
+    "Forged in the depths, this mask enhances the bearer's resilience against magic while amplifying nearby allies' arcane assaults.",
+  "Minion Dematerializer":
+    "A device from Piltover that disintegrates minions instantly, aiding champions in controlling the battlefield's flow.",
+  "Seeker's Armguard":
+    "Favored by mages, this armguard provides escalating protection against physical threats as battles prolong.",
+  "Shattered Armguard":
+    "Once whole, this broken armguard still offers substantial defense, especially when facing relentless adversaries.",
+  "Slightly Magical Footwear":
+    "Enchanted boots that, over time, enhance movement speed, allowing wearers to traverse the battlefield swiftly.",
+  "Overlord's Bloodmail":
+    "Armor soaked in the blood of conquered foes, granting the wearer enhanced vitality and a fearsome presence.",
+  "Fated Ashes":
+    "Remnants of a prophecy, these ashes empower the bearer, aligning their destiny with foretold greatness.",
+  "Symbiotic Soles":
+    "Boots that bond with the wearer, adapting to their needs and enhancing their agility in unpredictable ways.",
+  "Chalice of Blessing":
+    "A sacred cup that restores mana to its bearer, ensuring they remain a constant force in prolonged battles.",
+  "Synchronized Souls":
+    "Twin relics that harmonize the bearer's spirit with allies, enhancing coordinated attacks and defenses.",
+  "Lifewell Pendant":
+    "A necklace that taps into the life force of the land, granting regenerative properties to its wearer.",
+  "Glacial Buckler":
+    "A shield carved from True Ice, providing robust defense and chilling attackers upon contact.",
+  "Last Whisper":
+    "This item grants armor penetration, allowing attacks to bypass enemy defenses.",
+  "Mejai's Soulstealer":
+    "A book that absorbs the souls of defeated foes, increasing the bearer's power with each kill.",
+  Phage:
+    "A weapon that grants increased health and movement speed upon dealing damage.",
+  "Hearthbound Axe":
+    "An axe that increases attack speed and movement speed upon striking enemies.",
+  "Winged Moonplate":
+    "Armor that enhances movement speed, allowing for swift repositioning in battles.",
+  "Tear of the Goddess":
+    "A mystical artifact that increases mana capacity as spells are cast.",
+  "Bramble Vest":
+    "Armor that reflects a portion of incoming damage back to attackers.",
+  Tiamat: "A weapon that deals area-of-effect damage with basic attacks.",
   "Warden's Mail": "Armor that reduces incoming critical strike damage.",
-  "Warmog's Armor": "Grants massive health and rapid health regeneration when out of combat.",
-  "Zeal": "An item that increases attack speed, critical strike chance, and movement speed.",
+  "Warmog's Armor":
+    "Grants massive health and rapid health regeneration when out of combat.",
+  Zeal: "An item that increases attack speed, critical strike chance, and movement speed.",
   "Fiendish Codex": "A tome that enhances ability power and reduces cooldowns.",
   "Aether Wisp": "An item that increases ability power and movement speed.",
   "Forbidden Idol": "An artifact that enhances healing and shielding power.",
-  "Mobility Boots": "Boots that grant significant movement speed, especially out of combat.",
-  "Executioner's Calling": "A weapon that applies grievous wounds, reducing enemy healing.",
-  "Deathfire Grasp": "An item that enhances ability power and provides an active ability to deal damage.",
-  "Sword of the Divine": "A weapon that grants bursts of attack speed and critical strike chance.",
-  "Caulfield's Warhammer": "A weapon that increases attack damage and reduces ability cooldowns.",
-  "Serrated Dirk": "A weapon that enhances lethality, allowing attacks to ignore a portion of enemy armor.",
-  "Quicksilver Sash": "An item that removes all crowd control debuffs when activated.",
-  "Scout's Slingshot": "A tool used to place wards at a distance, providing vision.",
-  "Hextech Alternator": "A device that adds bonus magic damage on the next attack after a delay.",
-  "Swiftmarch": "Boots blessed by the wind spirits of Ionia, allowing the wearer to traverse battlefields with unparalleled speed.",
-  "Crimson Lucidity": "A gem infused with the blood of ancient sorcerers, enhancing clarity and magical prowess.",
-  "Gunmetal Greaves": "Sturdy boots crafted from Piltover's finest steel, favored by enforcers for their durability.",
-  "Chainlaced Crushers": "Footwear reinforced with Demacian chains, enabling crushing stomps that deter foes.",
-  "Armored Advance": "A shield imbued with the spirit of Demacia, bolstering the resolve of those who march forward.",
-  "Spellslinger's Shoes": "Enchanted footwear from the arcane academies, aiding mages in swift spellcasting.",
-  "Forever Forward": "A relic from Noxian warlords, inspiring relentless advancement in battle.",
-  "Umbral Glaive": "A shadowy weapon from the Shadow Isles, revealing and extinguishing hidden threats.",
-  "Spectre's Cowl": "A hood woven with spectral threads, granting protection against haunting apparitions.",
-  "Scarecrow Effigy": "A lifelike decoy resembling the ancient demon Fiddlesticks, instilling fear in the hearts of enemies.",
-  "Arcane Sweeper": "A device from Piltover that detects and dispels concealed magic traps.",
-  "Lucent Singularity": "A radiant orb harnessing the power of light, capable of illuminating and damaging foes.",
-  "Farsight Alteration": "A trinket blessed by seers, granting vision of distant lands and unseen dangers.",
-  "Oracle Lens": "An Ionian artifact that reveals hidden truths, exposing invisible enemies.",
-  "Your Cut": "A share of the spoils from a successful hunt, symbolizing trust and camaraderie.",
-  "Rite Of Ruin": "A forbidden ritual from the Shadow Isles, channeling destructive energies upon its completion.",
-  "Kalista's Black Spear": "A spear bound by oath, allowing allies to pledge themselves to the Spear of Vengeance.",
-  "Crystalline Bracer": "A bracer adorned with crystals from the Freljord, enhancing resilience and vitality.",
-  "Lost Chapter": "A tome containing forgotten spells, reigniting a mage's passion for knowledge.",
-  "Catalyst of Aeons": "An ancient artifact that converts damage into mana, fueling the user's longevity in battles.",
-  "Spellthief's Edge": "A blade favored by cunning mages, designed to pilfer magical essence from adversaries.",
-  "Frostfang": "A shard of True Ice from the Freljord, chilling enemies to their core.",
-  "Shard of True Ice": "A rare fragment of True Ice, embodying the essence of the Freljord's eternal winter.",
-  "Steel Shoulderguards": "Pauldrons forged in Demacia, offering protection and symbolizing martial honor.",
-  "Runesteel Spaulders": "Shoulder armor inscribed with ancient runes, enhancing the bearer's strength.",
-  "Pauldrons of Whiterock": "Armor pieces from the fortress of Whiterock, known for their impeccable craftsmanship.",
-  "Relic Shield": "A shield from Targon, allowing its bearer to share the spoils of war with allies.",
-  "Targon's Buckler": "A small shield blessed by the Aspect of the Protector, offering divine safeguarding.",
-  "Bulwark of the Mountain": "A massive shield representing the steadfastness of Mount Targon, protecting allies from harm.",
-  "Spectral Sickle": "A sickle from the Shadow Isles, harvesting the souls of the fallen.",
-  "Harrowing Crescent": "A moon-shaped relic that empowers its bearer during the Harrowing.",
-  "Black Mist Scythe": "A scythe enveloped in the Black Mist, granting its wielder the power to reap souls.",
-  "World Atlas": "A comprehensive map detailing the vast lands of Runeterra, guiding explorers on their journeys.",
-  "Runic Compass": "A mystical compass that points towards concentrations of magical ley lines.",
-  "Bounty of Worlds": "A collection of treasures gathered from various realms, symbolizing the wealth of exploration.",
-  "Celestial Opposition": "A relic representing the eternal struggle between celestial beings.",
-  "Dream Maker": "An artifact that turns the bearer's aspirations into reality, inspired by the dreams of Ionia.",
-  "Zaz'Zak's Realmspike": "A weapon imbued with the chaotic energy of the yordle Zaz'Zak, unpredictable in nature.",
-  "Solstice Sleigh": "A festive vehicle from the Poro King, delivering joy during the Snowdown celebrations.",
-  "Bloodsong": "A blade that sings with each strike, echoing the cries of battles long past.",
-  "Fire at Will": "A command relic from Bilgewater, urging cannons to unleash relentless volleys.",
-  "Death's Daughter": "A cursed cannonball from the Shadow Isles, bringing inevitable doom upon impact.",
-  "Raise Morale": "A banner that, when raised, invigorates allies, reminding them of their purpose.",
-  "Oblivion Orb": "An orb containing the essence of oblivion, weakening the healing of those struck.",
-  "Lifeline": "A charm that grants a second chance, shielding its bearer from fatal harm.",
-  "Bloodletter's Curse": "A weapon that curses its victim, causing them to bleed profusely.",
-  "Sword of Blossoming Dawn": "A blade that blooms with each strike, symbolizing the renewal of dawn.",
-  "Sin Eater": "An artifact that absorbs the sins of its bearer, granting them temporary absolution.",
-  "Lightning Braid": "A hairpiece that crackles with electricity, enhancing the speed of its wearer.",
-  "Frozen Mallet": "A hammer imbued with the chill of the Freljord, slowing enemies upon impact.",
-  "Perplexity": "A tome that confounds those who read it, causing disorientation.",
-  "Wordless Promise": "A silent vow bound by magic, enforcing agreements without utterance.",
-  "Hellfire Hatchet": "An axe forged in the fires of the underworld, igniting targets with demonic flames.",
-  "Innervating Locket": "A locket that revitalizes allies, restoring their vigor in times of need.",
-  "Darksteel Talons": "Claws forged from darksteel, granting the wearer lethal precision.",
-  "Fulmination": "A staff that channels the fury of thunderstorms, unleashing devastating lightning.",
-  "Demon King's Crown": "A crown once worn by a demon king, corrupting the mind of its wearer.",
-  "Shield of Molten Stone": "A shield formed from molten rock, burning those who dare strike it.",
-  "Cloak of Starry Night": "A cloak that mirrors the night sky, shrouding its wearer in cosmic energy.",
-  "Force Of Entropy": "A relic from the void, emanating chaotic energies that unravel the fabric of reality.",
-  "Sanguine Gift": "An ancient talisman infused with the blood of fallen champions, granting vitality and strength.",
-  "Eleisa's Miracle": "A blessed charm that heals wounds and rejuvenates the spirit, named after a legendary healer.",
-  "Talisman Of Ascension": "An amulet that elevates the bearer to new heights, bestowing divine favor and swiftness.",
-  "Hamstringer": "A cruel blade designed to cripple foes, ensuring they can neither fight nor flee.",
-  "Turbo Chemtank": "A Zaunite invention, this tank grants unparalleled speed and resilience, fueled by volatile chemicals.",
-  "Twin Mask": "A mysterious artifact from Ionia, representing the duality of life and death, light and shadow.",
-  "Hexbolt Companion": "A sentient device from Piltover, firing hextech bolts to protect its master.",
-  "Reaper's Toll": "A scythe that claims the souls of the fallen, each swing echoing with the wails of the damned.",
-  "Mirage Blade": "A shimmering sword that confounds enemies, making the wielder appear as an elusive phantom.",
-  "Gambler's Blade": "A cursed dagger that brings fortune to the daring, but doom to the reckless.",
-  "Reality Fracture": "A staff that tears the veil between dimensions, unleashing unpredictable cosmic forces.",
-  "Hemomancer's Helm": "A helmet worn by blood mages, enhancing their control over the lifeblood of allies and enemies alike.",
-  "Empyrean Promise": "A celestial ring that binds the wearer to a higher purpose, radiating with otherworldly power.",
-  "Dragonheart": "A pendant containing the essence of a dragon's heart, granting fiery strength and courage.",
-  "Decapitator": "A brutal axe favored by Noxian executioners, designed for swift and unmerciful beheadings.",
-  "Runecarver": "A chisel imbued with ancient magic, capable of inscribing powerful runes that alter reality.",
-  "Cruelty": "A sinister weapon that feeds on the suffering of others, growing stronger with each inflicted pain.",
-  "Moonflair Spellblade": "A blade forged under a lunar eclipse, enhancing the wielder's magical prowess.",
-  "Flesheater": "A cursed weapon that consumes the flesh of its victims, transferring their strength to the bearer.",
-  "Detonation Orb": "An explosive sphere from Piltover, capable of leveling structures and scattering foes.",
-  "Reverberation": "A tuning fork that amplifies sound waves into destructive force, shattering armor and bone.",
-  "Regicide": "A blade infamous for slaying kings, symbolizing the overthrow of tyrants.",
-  "Kinkou Jitte": "A weapon used by the Kinkou Order, embodying the balance between offense and defense.",
-  "Pyromancer's Cloak": "A cloak enchanted to protect its wearer from flames, allowing them to dance through infernos unscathed.",
-  "Lightning Rod": "A spear that draws and channels lightning, striking foes with electrifying precision.",
-  "Diamond-Tipped Spear": "A spear with a diamond-coated tip, capable of piercing the toughest armor.",
-  "Twilight's Edge": "A dagger that thrives in the ambiguity of dusk, granting the wielder stealth and lethality.",
-  "Black Hole Gauntlet": "A gauntlet that manipulates gravitational forces, pulling enemies into the abyss.",
-  "Puppeteer": "A sinister artifact that controls the movements of foes, turning allies against each other.",
-  "Blighting Jewel": "A gemstone that spreads decay, weakening the defenses of those nearby.",
-  "Verdant Barrier": "A shield crafted from enchanted wood, protecting the bearer from magical attacks.",
-  "Leeching Leer": "A mask that drains the life force of enemies, rejuvenating the wearer with stolen vitality.",
-  "Watchful Wardstone": "A stone that, when placed, reveals hidden dangers, ensuring the safety of allies.",
-  "Stirring Wardstone": "An upgraded wardstone that not only reveals enemies but also invigorates allies within its range.",
-  "Bandleglass Mirror": "A mirror from Bandle City that reflects not just images but also magical attacks.",
-  "Vigilant Wardstone": "The pinnacle of wardstones, providing unparalleled vision and protection against unseen threats.",
-  "Ironspike Whip": "A whip with iron spikes, delivering painful lashes that leave lasting wounds.",
-  "Liandry's Torment": "A mask that curses enemies with agonizing flames, causing their very flesh to burn.",
-  "Bami's Cinder": "A smoldering ember that engulfs the bearer in protective flames, damaging nearby foes.",
-  "Noonquiver": "A quiver blessed by the sun, ensuring arrows fly true and strike with radiant energy.",
-  "Navori Flickerblade": "A blade from Navori that strikes with such speed, enemies fall before they realize they've been hit.",
-  "Rageknife": "A dagger that feeds on the anger of its wielder, increasing in power with their fury.",
-  "Rectrix": "A compass that always points toward one's true desire, guiding them unerringly.",
-  "Shield of the Rakkor": "A shield used by the Rakkor tribes, symbolizing their unyielding resolve and martial prowess.",
-  "Gangplank Placeholder": "A mysterious artifact linked to the dread pirate Gangplank, its true purpose unknown.",
-  "Locked Weapon Slot": "A sealed compartment that holds a weapon of immense power, awaiting the worthy.",
-  "Cyclonic Slicers": "Blades that create whirlwinds with each swing, slicing through multiple foes effortlessly.",
-  "YuumiBot": "A mechanical replica of the magical cat Yuumi, providing companionship and assistance in battle.",
-  "Radiant Field": "An area blessed with light magic, healing allies and purifying the land of corruption.",
-  "Statikk Sword": "A sword that crackles with electrical energy, delivering shocks with every strike.",
-  "Lioness's Lament": "A bow that sings a mournful tune, each arrow honoring a fallen comrade.",
-  "Gatling Bunny-Guns": "A pair of rapid-fire guns shaped like bunnies, combining cuteness with deadly force.",
-  "Searing Shortbow": "A compact bow that fires arrows imbued with scorching flames.",
-  "The Annihilator": "A weapon of mass destruction, capable of obliterating entire battalions in a single strike.",
-  "Battle Bunny Crossbow": "A crossbow adorned with bunny motifs, deceptively charming yet lethal in function.",
-  "UwU Blaster": "A weapon that disarms foes with overwhelming cuteness before delivering a devastating blast.",
-  "Vortex Glove": "A glove that manipulates wind currents, allowing the wearer to control the battlefield.",
-  "Blade-o-rang": "A versatile weapon that returns to its wielder, slicing through enemies with precision.",
-  "Bunny Mega-Blast": "An explosive device disguised as an innocent bunny, delivering a surprising punch.",
-  "Anti-Shark Sea Mine": "A submersible mine designed to deter and destroy aquatic threats lurking beneath the waves.",
-  "T.I.B.B.E.R.S": "A mechanical bear imbued with fiery rage, protecting its owner with relentless ferocity.",
-  "Ani-Mines": "Animated explosives that seek out targets, ensuring no enemy escapes unscathed.",
-  "Final City Transit": "A teleportation device granting swift passage through the sprawling urban landscapes.",
-  "Echoing Batblades": "Twin blades emitting ultrasonic waves, confusing foes and striking with deadly accuracy.",
-  "Paw Print Poisoner": "A trap leaving toxic paw prints, poisoning those who dare to follow.",
-  "Iceblast Armor": "Frost-infused armor that retaliates against attackers with chilling blasts.",
-  "Unceasing Cyclone": "A weapon generating perpetual whirlwinds, engulfing enemies in a storm of blades.",
-  "YuumiBot_Final_FINAL": "The ultimate iteration of the YuumiBot, offering unmatched support and companionship.",
-  "Explosive Embrace": "A close-quarters weapon that detonates upon contact, embracing foes in fiery destruction.",
-  "Prumbis's Electrocarver": "An electric blade crafted by the eccentric inventor Prumbis, slicing with shocking efficiency.",
-  "Enveloping Light": "A radiant shield that surrounds allies, protecting them from harm and illuminating the path ahead.",
-  "Double Bun-Bun Barrage": "A rapid-fire assault of bunny-shaped projectiles, overwhelming enemies with sheer cuteness and force.",
-  "Evolved Embershot": "An advanced firearm shooting incendiary rounds, setting targets ablaze with each shot.",
-  "Animapocalypse": "A doomsday device unleashing a horde of animated creatures, overwhelming all in its path.",
-  "Bunny Prime Ballista": "A massive crossbow launching explosive bunny-shaped bolts, causing widespread devastation.",
-  "OwO Blaster": "A weapon that disarms foes with overwhelming cuteness before delivering a devastating blast.",
-  "Tempest's Gauntlet": "A gauntlet harnessing the power of storms, allowing the wearer to command lightning and thunder.",
-  "Quad-o-rang": "A four-pronged boomerang striking multiple targets before returning to its master.",
-  "Rapid Rabbit Raindown": "An aerial assault deploying a barrage of rabbit-shaped explosives from above.",
-  "Neverending Mobstomper": "Boots granting the wearer the ability to stomp through hordes of enemies without tiring.",
-  "T.I.B.B.E.R.S (B.E.E.G Edition)": "A larger, more formidable version of the mechanical bear, with enhanced strength and durability.",
-  "Jinx's Tri-Namite": "An explosive concoction from Jinx, causing triple the chaos and destruction.",
-  "FC Limited Express": "A high-speed transport device, ensuring swift movement across the battlefield.",
-  "Vayne's Chromablades": "Blades wielded by Vayne, capable of changing color and adapting to exploit enemy weaknesses.",
-  "Bearfoot Chem-Dispenser": "Footwear releasing chemical agents with each step, hindering foes and aiding allies.",
-  "Deep Freeze": "A weapon emitting blasts of extreme cold, freezing targets solid in an instant.",
-  "Meow Meow": "A feline-inspired device distracting enemies with irresistible charm before striking.",
-  "Shield Slam": "A technique allowing the bearer to bash enemies with their shield, stunning and damaging them.",
-  "Sound Wave": "A device emitting powerful sonic waves, disrupting enemy formations and causing disarray.",
-  "Pillory Swipe": "A swift attack that shackles the target momentarily, leaving them vulnerable to follow-up strikes.",
-  "Steel Tempest": "A blade technique creating a tempest of steel, cutting down all who stand in its path.",
-  "Tentacle Slam": "A brutal move summoning tentacles to smash enemies into the ground with overwhelming force.",
-  "Winged Dagger": "A dagger granting the wielder increased agility, allowing them to strike swiftly and evade attacks.",
-  "Guiding Hex": "A magical charm guiding spells and attacks to their targets with unerring accuracy.",
-  "Bunny Hop": "A movement technique allowing the user to leap unpredictably, evading attacks and closing distances.",
-  "Battle Cat Barrage": "A coordinated attack where feline companions launch a series of strikes against the enemy.",
-  "Light of the Lion": "A beacon emitting a lion's roar, inspiring allies and intimidating foes.",
-  "Anima Echo": "A mystical artifact that resonates with the soul, amplifying the user's magical abilities.",
-  "Savage Slice": "A ferocious attack that rends enemies asunder, leaving them bleeding and weakened.",
-  "Wandering Storms": "A spell conjuring roaming storms that wreak havoc across the battlefield.",
-  "Grizzly Smash": "A powerful strike channeling the strength of a grizzly, crushing enemies with overwhelming force.",
-  "Lover's Ricochet": "A paired weapon set that, when used together, causes attacks to bounce between targets harmoniously.",
-  "Hopped-Up Hex": "A potion granting the drinker enhanced agility and reflexes, making them a blur on the battlefield.",
-  "Carrot Crash": "A deceptive explosive disguised as a carrot, catching foes off-guard with its unexpected blast."
-}
+  "Mobility Boots":
+    "Boots that grant significant movement speed, especially out of combat.",
+  "Executioner's Calling":
+    "A weapon that applies grievous wounds, reducing enemy healing.",
+  "Deathfire Grasp":
+    "An item that enhances ability power and provides an active ability to deal damage.",
+  "Sword of the Divine":
+    "A weapon that grants bursts of attack speed and critical strike chance.",
+  "Caulfield's Warhammer":
+    "A weapon that increases attack damage and reduces ability cooldowns.",
+  "Serrated Dirk":
+    "A weapon that enhances lethality, allowing attacks to ignore a portion of enemy armor.",
+  "Quicksilver Sash":
+    "An item that removes all crowd control debuffs when activated.",
+  "Scout's Slingshot":
+    "A tool used to place wards at a distance, providing vision.",
+  "Hextech Alternator":
+    "A device that adds bonus magic damage on the next attack after a delay.",
+  Swiftmarch:
+    "Boots blessed by the wind spirits of Ionia, allowing the wearer to traverse battlefields with unparalleled speed.",
+  "Crimson Lucidity":
+    "A gem infused with the blood of ancient sorcerers, enhancing clarity and magical prowess.",
+  "Gunmetal Greaves":
+    "Sturdy boots crafted from Piltover's finest steel, favored by enforcers for their durability.",
+  "Chainlaced Crushers":
+    "Footwear reinforced with Demacian chains, enabling crushing stomps that deter foes.",
+  "Armored Advance":
+    "A shield imbued with the spirit of Demacia, bolstering the resolve of those who march forward.",
+  "Spellslinger's Shoes":
+    "Enchanted footwear from the arcane academies, aiding mages in swift spellcasting.",
+  "Forever Forward":
+    "A relic from Noxian warlords, inspiring relentless advancement in battle.",
+  "Umbral Glaive":
+    "A shadowy weapon from the Shadow Isles, revealing and extinguishing hidden threats.",
+  "Spectre's Cowl":
+    "A hood woven with spectral threads, granting protection against haunting apparitions.",
+  "Scarecrow Effigy":
+    "A lifelike decoy resembling the ancient demon Fiddlesticks, instilling fear in the hearts of enemies.",
+  "Arcane Sweeper":
+    "A device from Piltover that detects and dispels concealed magic traps.",
+  "Lucent Singularity":
+    "A radiant orb harnessing the power of light, capable of illuminating and damaging foes.",
+  "Farsight Alteration":
+    "A trinket blessed by seers, granting vision of distant lands and unseen dangers.",
+  "Oracle Lens":
+    "An Ionian artifact that reveals hidden truths, exposing invisible enemies.",
+  "Your Cut":
+    "A share of the spoils from a successful hunt, symbolizing trust and camaraderie.",
+  "Rite Of Ruin":
+    "A forbidden ritual from the Shadow Isles, channeling destructive energies upon its completion.",
+  "Kalista's Black Spear":
+    "A spear bound by oath, allowing allies to pledge themselves to the Spear of Vengeance.",
+  "Crystalline Bracer":
+    "A bracer adorned with crystals from the Freljord, enhancing resilience and vitality.",
+  "Lost Chapter":
+    "A tome containing forgotten spells, reigniting a mage's passion for knowledge.",
+  "Catalyst of Aeons":
+    "An ancient artifact that converts damage into mana, fueling the user's longevity in battles.",
+  "Spellthief's Edge":
+    "A blade favored by cunning mages, designed to pilfer magical essence from adversaries.",
+  Frostfang:
+    "A shard of True Ice from the Freljord, chilling enemies to their core.",
+  "Shard of True Ice":
+    "A rare fragment of True Ice, embodying the essence of the Freljord's eternal winter.",
+  "Steel Shoulderguards":
+    "Pauldrons forged in Demacia, offering protection and symbolizing martial honor.",
+  "Runesteel Spaulders":
+    "Shoulder armor inscribed with ancient runes, enhancing the bearer's strength.",
+  "Pauldrons of Whiterock":
+    "Armor pieces from the fortress of Whiterock, known for their impeccable craftsmanship.",
+  "Relic Shield":
+    "A shield from Targon, allowing its bearer to share the spoils of war with allies.",
+  "Targon's Buckler":
+    "A small shield blessed by the Aspect of the Protector, offering divine safeguarding.",
+  "Bulwark of the Mountain":
+    "A massive shield representing the steadfastness of Mount Targon, protecting allies from harm.",
+  "Spectral Sickle":
+    "A sickle from the Shadow Isles, harvesting the souls of the fallen.",
+  "Harrowing Crescent":
+    "A moon-shaped relic that empowers its bearer during the Harrowing.",
+  "Black Mist Scythe":
+    "A scythe enveloped in the Black Mist, granting its wielder the power to reap souls.",
+  "World Atlas":
+    "A comprehensive map detailing the vast lands of Runeterra, guiding explorers on their journeys.",
+  "Runic Compass":
+    "A mystical compass that points towards concentrations of magical ley lines.",
+  "Bounty of Worlds":
+    "A collection of treasures gathered from various realms, symbolizing the wealth of exploration.",
+  "Celestial Opposition":
+    "A relic representing the eternal struggle between celestial beings.",
+  "Dream Maker":
+    "An artifact that turns the bearer's aspirations into reality, inspired by the dreams of Ionia.",
+  "Zaz'Zak's Realmspike":
+    "A weapon imbued with the chaotic energy of the yordle Zaz'Zak, unpredictable in nature.",
+  "Solstice Sleigh":
+    "A festive vehicle from the Poro King, delivering joy during the Snowdown celebrations.",
+  Bloodsong:
+    "A blade that sings with each strike, echoing the cries of battles long past.",
+  "Fire at Will":
+    "A command relic from Bilgewater, urging cannons to unleash relentless volleys.",
+  "Death's Daughter":
+    "A cursed cannonball from the Shadow Isles, bringing inevitable doom upon impact.",
+  "Raise Morale":
+    "A banner that, when raised, invigorates allies, reminding them of their purpose.",
+  "Oblivion Orb":
+    "An orb containing the essence of oblivion, weakening the healing of those struck.",
+  Lifeline:
+    "A charm that grants a second chance, shielding its bearer from fatal harm.",
+  "Bloodletter's Curse":
+    "A weapon that curses its victim, causing them to bleed profusely.",
+  "Sword of Blossoming Dawn":
+    "A blade that blooms with each strike, symbolizing the renewal of dawn.",
+  "Sin Eater":
+    "An artifact that absorbs the sins of its bearer, granting them temporary absolution.",
+  "Lightning Braid":
+    "A hairpiece that crackles with electricity, enhancing the speed of its wearer.",
+  "Frozen Mallet":
+    "A hammer imbued with the chill of the Freljord, slowing enemies upon impact.",
+  Perplexity:
+    "A tome that confounds those who read it, causing disorientation.",
+  "Wordless Promise":
+    "A silent vow bound by magic, enforcing agreements without utterance.",
+  "Hellfire Hatchet":
+    "An axe forged in the fires of the underworld, igniting targets with demonic flames.",
+  "Innervating Locket":
+    "A locket that revitalizes allies, restoring their vigor in times of need.",
+  "Darksteel Talons":
+    "Claws forged from darksteel, granting the wearer lethal precision.",
+  Fulmination:
+    "A staff that channels the fury of thunderstorms, unleashing devastating lightning.",
+  "Demon King's Crown":
+    "A crown once worn by a demon king, corrupting the mind of its wearer.",
+  "Shield of Molten Stone":
+    "A shield formed from molten rock, burning those who dare strike it.",
+  "Cloak of Starry Night":
+    "A cloak that mirrors the night sky, shrouding its wearer in cosmic energy.",
+  "Force Of Entropy":
+    "A relic from the void, emanating chaotic energies that unravel the fabric of reality.",
+  "Sanguine Gift":
+    "An ancient talisman infused with the blood of fallen champions, granting vitality and strength.",
+  "Eleisa's Miracle":
+    "A blessed charm that heals wounds and rejuvenates the spirit, named after a legendary healer.",
+  "Talisman Of Ascension":
+    "An amulet that elevates the bearer to new heights, bestowing divine favor and swiftness.",
+  Hamstringer:
+    "A cruel blade designed to cripple foes, ensuring they can neither fight nor flee.",
+  "Turbo Chemtank":
+    "A Zaunite invention, this tank grants unparalleled speed and resilience, fueled by volatile chemicals.",
+  "Twin Mask":
+    "A mysterious artifact from Ionia, representing the duality of life and death, light and shadow.",
+  "Hexbolt Companion":
+    "A sentient device from Piltover, firing hextech bolts to protect its master.",
+  "Reaper's Toll":
+    "A scythe that claims the souls of the fallen, each swing echoing with the wails of the damned.",
+  "Mirage Blade":
+    "A shimmering sword that confounds enemies, making the wielder appear as an elusive phantom.",
+  "Gambler's Blade":
+    "A cursed dagger that brings fortune to the daring, but doom to the reckless.",
+  "Reality Fracture":
+    "A staff that tears the veil between dimensions, unleashing unpredictable cosmic forces.",
+  "Hemomancer's Helm":
+    "A helmet worn by blood mages, enhancing their control over the lifeblood of allies and enemies alike.",
+  "Empyrean Promise":
+    "A celestial ring that binds the wearer to a higher purpose, radiating with otherworldly power.",
+  Dragonheart:
+    "A pendant containing the essence of a dragon's heart, granting fiery strength and courage.",
+  Decapitator:
+    "A brutal axe favored by Noxian executioners, designed for swift and unmerciful beheadings.",
+  Runecarver:
+    "A chisel imbued with ancient magic, capable of inscribing powerful runes that alter reality.",
+  Cruelty:
+    "A sinister weapon that feeds on the suffering of others, growing stronger with each inflicted pain.",
+  "Moonflair Spellblade":
+    "A blade forged under a lunar eclipse, enhancing the wielder's magical prowess.",
+  Flesheater:
+    "A cursed weapon that consumes the flesh of its victims, transferring their strength to the bearer.",
+  "Detonation Orb":
+    "An explosive sphere from Piltover, capable of leveling structures and scattering foes.",
+  Reverberation:
+    "A tuning fork that amplifies sound waves into destructive force, shattering armor and bone.",
+  Regicide:
+    "A blade infamous for slaying kings, symbolizing the overthrow of tyrants.",
+  "Kinkou Jitte":
+    "A weapon used by the Kinkou Order, embodying the balance between offense and defense.",
+  "Pyromancer's Cloak":
+    "A cloak enchanted to protect its wearer from flames, allowing them to dance through infernos unscathed.",
+  "Lightning Rod":
+    "A spear that draws and channels lightning, striking foes with electrifying precision.",
+  "Diamond-Tipped Spear":
+    "A spear with a diamond-coated tip, capable of piercing the toughest armor.",
+  "Twilight's Edge":
+    "A dagger that thrives in the ambiguity of dusk, granting the wielder stealth and lethality.",
+  "Black Hole Gauntlet":
+    "A gauntlet that manipulates gravitational forces, pulling enemies into the abyss.",
+  Puppeteer:
+    "A sinister artifact that controls the movements of foes, turning allies against each other.",
+  "Blighting Jewel":
+    "A gemstone that spreads decay, weakening the defenses of those nearby.",
+  "Verdant Barrier":
+    "A shield crafted from enchanted wood, protecting the bearer from magical attacks.",
+  "Leeching Leer":
+    "A mask that drains the life force of enemies, rejuvenating the wearer with stolen vitality.",
+  "Watchful Wardstone":
+    "A stone that, when placed, reveals hidden dangers, ensuring the safety of allies.",
+  "Stirring Wardstone":
+    "An upgraded wardstone that not only reveals enemies but also invigorates allies within its range.",
+  "Bandleglass Mirror":
+    "A mirror from Bandle City that reflects not just images but also magical attacks.",
+  "Vigilant Wardstone":
+    "The pinnacle of wardstones, providing unparalleled vision and protection against unseen threats.",
+  "Ironspike Whip":
+    "A whip with iron spikes, delivering painful lashes that leave lasting wounds.",
+  "Liandry's Torment":
+    "A mask that curses enemies with agonizing flames, causing their very flesh to burn.",
+  "Bami's Cinder":
+    "A smoldering ember that engulfs the bearer in protective flames, damaging nearby foes.",
+  Noonquiver:
+    "A quiver blessed by the sun, ensuring arrows fly true and strike with radiant energy.",
+  "Navori Flickerblade":
+    "A blade from Navori that strikes with such speed, enemies fall before they realize they've been hit.",
+  Rageknife:
+    "A dagger that feeds on the anger of its wielder, increasing in power with their fury.",
+  Rectrix:
+    "A compass that always points toward one's true desire, guiding them unerringly.",
+  "Shield of the Rakkor":
+    "A shield used by the Rakkor tribes, symbolizing their unyielding resolve and martial prowess.",
+  "Gangplank Placeholder":
+    "A mysterious artifact linked to the dread pirate Gangplank, its true purpose unknown.",
+  "Locked Weapon Slot":
+    "A sealed compartment that holds a weapon of immense power, awaiting the worthy.",
+  "Cyclonic Slicers":
+    "Blades that create whirlwinds with each swing, slicing through multiple foes effortlessly.",
+  YuumiBot:
+    "A mechanical replica of the magical cat Yuumi, providing companionship and assistance in battle.",
+  "Radiant Field":
+    "An area blessed with light magic, healing allies and purifying the land of corruption.",
+  "Statikk Sword":
+    "A sword that crackles with electrical energy, delivering shocks with every strike.",
+  "Lioness's Lament":
+    "A bow that sings a mournful tune, each arrow honoring a fallen comrade.",
+  "Gatling Bunny-Guns":
+    "A pair of rapid-fire guns shaped like bunnies, combining cuteness with deadly force.",
+  "Searing Shortbow":
+    "A compact bow that fires arrows imbued with scorching flames.",
+  "The Annihilator":
+    "A weapon of mass destruction, capable of obliterating entire battalions in a single strike.",
+  "Battle Bunny Crossbow":
+    "A crossbow adorned with bunny motifs, deceptively charming yet lethal in function.",
+  "UwU Blaster":
+    "A weapon that disarms foes with overwhelming cuteness before delivering a devastating blast.",
+  "Vortex Glove":
+    "A glove that manipulates wind currents, allowing the wearer to control the battlefield.",
+  "Blade-o-rang":
+    "A versatile weapon that returns to its wielder, slicing through enemies with precision.",
+  "Bunny Mega-Blast":
+    "An explosive device disguised as an innocent bunny, delivering a surprising punch.",
+  "Anti-Shark Sea Mine":
+    "A submersible mine designed to deter and destroy aquatic threats lurking beneath the waves.",
+  "T.I.B.B.E.R.S":
+    "A mechanical bear imbued with fiery rage, protecting its owner with relentless ferocity.",
+  "Ani-Mines":
+    "Animated explosives that seek out targets, ensuring no enemy escapes unscathed.",
+  "Final City Transit":
+    "A teleportation device granting swift passage through the sprawling urban landscapes.",
+  "Echoing Batblades":
+    "Twin blades emitting ultrasonic waves, confusing foes and striking with deadly accuracy.",
+  "Paw Print Poisoner":
+    "A trap leaving toxic paw prints, poisoning those who dare to follow.",
+  "Iceblast Armor":
+    "Frost-infused armor that retaliates against attackers with chilling blasts.",
+  "Unceasing Cyclone":
+    "A weapon generating perpetual whirlwinds, engulfing enemies in a storm of blades.",
+  YuumiBot_Final_FINAL:
+    "The ultimate iteration of the YuumiBot, offering unmatched support and companionship.",
+  "Explosive Embrace":
+    "A close-quarters weapon that detonates upon contact, embracing foes in fiery destruction.",
+  "Prumbis's Electrocarver":
+    "An electric blade crafted by the eccentric inventor Prumbis, slicing with shocking efficiency.",
+  "Enveloping Light":
+    "A radiant shield that surrounds allies, protecting them from harm and illuminating the path ahead.",
+  "Double Bun-Bun Barrage":
+    "A rapid-fire assault of bunny-shaped projectiles, overwhelming enemies with sheer cuteness and force.",
+  "Evolved Embershot":
+    "An advanced firearm shooting incendiary rounds, setting targets ablaze with each shot.",
+  Animapocalypse:
+    "A doomsday device unleashing a horde of animated creatures, overwhelming all in its path.",
+  "Bunny Prime Ballista":
+    "A massive crossbow launching explosive bunny-shaped bolts, causing widespread devastation.",
+  "OwO Blaster":
+    "A weapon that disarms foes with overwhelming cuteness before delivering a devastating blast.",
+  "Tempest's Gauntlet":
+    "A gauntlet harnessing the power of storms, allowing the wearer to command lightning and thunder.",
+  "Quad-o-rang":
+    "A four-pronged boomerang striking multiple targets before returning to its master.",
+  "Rapid Rabbit Raindown":
+    "An aerial assault deploying a barrage of rabbit-shaped explosives from above.",
+  "Neverending Mobstomper":
+    "Boots granting the wearer the ability to stomp through hordes of enemies without tiring.",
+  "T.I.B.B.E.R.S (B.E.E.G Edition)":
+    "A larger, more formidable version of the mechanical bear, with enhanced strength and durability.",
+  "Jinx's Tri-Namite":
+    "An explosive concoction from Jinx, causing triple the chaos and destruction.",
+  "FC Limited Express":
+    "A high-speed transport device, ensuring swift movement across the battlefield.",
+  "Vayne's Chromablades":
+    "Blades wielded by Vayne, capable of changing color and adapting to exploit enemy weaknesses.",
+  "Bearfoot Chem-Dispenser":
+    "Footwear releasing chemical agents with each step, hindering foes and aiding allies.",
+  "Deep Freeze":
+    "A weapon emitting blasts of extreme cold, freezing targets solid in an instant.",
+  "Meow Meow":
+    "A feline-inspired device distracting enemies with irresistible charm before striking.",
+  "Shield Slam":
+    "A technique allowing the bearer to bash enemies with their shield, stunning and damaging them.",
+  "Sound Wave":
+    "A device emitting powerful sonic waves, disrupting enemy formations and causing disarray.",
+  "Pillory Swipe":
+    "A swift attack that shackles the target momentarily, leaving them vulnerable to follow-up strikes.",
+  "Steel Tempest":
+    "A blade technique creating a tempest of steel, cutting down all who stand in its path.",
+  "Tentacle Slam":
+    "A brutal move summoning tentacles to smash enemies into the ground with overwhelming force.",
+  "Winged Dagger":
+    "A dagger granting the wielder increased agility, allowing them to strike swiftly and evade attacks.",
+  "Guiding Hex":
+    "A magical charm guiding spells and attacks to their targets with unerring accuracy.",
+  "Bunny Hop":
+    "A movement technique allowing the user to leap unpredictably, evading attacks and closing distances.",
+  "Battle Cat Barrage":
+    "A coordinated attack where feline companions launch a series of strikes against the enemy.",
+  "Light of the Lion":
+    "A beacon emitting a lion's roar, inspiring allies and intimidating foes.",
+  "Anima Echo":
+    "A mystical artifact that resonates with the soul, amplifying the user's magical abilities.",
+  "Savage Slice":
+    "A ferocious attack that rends enemies asunder, leaving them bleeding and weakened.",
+  "Wandering Storms":
+    "A spell conjuring roaming storms that wreak havoc across the battlefield.",
+  "Grizzly Smash":
+    "A powerful strike channeling the strength of a grizzly, crushing enemies with overwhelming force.",
+  "Lover's Ricochet":
+    "A paired weapon set that, when used together, causes attacks to bounce between targets harmoniously.",
+  "Hopped-Up Hex":
+    "A potion granting the drinker enhanced agility and reflexes, making them a blur on the battlefield.",
+  "Carrot Crash":
+    "A deceptive explosive disguised as a carrot, catching foes off-guard with its unexpected blast.",
+};
 
 export default function EpicLegendMap({ itemName }: { itemName: string }) {
   if (!(itemName in epicLegend)) {
-    return <></>
+    return <></>;
   }
-  const epicItemDesc: string = epicLegend[itemName]
+  const epicItemDesc: string = epicLegend[itemName];
   return (
     <div>
-      <span className={`text-xl font text-charcoal font-bold ${cormorant.className}`}>
+      <span
+        className={`text-xl font text-charcoal font-bold ${cormorant.className}`}
+      >
         {`"${epicItemDesc}"`}
       </span>
     </div>
-  )
+  );
 }

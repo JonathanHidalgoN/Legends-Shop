@@ -11,8 +11,7 @@ import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 
 export default function Header({ items }: { items: Item[] }) {
-  const { userName, logOut, login } =
-    useAuthContext();
+  const { userName, logOut, login } = useAuthContext();
   const { carItems } = useCarContext();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
