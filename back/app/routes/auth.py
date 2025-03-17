@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
@@ -144,16 +144,16 @@ async def singUp(
     birthDate:str = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
+    logger.debug(f"Request to {request.url.path}")
     if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$',email):
         raise HTTPException(
-            status_code=400, detail="Error retriving the user from the server"
+            status_code=400, detail="Email has not a valid pattern"
         )
     try:
-        birthDateDate = datetime.datetime.strptime(birthDate, "%Y-%m-%d")
+        birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date value")
     try:
-        logger.debug(f"Request to {request.url.path}")
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
     except Exception as e:
@@ -172,7 +172,10 @@ async def singUp(
         )
         raise HTTPException(status_code=400, detail="Email exist, change it")
     userInDB: UserInDB = UserInDB(
-        userName=username, hashedPassword=hashPassword(password)
+        userName=username, hashedPassword=hashPassword(password), 
+        created=datetime.now().date(),
+        email=email, goldSpend=0, currentGold=99999, 
+        birthDate=birthDateDate, lastSingin=datetime.now().date()
     )
     try:
         await insertUser(db, userInDB)
