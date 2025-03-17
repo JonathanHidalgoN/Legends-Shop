@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.models.UserTable import UserTable
 
 
-async def getUserGoldWithUserName(asyncSession: AsyncSession, userName: str) -> int | None:
+async def getCurrentUserGoldWithUserName(asyncSession: AsyncSession, userName: str) -> int | None:
     """
     """
     result = await asyncSession.execute(
