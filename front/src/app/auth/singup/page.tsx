@@ -53,7 +53,6 @@ export default function SingupPage() {
       setFormPassword2("");
       setSingupError(null);
     } else if (responseStatus.status === 400) {
-      console.log("Here");
       setSingupError(responseStatus.errorType);
     }
   }
@@ -98,9 +97,8 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => checkEmailPattern(e.target.value)}
-            className={`border p-2 rounded ${
-              singupError ? "border-red-500" : ""
-            }`}
+            className={`border p-2 rounded ${singupError ? "border-red-500" : ""
+              }`}
           />
           {singupError === SingupError.INVALIDEMAIL && (
             <span className="text-red-500 text-sm mt-1">
@@ -168,9 +166,8 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${
-              singupError ? "border-red-500" : ""
-            }`}
+            className={`border p-2 rounded ${singupError ? "border-red-500" : ""
+              }`}
           />
           {singupError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">
@@ -181,11 +178,10 @@ export default function SingupPage() {
         <button
           type="submit"
           disabled={singupError === SingupError.INVALIDEMAIL}
-          className={`w-full bg-[var(--orange)] text-white py-2 rounded transition ${
-            singupError === SingupError.INVALIDEMAIL
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:opacity-80"
-          }`}
+          className={`w-full bg-[var(--orange)] text-white py-2 rounded transition ${singupError === SingupError.INVALIDEMAIL
+            ? "opacity-50 cursor-not-allowed"
+            : "hover:opacity-80"
+            }`}
         >
           Submit
         </button>

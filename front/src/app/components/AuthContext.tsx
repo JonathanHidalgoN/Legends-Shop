@@ -61,7 +61,6 @@ export function AuthContextProvider({
       } else {
         const errorTypeHeader: string | null =
           response.headers.get("X-Error-Type");
-        console.log("Here");
         let errorType: SingupError | null = null;
         if (errorTypeHeader === SingupError.EMAILEXIST) {
           errorType = SingupError.EMAILEXIST;
