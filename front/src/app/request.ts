@@ -52,12 +52,16 @@ export async function logInRequest(
 export async function singupRequest(
   userName: string,
   password: string,
+  email: string,
+  birthDate: Date,
   from: string = "server",
 ) {
   const url: string = makeUrl(from, ENDPOINT_SINGUP);
   const formData = new URLSearchParams();
   formData.append("username", userName);
   formData.append("password", password);
+  formData.append("email", email);
+  formData.append("birthDate", birthDate.toISOString().substring(0, 10));
   return await fetch(url, {
     method: "POST",
     headers: {
