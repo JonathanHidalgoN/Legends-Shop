@@ -65,19 +65,28 @@ def mapItemTableToItem(
 
 def mapUserInDBToUserTable(userInDB: UserInDB) -> UserTable:
     userTable: UserTable = UserTable(
-        userName=userInDB.userName, password=userInDB.hashedPassword,
-        created=userInDB.created, last_singn=userInDB.lastSingin, 
-        gold_spend=userInDB.goldSpend, current_gold=userInDB.currentGold,
-        email=userInDB.email, birthdate=userInDB.birthDate
+        userName=userInDB.userName,
+        password=userInDB.hashedPassword,
+        created=userInDB.created,
+        last_singn=userInDB.lastSingin,
+        gold_spend=userInDB.goldSpend,
+        current_gold=userInDB.currentGold,
+        email=userInDB.email,
+        birthdate=userInDB.birthDate,
     )
     return userTable
 
 
 def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
     userInDB: UserInDB = UserInDB(
-        userName=userTable.userName, hashedPassword=userTable.password,
-        email=userTable.email, created=userTable.created, lastSingin=userTable.last_singn,
-        goldSpend=userTable.gold_spend, currentGold=userTable.current_gold, birthDate=userTable.birthdate
+        userName=userTable.userName,
+        hashedPassword=userTable.password,
+        email=userTable.email,
+        created=userTable.created,
+        lastSingin=userTable.last_singn,
+        goldSpend=userTable.gold_spend,
+        currentGold=userTable.current_gold,
+        birthDate=userTable.birthdate,
     )
     return userInDB
 

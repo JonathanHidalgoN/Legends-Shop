@@ -33,6 +33,7 @@ app.include_router(orders.router, prefix="/orders")
 async def root():
     return {"message": "up"}
 
+
 @app.get("/db")
 async def db_status(db: AsyncSession = Depends(database.getDbSession)):
     try:
@@ -40,9 +41,9 @@ async def db_status(db: AsyncSession = Depends(database.getDbSession)):
         return {"message": "Database is connected and healthy"}
     except Exception as e:
         raise HTTPException(
-            status_code=503,
-            detail=f"Database connection failed: {str(e)}"
+            status_code=503, detail=f"Database connection failed: {str(e)}"
         )
+
 
 @app.get("/testUpdateTagsTable")
 async def testUpdateTagsTable(db: AsyncSession = Depends(database.getDbSession)):

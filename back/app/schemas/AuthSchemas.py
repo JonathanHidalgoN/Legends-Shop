@@ -5,12 +5,12 @@ from datetime import date
 
 class User(BaseModel):
     userName: str
-    email:str
-    created:date
-    lastSingin:date
-    goldSpend:int
-    currentGold:int
-    birthDate:date
+    email: str
+    created: date
+    lastSingin: date
+    goldSpend: int
+    currentGold: int
+    birthDate: date
 
 
 class Token(BaseModel):
@@ -25,8 +25,9 @@ class TokenData(BaseModel):
 class UserInDB(User):
     hashedPassword: str
 
+
 class SingUpError(str, Enum):
     USERNAMEEXIST = "USERNAMEEXIST"
-    EMAILEXIST= "EMAILEXIST"
+    EMAILEXIST = "EMAILEXIST"
     INVALIDEMAIL = "INVALIDEMAIL"
-    INVALIDDATE="INVALIDDATE"
+    INVALIDDATE = "INVALIDDATE"

@@ -137,30 +137,34 @@ async def tokenRefresh(
 @router.post("/singup")
 async def singUp(
     request: Request,
-    #This ... makes required in fastapi
-    username:str = Form(...),
-    password:str = Form(...),
-    email:str = Form(...),
-    birthDate:str = Form(...),
+    # This ... makes required in fastapi
+    username: str = Form(...),
+    password: str = Form(...),
+    email: str = Form(...),
+    birthDate: str = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
     logger.debug(f"Request to {request.url.path}")
-    if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$',email):
+    if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
         raise HTTPException(
-            status_code=400, detail="Email has not a valid pattern"
-                            ,headers={"X-Error-Type": SingUpError.INVALIDEMAIL,
-                            "Access-Control-Expose-Headers":"X-Error-Type"
-                                      }
+            status_code=400,
+            detail="Email has not a valid pattern",
+            headers={
+                "X-Error-Type": SingUpError.INVALIDEMAIL,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
         )
     try:
         birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date value"
-                            ,headers={
-                            "X-Error-Type": SingUpError.INVALIDDATE,
-                            "Access-Control-Expose-Headers":"X-Error-Type"
-                                      }
-                            )
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid date value",
+            headers={
+                "X-Error-Type": SingUpError.INVALIDDATE,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     try:
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
@@ -173,25 +177,33 @@ async def singUp(
         logger.error(
             f"Error in {request.url.path}, the username {username} already exist"
         )
-        raise HTTPException(status_code=400, detail="Username exist, change it"
-                            ,headers={"X-Error-Type": SingUpError.USERNAMEEXIST,
-                            "Access-Control-Expose-Headers":"X-Error-Type"
-                                      }
-                            )
-    if emailExist:
-        logger.error(
-            f"Error in {request.url.path}, the email {email} already exist"
+        raise HTTPException(
+            status_code=400,
+            detail="Username exist, change it",
+            headers={
+                "X-Error-Type": SingUpError.USERNAMEEXIST,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
         )
-        raise HTTPException(status_code=400, detail="Email exist, change it",
-                            headers={"X-Error-Type": SingUpError.EMAILEXIST,
-                            "Access-Control-Expose-Headers":"X-Error-Type"
-                                     }
-                            )
+    if emailExist:
+        logger.error(f"Error in {request.url.path}, the email {email} already exist")
+        raise HTTPException(
+            status_code=400,
+            detail="Email exist, change it",
+            headers={
+                "X-Error-Type": SingUpError.EMAILEXIST,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     userInDB: UserInDB = UserInDB(
-        userName=username, hashedPassword=hashPassword(password), 
+        userName=username,
+        hashedPassword=hashPassword(password),
         created=datetime.now().date(),
-        email=email, goldSpend=0, currentGold=99999, 
-        birthDate=birthDateDate, lastSingin=datetime.now().date()
+        email=email,
+        goldSpend=0,
+        currentGold=99999,
+        birthDate=birthDateDate,
+        lastSingin=datetime.now().date(),
     )
     try:
         await insertUser(db, userInDB)
@@ -201,8 +213,7 @@ async def singUp(
         logger.error(
             f"Error in {request.url.path}, unexpected error inserting new user with userName {username}, exception: {e}"
         )
-        raise HTTPException(status_code=500, detail="Server error inserting the user"
-                            )
+        raise HTTPException(status_code=500, detail="Server error inserting the user")
 
 
 @router.get("/logout")

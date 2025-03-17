@@ -11,13 +11,11 @@ async def getUserInDB(asyncSession: AsyncSession, userName: str) -> UserInDB | N
     Retrieve the user from the database if they exist.
     """
     result = await asyncSession.execute(
-        select(UserTable).where(
-            UserTable.userName == userName
-        )
+        select(UserTable).where(UserTable.userName == userName)
     )
-    userTable:UserTable | None = result.scalars().first()
-    if userTable :
-        return mapUserTableToUserInDB(userTable) 
+    userTable: UserTable | None = result.scalars().first()
+    if userTable:
+        return mapUserTableToUserInDB(userTable)
     return None
 
 
@@ -32,6 +30,7 @@ async def checkUserExistInDB(asyncSession: AsyncSession, userName: str) -> bool:
     if row is None:
         return False
     return True
+
 
 async def checkEmailExistInDB(asyncSession: AsyncSession, email: str) -> bool:
     """
