@@ -11,7 +11,8 @@ interface AuthContextType {
   login: (userName: string, password: string) => Promise<number>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
-  singup: (userName: string, password: string) => Promise<number>;
+  singup: (userName: string, password: string,
+    email: string, birthDate: Date) => Promise<number>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,8 +42,11 @@ export function AuthContextProvider({
     return response.status;
   }
 
-  async function singup(userName: string, password: string): Promise<number> {
-    const response = await singupRequest(userName, password, "client");
+  async function singup(userName: string, password: string,
+    email: string, birthDate: Date): Promise<number> {
+    const response = await singupRequest(userName, password,
+      email, birthDate,
+      "client");
     if (!response.ok) {
       if (response.status == 400) {
         toast.error("The username already exist, chose other");
