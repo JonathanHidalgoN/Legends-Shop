@@ -13,6 +13,7 @@ from app.auth.functions import (
 )
 from app.data import database
 from app.data.queries.authQueries import (
+    checkEmailExistInDB,
     checkUserExistInDB,
     getUserIdWithUserName,
     getUserInDB,
@@ -154,6 +155,7 @@ async def singUp(
     try:
         logger.debug(f"Request to {request.url.path}")
         userExist: bool = await checkUserExistInDB(db, username)
+        emailExist: bool = await checkEmailExistInDB(db, email)
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
@@ -161,9 +163,14 @@ async def singUp(
         )
     if userExist:
         logger.error(
-            f"Error in {request.url.path}, the {username} already exist"
+            f"Error in {request.url.path}, the username {username} already exist"
         )
         raise HTTPException(status_code=400, detail="Username exist, change it")
+    if emailExist:
+        logger.error(
+            f"Error in {request.url.path}, the email {email} already exist"
+        )
+        raise HTTPException(status_code=400, detail="Email exist, change it")
     userInDB: UserInDB = UserInDB(
         userName=username, hashedPassword=hashPassword(password)
     )
