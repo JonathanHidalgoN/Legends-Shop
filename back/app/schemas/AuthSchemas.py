@@ -1,3 +1,4 @@
+from enum import Enum
 from pydantic import BaseModel
 from datetime import date
 
@@ -23,3 +24,9 @@ class TokenData(BaseModel):
 
 class UserInDB(User):
     hashedPassword: str
+
+class SingUpError(str, Enum):
+    USERNAMEEXIST = "USERNAMEEXIST"
+    EMAILEXIST= "EMAILEXIST"
+    INVALIDEMAIL = "INVALIDEMAIL"
+    INVALIDDATE="INVALIDDATE"
