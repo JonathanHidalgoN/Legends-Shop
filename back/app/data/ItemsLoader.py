@@ -514,13 +514,13 @@ class ItemsLoader:
             await self.dbSession.commit()
             logger.debug(f"Updated {len(itemsList)} items successfully")
         except SQLAlchemyError as e:
-            logger.debug(
+            logger.error(
                 f"Error getting the item from the database with name {currentItemName}, exception: {e}"
             )
             await self.dbSession.rollback()
             raise UpdateItemsError() from e
         except Exception as e:
-            logger.debug(
+            logger.error(
                 f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}"
             )
             await self.dbSession.rollback()
