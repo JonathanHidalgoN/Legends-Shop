@@ -7,6 +7,7 @@ from app.data.queries.itemQueries import getVersion
 from app.routes import items, auth, orders
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
+from app.routes import profile
 
 app = FastAPI()
 origins = [
@@ -27,6 +28,7 @@ app.add_middleware(
 app.include_router(items.router, prefix="/items")
 app.include_router(auth.router, prefix="/auth")
 app.include_router(orders.router, prefix="/orders")
+app.include_router(profile.router, prefix="/profile")
 
 
 @app.get("/")
