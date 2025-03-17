@@ -1,3 +1,5 @@
+import datetime
+import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -137,8 +139,18 @@ async def singUp(
     #This ... makes required in fastapi
     username:str = Form(...),
     password:str = Form(...),
+    email:str = Form(...),
+    birthDate:str = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
+    if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$',email):
+        raise HTTPException(
+            status_code=400, detail="Error retriving the user from the server"
+        )
+    try:
+        birthDateDate = datetime.datetime.strptime(birthDate, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date value")
     try:
         logger.debug(f"Request to {request.url.path}")
         userExist: bool = await checkUserExistInDB(db, username)
