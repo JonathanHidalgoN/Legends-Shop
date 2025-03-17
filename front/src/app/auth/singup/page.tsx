@@ -5,17 +5,33 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+enum EmailError {
+  Pattern,
+  Exist
+}
+
 export default function SingupPage() {
-
   const { singup } = useAuthContext();
-
   const router = useRouter();
 
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword1, setFormPassword1] = useState<string>("");
   const [formPassword2, setFormPassword2] = useState<string>("");
+  const [formEmail, setFormEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState<EmailError | null>(null);
+  const [formBirthDate, setFormBirthDate] = useState<string>("");
   const [singupError, setSingupError] = useState<boolean>(false);
   const [differentPassword, setDifferentPassword] = useState<boolean>(false);
+
+  function checkEmailPattern(email: string) {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (pattern.test(email)) {
+      setEmailError(null);
+      setFormEmail(email);
+    } else {
+      setEmailError(EmailError.Pattern);
+    }
+  }
 
   async function handleSingupSubmit(e: any): Promise<void> {
     e.preventDefault();
@@ -26,7 +42,9 @@ export default function SingupPage() {
     } else {
       setDifferentPassword(false);
     }
-    const responseStatus = await singup(formUserName, formPassword1);
+    const birthDate = new Date(formBirthDate);
+    const responseStatus = await singup(formUserName, formPassword1,
+      formEmail, birthDate);
     if (responseStatus === 200) {
       setFormUserName("");
       setFormPassword1("");
@@ -39,18 +57,11 @@ export default function SingupPage() {
   }
 
   return (
-    <div
-      className="bg-[var(--white)] 
-      min-h-screen flex flex-col items-center justify-center p-4"
-    >
+    <div className="bg-[var(--white)] min-h-screen flex flex-col items-center justify-center p-4">
       <h1 className="text-3xl text-[var(--orange)] font-bold mb-6">Sing up!</h1>
       <form onSubmit={handleSingupSubmit} className="w-full max-w-md space-y-4">
         <div className="flex flex-col">
-          <label
-            htmlFor="username"
-            className="mb-1 font-bold 
-            text-[var(--orange)]"
-          >
+          <label htmlFor="username" className="mb-1 font-bold text-[var(--orange)]">
             Username
           </label>
           <input
@@ -62,11 +73,35 @@ export default function SingupPage() {
             className={`border p-2 rounded ${singupError ? "border-red-500" : ""}`}
           />
         </div>
+
         <div className="flex flex-col">
-          <label
-            htmlFor="password"
-            className="mb-1 font-bold text-[var(--orange)]"
-          >
+          <label htmlFor="email" className="mb-1 font-bold text-[var(--orange)]">
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formEmail}
+            onChange={(e) => checkEmailPattern(e.target.value)}
+            className={`border p-2 rounded ${emailError || singupError
+              ? "border-red-500" : ""}`}
+          />
+          {emailError === EmailError.Pattern && (
+            <span className="text-red-500 text-sm mt-1">
+              This is not a valid email
+            </span>
+          )}
+          {emailError === EmailError.Exist && (
+            <span className="text-red-500 text-sm mt-1">
+              An user with this email already exists, change it
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
             Password
           </label>
           <input
@@ -79,16 +114,14 @@ export default function SingupPage() {
             className={`border p-2 rounded ${singupError || differentPassword ? "border-red-500" : ""}`}
           />
         </div>
+
         <div className="flex flex-col">
-          <label
-            htmlFor="password"
-            className="mb-1 font-bold text-[var(--orange)]"
-          >
+          <label htmlFor="confirm-password" className="mb-1 font-bold text-[var(--orange)]">
             Confirm password
           </label>
           <input
-            id="password"
-            name="password"
+            id="confirm-password"
+            name="confirm-password"
             type="password"
             placeholder="Repeat your password"
             value={formPassword2}
@@ -97,7 +130,7 @@ export default function SingupPage() {
           />
           {singupError && (
             <span className="text-red-500 text-sm mt-1">
-              Username already exist, change it
+              Username already exists, change it
             </span>
           )}
           {differentPassword && (
@@ -106,10 +139,25 @@ export default function SingupPage() {
             </span>
           )}
         </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="birthdate" className="mb-1 font-bold text-[var(--orange)]">
+            Date of Birth
+          </label>
+          <input
+            id="birthdate"
+            name="birthdate"
+            type="date"
+            value={formBirthDate}
+            onChange={(e) => setFormBirthDate(e.target.value)}
+            className={`border p-2 rounded ${singupError
+              ? "border-red-500" : ""}`}
+          />
+        </div>
+
         <button
           type="submit"
-          className="w-full bg-[var(--orange)] 
-          text-white py-2 rounded hover:opacity-80 transition"
+          className="w-full bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition"
         >
           Sing up
         </button>
