@@ -34,6 +34,18 @@ async def checkUserExistInDB(asyncSession: AsyncSession, userName: str) -> bool:
         return False
     return True
 
+async def checkEmailExistInDB(asyncSession: AsyncSession, email: str) -> bool:
+    """
+    Check if a email exist in db
+    """
+    result = await asyncSession.execute(
+        select(UserTable.email).where(UserTable.email == email)
+    )
+    row = result.first()
+    if row is None:
+        return False
+    return True
+
 
 async def insertUser(asyncSession: AsyncSession, userInDB: UserInDB) -> None:
     """
