@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     DifferentTotal,
     InvalidItemException,
+    NotEnoughGoldException,
     ProcessOrderException,
     UserIdNotFound,
 )
@@ -34,7 +35,7 @@ async def order(
     try:
         logger.debug(f"Request to {request.url.path} from user {userId}")
         orderId: int = await orderProcessor.makeOrder(order, userId)
-    except (InvalidItemException, DifferentTotal) as e:
+    except (InvalidItemException, DifferentTotal, NotEnoughGoldException) as e:
         raise HTTPException(status_code=400, detail=str(e))
     except (UserIdNotFound, ProcessOrderException) as e:
         raise HTTPException(status_code=500, detail=str(e))
