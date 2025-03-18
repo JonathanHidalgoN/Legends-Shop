@@ -32,6 +32,8 @@ interface CarContextType {
    * Deletes all car items
    */
   cleanCar: () => void;
+  currentGold: number | null;
+  setCurrentGold: (value: number | null) => void;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -42,6 +44,7 @@ export function CarContextProvider({
   children: React.ReactNode;
 }) {
   const [carItems, setCarItems] = useState<Item[]>([]);
+  const [currentGold, setCurrentGold] = useState<number | null>(null);
 
   /**
    * Removes one instance of an item from the cart.
@@ -97,6 +100,8 @@ export function CarContextProvider({
         addOneItemToCar,
         getTotalCost,
         cleanCar,
+        currentGold,
+        setCurrentGold
       }}
     >
       {children}

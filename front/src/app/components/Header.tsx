@@ -9,13 +9,12 @@ import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
-import { getCurrentUserGoldRequest } from "../request";
 import { getCurrentUserGold } from "../profileFunctions";
 
 export default function Header({ items }: { items: Item[] }) {
 
   const { userName, logOut, login } = useAuthContext();
-  const { carItems } = useCarContext();
+  const { carItems, currentGold, setCurrentGold } = useCarContext();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
@@ -23,7 +22,6 @@ export default function Header({ items }: { items: Item[] }) {
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<boolean>(false);
-  const [userGold, setUserGold] = useState<number>(0);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
@@ -51,12 +49,12 @@ export default function Header({ items }: { items: Item[] }) {
       if (userName) {
         const userGold: number | null = await getCurrentUserGold();
         if (userGold !== null) {
-          setUserGold(userGold);
+          setCurrentGold(userGold);
         } else {
-          setUserGold(0);
+          setCurrentGold(null);
         }
       } else {
-        setUserGold(0);
+        setCurrentGold(null);
       }
     }
     fetchUserGold();
@@ -254,7 +252,7 @@ export default function Header({ items }: { items: Item[] }) {
           </div>
         )}
 
-        {userName && (
+        {userName && currentGold != null && (
           <div className="flex items-center border border-yellow-500 bg-white rounded p-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -265,7 +263,7 @@ export default function Header({ items }: { items: Item[] }) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z" />
             </svg>
-            <span className="text-yellow-500 text-xl font-bold">{userGold.toLocaleString()} g</span>
+            <span className="text-yellow-500 text-xl font-bold">{currentGold.toLocaleString()} g</span>
           </div>
         )}
 
