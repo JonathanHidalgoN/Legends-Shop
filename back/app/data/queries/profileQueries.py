@@ -26,6 +26,15 @@ async def getCurrentUserGoldWithUserId(
     userGold: int | None = result.scalars().first()
     return userGold
 
+async def getTotalSpendUserGoldWithUserId(
+    asyncSession: AsyncSession, userId: int
+) -> int | None:
+    """ """
+    result = await asyncSession.execute(
+        select(UserTable.gold_spend).where(UserTable.id == userId)
+    )
+    userSpendGold: int | None = result.scalars().first()
+    return userSpendGold
 
 async def updateUserGoldWithUserId(
     asyncSession: AsyncSession, userId: int, newGold: int
@@ -37,5 +46,18 @@ async def updateUserGoldWithUserId(
     if result.rowcount == 0:
         raise SQLAlchemyError(
             f"Tried to update current_gold row of table UserTable with user id {userId} but 0 rows where updated"
+        )
+    await asyncSession.commit()
+
+async def updateUserSpendGoldWithUserId(
+    asyncSession: AsyncSession, userId: int, newGold: int
+) -> None:
+    """ """
+    result = await asyncSession.execute(
+        update(UserTable).where(UserTable.id == userId).values(gold_spend=newGold)
+    )
+    if result.rowcount == 0:
+        raise SQLAlchemyError(
+            f"Tried to update spend_gold row of table UserTable with user id {userId} but 0 rows where updated"
         )
     await asyncSession.commit()
