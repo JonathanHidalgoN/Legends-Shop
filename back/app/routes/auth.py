@@ -22,6 +22,8 @@ from app.data.queries.authQueries import (
 from app.schemas.AuthSchemas import SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
+from back.app.data.queries.profileQueries import updateLastSinginWithUserName
+
 # Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
 router = APIRouter()
 oauth2Scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
@@ -95,6 +97,7 @@ async def getToken(
         max_age=60 * 30,
         path="/",
     )
+    await updateLastSinginWithUserName(db,dataForm.username, datetime.now().date())
     logger.debug(f"Request to {request.url.path} completed successfully")
 
 
@@ -129,6 +132,7 @@ async def tokenRefresh(
         max_age=60 * 30,
         path="/",
     )
+    await updateLastSinginWithUserName(db, userName, datetime.now().date())
     logger.debug(
         f"Request to {request.url.path} completed successfully, token in response"
     )
