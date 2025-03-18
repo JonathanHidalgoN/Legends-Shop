@@ -19,7 +19,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.data.queries.profileQueries import (
     getCurrentUserGoldWithUserId,
+    getTotalSpendUserGoldWithUserId,
     updateUserGoldWithUserId,
+    updateUserSpendGoldWithUserId,
 )
 
 
@@ -55,6 +57,7 @@ class OrderProcessor:
             await self.insertItemOrderData(orderId, orderDataPerItem)
             # If an user send a lot of orders does this async job run and make the gold negative?
             await self.updateUserGold(userId, leftGold)
+            await self.updateTotalUserSpendGold(userId, order.total)
             await self.dbSession.commit()
             logger.debug(f"Orded processed successfully{userId}")
             return orderId
@@ -264,6 +267,25 @@ class OrderProcessor:
             )
             await updateUserGoldWithUserId(self.dbSession, userId, newGold)
             logger.debug(f"Current gold updated successfully")
-        except Exception as e:
+        except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")
+
+    async def updateTotalUserSpendGold(self, userId:int, toAdd:int) -> None:
+        logger.debug(
+            f"Updating user total spend gold with id {userId} adding {toAdd} gold"
+        )
+        try:
+            userSpendGold : int | None = await getTotalSpendUserGoldWithUserId(self.dbSession, userId)
+        except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")
+        if userSpendGold is None:
+            logger.error(f"User with id {userId} has no spend gold row, this in an error default is 0")
+            raise ProcessOrderException("Interanl server error")
+        newSpend : int = userSpendGold + toAdd
+        try:
+            await updateUserSpendGoldWithUserId(self.dbSession, userId, newSpend)
+        except SQLAlchemyError as e:
             logger.error(f"Error: {e}")
             raise ProcessOrderException("Internal server error")
