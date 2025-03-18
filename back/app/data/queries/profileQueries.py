@@ -12,3 +12,13 @@ async def getCurrentUserGoldWithUserName(asyncSession: AsyncSession, userName: s
     )
     userGold: int | None = result.scalars().first()
     return userGold 
+
+
+async def getCurrentUserGoldWithUserId(asyncSession: AsyncSession, userId: int) -> int | None:
+    """
+    """
+    result = await asyncSession.execute(
+        select(UserTable.current_gold).where(UserTable.id == userId)
+    )
+    userGold: int | None = result.scalars().first()
+    return userGold 
