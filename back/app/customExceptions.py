@@ -34,7 +34,7 @@ class InvalidItemException(ProcessOrderException):
     pass
 
 
-class UserIdNotFound(Exception):
+class UserIdNotFound(ProcessOrderException):
     def __init__(self, userName: str, message: str):
         self.userName = userName
         self.message = message
@@ -55,6 +55,8 @@ class DifferentTotal(ProcessOrderException):
 class OrderNotFoundException(ProcessOrderException):
     pass
 
+class NotEnoughGoldException(ProcessOrderException):
+    pass
 
 class ProfileWorkerException(Exception):
     pass
