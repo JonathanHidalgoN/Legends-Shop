@@ -9,9 +9,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import OrderSuccessModal from "@/app/components/OrderSuccessModal";
 import { usePathname } from "next/navigation";
+import { getCurrentUserGold } from "@/app/profileFunctions";
 
 export default function OrderPage() {
-  const { carItems, getTotalCost, cleanCar } = useCarContext();
+  const { carItems, getTotalCost, cleanCar, setCurrentGold } = useCarContext();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
@@ -33,9 +34,11 @@ export default function OrderPage() {
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
-        throw new Error(``);
+        toast.error("Error making the order")
+        return;
       }
-
+      const leftGold: number | null = await getCurrentUserGold();
+      setCurrentGold(leftGold);
       const data = await response.json();
       setOrderId(data.order_id);
       setShowModal(true);
