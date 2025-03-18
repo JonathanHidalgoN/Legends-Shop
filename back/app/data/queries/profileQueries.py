@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy import select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,5 +60,16 @@ async def updateUserSpendGoldWithUserId(
     if result.rowcount == 0:
         raise SQLAlchemyError(
             f"Tried to update spend_gold row of table UserTable with user id {userId} but 0 rows where updated"
+        )
+    await asyncSession.commit()
+
+async def updateLastSinginWithUserName(asyncSession: AsyncSession, userName:str, singin:date)->None:
+    """ """
+    result = await asyncSession.execute(
+        update(UserTable).where(UserTable.userName == userName).values(last_singn=singin)
+    )
+    if result.rowcount == 0:
+        raise SQLAlchemyError(
+            f"Tried to update last_singn row of table UserTable with username {userName} but 0 rows where updated"
         )
     await asyncSession.commit()
