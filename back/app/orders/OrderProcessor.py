@@ -9,12 +9,15 @@ from app.logger import logger
 from app.customExceptions import (
     DifferentTotal,
     InvalidItemException,
+    NotEnoughGoldException,
     OrderNotFoundException,
     ProcessOrderException,
 )
 from app.data.queries.itemQueries import getGoldBaseWithItemId, getItemIdByItemName
 from app.schemas.Order import Order, OrderDataPerItem, OrderStatus
 from sqlalchemy.exc import SQLAlchemyError
+
+from back.app.data.queries.profileQueries import getCurrentUserGoldWithUserId
 
 
 class OrderProcessor:
@@ -45,6 +48,7 @@ class OrderProcessor:
                 order, orderId
             )
             self.comparePrices(orderDataPerItem, order.total)
+            leftGold:int = await self.computeUserChange(userId, order.total) 
             await self.insertItemOrderData(orderId, orderDataPerItem)
             await self.dbSession.commit()
             logger.debug(f"Orded processed successfully{userId}")
@@ -219,3 +223,32 @@ class OrderProcessor:
                 f"Unexpected exception while canceling the order table with id {orderTable.id}, exception: {e}"
             )
             raise ProcessOrderException("Internal server error") from e
+
+    async def computeUserChange(self, userId:int, total:int):
+        userCurrentGold: int | None = await getCurrentUserGoldWithUserId(self.dbSession, userId) 
+        if userCurrentGold is None:
+            logger.error(f"Error, user with id: {userId} has no gold row, this is an error, default is 0")
+            raise ProcessOrderException("Internal server error")
+        if userCurrentGold < 0:
+            logger.error(f"Error, user with id: {userId} has negative gold")
+            raise ProcessOrderException("Internal server error")
+        leftGold : int = total - userCurrentGold
+        if leftGold < 0:
+            logger.error(f"Error, user with id: {userId} has not enogh gold, userGold: {userCurrentGold}, order total: {total}")
+            raise NotEnoughGoldException("Not enough gold")
+        return leftGold
+        
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
