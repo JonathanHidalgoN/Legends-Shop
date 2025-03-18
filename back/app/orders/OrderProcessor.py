@@ -17,7 +17,7 @@ from app.data.queries.itemQueries import getGoldBaseWithItemId, getItemIdByItemN
 from app.schemas.Order import Order, OrderDataPerItem, OrderStatus
 from sqlalchemy.exc import SQLAlchemyError
 
-from back.app.data.queries.profileQueries import getCurrentUserGoldWithUserId
+from app.data.queries.profileQueries import getCurrentUserGoldWithUserId, updateUserGoldWithUserId
 
 
 class OrderProcessor:
@@ -50,10 +50,13 @@ class OrderProcessor:
             self.comparePrices(orderDataPerItem, order.total)
             leftGold:int = await self.computeUserChange(userId, order.total) 
             await self.insertItemOrderData(orderId, orderDataPerItem)
+            #If an user send a lot of orders does this async job run and make the gold negative?
+            await self.updateUserGold(userId, leftGold)
             await self.dbSession.commit()
             logger.debug(f"Orded processed successfully{userId}")
             return orderId
         except ProcessOrderException as e:
+            await self.dbSession.rollback()
             raise e
         except SQLAlchemyError as e:
             logger.error(f"Error in database processing order {e}")
@@ -61,6 +64,7 @@ class OrderProcessor:
             raise ProcessOrderException("Internal server error") from e
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
+            await self.dbSession.rollback()
             raise ProcessOrderException("Internal server error") from e
 
     def creteaRandomDate(self, ref: datetime) -> datetime:
@@ -224,7 +228,8 @@ class OrderProcessor:
             )
             raise ProcessOrderException("Internal server error") from e
 
-    async def computeUserChange(self, userId:int, total:int):
+    async def computeUserChange(self, userId:int, total:int)->int:
+        logger.debug(f"Checking if userId {userId} has enough gold to spend {total} gold")
         userCurrentGold: int | None = await getCurrentUserGoldWithUserId(self.dbSession, userId) 
         if userCurrentGold is None:
             logger.error(f"Error, user with id: {userId} has no gold row, this is an error, default is 0")
@@ -232,23 +237,19 @@ class OrderProcessor:
         if userCurrentGold < 0:
             logger.error(f"Error, user with id: {userId} has negative gold")
             raise ProcessOrderException("Internal server error")
-        leftGold : int = total - userCurrentGold
+        leftGold : int = userCurrentGold - total 
         if leftGold < 0:
             logger.error(f"Error, user with id: {userId} has not enogh gold, userGold: {userCurrentGold}, order total: {total}")
             raise NotEnoughGoldException("Not enough gold")
+        logger.debug(f"UserId has {userCurrentGold}, will spend {total}, left gold {leftGold}")
         return leftGold
         
-
-    
-
-
-
-
-
-
-
-
-
-
-
+    async def updateUserGold(self, userId:int, newGold:int)->None:
+        try:
+            logger.debug(f"Updating user with id {userId} current gold with value {newGold}")
+            await updateUserGoldWithUserId(self.dbSession, userId, newGold)
+            logger.debug(f"Current gold updated successfully")
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")
 
