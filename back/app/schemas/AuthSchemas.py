@@ -7,7 +7,7 @@ class User(BaseModel):
     userName: str
     email: str
     created: date
-    lastSingin: date
+    lastSingIn: date
     goldSpend: int
     currentGold: int
     birthDate: date

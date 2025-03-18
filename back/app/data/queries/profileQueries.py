@@ -63,10 +63,10 @@ async def updateUserSpendGoldWithUserId(
         )
     await asyncSession.commit()
 
-async def updateLastSinginWithUserName(asyncSession: AsyncSession, userName:str, singin:date)->None:
+async def updateLastSingInWithUserName(asyncSession: AsyncSession, userName:str, singIn:date)->None:
     """ """
     result = await asyncSession.execute(
-        update(UserTable).where(UserTable.userName == userName).values(last_singn=singin)
+        update(UserTable).where(UserTable.userName == userName).values(last_singn=singIn)
     )
     if result.rowcount == 0:
         raise SQLAlchemyError(

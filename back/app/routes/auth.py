@@ -22,7 +22,7 @@ from app.data.queries.authQueries import (
 from app.schemas.AuthSchemas import SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
-from back.app.data.queries.profileQueries import updateLastSinginWithUserName
+from back.app.data.queries.profileQueries import updateLastSingInWithUserName
 
 # Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
 router = APIRouter()
@@ -97,7 +97,7 @@ async def getToken(
         max_age=60 * 30,
         path="/",
     )
-    await updateLastSinginWithUserName(db,dataForm.username, datetime.now().date())
+    await updateLastSingInWithUserName(db,dataForm.username, datetime.now().date())
     logger.debug(f"Request to {request.url.path} completed successfully")
 
 
@@ -132,7 +132,7 @@ async def tokenRefresh(
         max_age=60 * 30,
         path="/",
     )
-    await updateLastSinginWithUserName(db, userName, datetime.now().date())
+    await updateLastSingInWithUserName(db, userName, datetime.now().date())
     logger.debug(
         f"Request to {request.url.path} completed successfully, token in response"
     )
@@ -207,7 +207,7 @@ async def singUp(
         goldSpend=0,
         currentGold=99999,
         birthDate=birthDateDate,
-        lastSingin=datetime.now().date(),
+        lastSingIn=datetime.now().date(),
     )
     try:
         await insertUser(db, userInDB)
