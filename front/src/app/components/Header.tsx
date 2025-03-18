@@ -9,8 +9,11 @@ import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
+import { getCurrentUserGoldRequest } from "../request";
+import { getCurrentUserGold } from "../profileFunctions";
 
 export default function Header({ items }: { items: Item[] }) {
+
   const { userName, logOut, login } = useAuthContext();
   const { carItems } = useCarContext();
 
@@ -20,6 +23,7 @@ export default function Header({ items }: { items: Item[] }) {
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<boolean>(false);
+  const [userGold, setUserGold] = useState<number>(0);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
@@ -40,17 +44,33 @@ export default function Header({ items }: { items: Item[] }) {
     }
   }
 
+
   useEffect(() => {
     setIsMounted(true);
+    async function fetchUserGold() {
+      if (userName) {
+        const userGold: number | null = await getCurrentUserGold();
+        if (userGold !== null) {
+          setUserGold(userGold);
+        } else {
+          setUserGold(0);
+        }
+      } else {
+        setUserGold(0);
+      }
+    }
+    fetchUserGold();
+
     const handleClick = (event: MouseEvent) => {
       handleClickOutside(event, loginDropDownRef, setShowLoginDropdown);
       handleClickOutside(event, carDropDownRef, setShowCartDropdown);
     };
+
     document.addEventListener("mousedown", handleClick);
     return () => {
       document.removeEventListener("mousedown", handleClick);
     };
-  }, []);
+  }, [userName]);
 
   return (
     <header
@@ -184,25 +204,16 @@ export default function Header({ items }: { items: Item[] }) {
             bg-[var(--orange)] text-[var(--white)]"
           >
             Car
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="gold"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16 11V7a4 4 0 00-8 0v4"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 11h14l1 9H4l1-9z"
-              />
-            </svg>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16 11V7a4 4 0 00-8 0v4"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 11h14l1 9H4l1-9z"
+            />
           </button>
           {showCartDropdown && (
             <div
@@ -242,6 +253,22 @@ export default function Header({ items }: { items: Item[] }) {
             ) : null}
           </div>
         )}
+
+        {userName && (
+          <div className="flex items-center border border-yellow-500 bg-white rounded p-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-yellow-500 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z" />
+            </svg>
+            <span className="text-yellow-500 text-xl font-bold">{userGold.toLocaleString()} g</span>
+          </div>
+        )}
+
       </div>
     </header>
   );
