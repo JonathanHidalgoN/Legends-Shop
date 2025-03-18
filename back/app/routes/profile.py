@@ -8,6 +8,7 @@ from app.routes.auth import getCurrentUserTokenFlow
 from app.data import database
 from app.customExceptions import ProfileWorkerException
 from app.profile.ProfileWorker import ProfileWorker
+from app.schemas.profileSchemas import UserGoldResponse
 
 router = APIRouter()
 
@@ -16,7 +17,7 @@ def getProfileWorker(
 ) -> ProfileWorker:
     return ProfileWorker(db)
 
-@router.post("/get_gold")
+@router.get("/current_gold", response_model=UserGoldResponse)
 async def getUserGold(
     request: Request,
     userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
@@ -26,7 +27,7 @@ async def getUserGold(
         logger.debug(f"Request to {request.url.path} from user {userName}")
         userGold : int = await profileWorker.getUserGoldWithUserName(userName)
         logger.debug(f"Request to {request.url.path} completed")
-        return {"user_gold": userGold}
+        return {"userGold": userGold}
     except ProfileWorkerException:
         raise HTTPException(status_code=500, detail="Internal server error")
 
