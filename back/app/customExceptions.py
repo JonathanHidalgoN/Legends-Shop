@@ -55,11 +55,14 @@ class DifferentTotal(ProcessOrderException):
 class OrderNotFoundException(ProcessOrderException):
     pass
 
+
 class NotEnoughGoldException(ProcessOrderException):
     pass
 
+
 class ProfileWorkerException(Exception):
     pass
+
 
 class UserNoGoldRow(ProfileWorkerException):
     pass

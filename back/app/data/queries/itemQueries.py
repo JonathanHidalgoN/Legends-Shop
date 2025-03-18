@@ -304,7 +304,9 @@ async def getTagIdWithtTagName(asyncSession: AsyncSession, tagName: str) -> int 
     if tag:
         return tag
     else:
-        logger.warning(f"Tried to get tag id with tag name {tagName} but None was found")
+        logger.warning(
+            f"Tried to get tag id with tag name {tagName} but None was found"
+        )
         return None
 
 

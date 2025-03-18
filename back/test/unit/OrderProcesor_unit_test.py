@@ -5,7 +5,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.orders.OrderProcessor import OrderProcessor
 from app.schemas.Order import OrderDataPerItem, OrderStatus
-from app.customExceptions import DifferentTotal, NotEnoughGoldException, ProcessOrderException
+from app.customExceptions import (
+    DifferentTotal,
+    NotEnoughGoldException,
+    ProcessOrderException,
+)
 from staticData import STATIC_DATA_ORDER1, STATIC_DATA_ORDER2
 
 
@@ -192,42 +196,58 @@ def test_comparePrices_failure(processor):
     with pytest.raises(DifferentTotal):
         processor.comparePrices(orderData, 110)
 
+
 @pytest.mark.asyncio
 async def test_computeUserChange_success(processor):
     userId = 1
     total = 500
     currentGold = 1000
-    expectedLeft = currentGold - total  
-    
-    with patch("app.orders.OrderProcessor.getCurrentUserGoldWithUserId", new=AsyncMock(return_value=currentGold)):
+    expectedLeft = currentGold - total
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=currentGold),
+    ):
         left = await processor.computeUserChange(userId, total)
         assert left == expectedLeft
+
 
 @pytest.mark.asyncio
 async def test_computeUserChange_no_gold(processor):
     userId = 1
     total = 500
-    
-    with patch("app.orders.OrderProcessor.getCurrentUserGoldWithUserId", new=AsyncMock(return_value=None)):
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=None),
+    ):
         with pytest.raises(ProcessOrderException, match="Internal server error"):
             await processor.computeUserChange(userId, total)
+
 
 @pytest.mark.asyncio
 async def test_computeUserChange_negative_gold(processor):
     userId = 1
     total = 500
     negativeGold = -100
-    
-    with patch("app.orders.OrderProcessor.getCurrentUserGoldWithUserId", new=AsyncMock(return_value=negativeGold)):
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=negativeGold),
+    ):
         with pytest.raises(ProcessOrderException, match="Internal server error"):
             await processor.computeUserChange(userId, total)
+
 
 @pytest.mark.asyncio
 async def test_computeUserChange_not_enough_gold(processor):
     userId = 1
     total = 500
-    currentGold = 400 
-    
-    with patch("app.orders.OrderProcessor.getCurrentUserGoldWithUserId", new=AsyncMock(return_value=currentGold)):
+    currentGold = 400
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=currentGold),
+    ):
         with pytest.raises(NotEnoughGoldException, match="Not enough gold"):
             await processor.computeUserChange(userId, total)
