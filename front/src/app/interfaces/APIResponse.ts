@@ -15,8 +15,14 @@ export enum LoginError {
   INTERNALSERVERERROR = "INTERNALSERVERERROR"
 }
 
-export interface APIResponse {
+export interface APISingupResponse {
   status: number;
   errorType: SingupError | null;
+  message: string;
+}
+
+export interface APILoginResponse {
+  status: number;
+  errorType: LoginError | null;
   message: string;
 }
