@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 import { getCurrentUserGold } from "../profileFunctions";
-import { LoginError } from "../interfaces/APIResponse";
+import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
 
 export default function Header({ items }: { items: Item[] }) {
 
@@ -33,14 +33,14 @@ export default function Header({ items }: { items: Item[] }) {
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const responseStatus = await login(formUserName, formPassword);
-    if (responseStatus === 200) {
+    const apiResponse: APILoginResponse = await login(formUserName, formPassword);
+    if (apiResponse.status === 200) {
       setShowLoginDropdown(false);
       setFormUserName("");
       setFormPassword("");
       setLoginError(null);
-    } else if (responseStatus === 401) {
-      setLoginError(LoginError.INVALIDPASSWORD);
+    } else if (apiResponse.status === 401) {
+      setLoginError(apiResponse.errorType);
     }
   }
 
