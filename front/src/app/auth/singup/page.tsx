@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
-import { APIResponse, SingupError } from "@/app/interfaces/APIResponse";
+import { APISingupResponse, SingupError } from "@/app/interfaces/APIResponse";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -38,7 +38,7 @@ export default function SingupPage() {
       setDifferentPassword(false);
     }
     const birthDate = new Date(formBirthDate);
-    const responseStatus: APIResponse = await singup(
+    const responseStatus: APISingupResponse = await singup(
       formUserName,
       formPassword1,
       formEmail,
