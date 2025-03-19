@@ -103,7 +103,7 @@ export default function Header({ items }: { items: Item[] }) {
             >
               <button
                 onClick={() => {
-                  router.push(`profile/${userName}`);
+                  router.push(`/profile/${userName}`);
                   setShowLoginDropdown(false);
                 }}
                 className="block w-full text-left px-2 py-1 hover:bg-gray-100"

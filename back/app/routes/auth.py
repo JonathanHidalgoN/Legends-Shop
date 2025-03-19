@@ -22,7 +22,7 @@ from app.data.queries.authQueries import (
 from app.schemas.AuthSchemas import SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
-from back.app.data.queries.profileQueries import updateLastSingInWithUserName
+from app.data.queries.profileQueries import updateLastSingInWithUserName
 
 # Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
 router = APIRouter()
