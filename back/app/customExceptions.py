@@ -67,11 +67,11 @@ class ProfileWorkerException(Exception):
 class UserNoGoldRow(ProfileWorkerException):
     pass
 
-class InvalidUserNameException(ValueError):
+class InvalidUserNameException(Exception):
     pass
 
-class InvalidUserEmailException(ValueError):
+class InvalidUserEmailException(Exception):
     pass
 
-class InvalidUserGoldFieldException(ValueError):
+class InvalidUserGoldFieldException(Exception):
     pass
