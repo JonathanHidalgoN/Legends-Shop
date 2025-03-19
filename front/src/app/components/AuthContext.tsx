@@ -106,6 +106,15 @@ export function AuthContextProvider({
         if (errorTypeHeader === SingupError.EMAILEXIST) {
           errorType = SingupError.EMAILEXIST;
         }
+        if (errorTypeHeader === SingupError.INTERNALSERVERERROR) {
+          errorType = SingupError.INTERNALSERVERERROR;
+        }
+        if (errorTypeHeader === SingupError.INVALIDUSERGOLD) {
+          errorType = SingupError.INVALIDUSERGOLD;
+        }
+        if (errorTypeHeader === SingupError.INVALIDUSERNAME) {
+          errorType = SingupError.INVALIDUSERNAME;
+        }
         if (errorTypeHeader === SingupError.INVALIDEMAIL) {
           errorType = SingupError.INVALIDEMAIL;
         }
