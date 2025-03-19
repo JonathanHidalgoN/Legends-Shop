@@ -174,6 +174,7 @@ async def singUp(
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
     except InvalidUserNameException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
             status_code=400,
             detail=str(e),
@@ -183,6 +184,7 @@ async def singUp(
             },
         )
     except InvalidUserEmailException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
             status_code=400,
             detail=str(e),
@@ -192,6 +194,7 @@ async def singUp(
             },
         )
     except InvalidUserGoldFieldException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
             status_code=400,
             detail=str(e),
@@ -200,7 +203,8 @@ async def singUp(
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
-    except ValueError:
+    except ValueError as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
             status_code=400,
             detail="Invalid date value",
