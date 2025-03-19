@@ -218,7 +218,7 @@ export default function Header({ items }: { items: Item[] }) {
           {showCartDropdown && (
             <div
               ref={carDropDownRef}
-              className="absolute right-0 mt-2 w-80 p-2 rounded shadow-lg bg-white z-10"
+              className="absolute right-2 mt-2 w-96 p-2 rounded shadow-lg bg-white z-10"
             >
               {carItems.length > 0 ? (
                 <>

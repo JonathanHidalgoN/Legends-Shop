@@ -54,11 +54,11 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
                   className="object-cover rounded"
                 />
               </div>
-              <div>
-                <p className="font-semibold text-sm">
+              <div className="flex flex-col">
+                <p className="font-semibold text-sm truncate w-16">
                   {summary.itemSample.name}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-600 w-8">
                   {summary.itemSample.gold.base} g
                 </p>
               </div>
@@ -76,7 +76,9 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
               >
                 +
               </button>
-              <span className="text-sm px-2">{summary.count}</span>
+              <div className="w-8 text-center">
+                <span className="text-sm">{summary.count}</span>
+              </div>
               <button
                 onClick={() => deleteOneItemFromCar(summary.itemSample)}
                 className={
@@ -89,7 +91,7 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
               >
                 -
               </button>
-              <span className="text-base font-bold whitespace-nowrap">
+              <span className="text-base font-bold whitespace-nowrap w-16">
                 {summary.total} g
               </span>
             </div>
