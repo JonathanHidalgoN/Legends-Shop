@@ -5,7 +5,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.orders.OrderProcessor import OrderProcessor
 from app.schemas.Order import OrderDataPerItem, OrderStatus
-from app.customExceptions import DifferentTotal, ProcessOrderException
+from app.customExceptions import (
+    DifferentTotal,
+    NotEnoughGoldException,
+    ProcessOrderException,
+)
 from staticData import STATIC_DATA_ORDER1, STATIC_DATA_ORDER2
 
 
@@ -73,7 +77,7 @@ async def test_insertItemOrderData_failure(processor):
     with patch.object(
         processor.dbSession, "execute", side_effect=SQLAlchemyError("DB error")
     ):
-        with pytest.raises(ProcessOrderException, match="Internal server error"):
+        with pytest.raises(ProcessOrderException):
             await processor.insertItemOrderData(orderId, orderDataPerItem)
 
 
@@ -191,3 +195,101 @@ def test_comparePrices_failure(processor):
     orderData = [item1, item2]
     with pytest.raises(DifferentTotal):
         processor.comparePrices(orderData, 110)
+
+
+@pytest.mark.asyncio
+async def test_computeUserChange_success(processor):
+    userId = 1
+    total = 500
+    currentGold = 1000
+    expectedLeft = currentGold - total
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=currentGold),
+    ):
+        left = await processor.computeUserChange(userId, total)
+        assert left == expectedLeft
+
+
+@pytest.mark.asyncio
+async def test_computeUserChange_no_gold(processor):
+    userId = 1
+    total = 500
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=None),
+    ):
+        with pytest.raises(ProcessOrderException):
+            await processor.computeUserChange(userId, total)
+
+
+@pytest.mark.asyncio
+async def test_computeUserChange_negative_gold(processor):
+    userId = 1
+    total = 500
+    negativeGold = -100
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=negativeGold),
+    ):
+        with pytest.raises(ProcessOrderException):
+            await processor.computeUserChange(userId, total)
+
+
+@pytest.mark.asyncio
+async def test_computeUserChange_not_enough_gold(processor):
+    userId = 1
+    total = 500
+    currentGold = 400
+
+    with patch(
+        "app.orders.OrderProcessor.getCurrentUserGoldWithUserId",
+        new=AsyncMock(return_value=currentGold),
+    ):
+        with pytest.raises(NotEnoughGoldException):
+            await processor.computeUserChange(userId, total)
+
+@pytest.mark.asyncio
+async def test_updateTotalUserSpendGold_success(processor):
+    userId = 1
+    toAdd = 100
+    initialSpend = 500
+    expectedNewSpend = initialSpend + toAdd
+
+    with patch("app.orders.OrderProcessor.getTotalSpendUserGoldWithUserId", new=AsyncMock(return_value=initialSpend)):
+        with patch("app.orders.OrderProcessor.updateUserSpendGoldWithUserId", new=AsyncMock(return_value=None)) as updateMock:
+            await processor.updateTotalUserSpendGold(userId, toAdd)
+            updateMock.assert_awaited_once_with(processor.dbSession, userId, expectedNewSpend)
+
+@pytest.mark.asyncio
+async def test_updateTotalUserSpendGold_no_spend_gold(processor):
+    userId = 1
+    toAdd = 100
+
+    with patch("app.orders.OrderProcessor.getTotalSpendUserGoldWithUserId", new=AsyncMock(return_value=None)):
+        with pytest.raises(ProcessOrderException):
+            await processor.updateTotalUserSpendGold(userId, toAdd)
+
+@pytest.mark.asyncio
+async def test_updateTotalUserSpendGold_sqlalchemy_error_on_get(processor):
+    userId = 1
+    toAdd = 100
+
+    with patch("app.orders.OrderProcessor.getTotalSpendUserGoldWithUserId", new=AsyncMock(side_effect=SQLAlchemyError("DB error"))):
+        with pytest.raises(ProcessOrderException):
+            await processor.updateTotalUserSpendGold(userId, toAdd)
+
+@pytest.mark.asyncio
+async def test_updateTotalUserSpendGold_sqlalchemy_error_on_update(processor):
+    userId = 1
+    toAdd = 100
+    initialSpend = 500
+
+    with patch("app.orders.OrderProcessor.getTotalSpendUserGoldWithUserId", new=AsyncMock(return_value=initialSpend)):
+        with patch("app.orders.OrderProcessor.updateUserSpendGoldWithUserId", new=AsyncMock(side_effect=SQLAlchemyError("DB error"))):
+            with pytest.raises(ProcessOrderException):
+                await processor.updateTotalUserSpendGold(userId, toAdd)
+

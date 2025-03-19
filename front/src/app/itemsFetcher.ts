@@ -1,3 +1,4 @@
+//TODO: CHANGE NAME TO ITEMFUNCTIONS
 import {
   Effect,
   EffectKind,

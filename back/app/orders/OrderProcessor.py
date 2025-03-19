@@ -9,12 +9,20 @@ from app.logger import logger
 from app.customExceptions import (
     DifferentTotal,
     InvalidItemException,
+    NotEnoughGoldException,
     OrderNotFoundException,
     ProcessOrderException,
 )
 from app.data.queries.itemQueries import getGoldBaseWithItemId, getItemIdByItemName
 from app.schemas.Order import Order, OrderDataPerItem, OrderStatus
 from sqlalchemy.exc import SQLAlchemyError
+
+from app.data.queries.profileQueries import (
+    getCurrentUserGoldWithUserId,
+    getTotalSpendUserGoldWithUserId,
+    updateUserGoldWithUserId,
+    updateUserSpendGoldWithUserId,
+)
 
 
 class OrderProcessor:
@@ -45,11 +53,16 @@ class OrderProcessor:
                 order, orderId
             )
             self.comparePrices(orderDataPerItem, order.total)
+            leftGold: int = await self.computeUserChange(userId, order.total)
             await self.insertItemOrderData(orderId, orderDataPerItem)
+            # If an user send a lot of orders does this async job run and make the gold negative?
+            await self.updateUserGold(userId, leftGold)
+            await self.updateTotalUserSpendGold(userId, order.total)
             await self.dbSession.commit()
             logger.debug(f"Orded processed successfully{userId}")
             return orderId
         except ProcessOrderException as e:
+            await self.dbSession.rollback()
             raise e
         except SQLAlchemyError as e:
             logger.error(f"Error in database processing order {e}")
@@ -57,6 +70,7 @@ class OrderProcessor:
             raise ProcessOrderException("Internal server error") from e
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
+            await self.dbSession.rollback()
             raise ProcessOrderException("Internal server error") from e
 
     def creteaRandomDate(self, ref: datetime) -> datetime:
@@ -219,3 +233,59 @@ class OrderProcessor:
                 f"Unexpected exception while canceling the order table with id {orderTable.id}, exception: {e}"
             )
             raise ProcessOrderException("Internal server error") from e
+
+    async def computeUserChange(self, userId: int, total: int) -> int:
+        logger.debug(
+            f"Checking if userId {userId} has enough gold to spend {total} gold"
+        )
+        userCurrentGold: int | None = await getCurrentUserGoldWithUserId(
+            self.dbSession, userId
+        )
+        if userCurrentGold is None:
+            logger.error(
+                f"Error, user with id: {userId} has no gold row, this is an error, default is 0"
+            )
+            raise ProcessOrderException("Internal server error")
+        if userCurrentGold < 0:
+            logger.error(f"Error, user with id: {userId} has negative gold")
+            raise ProcessOrderException("Internal server error")
+        leftGold: int = userCurrentGold - total
+        if leftGold < 0:
+            logger.error(
+                f"Error, user with id: {userId} has not enogh gold, userGold: {userCurrentGold}, order total: {total}"
+            )
+            raise NotEnoughGoldException("Not enough gold")
+        logger.debug(
+            f"UserId has {userCurrentGold}, will spend {total}, left gold {leftGold}"
+        )
+        return leftGold
+
+    async def updateUserGold(self, userId: int, newGold: int) -> None:
+        try:
+            logger.debug(
+                f"Updating user with id {userId} current gold with value {newGold}"
+            )
+            await updateUserGoldWithUserId(self.dbSession, userId, newGold)
+            logger.debug(f"Current gold updated successfully")
+        except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")
+
+    async def updateTotalUserSpendGold(self, userId:int, toAdd:int) -> None:
+        logger.debug(
+            f"Updating user total spend gold with id {userId} adding {toAdd} gold"
+        )
+        try:
+            userSpendGold : int | None = await getTotalSpendUserGoldWithUserId(self.dbSession, userId)
+        except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")
+        if userSpendGold is None:
+            logger.error(f"User with id {userId} has no spend gold row, this in an error default is 0")
+            raise ProcessOrderException("Interanl server error")
+        newSpend : int = userSpendGold + toAdd
+        try:
+            await updateUserSpendGoldWithUserId(self.dbSession, userId, newSpend)
+        except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")

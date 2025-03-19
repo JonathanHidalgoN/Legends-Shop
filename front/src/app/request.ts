@@ -12,6 +12,7 @@ export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 export const ENDPOINT_ORDER: string = `orders/order`;
 export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
+export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -52,12 +53,16 @@ export async function logInRequest(
 export async function singupRequest(
   userName: string,
   password: string,
+  email: string,
+  birthDate: Date,
   from: string = "server",
 ) {
   const url: string = makeUrl(from, ENDPOINT_SINGUP);
   const formData = new URLSearchParams();
   formData.append("username", userName);
   formData.append("password", password);
+  formData.append("email", email);
+  formData.append("birthDate", birthDate.toISOString().substring(0, 10));
   return await fetch(url, {
     method: "POST",
     headers: {
@@ -194,6 +199,13 @@ export async function cancelOrderRequest(
   const url: string = makeUrl(from, `${ENDPOINT_ORDER_CANCEL}/${orderId}`);
   return await fetch(url, {
     method: "PUT",
+    credentials: "include",
+  });
+}
+
+export async function getCurrentUserGoldRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_PROFILE_CURRENT_GOLD);
+  return await fetch(url, {
     credentials: "include",
   });
 }

@@ -1,3 +1,5 @@
+from datetime import datetime
+import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,13 +13,16 @@ from app.auth.functions import (
 )
 from app.data import database
 from app.data.queries.authQueries import (
+    checkEmailExistInDB,
     checkUserExistInDB,
     getUserIdWithUserName,
     getUserInDB,
     insertUser,
 )
-from app.schemas.AuthSchemas import UserInDB
+from app.schemas.AuthSchemas import SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+
+from app.data.queries.profileQueries import updateLastSingInWithUserName
 
 # Source:https://fastapi.tiangolo.com/tutorial/security/first-steps/#create-mainpy
 router = APIRouter()
@@ -92,6 +97,7 @@ async def getToken(
         max_age=60 * 30,
         path="/",
     )
+    await updateLastSingInWithUserName(db,dataForm.username, datetime.now().date())
     logger.debug(f"Request to {request.url.path} completed successfully")
 
 
@@ -108,7 +114,7 @@ async def tokenRefresh(
         if not matchUser:
             logger.error(f"Error in {request.url.path}, {userName} do not exit")
             raise HTTPException(
-                status_code=400, detail="Incorrect username or password"
+                status_code=401, detail="Incorrect username or password"
             )
         logger.debug(f"Request to {request.url.path} completed successfully")
     except Exception as e:
@@ -126,6 +132,7 @@ async def tokenRefresh(
         max_age=60 * 30,
         path="/",
     )
+    await updateLastSingInWithUserName(db, userName, datetime.now().date())
     logger.debug(
         f"Request to {request.url.path} completed successfully, token in response"
     )
@@ -134,14 +141,37 @@ async def tokenRefresh(
 @router.post("/singup")
 async def singUp(
     request: Request,
-    #This ... makes required in fastapi
-    username:str = Form(...),
-    password:str = Form(...),
+    # This ... makes required in fastapi
+    username: str = Form(...),
+    password: str = Form(...),
+    email: str = Form(...),
+    birthDate: str = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
+    logger.debug(f"Request to {request.url.path}")
+    if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
+        raise HTTPException(
+            status_code=400,
+            detail="Email has not a valid pattern",
+            headers={
+                "X-Error-Type": SingUpError.INVALIDEMAIL,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     try:
-        logger.debug(f"Request to {request.url.path}")
+        birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid date value",
+            headers={
+                "X-Error-Type": SingUpError.INVALIDDATE,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    try:
         userExist: bool = await checkUserExistInDB(db, username)
+        emailExist: bool = await checkEmailExistInDB(db, email)
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
@@ -149,11 +179,35 @@ async def singUp(
         )
     if userExist:
         logger.error(
-            f"Error in {request.url.path}, the {username} already exist"
+            f"Error in {request.url.path}, the username {username} already exist"
         )
-        raise HTTPException(status_code=400, detail="Username exist, change it")
+        raise HTTPException(
+            status_code=400,
+            detail="Username exist, change it",
+            headers={
+                "X-Error-Type": SingUpError.USERNAMEEXIST,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    if emailExist:
+        logger.error(f"Error in {request.url.path}, the email {email} already exist")
+        raise HTTPException(
+            status_code=400,
+            detail="Email exist, change it",
+            headers={
+                "X-Error-Type": SingUpError.EMAILEXIST,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     userInDB: UserInDB = UserInDB(
-        userName=username, hashedPassword=hashPassword(password)
+        userName=username,
+        hashedPassword=hashPassword(password),
+        created=datetime.now().date(),
+        email=email,
+        goldSpend=0,
+        currentGold=99999,
+        birthDate=birthDateDate,
+        lastSingIn=datetime.now().date(),
     )
     try:
         await insertUser(db, userInDB)
