@@ -18,7 +18,7 @@ export default function SingupPage() {
   const [singupError, setSingupError] = useState<SingupError | null>(null);
   const [differentPassword, setDifferentPassword] = useState<boolean>(false);
 
-  function checkEmailPattern(email: string) {
+  function checkEmailPattern(email: string): void {
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     setFormEmail(email);
     if (pattern.test(email)) {
@@ -133,6 +133,11 @@ export default function SingupPage() {
             onChange={(e) => setFormPassword1(e.target.value)}
             className={`border p-2 rounded ${singupError || differentPassword ? "border-red-500" : ""}`}
           />
+          {singupError === SingupError.INVALIDPASSWORD && (
+            <span className="text-red-500 text-sm mt-1">
+              Invalid password
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col">
