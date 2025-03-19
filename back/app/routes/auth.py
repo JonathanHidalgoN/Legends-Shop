@@ -212,7 +212,12 @@ async def singUp(
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
-            status_code=500, detail="Error retriving the user from the server"
+            status_code=500,
+            detail="Internal server error",
+            headers={
+                "X-Error-Type": SingUpError.INTERNALSERVERERROR,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
         )
     if userExist:
         logger.error(
