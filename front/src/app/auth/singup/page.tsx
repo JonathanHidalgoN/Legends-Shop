@@ -81,6 +81,11 @@ export default function SingupPage() {
               Username exist, change it
             </span>
           )}
+          {singupError === SingupError.INVALIDUSERNAME && (
+            <span className="text-red-500 text-sm mt-1">
+              Invalid username
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col">
