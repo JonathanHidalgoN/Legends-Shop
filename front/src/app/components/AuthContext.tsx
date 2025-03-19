@@ -124,6 +124,9 @@ export function AuthContextProvider({
         if (errorTypeHeader === SingupError.INVALIDDATE) {
           errorType = SingupError.INVALIDDATE;
         }
+        if (errorTypeHeader === SingupError.INVALIDPASSWORD) {
+          errorType = SingupError.INVALIDPASSWORD;
+        }
         return {
           status: response.status,
           errorType: errorType,
