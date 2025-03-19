@@ -3,6 +3,7 @@
 import { useAuthContext } from "@/app/components/AuthContext";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { APILoginResponse, LoginError } from "@/app/interfaces/APIResponse";
 
 export default function LogInPage() {
   const { login } = useAuthContext();
@@ -12,18 +13,18 @@ export default function LogInPage() {
 
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
-  const [loginError, setLoginError] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<LoginError | null>(null);
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const responseStatus = await login(formUserName, formPassword);
-    if (responseStatus === 200) {
+    const apiResponse: APILoginResponse = await login(formUserName, formPassword);
+    if (apiResponse.status === 200) {
       setFormUserName("");
       setFormPassword("");
-      setLoginError(false);
+      setLoginError(null);
       router.push(redirect);
-    } else if (responseStatus === 401) {
-      setLoginError(true);
+    } else if (apiResponse.status === 401) {
+      setLoginError(LoginError.INCORRECTCREDENTIALS);
     }
   }
 
