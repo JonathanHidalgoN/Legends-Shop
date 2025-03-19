@@ -18,6 +18,12 @@ export default function SingupPage() {
   const [singupError, setSingupError] = useState<SingupError | null>(null);
   const [differentPassword, setDifferentPassword] = useState<boolean>(false);
 
+  function checkPasswords(p1: string, p2: string): void {
+    setDifferentPassword(p1 != p2)
+    setFormPassword2(p2);
+    setFormPassword1(p1);
+  }
+
   function checkEmailPattern(email: string): void {
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     setFormEmail(email);
@@ -130,7 +136,7 @@ export default function SingupPage() {
             type="password"
             placeholder="Password"
             value={formPassword1}
-            onChange={(e) => setFormPassword1(e.target.value)}
+            onChange={(e) => checkPasswords(e.target.value, formPassword2)}
             className={`border p-2 rounded ${singupError || differentPassword ? "border-red-500" : ""}`}
           />
           {singupError === SingupError.INVALIDPASSWORD && (
@@ -153,7 +159,7 @@ export default function SingupPage() {
             type="password"
             placeholder="Repeat your password"
             value={formPassword2}
-            onChange={(e) => setFormPassword2(e.target.value)}
+            onChange={(e) => checkPasswords(formPassword1, e.target.value)}
             className={`border p-2 rounded ${singupError || differentPassword ? "border-red-500" : ""}`}
           />
           {differentPassword && (
