@@ -75,3 +75,6 @@ class InvalidUserEmailException(Exception):
 
 class InvalidUserGoldFieldException(Exception):
     pass
+
+class InvalidPasswordException(Exception):
+    pass
