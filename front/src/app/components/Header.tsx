@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 import { getCurrentUserGold } from "../profileFunctions";
+import { LoginError } from "../interfaces/APIResponse";
 
 export default function Header({ items }: { items: Item[] }) {
 
@@ -21,7 +22,7 @@ export default function Header({ items }: { items: Item[] }) {
   const [isMounted, setIsMounted] = useState(false);
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
-  const [loginError, setLoginError] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<LoginError | null>(null);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
@@ -29,6 +30,7 @@ export default function Header({ items }: { items: Item[] }) {
     useRef<HTMLDivElement>(null);
 
   const router = useRouter();
+
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
     const responseStatus = await login(formUserName, formPassword);
@@ -36,9 +38,9 @@ export default function Header({ items }: { items: Item[] }) {
       setShowLoginDropdown(false);
       setFormUserName("");
       setFormPassword("");
-      setLoginError(false);
+      setLoginError(null);
     } else if (responseStatus === 401) {
-      setLoginError(true);
+      setLoginError(LoginError.INVALIDPASSWORD);
     }
   }
 
