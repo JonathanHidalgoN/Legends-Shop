@@ -83,7 +83,12 @@ async def getToken(
         )
     if not matchUser:
         logger.error(f"Error in {request.url.path}, {dataForm.username} do not exit")
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password",
+            headers={
+                "X-Error-Type": LogInError.INCORRECTCREDENTIALS,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+                            )
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         logger.error(
             f"Error in {request.url.path}, incorrect password for user {dataForm.username}"
