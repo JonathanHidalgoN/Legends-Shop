@@ -9,7 +9,7 @@ from app.customExceptions import InvalidUserEmailException, InvalidUserGoldField
 def userNameValidation(userName:str)->str:
     MIN_LEN : int = 8 
     if len(userName) < MIN_LEN:
-        raise InvalidUserNameException(f"Error, userName has to be {MIN_LEN} characters at least")
+        raise InvalidUserNameException(f"Username has to be {MIN_LEN} characters at least")
     return userName
 
 def emailValidation(email:str)->str:
