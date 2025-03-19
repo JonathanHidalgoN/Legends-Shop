@@ -78,7 +78,7 @@ export function AuthContextProvider({
     if (!response.ok) {
       const data = await response.json();
       const result: APILoginResponse = createAPIResponseLogin(response, data);
-      if (result.status == 400) {
+      if (result.status == 401) {
         toast.error(result.message);
       } else if (result.status == 500) {
         toast.error("Internal server error login");
