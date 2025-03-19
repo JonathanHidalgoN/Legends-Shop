@@ -3,7 +3,7 @@ import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.customExceptions import InvalidUserEmailException, InvalidUserGoldFieldException, InvalidUserNameException, UserIdNotFound
+from app.customExceptions import InvalidPasswordException, InvalidUserEmailException, InvalidUserGoldFieldException, InvalidUserNameException, UserIdNotFound
 from app.logger import logger
 from app.auth.functions import (
     createAccessToken,
@@ -146,7 +146,6 @@ async def tokenRefresh(
         f"Request to {request.url.path} completed successfully, token in response"
     )
 
-
 @router.post("/singup")
 async def singUp(
     request: Request,
@@ -170,6 +169,7 @@ async def singUp(
             currentGold=99999,
             birthDate=birthDateDate,
             lastSingIn=datetime.now().date(),
+            password = password
         )
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
@@ -180,6 +180,16 @@ async def singUp(
             detail=str(e),
             headers={
                 "X-Error-Type": SingUpError.INVALIDUSERNAME,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    except InvalidPasswordException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=str(e),
+            headers={
+                "X-Error-Type": SingUpError.INVALIDPASSWORD,
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
