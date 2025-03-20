@@ -27,6 +27,7 @@ async def getCurrentUserGoldWithUserId(
     userGold: int | None = result.scalars().first()
     return userGold
 
+
 async def getTotalSpendUserGoldWithUserId(
     asyncSession: AsyncSession, userId: int
 ) -> int | None:
@@ -36,6 +37,7 @@ async def getTotalSpendUserGoldWithUserId(
     )
     userSpendGold: int | None = result.scalars().first()
     return userSpendGold
+
 
 async def updateUserGoldWithUserId(
     asyncSession: AsyncSession, userId: int, newGold: int
@@ -50,6 +52,7 @@ async def updateUserGoldWithUserId(
         )
     await asyncSession.commit()
 
+
 async def updateUserSpendGoldWithUserId(
     asyncSession: AsyncSession, userId: int, newGold: int
 ) -> None:
@@ -63,10 +66,15 @@ async def updateUserSpendGoldWithUserId(
         )
     await asyncSession.commit()
 
-async def updateLastSingInWithUserName(asyncSession: AsyncSession, userName:str, singIn:date)->None:
+
+async def updateLastSingInWithUserName(
+    asyncSession: AsyncSession, userName: str, singIn: date
+) -> None:
     """ """
     result = await asyncSession.execute(
-        update(UserTable).where(UserTable.userName == userName).values(last_singn=singIn)
+        update(UserTable)
+        .where(UserTable.userName == userName)
+        .values(last_singn=singIn)
     )
     if result.rowcount == 0:
         raise SQLAlchemyError(

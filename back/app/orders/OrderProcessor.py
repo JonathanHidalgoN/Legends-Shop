@@ -271,19 +271,23 @@ class OrderProcessor:
             logger.error(f"Error: {e}")
             raise ProcessOrderException("Internal server error")
 
-    async def updateTotalUserSpendGold(self, userId:int, toAdd:int) -> None:
+    async def updateTotalUserSpendGold(self, userId: int, toAdd: int) -> None:
         logger.debug(
             f"Updating user total spend gold with id {userId} adding {toAdd} gold"
         )
         try:
-            userSpendGold : int | None = await getTotalSpendUserGoldWithUserId(self.dbSession, userId)
+            userSpendGold: int | None = await getTotalSpendUserGoldWithUserId(
+                self.dbSession, userId
+            )
         except SQLAlchemyError as e:
             logger.error(f"Error: {e}")
             raise ProcessOrderException("Internal server error")
         if userSpendGold is None:
-            logger.error(f"User with id {userId} has no spend gold row, this in an error default is 0")
+            logger.error(
+                f"User with id {userId} has no spend gold row, this in an error default is 0"
+            )
             raise ProcessOrderException("Interanl server error")
-        newSpend : int = userSpendGold + toAdd
+        newSpend: int = userSpendGold + toAdd
         try:
             await updateUserSpendGoldWithUserId(self.dbSession, userId, newSpend)
         except SQLAlchemyError as e:

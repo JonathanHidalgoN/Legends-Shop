@@ -1,9 +1,16 @@
 "use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
-import { validateEmailInput, validatePasswordInput, validateUsernameInput } from "@/app/functions";
+import {
+  validateEmailInput,
+  validatePasswordInput,
+  validateUsernameInput,
+} from "@/app/functions";
 import { APISingupResponse, SingupError } from "@/app/interfaces/APIResponse";
-import { defaultValidationResult, ValidationResult } from "@/app/interfaces/Errors";
+import {
+  defaultValidationResult,
+  ValidationResult,
+} from "@/app/interfaces/Errors";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -17,15 +24,21 @@ export default function SingupPage() {
   const [formPassword2, setFormPassword2] = useState<string>("");
   const [formEmail, setFormEmail] = useState<string>("");
   const [formBirthDate, setFormBirthDate] = useState<string>("");
-  const [singupApiError, setSingupApiError] = useState<SingupError | null>(null);
+  const [singupApiError, setSingupApiError] = useState<SingupError | null>(
+    null,
+  );
   const [differentPassword, setDifferentPassword] = useState<boolean>(false);
-  const [validUsernameInput, setValidUsernameInput] = useState<ValidationResult>(defaultValidationResult);
-  const [validEmailInput, setValidEmailInput] = useState<ValidationResult>(defaultValidationResult);
-  const [validPasswordInput, setValidPasswordInput] = useState<ValidationResult>(defaultValidationResult);
+  const [validUsernameInput, setValidUsernameInput] =
+    useState<ValidationResult>(defaultValidationResult);
+  const [validEmailInput, setValidEmailInput] = useState<ValidationResult>(
+    defaultValidationResult,
+  );
+  const [validPasswordInput, setValidPasswordInput] =
+    useState<ValidationResult>(defaultValidationResult);
 
   function passwordsInputHandleChange(p1: string, p2: string): void {
     const different: boolean = p1 != p2;
-    setDifferentPassword(different)
+    setDifferentPassword(different);
     setFormPassword2(p2);
     setFormPassword1(p1);
     if (!different) {
@@ -42,7 +55,6 @@ export default function SingupPage() {
 
   function usernameInputHandleChange(username: string): void {
     const validInput: ValidationResult = validateUsernameInput(username);
-    console.log("here");
     setFormUserName(username);
     setValidUsernameInput(validInput);
   }
@@ -106,9 +118,7 @@ export default function SingupPage() {
             </span>
           )}
           {singupApiError === SingupError.INVALIDUSERNAME && (
-            <span className="text-red-500 text-sm mt-1">
-              Invalid username
-            </span>
+            <span className="text-red-500 text-sm mt-1">Invalid username</span>
           )}
         </div>
 
@@ -126,8 +136,9 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => emailInputHandleChange(e.target.value)}
-            className={`border p-2 rounded ${singupApiError || !validEmailInput.valid ? "border-red-500" : ""
-              }`}
+            className={`border p-2 rounded ${
+              singupApiError || !validEmailInput.valid ? "border-red-500" : ""
+            }`}
           />
           {!validEmailInput.valid && (
             <span className="text-red-500 text-sm mt-1">
@@ -159,7 +170,9 @@ export default function SingupPage() {
             type="password"
             placeholder="Password"
             value={formPassword1}
-            onChange={(e) => passwordsInputHandleChange(e.target.value, formPassword2)}
+            onChange={(e) =>
+              passwordsInputHandleChange(e.target.value, formPassword2)
+            }
             className={`border p-2 rounded ${singupApiError || differentPassword || !validPasswordInput.valid ? "border-red-500" : ""}`}
           />
         </div>
@@ -177,7 +190,9 @@ export default function SingupPage() {
             type="password"
             placeholder="Repeat your password"
             value={formPassword2}
-            onChange={(e) => passwordsInputHandleChange(formPassword1, e.target.value)}
+            onChange={(e) =>
+              passwordsInputHandleChange(formPassword1, e.target.value)
+            }
             className={`border p-2 rounded ${singupApiError || differentPassword || !validPasswordInput.valid ? "border-red-500" : ""}`}
           />
           {differentPassword && (
@@ -191,9 +206,7 @@ export default function SingupPage() {
             </span>
           )}
           {singupApiError === SingupError.INVALIDPASSWORD && (
-            <span className="text-red-500 text-sm mt-1">
-              Invalid password
-            </span>
+            <span className="text-red-500 text-sm mt-1">Invalid password</span>
           )}
         </div>
 
@@ -210,8 +223,9 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${singupApiError ? "border-red-500" : ""
-              }`}
+            className={`border p-2 rounded ${
+              singupApiError ? "border-red-500" : ""
+            }`}
           />
           {singupApiError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">
@@ -223,10 +237,14 @@ export default function SingupPage() {
           type="submit"
           disabled={!validEmailInput.valid}
           className={`w-full bg-[var(--orange)] text-white py-2 rounded transition 
-${!validEmailInput.valid || !validPasswordInput.valid || !validUsernameInput.valid || differentPassword
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:opacity-80"
-            }`}
+${
+  !validEmailInput.valid ||
+  !validPasswordInput.valid ||
+  !validUsernameInput.valid ||
+  differentPassword
+    ? "opacity-50 cursor-not-allowed"
+    : "hover:opacity-80"
+}`}
         >
           Submit
         </button>

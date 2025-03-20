@@ -52,8 +52,10 @@ export default function SelectedItems({
 
   return (
     <div className="grid grid-cols-2 grid-cols-[13%_80%] gap-4 h-full">
-      <aside className="p-2 flex flex-col shadow-lg overflow-y-auto h-screen 
-        bg-[var(--white)] text-[var(--black)] sticky top-0">
+      <aside
+        className="p-2 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0"
+      >
         <div className="mb-6">
           <h2 className="font-bold mb-2">Price</h2>
           <div className="flex items-center flex-col md:flex-row items-center">

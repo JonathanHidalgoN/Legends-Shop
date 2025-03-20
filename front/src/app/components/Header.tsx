@@ -13,7 +13,6 @@ import { getCurrentUserGold } from "../profileFunctions";
 import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
 
 export default function Header({ items }: { items: Item[] }) {
-
   const { userName, logOut, login } = useAuthContext();
   const { carItems, currentGold, setCurrentGold } = useCarContext();
 
@@ -33,7 +32,10 @@ export default function Header({ items }: { items: Item[] }) {
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const apiResponse: APILoginResponse = await login(formUserName, formPassword);
+    const apiResponse: APILoginResponse = await login(
+      formUserName,
+      formPassword,
+    );
     if (apiResponse.status === 200) {
       setShowLoginDropdown(false);
       setFormUserName("");
@@ -43,7 +45,6 @@ export default function Header({ items }: { items: Item[] }) {
       setLoginError(apiResponse.errorType);
     }
   }
-
 
   useEffect(() => {
     setIsMounted(true);
@@ -263,12 +264,18 @@ export default function Header({ items }: { items: Item[] }) {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z"
+              />
             </svg>
-            <span className="text-yellow-500 text-xl font-bold">{currentGold.toLocaleString()} g</span>
+            <span className="text-yellow-500 text-xl font-bold">
+              {currentGold.toLocaleString()} g
+            </span>
           </div>
         )}
-
       </div>
     </header>
   );

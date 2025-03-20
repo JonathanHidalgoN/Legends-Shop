@@ -17,7 +17,10 @@ export default function LogInPage() {
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const apiResponse: APILoginResponse = await login(formUserName, formPassword);
+    const apiResponse: APILoginResponse = await login(
+      formUserName,
+      formPassword,
+    );
     if (apiResponse.status === 200) {
       setFormUserName("");
       setFormPassword("");

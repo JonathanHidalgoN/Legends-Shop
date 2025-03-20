@@ -9,7 +9,12 @@ import {
 } from "../request";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { APILoginResponse, APISingupResponse, LoginError, SingupError } from "../interfaces/APIResponse";
+import {
+  APILoginResponse,
+  APISingupResponse,
+  LoginError,
+  SingupError,
+} from "../interfaces/APIResponse";
 
 interface AuthContextType {
   userName: string | null;
@@ -35,8 +40,10 @@ export function AuthContextProvider({
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
 
-
-  function createAPIResponseLogin(response: Response, data: any): APILoginResponse {
+  function createAPIResponseLogin(
+    response: Response,
+    data: any,
+  ): APILoginResponse {
     if (!response.ok) {
       if (!data) {
         throw new Error(
@@ -73,7 +80,10 @@ export function AuthContextProvider({
     }
   }
 
-  async function login(userName: string, password: string): Promise<APILoginResponse> {
+  async function login(
+    userName: string,
+    password: string,
+  ): Promise<APILoginResponse> {
     const response = await logInRequest(userName, password, "client");
     if (!response.ok) {
       const data = await response.json();
@@ -93,7 +103,10 @@ export function AuthContextProvider({
     return result;
   }
 
-  function createAPIResponseSingup(response: Response, data: any): APISingupResponse {
+  function createAPIResponseSingup(
+    response: Response,
+    data: any,
+  ): APISingupResponse {
     if (!response.ok) {
       if (!data) {
         throw new Error(

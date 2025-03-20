@@ -17,14 +17,14 @@ export function validateUsernameInput(username: string): ValidationResult {
   let valid: boolean = true;
   const validLen: boolean = username.length >= 8;
   if (!validLen) {
-    errorMsg = "username is less than 8 characters"
+    errorMsg = "username is less than 8 characters";
   }
   valid = validLen && true;
   const finalMsg: string | null = valid ? null : errorMsg;
   return {
     valid: valid,
     input: "username",
-    msg: finalMsg
+    msg: finalMsg,
   };
 }
 
@@ -33,17 +33,16 @@ export function validatePasswordInput(password: string): ValidationResult {
   let valid: boolean = true;
   const validLen: boolean = password.length >= 8;
   if (!validLen) {
-    errorMsg = "password is less than 8 characters"
+    errorMsg = "password is less than 8 characters";
   }
   valid = validLen && true;
   const finalMsg: string | null = valid ? null : errorMsg;
   return {
     valid: valid,
     input: "password",
-    msg: finalMsg
+    msg: finalMsg,
   };
 }
-
 
 export function validateEmailInput(email: string): ValidationResult {
   let errorMsg: string | null = "";
@@ -58,6 +57,6 @@ export function validateEmailInput(email: string): ValidationResult {
   return {
     valid: valid,
     input: "email",
-    msg: finalMsg
+    msg: finalMsg,
   };
 }

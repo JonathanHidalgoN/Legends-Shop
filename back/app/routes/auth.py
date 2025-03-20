@@ -3,7 +3,13 @@ import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.customExceptions import InvalidPasswordException, InvalidUserEmailException, InvalidUserGoldFieldException, InvalidUserNameException, UserIdNotFound
+from app.customExceptions import (
+    InvalidPasswordException,
+    InvalidUserEmailException,
+    InvalidUserGoldFieldException,
+    InvalidUserNameException,
+    UserIdNotFound,
+)
 from app.logger import logger
 from app.auth.functions import (
     createAccessToken,
@@ -75,7 +81,8 @@ async def getToken(
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
-            status_code=500, detail="Error retriving the user from the server",
+            status_code=500,
+            detail="Error retriving the user from the server",
             headers={
                 "X-Error-Type": LogInError.INTERNALSERVERERROR,
                 "Access-Control-Expose-Headers": "X-Error-Type",
@@ -83,22 +90,26 @@ async def getToken(
         )
     if not matchUser:
         logger.error(f"Error in {request.url.path}, {dataForm.username} do not exit")
-        raise HTTPException(status_code=401, detail="Incorrect username or password",
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
             headers={
                 "X-Error-Type": LogInError.INCORRECTCREDENTIALS,
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
-                            )
+        )
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         logger.error(
             f"Error in {request.url.path}, incorrect password for user {dataForm.username}"
         )
-        raise HTTPException(status_code=401, detail="Incorrect username or password",
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
             headers={
                 "X-Error-Type": LogInError.INCORRECTCREDENTIALS,
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
-                            )
+        )
     accessToken = createAccessToken(data={"sub": matchUser.userName})
     response.set_cookie(
         key="access_token",
@@ -111,7 +122,7 @@ async def getToken(
         max_age=60 * 30,
         path="/",
     )
-    await updateLastSingInWithUserName(db,dataForm.username, datetime.now().date())
+    await updateLastSingInWithUserName(db, dataForm.username, datetime.now().date())
     logger.debug(f"Request to {request.url.path} completed successfully")
 
 
@@ -151,6 +162,7 @@ async def tokenRefresh(
         f"Request to {request.url.path} completed successfully, token in response"
     )
 
+
 @router.post("/singup")
 async def singUp(
     request: Request,
@@ -174,7 +186,7 @@ async def singUp(
             currentGold=99999,
             birthDate=birthDateDate,
             lastSingIn=datetime.now().date(),
-            password = password
+            password=password,
         )
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
