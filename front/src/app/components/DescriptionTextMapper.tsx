@@ -8,15 +8,15 @@ export interface TagTransformation {
 export const activeTransformation: TagTransformation = {
   openerTag: "<active>",
   endingTag: "</active>",
-  openerChange: '<br /><span style="color: var(--pink2)"><strong>',
-  endingChange: "</strong></span><br />",
+  openerChange: '<span style="color: var(--pink2)"><strong>',
+  endingChange: "</strong></span>",
 };
 
 export const passiveTransformation: TagTransformation = {
   openerTag: "<passive>",
   endingTag: "</passive>",
-  openerChange: '<br><span style="color: var(--pink2)"><strong> (Passive) ',
-  endingChange: "</strong></span><br>",
+  openerChange: '<span style="color: var(--pink2)"><strong> (Passive) ',
+  endingChange: "</strong></span>",
 };
 
 export const mainTextTransformation: TagTransformation = {
@@ -57,7 +57,7 @@ export const brTransformation: TagTransformation = {
 export const spellNameTransformation: TagTransformation = {
   openerTag: "<spellName>",
   endingTag: "</spellName>",
-  openerChange: '<br><span style="color: var(--pink1)"><strong>',
+  openerChange: '<span style="color: var(--pink1)"><strong>',
   endingChange: "</strong></span>",
 };
 
@@ -78,7 +78,7 @@ export const magicDamageTransformation: TagTransformation = {
 export const rulesTransformation: TagTransformation = {
   openerTag: "<rules>",
   endingTag: "</rules>",
-  openerChange: '<br><span style="color: gray"><strong>',
+  openerChange: '<span style="color: gray"><strong>',
   endingChange: "</strong></span>",
 };
 

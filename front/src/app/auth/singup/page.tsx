@@ -1,7 +1,16 @@
 "use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
-import { APIResponse, SingupError } from "@/app/interfaces/APIResponse";
+import {
+  validateEmailInput,
+  validatePasswordInput,
+  validateUsernameInput,
+} from "@/app/functions";
+import { APISingupResponse, SingupError } from "@/app/interfaces/APIResponse";
+import {
+  defaultValidationResult,
+  ValidationResult,
+} from "@/app/interfaces/Errors";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -15,17 +24,39 @@ export default function SingupPage() {
   const [formPassword2, setFormPassword2] = useState<string>("");
   const [formEmail, setFormEmail] = useState<string>("");
   const [formBirthDate, setFormBirthDate] = useState<string>("");
-  const [singupError, setSingupError] = useState<SingupError | null>(null);
+  const [singupApiError, setSingupApiError] = useState<SingupError | null>(
+    null,
+  );
   const [differentPassword, setDifferentPassword] = useState<boolean>(false);
+  const [validUsernameInput, setValidUsernameInput] =
+    useState<ValidationResult>(defaultValidationResult);
+  const [validEmailInput, setValidEmailInput] = useState<ValidationResult>(
+    defaultValidationResult,
+  );
+  const [validPasswordInput, setValidPasswordInput] =
+    useState<ValidationResult>(defaultValidationResult);
 
-  function checkEmailPattern(email: string) {
-    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setFormEmail(email);
-    if (pattern.test(email)) {
-      setSingupError(null);
-    } else {
-      setSingupError(SingupError.INVALIDEMAIL);
+  function passwordsInputHandleChange(p1: string, p2: string): void {
+    const different: boolean = p1 != p2;
+    setDifferentPassword(different);
+    setFormPassword2(p2);
+    setFormPassword1(p1);
+    if (!different) {
+      const validInput: ValidationResult = validatePasswordInput(p1);
+      setValidPasswordInput(validInput);
     }
+  }
+
+  function emailInputHandleChange(email: string): void {
+    const validInput: ValidationResult = validateEmailInput(email);
+    setFormEmail(email);
+    setValidEmailInput(validInput);
+  }
+
+  function usernameInputHandleChange(username: string): void {
+    const validInput: ValidationResult = validateUsernameInput(username);
+    setFormUserName(username);
+    setValidUsernameInput(validInput);
   }
 
   async function handleSingupSubmit(e: any): Promise<void> {
@@ -38,7 +69,7 @@ export default function SingupPage() {
       setDifferentPassword(false);
     }
     const birthDate = new Date(formBirthDate);
-    const responseStatus: APIResponse = await singup(
+    const responseStatus: APISingupResponse = await singup(
       formUserName,
       formPassword1,
       formEmail,
@@ -51,11 +82,20 @@ export default function SingupPage() {
       setFormBirthDate("");
       setFormPassword1("");
       setFormPassword2("");
-      setSingupError(null);
+      setSingupApiError(null);
     } else if (responseStatus.status === 400) {
-      setSingupError(responseStatus.errorType);
+      setSingupApiError(responseStatus.errorType);
     }
   }
+
+  const emptyFields: boolean = formPassword1 === "" || formUserName === ""
+    || formPassword2 === "" || formEmail === "" || formBirthDate === "";
+
+  const canSubmit: boolean = validEmailInput.valid &&
+    validPasswordInput.valid &&
+    validUsernameInput.valid &&
+    !differentPassword &&
+    !emptyFields;
 
   return (
     <div className="bg-[var(--white)] min-h-screen flex flex-col items-center justify-center p-4">
@@ -73,13 +113,21 @@ export default function SingupPage() {
             name="username"
             placeholder="Username"
             value={formUserName}
-            onChange={(e) => setFormUserName(e.target.value)}
-            className={`border p-2 rounded ${singupError ? "border-red-500" : ""}`}
+            onChange={(e) => usernameInputHandleChange(e.target.value)}
+            className={`border p-2 rounded ${singupApiError || !validUsernameInput.valid ? "border-red-500" : ""}`}
           />
-          {singupError === SingupError.USERNAMEEXIST && (
+          {!validUsernameInput.valid && (
+            <span className="text-red-500 text-sm mt-1">
+              {validUsernameInput.msg}
+            </span>
+          )}
+          {singupApiError === SingupError.USERNAMEEXIST && (
             <span className="text-red-500 text-sm mt-1">
               Username exist, change it
             </span>
+          )}
+          {singupApiError === SingupError.INVALIDUSERNAME && (
+            <span className="text-red-500 text-sm mt-1">Invalid username</span>
           )}
         </div>
 
@@ -96,16 +144,21 @@ export default function SingupPage() {
             type="email"
             placeholder="Email"
             value={formEmail}
-            onChange={(e) => checkEmailPattern(e.target.value)}
-            className={`border p-2 rounded ${singupError ? "border-red-500" : ""
+            onChange={(e) => emailInputHandleChange(e.target.value)}
+            className={`border p-2 rounded ${singupApiError || !validEmailInput.valid ? "border-red-500" : ""
               }`}
           />
-          {singupError === SingupError.INVALIDEMAIL && (
+          {!validEmailInput.valid && (
+            <span className="text-red-500 text-sm mt-1">
+              {validEmailInput.msg}
+            </span>
+          )}
+          {singupApiError === SingupError.INVALIDEMAIL && (
             <span className="text-red-500 text-sm mt-1">
               This is not a valid email
             </span>
           )}
-          {singupError === SingupError.EMAILEXIST && (
+          {singupApiError === SingupError.EMAILEXIST && (
             <span className="text-red-500 text-sm mt-1">
               An user with this email already exists, change it
             </span>
@@ -125,8 +178,10 @@ export default function SingupPage() {
             type="password"
             placeholder="Password"
             value={formPassword1}
-            onChange={(e) => setFormPassword1(e.target.value)}
-            className={`border p-2 rounded ${singupError || differentPassword ? "border-red-500" : ""}`}
+            onChange={(e) =>
+              passwordsInputHandleChange(e.target.value, formPassword2)
+            }
+            className={`border p-2 rounded ${singupApiError || differentPassword || !validPasswordInput.valid ? "border-red-500" : ""}`}
           />
         </div>
 
@@ -143,13 +198,23 @@ export default function SingupPage() {
             type="password"
             placeholder="Repeat your password"
             value={formPassword2}
-            onChange={(e) => setFormPassword2(e.target.value)}
-            className={`border p-2 rounded ${singupError || differentPassword ? "border-red-500" : ""}`}
+            onChange={(e) =>
+              passwordsInputHandleChange(formPassword1, e.target.value)
+            }
+            className={`border p-2 rounded ${singupApiError || differentPassword || !validPasswordInput.valid ? "border-red-500" : ""}`}
           />
           {differentPassword && (
             <span className="text-red-500 text-sm mt-1">
               Passwords do not match!
             </span>
+          )}
+          {!validPasswordInput.valid && (
+            <span className="text-red-500 text-sm mt-1">
+              {validPasswordInput.msg}
+            </span>
+          )}
+          {singupApiError === SingupError.INVALIDPASSWORD && (
+            <span className="text-red-500 text-sm mt-1">Invalid password</span>
           )}
         </div>
 
@@ -166,10 +231,10 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${singupError ? "border-red-500" : ""
+            className={`border p-2 rounded ${singupApiError ? "border-red-500" : ""
               }`}
           />
-          {singupError === SingupError.INVALIDDATE && (
+          {singupApiError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">
               Not a valid date format
             </span>
@@ -177,10 +242,11 @@ export default function SingupPage() {
         </div>
         <button
           type="submit"
-          disabled={singupError === SingupError.INVALIDEMAIL}
-          className={`w-full bg-[var(--orange)] text-white py-2 rounded transition ${singupError === SingupError.INVALIDEMAIL
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:opacity-80"
+          disabled={!canSubmit}
+          className={`w-full bg-[var(--orange)] text-white py-2 rounded transition 
+${!canSubmit
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:opacity-80"
             }`}
         >
           Submit

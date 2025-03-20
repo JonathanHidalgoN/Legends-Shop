@@ -9,12 +9,17 @@ import {
 } from "../request";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { APIResponse, SingupError } from "../interfaces/APIResponse";
+import {
+  APILoginResponse,
+  APISingupResponse,
+  LoginError,
+  SingupError,
+} from "../interfaces/APIResponse";
 
 interface AuthContextType {
   userName: string | null;
   setUserName: (userName: string | null) => void;
-  login: (userName: string, password: string) => Promise<number>;
+  login: (userName: string, password: string) => Promise<APILoginResponse>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
   singup: (
@@ -22,7 +27,7 @@ interface AuthContextType {
     password: string,
     email: string,
     birthDate: Date,
-  ) => Promise<APIResponse>;
+  ) => Promise<APISingupResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,24 +40,73 @@ export function AuthContextProvider({
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
 
-  async function login(userName: string, password: string): Promise<number> {
+  function createAPIResponseLogin(
+    response: Response,
+    data: any,
+  ): APILoginResponse {
+    if (!response.ok) {
+      if (!data) {
+        throw new Error(
+          "You need the data to create the api response if the status is not ok",
+        );
+      } else {
+        const errorTypeHeader: string | null =
+          response.headers.get("X-Error-Type");
+        let errorType: LoginError | null = null;
+        if (errorTypeHeader === LoginError.INVALIDUSERNAME) {
+          errorType = LoginError.INVALIDUSERNAME;
+        }
+        if (errorTypeHeader === LoginError.INCORRECTCREDENTIALS) {
+          errorType = LoginError.INCORRECTCREDENTIALS;
+        }
+        if (errorTypeHeader === LoginError.INVALIDPASSWORD) {
+          errorType = LoginError.INVALIDPASSWORD;
+        }
+        if (errorTypeHeader === LoginError.INTERNALSERVERERROR) {
+          errorType = LoginError.INTERNALSERVERERROR;
+        }
+        return {
+          status: response.status,
+          errorType: errorType,
+          message: data.detail ? data.detail : "Error",
+        };
+      }
+    } else {
+      return {
+        status: response.status,
+        errorType: null,
+        message: "Success",
+      };
+    }
+  }
+
+  async function login(
+    userName: string,
+    password: string,
+  ): Promise<APILoginResponse> {
     const response = await logInRequest(userName, password, "client");
     if (!response.ok) {
-      if (response.status == 401) {
-        toast.error("Incorrect username or password");
-      } else if (response.status == 500) {
+      const data = await response.json();
+      const result: APILoginResponse = createAPIResponseLogin(response, data);
+      if (result.status == 401) {
+        toast.error(result.message);
+      } else if (result.status == 500) {
         toast.error("Internal server error login");
       } else {
         toast.error("Unexpected error");
       }
-      return response.status;
+      return result;
     }
+    const result: APILoginResponse = createAPIResponseLogin(response, null);
     setUserName(userName);
     toast.success(`Welcome ${userName}!`);
-    return response.status;
+    return result;
   }
 
-  function createAPIResponseSingup(response: Response, data: any): APIResponse {
+  function createAPIResponseSingup(
+    response: Response,
+    data: any,
+  ): APISingupResponse {
     if (!response.ok) {
       if (!data) {
         throw new Error(
@@ -65,6 +119,15 @@ export function AuthContextProvider({
         if (errorTypeHeader === SingupError.EMAILEXIST) {
           errorType = SingupError.EMAILEXIST;
         }
+        if (errorTypeHeader === SingupError.INTERNALSERVERERROR) {
+          errorType = SingupError.INTERNALSERVERERROR;
+        }
+        if (errorTypeHeader === SingupError.INVALIDUSERGOLD) {
+          errorType = SingupError.INVALIDUSERGOLD;
+        }
+        if (errorTypeHeader === SingupError.INVALIDUSERNAME) {
+          errorType = SingupError.INVALIDUSERNAME;
+        }
         if (errorTypeHeader === SingupError.INVALIDEMAIL) {
           errorType = SingupError.INVALIDEMAIL;
         }
@@ -73,6 +136,9 @@ export function AuthContextProvider({
         }
         if (errorTypeHeader === SingupError.INVALIDDATE) {
           errorType = SingupError.INVALIDDATE;
+        }
+        if (errorTypeHeader === SingupError.INVALIDPASSWORD) {
+          errorType = SingupError.INVALIDPASSWORD;
         }
         return {
           status: response.status,
@@ -94,7 +160,7 @@ export function AuthContextProvider({
     password: string,
     email: string,
     birthDate: Date,
-  ): Promise<APIResponse> {
+  ): Promise<APISingupResponse> {
     const response = await singupRequest(
       userName,
       password,
@@ -104,7 +170,7 @@ export function AuthContextProvider({
     );
     if (!response.ok) {
       const data = await response.json();
-      const result: APIResponse = createAPIResponseSingup(response, data);
+      const result: APISingupResponse = createAPIResponseSingup(response, data);
       if (result.status == 400) {
         toast.error(result.message);
       } else if (result.status == 500) {
@@ -114,7 +180,7 @@ export function AuthContextProvider({
       }
       return result;
     }
-    const result: APIResponse = createAPIResponseSingup(response, null);
+    const result: APISingupResponse = createAPIResponseSingup(response, null);
     toast.success(`Singup succesfully ${userName}!`);
     await login(userName, password);
     return result;

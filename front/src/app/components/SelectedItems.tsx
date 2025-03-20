@@ -52,7 +52,10 @@ export default function SelectedItems({
 
   return (
     <div className="grid grid-cols-2 grid-cols-[13%_80%] gap-4 h-full">
-      <aside className="p-2 flex flex-col shadow-lg bg-[var(--white)] text-[var(--black)]">
+      <aside
+        className="p-2 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0"
+      >
         <div className="mb-6">
           <h2 className="font-bold mb-2">Price</h2>
           <div className="flex items-center flex-col md:flex-row items-center">
@@ -113,7 +116,10 @@ export default function SelectedItems({
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-4 mt-4">
             <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => {
+                setCurrentPage((prev) => Math.max(prev - 1, 1));
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
               disabled={currentPage === 1}
               className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
             >
@@ -123,9 +129,10 @@ export default function SelectedItems({
               Page {currentPage} of {totalPages}
             </span>
             <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
+              onClick={() => {
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
               disabled={currentPage === totalPages}
               className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
             >

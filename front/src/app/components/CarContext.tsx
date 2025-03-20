@@ -101,7 +101,7 @@ export function CarContextProvider({
         getTotalCost,
         cleanCar,
         currentGold,
-        setCurrentGold
+        setCurrentGold,
       }}
     >
       {children}

@@ -3,7 +3,13 @@ import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.customExceptions import UserIdNotFound
+from app.customExceptions import (
+    InvalidPasswordException,
+    InvalidUserEmailException,
+    InvalidUserGoldFieldException,
+    InvalidUserNameException,
+    UserIdNotFound,
+)
 from app.logger import logger
 from app.auth.functions import (
     createAccessToken,
@@ -19,7 +25,7 @@ from app.data.queries.authQueries import (
     getUserInDB,
     insertUser,
 )
-from app.schemas.AuthSchemas import SingUpError, UserInDB
+from app.schemas.AuthSchemas import LogInError, SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from app.data.queries.profileQueries import updateLastSingInWithUserName
@@ -75,16 +81,35 @@ async def getToken(
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
-            status_code=500, detail="Error retriving the user from the server"
+            status_code=500,
+            detail="Error retriving the user from the server",
+            headers={
+                "X-Error-Type": LogInError.INTERNALSERVERERROR,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
         )
     if not matchUser:
         logger.error(f"Error in {request.url.path}, {dataForm.username} do not exit")
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+            headers={
+                "X-Error-Type": LogInError.INCORRECTCREDENTIALS,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     if not verifyPassword(dataForm.password, matchUser.hashedPassword):
         logger.error(
             f"Error in {request.url.path}, incorrect password for user {dataForm.username}"
         )
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+            headers={
+                "X-Error-Type": LogInError.INCORRECTCREDENTIALS,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     accessToken = createAccessToken(data={"sub": matchUser.userName})
     response.set_cookie(
         key="access_token",
@@ -97,7 +122,7 @@ async def getToken(
         max_age=60 * 30,
         path="/",
     )
-    await updateLastSingInWithUserName(db,dataForm.username, datetime.now().date())
+    await updateLastSingInWithUserName(db, dataForm.username, datetime.now().date())
     logger.debug(f"Request to {request.url.path} completed successfully")
 
 
@@ -149,18 +174,64 @@ async def singUp(
     db: AsyncSession = Depends(database.getDbSession),
 ):
     logger.debug(f"Request to {request.url.path}")
-    if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
+
+    try:
+        birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
+        userInDB: UserInDB = UserInDB(
+            userName=username,
+            hashedPassword=hashPassword(password),
+            created=datetime.now().date(),
+            email=email,
+            goldSpend=0,
+            currentGold=99999,
+            birthDate=birthDateDate,
+            lastSingIn=datetime.now().date(),
+            password=password,
+        )
+        userExist: bool = await checkUserExistInDB(db, username)
+        emailExist: bool = await checkEmailExistInDB(db, email)
+    except InvalidUserNameException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
             status_code=400,
-            detail="Email has not a valid pattern",
+            detail=str(e),
+            headers={
+                "X-Error-Type": SingUpError.INVALIDUSERNAME,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    except InvalidPasswordException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=str(e),
+            headers={
+                "X-Error-Type": SingUpError.INVALIDPASSWORD,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    except InvalidUserEmailException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=str(e),
             headers={
                 "X-Error-Type": SingUpError.INVALIDEMAIL,
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
-    try:
-        birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
-    except ValueError:
+    except InvalidUserGoldFieldException as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=str(e),
+            headers={
+                "X-Error-Type": SingUpError.INVALIDUSERGOLD,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    except ValueError as e:
+        logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
             status_code=400,
             detail="Invalid date value",
@@ -169,13 +240,15 @@ async def singUp(
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
-    try:
-        userExist: bool = await checkUserExistInDB(db, username)
-        emailExist: bool = await checkEmailExistInDB(db, email)
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
         raise HTTPException(
-            status_code=500, detail="Error retriving the user from the server"
+            status_code=500,
+            detail="Internal server error",
+            headers={
+                "X-Error-Type": SingUpError.INTERNALSERVERERROR,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
         )
     if userExist:
         logger.error(
@@ -199,16 +272,6 @@ async def singUp(
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
-    userInDB: UserInDB = UserInDB(
-        userName=username,
-        hashedPassword=hashPassword(password),
-        created=datetime.now().date(),
-        email=email,
-        goldSpend=0,
-        currentGold=99999,
-        birthDate=birthDateDate,
-        lastSingIn=datetime.now().date(),
-    )
     try:
         await insertUser(db, userInDB)
         logger.debug(f"Request to {request.url.path} completed successfully")

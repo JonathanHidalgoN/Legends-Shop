@@ -10,9 +10,9 @@ import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 import { getCurrentUserGold } from "../profileFunctions";
+import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
 
 export default function Header({ items }: { items: Item[] }) {
-
   const { userName, logOut, login } = useAuthContext();
   const { carItems, currentGold, setCurrentGold } = useCarContext();
 
@@ -21,7 +21,7 @@ export default function Header({ items }: { items: Item[] }) {
   const [isMounted, setIsMounted] = useState(false);
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
-  const [loginError, setLoginError] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<LoginError | null>(null);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
@@ -29,19 +29,22 @@ export default function Header({ items }: { items: Item[] }) {
     useRef<HTMLDivElement>(null);
 
   const router = useRouter();
+
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const responseStatus = await login(formUserName, formPassword);
-    if (responseStatus === 200) {
+    const apiResponse: APILoginResponse = await login(
+      formUserName,
+      formPassword,
+    );
+    if (apiResponse.status === 200) {
       setShowLoginDropdown(false);
       setFormUserName("");
       setFormPassword("");
-      setLoginError(false);
-    } else if (responseStatus === 401) {
-      setLoginError(true);
+      setLoginError(null);
+    } else if (apiResponse.status === 401) {
+      setLoginError(apiResponse.errorType);
     }
   }
-
 
   useEffect(() => {
     setIsMounted(true);
@@ -216,7 +219,7 @@ export default function Header({ items }: { items: Item[] }) {
           {showCartDropdown && (
             <div
               ref={carDropDownRef}
-              className="absolute right-0 mt-2 w-80 p-2 rounded shadow-lg bg-white z-10"
+              className="absolute right-2 mt-2 w-96 p-2 rounded shadow-lg bg-white z-10"
             >
               {carItems.length > 0 ? (
                 <>
@@ -261,12 +264,18 @@ export default function Header({ items }: { items: Item[] }) {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z"
+              />
             </svg>
-            <span className="text-yellow-500 text-xl font-bold">{currentGold.toLocaleString()} g</span>
+            <span className="text-yellow-500 text-xl font-bold">
+              {currentGold.toLocaleString()} g
+            </span>
           </div>
         )}
-
       </div>
     </header>
   );

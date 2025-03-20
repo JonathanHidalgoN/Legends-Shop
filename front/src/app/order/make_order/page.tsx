@@ -34,7 +34,7 @@ export default function OrderPage() {
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
-        toast.error("Error making the order")
+        toast.error("Error making the order");
         return;
       }
       const leftGold: number | null = await getCurrentUserGold();
