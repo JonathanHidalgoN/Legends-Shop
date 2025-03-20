@@ -34,7 +34,7 @@ export default function ItemPreView({ item }: { item: Item }) {
         </Link>
       </div>
 
-      <div className="flex-1 md:ml-4 mt-4 md:mt-0">
+      <div className="flex-1 md:ml-4 md:mt-0">
         <h3 className="text-xl font-bold text-[var(--black)]">{item.name}</h3>
         <div className="m-2">
           <EpicLegendMap itemName={item.name} />
