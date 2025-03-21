@@ -99,7 +99,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
 
   return (
     <div className="grid grid-cols-2 grid-cols-[17%_auto] gap-4 h-full">
-      <aside className="p-2 flex flex-col shadow-lg bg-[var(--white)] text-[var(--black)]">
+      <aside className="p-2 flex h-screen flex-col shadow-lg bg-[var(--white)] text-[var(--black)]">
         <div className="p-4">
           <h2 className="text-lg font-bold mb-2">Sort By</h2>
           <div className="flex flex-col gap-2">
@@ -243,7 +243,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
         </div>
       </aside>
 
-      <div className="flex flex-col justify-center items-center gap-4 p-4">
+      <div className="flex flex-col items-center gap-4 p-4">
         {orders.length > 0 ? (
           orders.map((order) => (
             <OrderHistoryCard key={order.id} order={order} />
