@@ -1,22 +1,22 @@
 import Image from "next/image";
 
-export default function WrongError() {
+export default function UnauthorizedError() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
       <div className="relative w-48 h-48 mb-6 opacity-80">
         <Image
-          src="/sadAmumu.png"
-          alt="sad amumu"
+          src="/blitzIcon.png"
+          alt="Blitz icon question mark"
           fill
           className="object-contain"
           priority
         />
       </div>
       <h1 className="text-2xl font-semibold text-[var(--orange)] mb-2">
-        Oops, something went wrong!
+        You have no credentials to access this page!
       </h1>
       <p className="text-[var(--gray)] max-w-md">
-        We're having trouble loading this page right now. Please try again later or contact support if the problem continues.
+        Are you sure you want to go there?
       </p>
     </div>
   );
