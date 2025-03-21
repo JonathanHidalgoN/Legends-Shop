@@ -60,7 +60,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   useEffect(() => {
     async function fetchUserHistory() {
       try {
-        const response = await getUserHistoryRequest(urlUserName, {
+        const response = await getUserHistoryRequest("client", {
           orderStatus: filterOrderStatus,
           minOrderDate: filterMinOrderDate,
           maxOrderDate: filterMaxOrderDate,
