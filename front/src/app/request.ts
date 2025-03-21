@@ -13,6 +13,7 @@ export const ENDPOINT_ORDER: string = `orders/order`;
 export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
+export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -205,6 +206,13 @@ export async function cancelOrderRequest(
 
 export async function getCurrentUserGoldRequest(from: string = "server") {
   const url: string = makeUrl(from, ENDPOINT_PROFILE_CURRENT_GOLD);
+  return await fetch(url, {
+    credentials: "include",
+  });
+}
+
+export async function getProfileInfoRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_PROFILE_INFO);
   return await fetch(url, {
     credentials: "include",
   });
