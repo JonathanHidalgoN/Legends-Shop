@@ -7,6 +7,7 @@ import { StaticDataContextProvider } from "./components/StaticDataContext";
 import { AuthContextProvider } from "./components/AuthContext";
 import { CarContextProvider } from "./components/CarContext";
 import { Toaster } from "react-hot-toast";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Legends Shop",
@@ -23,7 +24,7 @@ export default async function RootLayout({
     items = await fetchItems();
     tags = await fetchTags();
   } catch (error) {
-    console.log(error);
+    redirect("/error/wrong");
   }
 
   return (

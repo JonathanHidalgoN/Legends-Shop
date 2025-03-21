@@ -195,7 +195,6 @@ export function AuthContextProvider({
       }
       await response.json();
     } catch (error) {
-      console.log(error);
       toast.error("Internal server error refreshing token");
     }
   }
@@ -210,7 +209,6 @@ export function AuthContextProvider({
       router.push("/");
       toast.success(`Logout succesfully`);
     } catch (error) {
-      console.log("Error");
     }
   }
 

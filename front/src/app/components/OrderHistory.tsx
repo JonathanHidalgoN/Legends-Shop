@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { OrderStatus } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
 import Select, { ActionMeta, MultiValue } from "react-select";
+import { useRouter } from "next/navigation";
 
 interface OptionType {
   value: string;
@@ -40,6 +41,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   const [sortField, setSortField] = useState<SortField>("orderDate");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
+  const router = useRouter();
 
   function handleItemNameFilterChange(
     selectedNames: MultiValue<OptionType>,
@@ -72,12 +74,12 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
         });
         if (!response.ok) {
           toast.error("Error fetching order history");
+          router.push("/error/wrong")
           return;
         }
         const data = await response.json();
         setOrders(data);
       } catch (error) {
-        console.log(error);
         toast.error("An unexpected error occurred");
       } finally {
         setLoading(false);
