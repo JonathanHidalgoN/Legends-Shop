@@ -14,3 +14,11 @@ export interface Order {
   orderDate: Date;
   deliveryDate: Date;
 }
+
+export interface OrderSummary {
+  itemName: string;
+  basePrice: number;
+  timesOrdered: number;
+  totalSpend: number;
+  orderDates: Date[]
+}
