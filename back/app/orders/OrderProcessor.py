@@ -4,7 +4,7 @@ from typing import List, Set
 from sqlalchemy import insert
 from app.data.mappers import mapOrderToOrderTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
-from app.data.queries.orderQueries import getOrderWithId
+from app.data.queries.orderQueries import getOrderHistoryByUserId, getOrderWithId
 from app.logger import logger
 from app.customExceptions import (
     DifferentTotal,
@@ -293,3 +293,14 @@ class OrderProcessor:
         except SQLAlchemyError as e:
             logger.error(f"Error: {e}")
             raise ProcessOrderException("Internal server error")
+
+    async def getOrderHistory(self, userId:int)->List[Order]:
+        logger.debug(f"Getting orders history for user id {userId}")
+        try:
+            orderHistory:List[Order] = await getOrderHistoryByUserId(self.dbSession, userId)
+            logger.debug(f"Got orders history for user id {userId}")
+            return orderHistory
+        except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
+            raise ProcessOrderException("Internal server error")
+

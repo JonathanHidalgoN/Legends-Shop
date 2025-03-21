@@ -9,7 +9,6 @@ from app.customExceptions import (
     ProcessOrderException,
     UserIdNotFound,
 )
-from app.data.queries.orderQueries import getOrderHistoryQuery
 from app.logger import logger
 from app.data import database
 from app.orders.OrderProcessor import OrderProcessor
@@ -44,42 +43,18 @@ async def order(
     logger.debug(f"Request to {request.url.path} completed")
     return {"order_id": f"{orderId}"}
 
-
 @router.get("/order_history", response_model=List[Order])
 async def getOrderHistory(
     request: Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
-    orderStatus: str = Query("ALL"),
-    minOrderDate: Optional[date] = Query(None),
-    maxOrderDate: Optional[date] = Query(None),
-    minDeliveryDate: Optional[date] = Query(None),
-    maxDeliveryDate: Optional[date] = Query(None),
-    sortField: Optional[str] = Query(None),
-    sortOrder: Optional[str] = Query(None),
-    filterItemNames: Optional[str] = Query(None),
-    db: AsyncSession = Depends(database.getDbSession),
+    orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
     try:
         logger.debug(f"Request to {request.url.path} from user {userId}")
-        if filterItemNames:
-            itemNamesList = filterItemNames.split(",")
-        else:
-            itemNamesList = []
-        orders: List[Order] = await getOrderHistoryQuery(
-            db,
-            userId,
-            orderStatus,
-            minOrderDate,
-            maxOrderDate,
-            minDeliveryDate,
-            maxDeliveryDate,
-            sortField,
-            sortOrder,
-            itemNamesList,
-        )
+        orders: List[Order] = await orderProcessor.getOrderHistory(userId) 
         logger.debug(f"Request to {request.url.path} completed")
         return orders
-    except Exception as e:
+    except ProcessOrderException as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
