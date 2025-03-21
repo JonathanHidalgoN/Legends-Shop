@@ -27,9 +27,10 @@ async def getOrderHistoryByUserId(
             UserTable.userName,
             OrderItemAssociation.c.quantity,
         )
-        .select_from(UserTable)
+        .select_from(OrderTable)
         .join(OrderItemAssociation, OrderTable.id == OrderItemAssociation.c.order_id)
         .join(ItemTable, OrderItemAssociation.c.item_id == ItemTable.id)
+        .join(UserTable, UserTable.id == OrderTable.user_id)
         .where(OrderTable.user_id == userId)
     ).order_by(OrderTable.order_date.desc())
 
