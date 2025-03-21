@@ -22,3 +22,8 @@ export interface OrderSummary {
   totalSpend: number;
   orderDates: Date[]
 }
+
+export interface OptionType {
+  value: string;
+  label: string;
+}

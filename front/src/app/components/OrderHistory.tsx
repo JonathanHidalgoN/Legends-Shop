@@ -1,36 +1,30 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Order } from "@/app/interfaces/Order";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
-import { getUserHistoryRequest } from "@/app/request";
-import toast from "react-hot-toast";
-import { OrderStatus } from "@/app/interfaces/Order";
-import { useStaticData } from "./StaticDataContext";
-import Select, { ActionMeta, MultiValue } from "react-select";
+import { OptionType, Order, OrderStatus } from "@/app/interfaces/Order";
+import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
 import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import Select, { ActionMeta, MultiValue } from "react-select";
+import useSWR from "swr";
+import { useStaticData } from "./StaticDataContext";
 
-interface OptionType {
-  value: string;
-  label: string;
-}
 
 type SortField = "price" | "orderDate" | "deliveryDate" | "quantity";
 type SortOrder = "asc" | "desc";
 
-export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
-  const { items } = useStaticData();
-  const itemNameSelectOptions: OptionType[] = items.map((item) => ({
-    value: item.name,
-    label: item.name,
-  }));
+export default function OrderHistory() {
 
+  const { items } = useStaticData();
   const TODAY = new Date();
   const MIN_DATE = new Date(2025, 0, 1);
   const TODAY_2WEEKS = new Date(TODAY);
   TODAY_2WEEKS.setDate(TODAY.getDate() + 14);
 
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const itemNameSelectOptions: OptionType[] = items.map((item) => ({
+    value: item.name,
+    label: item.name,
+  }));
+
   const [filterOrderStatus, setFilterOrderStatus] = useState<string>("ALL");
   const [filterMinOrderDate, setFilterMinOrderDate] = useState<Date>(MIN_DATE);
   const [filterMaxOrderDate, setFilterMaxOrderDate] = useState<Date>(TODAY);
@@ -42,6 +36,18 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
   const router = useRouter();
+  const { data, error } = useSWR<Order[]>("client", getOrderHistoryWithCredentialsRequest);
+
+  useEffect(() => {
+    if (error) {
+      router.push("/error/wrong");
+    }
+  }, [error, router]);
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+
+  const orders = data;
 
   function handleItemNameFilterChange(
     selectedNames: MultiValue<OptionType>,
@@ -59,45 +65,7 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
     setSortOrder(e.target.value as SortOrder);
   };
 
-  useEffect(() => {
-    async function fetchUserHistory() {
-      try {
-        const response = await getUserHistoryRequest("client", {
-          orderStatus: filterOrderStatus,
-          minOrderDate: filterMinOrderDate,
-          maxOrderDate: filterMaxOrderDate,
-          minDeliveryDate: filterMinDeliveryDate,
-          maxDeliveryDate: filterMaxDeliveryDate,
-          sortField,
-          sortOrder,
-          filterItemNames: filterItemNames || [],
-        });
-        if (!response.ok) {
-          toast.error("Error fetching order history");
-          router.push("/error/wrong")
-          return;
-        }
-        const data = await response.json();
-        setOrders(data);
-      } catch (error) {
-        toast.error("An unexpected error occurred");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUserHistory();
-  }, [
-    urlUserName,
-    filterOrderStatus,
-    filterMinOrderDate,
-    filterMaxOrderDate,
-    filterMinDeliveryDate,
-    filterMaxDeliveryDate,
-    sortField,
-    sortOrder,
-    filterItemNames,
-  ]);
-  if (loading) return <div>Loading...</div>;
+  if (!data) return <div>Loading...</div>;
 
   return (
     <div className="grid grid-cols-2 grid-cols-[17%_auto] gap-4 h-full">
@@ -245,15 +213,18 @@ export default function OrderHistory({ urlUserName }: { urlUserName: string }) {
         </div>
       </aside>
 
-      <div className="flex flex-col items-center gap-4 p-4">
-        {orders.length > 0 ? (
-          orders.map((order) => (
-            <OrderHistoryCard key={order.id} order={order} />
-          ))
-        ) : (
-          <div>No orders found.</div>
-        )}
-      </div>
+      {orders && (
+        <div className="flex flex-col items-center gap-4 p-4">
+          {orders.length > 0 ? (
+            orders.map((order) => (
+              <OrderHistoryCard key={order.id} order={order} />
+            ))
+          ) : (
+            <div>No orders found.</div>
+          )}
+        </div>
+
+      )}
     </div>
   );
 }

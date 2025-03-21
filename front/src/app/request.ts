@@ -1,5 +1,6 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
 import { Order } from "./interfaces/Order";
+import toast, { Toaster } from "react-hot-toast";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
@@ -10,7 +11,7 @@ export const ENDPOINT_ITEMS_ALL: string = `items/all`;
 export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 export const ENDPOINT_ORDER: string = `orders/order`;
-export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
+export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history2`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
 export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
@@ -133,61 +134,17 @@ export async function orderRequest(order: Order, from: string = "server") {
 /**
  * Makes a GET request to fetch user history.
  */
-export async function getUserHistoryRequest(
-  from: string = "server",
-  filters: {
-    orderStatus?: string;
-    minOrderDate?: Date;
-    maxOrderDate?: Date;
-    minDeliveryDate?: Date;
-    maxDeliveryDate?: Date;
-    sortField?: string;
-    sortOrder?: string;
-    filterItemNames?: string[];
-  } = {},
-) {
-  const queryParams = new URLSearchParams();
-
-  if (filters.orderStatus) {
-    queryParams.append("orderStatus", filters.orderStatus);
-  }
-  if (filters.minOrderDate) {
-    queryParams.append(
-      "minOrderDate",
-      filters.minOrderDate.toISOString().substring(0, 10),
-    );
-  }
-  if (filters.maxOrderDate) {
-    queryParams.append(
-      "maxOrderDate",
-      filters.maxOrderDate.toISOString().substring(0, 10),
-    );
-  }
-  if (filters.minDeliveryDate) {
-    queryParams.append(
-      "minDeliveryDate",
-      filters.minDeliveryDate.toISOString().substring(0, 10),
-    );
-  }
-  if (filters.maxDeliveryDate) {
-    queryParams.append(
-      "maxDeliveryDate",
-      filters.maxDeliveryDate.toISOString().substring(0, 10),
-    );
-  }
-  if (filters.sortField) {
-    queryParams.append("sortField", filters.sortField);
-  }
-  if (filters.sortOrder) {
-    queryParams.append("sortOrder", filters.sortOrder);
-  }
-  if (filters.filterItemNames && filters.filterItemNames.length > 0) {
-    queryParams.append("filterItemNames", filters.filterItemNames.join(","));
-  }
-  const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}?${queryParams.toString()}`;
-  return await fetch(url, {
+export async function getOrderHistoryWithCredentialsRequest(from: string = "server"): Promise<Order[]> {
+  const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}`;
+  const response = await fetch(url, {
     credentials: "include",
   });
+  if (!response.ok) {
+    const errorMsg: string = "Failed to fetch the orders"
+    toast.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+  return await response.json();
 }
 
 /**
