@@ -294,13 +294,14 @@ class OrderProcessor:
             logger.error(f"Error: {e}")
             raise ProcessOrderException("Internal server error")
 
-    async def getOrderHistory(self, userId:int)->List[Order]:
+    async def getOrderHistory(self, userId: int) -> List[Order]:
         logger.debug(f"Getting orders history for user id {userId}")
         try:
-            orderHistory:List[Order] = await getOrderHistoryByUserId(self.dbSession, userId)
+            orderHistory: List[Order] = await getOrderHistoryByUserId(
+                self.dbSession, userId
+            )
             logger.debug(f"Got orders history for user id {userId}")
             return orderHistory
         except SQLAlchemyError as e:
             logger.error(f"Error: {e}")
             raise ProcessOrderException("Internal server error")
-

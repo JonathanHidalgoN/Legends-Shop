@@ -88,10 +88,15 @@ export default function SingupPage() {
     }
   }
 
-  const emptyFields: boolean = formPassword1 === "" || formUserName === ""
-    || formPassword2 === "" || formEmail === "" || formBirthDate === "";
+  const emptyFields: boolean =
+    formPassword1 === "" ||
+    formUserName === "" ||
+    formPassword2 === "" ||
+    formEmail === "" ||
+    formBirthDate === "";
 
-  const canSubmit: boolean = validEmailInput.valid &&
+  const canSubmit: boolean =
+    validEmailInput.valid &&
     validPasswordInput.valid &&
     validUsernameInput.valid &&
     !differentPassword &&
@@ -145,8 +150,9 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => emailInputHandleChange(e.target.value)}
-            className={`border p-2 rounded ${singupApiError || !validEmailInput.valid ? "border-red-500" : ""
-              }`}
+            className={`border p-2 rounded ${
+              singupApiError || !validEmailInput.valid ? "border-red-500" : ""
+            }`}
           />
           {!validEmailInput.valid && (
             <span className="text-red-500 text-sm mt-1">
@@ -231,8 +237,9 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${singupApiError ? "border-red-500" : ""
-              }`}
+            className={`border p-2 rounded ${
+              singupApiError ? "border-red-500" : ""
+            }`}
           />
           {singupApiError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">
@@ -244,10 +251,7 @@ export default function SingupPage() {
           type="submit"
           disabled={!canSubmit}
           className={`w-full bg-[var(--orange)] text-white py-2 rounded transition 
-${!canSubmit
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:opacity-80"
-            }`}
+${!canSubmit ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
         >
           Submit
         </button>

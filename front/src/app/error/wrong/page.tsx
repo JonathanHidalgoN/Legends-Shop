@@ -16,7 +16,8 @@ export default function WrongError() {
         Oops, something went wrong!
       </h1>
       <p className="text-[var(--gray)] max-w-md">
-        We're having trouble loading this page right now. Please try again later or contact support if the problem continues.
+        We're having trouble loading this page right now. Please try again later
+        or contact support if the problem continues.
       </p>
     </div>
   );

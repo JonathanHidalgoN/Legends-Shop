@@ -43,6 +43,7 @@ async def order(
     logger.debug(f"Request to {request.url.path} completed")
     return {"order_id": f"{orderId}"}
 
+
 @router.get("/order_history", response_model=List[Order])
 async def getOrderHistory(
     request: Request,
@@ -51,7 +52,7 @@ async def getOrderHistory(
 ):
     try:
         logger.debug(f"Request to {request.url.path} from user {userId}")
-        orders: List[Order] = await orderProcessor.getOrderHistory(userId) 
+        orders: List[Order] = await orderProcessor.getOrderHistory(userId)
         logger.debug(f"Request to {request.url.path} completed")
         return orders
     except ProcessOrderException as e:

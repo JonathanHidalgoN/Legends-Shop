@@ -8,12 +8,10 @@ import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
 
-
 type SortField = "price" | "orderDate" | "deliveryDate" | "quantity";
 type SortOrder = "asc" | "desc";
 
 export default function OrderHistory() {
-
   const { items } = useStaticData();
   const TODAY = new Date();
   const MIN_DATE = new Date(2025, 0, 1);
@@ -36,7 +34,10 @@ export default function OrderHistory() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
   const router = useRouter();
-  const { data, error } = useSWR<Order[]>("client", getOrderHistoryWithCredentialsRequest);
+  const { data, error } = useSWR<Order[]>(
+    "client",
+    getOrderHistoryWithCredentialsRequest,
+  );
 
   useEffect(() => {
     if (error) {
@@ -223,7 +224,6 @@ export default function OrderHistory() {
             <div>No orders found.</div>
           )}
         </div>
-
       )}
     </div>
   );

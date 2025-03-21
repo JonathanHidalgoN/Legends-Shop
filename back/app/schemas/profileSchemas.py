@@ -8,6 +8,7 @@ from app.schemas.Order import OrderSummary
 class ProfileGoldResponse(BaseModel):
     userGold: int
 
-class ProfileInfo (BaseModel):
+
+class ProfileInfo(BaseModel):
     user: UserInDB
     ordersInfo: List[OrderSummary]

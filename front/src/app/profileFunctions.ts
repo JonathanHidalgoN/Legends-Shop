@@ -16,7 +16,7 @@ export async function getCurrentUserGold(): Promise<number | null> {
 export async function getProfileInfo(): Promise<ProfileInfo | null> {
   const response = await getProfileInfoRequest("client");
   if (!response.ok) {
-    toast.error("Error getting the profile information")
+    toast.error("Error getting the profile information");
     return null;
   } else {
     const data = await response.json();

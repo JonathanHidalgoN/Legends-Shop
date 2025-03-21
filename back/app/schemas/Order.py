@@ -27,9 +27,10 @@ class OrderDataPerItem(BaseModel):
     total: int
     orderId: int
 
+
 class OrderSummary(BaseModel):
-    itemName:str
-    basePrice:int 
-    timesOrdered:int
-    totalSpend:int
-    orderDates:List[datetime]
+    itemName: str
+    basePrice: int
+    timesOrdered: int
+    totalSpend: int
+    orderDates: List[datetime]

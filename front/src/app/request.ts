@@ -1,6 +1,6 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
 import { Order } from "./interfaces/Order";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
@@ -134,13 +134,15 @@ export async function orderRequest(order: Order, from: string = "server") {
 /**
  * Makes a GET request to fetch user history.
  */
-export async function getOrderHistoryWithCredentialsRequest(from: string = "server"): Promise<Order[]> {
+export async function getOrderHistoryWithCredentialsRequest(
+  from: string = "server",
+): Promise<Order[]> {
   const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}`;
   const response = await fetch(url, {
     credentials: "include",
   });
   if (!response.ok) {
-    const errorMsg: string = "Failed to fetch the orders"
+    const errorMsg: string = "Failed to fetch the orders";
     toast.error(errorMsg);
     throw new Error(errorMsg);
   }

@@ -20,7 +20,7 @@ export interface OrderSummary {
   basePrice: number;
   timesOrdered: number;
   totalSpend: number;
-  orderDates: Date[]
+  orderDates: Date[];
 }
 
 export interface OptionType {

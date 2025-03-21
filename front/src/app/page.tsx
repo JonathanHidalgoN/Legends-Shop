@@ -8,7 +8,7 @@ export default function Home() {
   const router = useRouter();
 
   if (!items || items.length === 0) {
-    router.push("/error/wrong")
+    router.push("/error/wrong");
   }
 
   return <SelectedItems items={items} tags={tags} />;

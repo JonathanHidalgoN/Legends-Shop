@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.data.models.UserTable import UserTable
-from app.data.models.GoldTable import GoldTable 
+from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
 from app.schemas.Order import Order, OrderSummary
@@ -14,8 +14,7 @@ async def getOrderHistoryByUserId(
     asyncSession: AsyncSession,
     userId: int,
 ) -> List[Order]:
-    """
-    """
+    """ """
     query = (
         select(
             OrderTable.id,
@@ -101,7 +100,7 @@ async def getUniqueItemNamesQuantityAndBasePriceByUserName(
         .join(ItemTable, OrderItemAssociation.c.item_id == ItemTable.id)
         .join(GoldTable, GoldTable.id == ItemTable.id)
         .where(UserTable.userName == userName)
-        .group_by(ItemTable.name,GoldTable.base_cost)
+        .group_by(ItemTable.name, GoldTable.base_cost)
         .order_by(ItemTable.name)
     )
 
@@ -114,12 +113,13 @@ async def getUniqueItemNamesQuantityAndBasePriceByUserName(
         baseCost,
         totalQuantity,
     ) in rows:
-        ordSummary = OrderSummary(itemName=name,
-                                                 basePrice=baseCost,
-                                                 timesOrdered=totalQuantity,
-                                                 totalSpend=int(baseCost*totalQuantity),
-                                                 orderDates=[])
+        ordSummary = OrderSummary(
+            itemName=name,
+            basePrice=baseCost,
+            timesOrdered=totalQuantity,
+            totalSpend=int(baseCost * totalQuantity),
+            orderDates=[],
+        )
         finalList.append(ordSummary)
 
     return finalList
-
