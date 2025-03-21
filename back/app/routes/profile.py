@@ -8,7 +8,7 @@ from app.routes.auth import getCurrentUserTokenFlow
 from app.data import database
 from app.customExceptions import ProfileWorkerException
 from app.profile.ProfileWorker import ProfileWorker
-from app.schemas.profileSchemas import UserGoldResponse
+from app.schemas.profileSchemas import ProfileGoldResponse, ProfileInfo
 
 router = APIRouter()
 
@@ -19,11 +19,11 @@ def getProfileWorker(
     return ProfileWorker(db)
 
 
-@router.get("/current_gold", response_model=UserGoldResponse)
+@router.get("/current_gold", response_model=ProfileGoldResponse)
 async def getUserGold(
     request: Request,
-    userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
     profileWorker: Annotated[ProfileWorker, Depends(getProfileWorker)],
+    userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
 ):
     try:
         logger.debug(f"Request to {request.url.path} from user {userName}")
@@ -31,4 +31,25 @@ async def getUserGold(
         logger.debug(f"Request to {request.url.path} completed")
         return {"userGold": userGold}
     except ProfileWorkerException:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        logger.error(f"Error in {request.url.path}, unexpected error {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/info", response_model=ProfileInfo)
+async def getProfileInfo(
+    request: Request,
+    userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
+    profileWorker: Annotated[ProfileWorker, Depends(getProfileWorker)],
+):
+    try:
+        logger.debug(f"Request to {request.url.path} from user {userName}")
+        profileInfo: ProfileInfo = await profileWorker.getProfileInfo(userName)
+        logger.debug(f"Request to {request.url.path} completed")
+        return profileInfo
+    except ProfileWorkerException:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        logger.error(f"Error in {request.url.path}, unexpected error {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
