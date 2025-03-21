@@ -1,3 +1,5 @@
+import { OrderSummary } from "./Order";
+
 export enum SingupError {
   USERNAMEEXIST = "USERNAMEEXIST",
   EMAILEXIST = "EMAILEXIST",
@@ -26,4 +28,19 @@ export interface APILoginResponse {
   status: number;
   errorType: LoginError | null;
   message: string;
+}
+
+export interface UserInfo {
+  userName: string;
+  email: string;
+  cretead: Date;
+  lastSingIn: Date;
+  goldSpend: number;
+  currentGold: number;
+  birthDate: Date;
+}
+
+export interface ProfileInfo {
+  user: UserInfo;
+  ordersInfo: OrderSummary[];
 }
