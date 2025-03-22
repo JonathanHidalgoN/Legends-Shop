@@ -1,30 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ProfileInfo } from "../interfaces/profileInterfaces";
-import { getProfileInfo } from "../profileFunctions";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useStaticData } from "./StaticDataContext";
+import { getProfileInfoRequest } from "../request";
+import useSWR from "swr";
+import { APIProfileInfoResponse } from "../interfaces/APIResponse";
+import { useErrorRedirect } from "./useErrorRedirect";
 
-export default function ProfileView({ userName }: { userName: string }) {
+export default function ProfileView() {
 
   const { items } = useStaticData();
 
-  const [loading, setLoading] = useState<boolean>(true);
-  const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
-  const router = useRouter();
+  const { data, error } = useSWR<APIProfileInfoResponse>(
+    "client",
+    getProfileInfoRequest,
+  );
+  useErrorRedirect(error);
 
-  useEffect(() => {
-    async function fetchProfileInfo() {
-      const profileInfo: ProfileInfo | null = await getProfileInfo();
-      if (!profileInfo) {
-      }
-      setProfileInfo(profileInfo);
-    }
-    fetchProfileInfo();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
+  if (!data) {
+    return <div>Loading...</div>;
+  }
 
   return <div></div>;
 }
