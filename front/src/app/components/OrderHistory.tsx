@@ -1,12 +1,13 @@
 "use client";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
-import { FilterSortField, FilterSortOrder, OptionType, Order, APIOrder, OrderStatus, mapAPIOrderToOrder } from "@/app/interfaces/Order";
+import { FilterSortField, FilterSortOrder, OptionType, Order, OrderStatus } from "@/app/interfaces/Order";
+import { APIOrderResponse, mapAPIOrderResponseToOrder } from "../interfaces/APIResponse";
 import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
+import { useErrorRedirect } from "./useErrorRedirect";
 
 
 export default function OrderHistory() {
@@ -33,21 +34,13 @@ export default function OrderHistory() {
   const [filterItemNames, setFilterItemName] = useState<string[]>([]);
 
 
-  const router = useRouter();
-  const { data, error } = useSWR<APIOrder[]>(
+  const { data, error } = useSWR<APIOrderResponse[]>(
     "client",
     getOrderHistoryWithCredentialsRequest,
   );
 
-  useEffect(() => {
-    if (error) {
-      if (error.status == 401) {
-        router.push("/error/unauthorized");
-      } else {
-        router.push("/error/wrong");
-      }
-    }
-  }, [error, router]);
+  useErrorRedirect(error);
+
   if (!data) {
     return <div>Loading...</div>;
   }
@@ -61,7 +54,7 @@ export default function OrderHistory() {
   }
 
   const orders: Order[] = data
-    .map((apiOrder: APIOrder) => mapAPIOrderToOrder(apiOrder))
+    .map((apiOrder: APIOrderResponse) => mapAPIOrderResponseToOrder(apiOrder))
     .filter((order: Order) =>
       (filterOrderStatus === "ALL" ? true : order.status === filterOrderStatus) &&
       order.orderDate >= filterMinOrderDate &&

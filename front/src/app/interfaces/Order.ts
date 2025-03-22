@@ -1,5 +1,4 @@
 export enum OrderStatus {
-  PENDING = "PENDING",
   SHIPPED = "SHIPPED",
   DELIVERED = "DELIVERED",
   CANCELED = "CANCELED",
@@ -28,16 +27,6 @@ export interface Order {
   deliveryDate: Date;
 }
 
-export interface APIOrder {
-  id: number;
-  status: OrderStatus;
-  itemNames: string[];
-  total: number;
-  userName: string;
-  orderDate: string;
-  deliveryDate: string;
-}
-
 export interface OrderSummary {
   itemName: string;
   basePrice: number;
@@ -49,16 +38,4 @@ export interface OrderSummary {
 export interface OptionType {
   value: string;
   label: string;
-}
-
-export function mapAPIOrderToOrder(apiOrder: APIOrder): Order {
-  return {
-    id: apiOrder.id,
-    status: apiOrder.status,
-    itemNames: apiOrder.itemNames,
-    total: apiOrder.total,
-    userName: apiOrder.userName,
-    orderDate: new Date(apiOrder.orderDate),
-    deliveryDate: new Date(apiOrder.deliveryDate)
-  }
 }

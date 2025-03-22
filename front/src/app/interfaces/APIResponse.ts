@@ -1,4 +1,4 @@
-import { OrderSummary } from "./Order";
+import { Order, OrderStatus, OrderSummary } from "./Order";
 
 export enum SingupError {
   USERNAMEEXIST = "USERNAMEEXIST",
@@ -30,19 +30,14 @@ export interface APILoginResponse {
   message: string;
 }
 
-export interface UserInfo {
+export interface APIOrderResponse {
+  id: number;
+  status: OrderStatus;
+  itemNames: string[];
+  total: number;
   userName: string;
-  email: string;
-  cretead: Date;
-  lastSingIn: Date;
-  goldSpend: number;
-  currentGold: number;
-  birthDate: Date;
-}
-
-export interface ProfileInfo {
-  user: UserInfo;
-  ordersInfo: OrderSummary[];
+  orderDate: string;
+  deliveryDate: string;
 }
 
 export class APIError extends Error {
@@ -54,5 +49,17 @@ export class APIError extends Error {
     this.name = "APIError";
     this.status = status;
     this.data = data;
+  }
+}
+
+export function mapAPIOrderResponseToOrder(apiOrder: APIOrderResponse): Order {
+  return {
+    id: apiOrder.id,
+    status: apiOrder.status,
+    itemNames: apiOrder.itemNames,
+    total: apiOrder.total,
+    userName: apiOrder.userName,
+    orderDate: new Date(apiOrder.orderDate),
+    deliveryDate: new Date(apiOrder.deliveryDate)
   }
 }

@@ -1,6 +1,7 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
 import { APIError } from "./interfaces/APIResponse";
-import { Order, APIOrder } from "./interfaces/Order";
+import { Order } from "./interfaces/Order";
+import { APIOrderResponse } from "./interfaces/APIResponse";
 import toast from "react-hot-toast";
 
 //TODO: how to improve this solution?
@@ -41,6 +42,12 @@ export async function createAPIError(response: Response, errorMsg: string): Prom
       data
     )
   }
+}
+
+async function throwAPIError(response: Response, errorMsg: string) {
+  const apiError: APIError = await createAPIError(response, errorMsg);
+  toast.error(errorMsg);
+  throw apiError;
 }
 
 /**
@@ -154,18 +161,25 @@ export async function orderRequest(order: Order, from: string = "server") {
  */
 export async function getOrderHistoryWithCredentialsRequest(
   from: string = "server",
-): Promise<APIOrder[]> {
+): Promise<APIOrderResponse[]> {
   const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}`;
   const response = await fetch(url, {
     credentials: "include",
   });
-  const errorMsg: string = "Failed to fetch the orders";
   if (!response.ok) {
-    const apiError: APIError = await createAPIError(response, errorMsg);
-    toast.error(errorMsg);
-    throw apiError;
+    await throwAPIError(response, "Failed to fetch the orders");
   }
   return await response.json();
+}
+
+export async function getProfileInfoRequest(from: string = "server") {
+  const url: string = makeUrl(from, ENDPOINT_PROFILE_INFO);
+  const response = await fetch(url, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    await throwAPIError(response, "Failed to get the profile info");
+  }
 }
 
 /**
@@ -189,9 +203,3 @@ export async function getCurrentUserGoldRequest(from: string = "server") {
   });
 }
 
-export async function getProfileInfoRequest(from: string = "server") {
-  const url: string = makeUrl(from, ENDPOINT_PROFILE_INFO);
-  return await fetch(url, {
-    credentials: "include",
-  });
-}

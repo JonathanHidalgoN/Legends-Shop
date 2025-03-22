@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { getCurrentUserGoldRequest, getProfileInfoRequest } from "./request";
-import { ProfileInfo } from "./interfaces/APIResponse";
+import { ProfileInfo } from "./interfaces/profileInterfaces";
 
 export async function getCurrentUserGold(): Promise<number | null> {
   const response = await getCurrentUserGoldRequest("client");

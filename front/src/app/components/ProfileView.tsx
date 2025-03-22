@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProfileInfo } from "../interfaces/APIResponse";
+import { ProfileInfo } from "../interfaces/profileInterfaces";
 import { getProfileInfo } from "../profileFunctions";
 import { useRouter } from "next/navigation";
+import { useStaticData } from "./StaticDataContext";
 
 export default function ProfileView({ userName }: { userName: string }) {
+
+  const { items } = useStaticData();
+
   const [loading, setLoading] = useState<boolean>(true);
   const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
   const router = useRouter();
