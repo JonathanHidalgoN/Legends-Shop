@@ -44,3 +44,15 @@ export interface ProfileInfo {
   user: UserInfo;
   ordersInfo: OrderSummary[];
 }
+
+export class APIError extends Error {
+  public status: number;
+  public data?: any;
+
+  constructor(message: string, status: number, data?: any) {
+    super(message);
+    this.name = "APIError";
+    this.status = status;
+    this.data = data;
+  }
+}
