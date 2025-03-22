@@ -1,4 +1,5 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
+import { APIError } from "./interfaces/APIResponse";
 import { Order, APIOrder } from "./interfaces/Order";
 import toast from "react-hot-toast";
 
@@ -24,6 +25,22 @@ function makeUrl(from: string, endpoint: string): string {
     url = CLIENT_DOMAIN + endpoint;
   }
   return url;
+}
+
+export async function createAPIError(response: Response, errorMsg: string): Promise<APIError> {
+  if (response.status == 401) {
+    return new APIError(
+      "Unauthorized",
+      401,
+    )
+  } else {
+    const data = await response.json();
+    return new APIError(
+      data?.message || errorMsg,
+      response.status,
+      data
+    )
+  }
 }
 
 /**
@@ -131,6 +148,7 @@ export async function orderRequest(order: Order, from: string = "server") {
   });
 }
 
+
 /**
  * Makes a GET request to fetch user history.
  */
@@ -141,10 +159,11 @@ export async function getOrderHistoryWithCredentialsRequest(
   const response = await fetch(url, {
     credentials: "include",
   });
+  const errorMsg: string = "Failed to fetch the orders";
   if (!response.ok) {
-    const errorMsg: string = "Failed to fetch the orders";
+    const apiError: APIError = await createAPIError(response, errorMsg);
     toast.error(errorMsg);
-    throw new Error(errorMsg);
+    throw apiError;
   }
   return await response.json();
 }
