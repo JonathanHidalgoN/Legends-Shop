@@ -14,7 +14,6 @@ export default function ProfileView({ userName }: { userName: string }) {
     async function fetchProfileInfo() {
       const profileInfo: ProfileInfo | null = await getProfileInfo();
       if (!profileInfo) {
-        router.push("/error/wrong");
       }
       setProfileInfo(profileInfo);
     }
