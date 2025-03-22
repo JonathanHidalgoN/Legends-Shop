@@ -1,5 +1,5 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
-import { Order } from "./interfaces/Order";
+import { Order, APIOrder } from "./interfaces/Order";
 import toast from "react-hot-toast";
 
 //TODO: how to improve this solution?
@@ -136,7 +136,7 @@ export async function orderRequest(order: Order, from: string = "server") {
  */
 export async function getOrderHistoryWithCredentialsRequest(
   from: string = "server",
-): Promise<Order[]> {
+): Promise<APIOrder[]> {
   const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}`;
   const response = await fetch(url, {
     credentials: "include",
