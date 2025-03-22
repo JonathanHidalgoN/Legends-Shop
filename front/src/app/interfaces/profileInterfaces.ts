@@ -3,7 +3,7 @@ import { OrderSummary } from "./Order";
 export interface UserInfo {
   userName: string;
   email: string;
-  cretead: Date;
+  created: Date;
   lastSingIn: Date;
   goldSpend: number;
   currentGold: number;

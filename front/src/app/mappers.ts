@@ -20,7 +20,7 @@ export function mapAPIUserInfoToUserInDB(
   return {
     userName: apiUser.userName,
     email: apiUser.email,
-    cretead: new Date(apiUser.cretead),
+    created: new Date(apiUser.created),
     lastSingIn: new Date(apiUser.lastSingIn),
     goldSpend: apiUser.goldSpend,
     currentGold: apiUser.currentGold,

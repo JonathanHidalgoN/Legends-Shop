@@ -51,7 +51,7 @@ export interface APIOrderSummaryResponse {
 export interface APIUserInfoResponse {
   userName: string;
   email: string;
-  cretead: string;
+  created: string;
   lastSingIn: string;
   goldSpend: number;
   currentGold: number;
