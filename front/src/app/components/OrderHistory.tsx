@@ -41,7 +41,11 @@ export default function OrderHistory() {
 
   useEffect(() => {
     if (error) {
-      router.push("/error/wrong");
+      if (error.status == 401) {
+        router.push("/error/unauthorized");
+      } else {
+        router.push("/error/wrong");
+      }
     }
   }, [error, router]);
   if (!data) {
