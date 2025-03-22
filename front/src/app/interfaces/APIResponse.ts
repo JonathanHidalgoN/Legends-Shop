@@ -40,6 +40,29 @@ export interface APIOrderResponse {
   deliveryDate: string;
 }
 
+export interface APIOrderSummaryResponse {
+  itemName: string;
+  basePrice: number;
+  timesOrdered: number;
+  totalSpend: number;
+  orderDates: string[];
+}
+
+export interface APIUserInfoResponse {
+  userName: string;
+  email: string;
+  cretead: string;
+  lastSingIn: string;
+  goldSpend: number;
+  currentGold: number;
+  birthDate: string;
+}
+
+export interface APIProfileInfoResponse {
+  user: APIUserInfoResponse;
+  ordersInfo: APIOrderSummaryResponse[];
+}
+
 export class APIError extends Error {
   public status: number;
   public data?: any;
@@ -52,14 +75,3 @@ export class APIError extends Error {
   }
 }
 
-export function mapAPIOrderResponseToOrder(apiOrder: APIOrderResponse): Order {
-  return {
-    id: apiOrder.id,
-    status: apiOrder.status,
-    itemNames: apiOrder.itemNames,
-    total: apiOrder.total,
-    userName: apiOrder.userName,
-    orderDate: new Date(apiOrder.orderDate),
-    deliveryDate: new Date(apiOrder.deliveryDate)
-  }
-}
