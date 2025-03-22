@@ -1,6 +1,6 @@
 "use client";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
-import { OptionType, Order, OrderStatus } from "@/app/interfaces/Order";
+import { FilterSortField, FilterSortOrder, OptionType, Order, APIOrder, OrderStatus, mapAPIOrderToOrder } from "@/app/interfaces/Order";
 import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -8,8 +8,6 @@ import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
 
-type SortField = "price" | "orderDate" | "deliveryDate" | "quantity";
-type SortOrder = "asc" | "desc";
 
 export default function OrderHistory() {
   const { items } = useStaticData();
@@ -23,18 +21,20 @@ export default function OrderHistory() {
     label: item.name,
   }));
 
-  const [filterOrderStatus, setFilterOrderStatus] = useState<string>("ALL");
+  const [filterOrderStatus, setFilterOrderStatus] = useState<OrderStatus>(OrderStatus.ALL);
   const [filterMinOrderDate, setFilterMinOrderDate] = useState<Date>(MIN_DATE);
   const [filterMaxOrderDate, setFilterMaxOrderDate] = useState<Date>(TODAY);
   const [filterMinDeliveryDate, setFilterMinDeliveryDate] =
     useState<Date>(MIN_DATE);
   const [filterMaxDeliveryDate, setFilterMaxDeliveryDate] =
     useState<Date>(TODAY_2WEEKS);
-  const [sortField, setSortField] = useState<SortField>("orderDate");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [filterItemNames, setFilterItemName] = useState<string[] | null>(null);
+  const [sortField, setSortField] = useState<FilterSortField>(FilterSortField.ORDERDATE);
+  const [sortOrder, setSortOrder] = useState<FilterSortOrder>(FilterSortOrder.DESC);
+  const [filterItemNames, setFilterItemName] = useState<string[]>([]);
+
+
   const router = useRouter();
-  const { data, error } = useSWR<Order[]>(
+  const { data, error } = useSWR<APIOrder[]>(
     "client",
     getOrderHistoryWithCredentialsRequest,
   );
@@ -48,8 +48,44 @@ export default function OrderHistory() {
     return <div>Loading...</div>;
   }
 
-  const orders = data;
+  function orderMatchItemNames(orderItemNames: string[], filterItemNames: string[]): boolean {
+    if (filterItemNames.length == 0) {
+      return true;
+    } else {
+      return orderItemNames.some(name => filterItemNames.includes(name));
+    }
+  }
 
+  const orders: Order[] = data
+    .map((apiOrder: APIOrder) => mapAPIOrderToOrder(apiOrder))
+    .filter((order: Order) =>
+      (filterOrderStatus === "ALL" ? true : order.status === filterOrderStatus) &&
+      order.orderDate >= filterMinOrderDate &&
+      order.orderDate <= filterMaxOrderDate &&
+      order.deliveryDate >= filterMinDeliveryDate &&
+      order.deliveryDate <= filterMaxDeliveryDate &&
+      orderMatchItemNames(order.itemNames, filterItemNames)
+    )
+    .sort((a, b) => {
+      let comparison: number = 0;
+      switch (sortField) {
+        case FilterSortField.ORDERDATE:
+          comparison = a.orderDate.getTime() - b.orderDate.getTime();
+          break;
+        case FilterSortField.DELIVERYDATE:
+          comparison = a.deliveryDate.getTime() - b.deliveryDate.getTime();
+          break;
+        case FilterSortField.PRICE:
+          comparison = a.total - b.total;
+          break;
+        case FilterSortField.QUANTITY:
+          comparison = a.itemNames.length - b.itemNames.length;
+          break;
+        default:
+          break;
+      }
+      return sortOrder === FilterSortOrder.DESC ? -comparison : comparison;
+    });
   function handleItemNameFilterChange(
     selectedNames: MultiValue<OptionType>,
     _actionMeta: ActionMeta<OptionType>,
@@ -59,11 +95,11 @@ export default function OrderHistory() {
   }
 
   const handleSortFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSortField(e.target.value as SortField);
+    setSortField(e.target.value as FilterSortField);
   };
 
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSortOrder(e.target.value as SortOrder);
+    setSortOrder(e.target.value as FilterSortOrder);
   };
 
   if (!data) return <div>Loading...</div>;
@@ -78,8 +114,8 @@ export default function OrderHistory() {
               <input
                 type="radio"
                 name="sortField"
-                value="price"
-                checked={sortField === "price"}
+                value={FilterSortField.PRICE}
+                checked={sortField === FilterSortField.PRICE}
                 onChange={handleSortFieldChange}
               />
               <span className="ml-2">Price</span>
@@ -88,8 +124,8 @@ export default function OrderHistory() {
               <input
                 type="radio"
                 name="sortField"
-                value="orderDate"
-                checked={sortField === "orderDate"}
+                value={FilterSortField.ORDERDATE}
+                checked={sortField === FilterSortField.ORDERDATE}
                 onChange={handleSortFieldChange}
               />
               <span className="ml-2">Order Date</span>
@@ -98,8 +134,8 @@ export default function OrderHistory() {
               <input
                 type="radio"
                 name="sortField"
-                value="deliveryDate"
-                checked={sortField === "deliveryDate"}
+                value={FilterSortField.DELIVERYDATE}
+                checked={sortField === FilterSortField.DELIVERYDATE}
                 onChange={handleSortFieldChange}
               />
               <span className="ml-2">Delivery Date</span>
@@ -108,8 +144,8 @@ export default function OrderHistory() {
               <input
                 type="radio"
                 name="sortField"
-                value="quantity"
-                checked={sortField === "quantity"}
+                value={FilterSortField.QUANTITY}
+                checked={sortField === FilterSortField.QUANTITY}
                 onChange={handleSortFieldChange}
               />
               <span className="ml-2">Quantity</span>
@@ -145,7 +181,7 @@ export default function OrderHistory() {
         <select
           className="p-2 border rounded  bg-[var(--white)]"
           value={filterOrderStatus}
-          onChange={(e) => setFilterOrderStatus(e.target.value)}
+          onChange={(e) => setFilterOrderStatus(e.target.value as OrderStatus)}
         >
           <option key={"ALL"} value={"ALL"}>
             {"ALL"}
