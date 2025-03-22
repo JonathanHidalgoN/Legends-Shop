@@ -1,7 +1,8 @@
 "use client";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
 import { FilterSortField, FilterSortOrder, OptionType, Order, OrderStatus } from "@/app/interfaces/Order";
-import { APIOrderResponse, mapAPIOrderResponseToOrder } from "../interfaces/APIResponse";
+import { APIOrderResponse } from "../interfaces/APIResponse";
+import { mapAPIOrderResponseToOrder } from "../mappers";
 import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
 import React, { useState } from "react";
 import Select, { ActionMeta, MultiValue } from "react-select";
