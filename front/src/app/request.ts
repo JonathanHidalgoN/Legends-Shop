@@ -1,5 +1,5 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
-import { APIError } from "./interfaces/APIResponse";
+import { APIError, APIProfileInfoResponse } from "./interfaces/APIResponse";
 import { Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
 import toast from "react-hot-toast";
@@ -172,7 +172,7 @@ export async function getOrderHistoryWithCredentialsRequest(
   return await response.json();
 }
 
-export async function getProfileInfoRequest(from: string = "server") {
+export async function getProfileInfoRequest(from: string = "server"): Promise<APIProfileInfoResponse> {
   const url: string = makeUrl(from, ENDPOINT_PROFILE_INFO);
   const response = await fetch(url, {
     credentials: "include",
@@ -180,6 +180,7 @@ export async function getProfileInfoRequest(from: string = "server") {
   if (!response.ok) {
     await throwAPIError(response, "Failed to get the profile info");
   }
+  return await response.json();
 }
 
 /**

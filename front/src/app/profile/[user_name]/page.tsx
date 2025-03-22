@@ -9,7 +9,7 @@ export default async function ProfilePage({
   const urlUserName = (await params).user_name.replace(/%20/g, " ");
   return (
     <div>
-      <ProfileView userName={urlUserName} />
+      <ProfileView />
     </div>
   );
 }
