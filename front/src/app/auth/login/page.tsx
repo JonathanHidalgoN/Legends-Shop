@@ -4,6 +4,7 @@ import { useAuthContext } from "@/app/components/AuthContext";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { APILoginResponse, LoginError } from "@/app/interfaces/APIResponse";
+import Link from "next/link";
 
 export default function LogInPage() {
   const { login } = useAuthContext();
@@ -81,13 +82,23 @@ export default function LogInPage() {
               </span>
             )}
           </div>
-          <button
-            type="submit"
-            className="w-full bg-[var(--orange)] 
-          text-white py-2 rounded hover:bg-blue-700 transition"
-          >
-            Log In
-          </button>
+          <div className="flex flex-col gap-4">
+            <button
+              type="submit"
+              className="w-full bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition"
+            >
+              Log In
+            </button>
+            <span className="text-center text-m">
+              Are you new?
+            </span>
+            <Link
+              href="/auth/signup"
+              className="w-full text-center bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition"
+            >
+              Sign up
+            </Link>
+          </div>
         </form>
       </div>
     </Suspense>
