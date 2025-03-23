@@ -15,6 +15,7 @@ import {
   LoginError,
   SingupError,
 } from "../interfaces/APIResponse";
+import { showErrorToast } from "../customToast";
 
 interface AuthContextType {
   userName: string | null;
@@ -89,11 +90,11 @@ export function AuthContextProvider({
       const data = await response.json();
       const result: APILoginResponse = createAPIResponseLogin(response, data);
       if (result.status == 401) {
-        toast.error(result.message);
+        showErrorToast(result.message);
       } else if (result.status == 500) {
-        toast.error("Internal server error login");
+        showErrorToast("Internal server error login");
       } else {
-        toast.error("Unexpected error");
+        showErrorToast("Unexpected error");
       }
       return result;
     }
@@ -172,11 +173,11 @@ export function AuthContextProvider({
       const data = await response.json();
       const result: APISingupResponse = createAPIResponseSingup(response, data);
       if (result.status == 400) {
-        toast.error(result.message);
+        showErrorToast(result.message);
       } else if (result.status == 500) {
-        toast.error("Internal server error login");
+        showErrorToast("Internal server error login");
       } else {
-        toast.error("Unexpected error");
+        showErrorToast("Unexpected error");
       }
       return result;
     }
@@ -195,7 +196,7 @@ export function AuthContextProvider({
       }
       await response.json();
     } catch (error) {
-      toast.error("Internal server error refreshing token");
+      showErrorToast("Internal server error refreshing token");
     }
   }
 
@@ -208,7 +209,7 @@ export function AuthContextProvider({
       setUserName(null);
       router.push("/");
       toast.success(`Logout succesfully`);
-    } catch (error) {}
+    } catch (error) { }
   }
 
   useEffect(() => {

@@ -10,6 +10,7 @@ import { useState } from "react";
 import OrderSuccessModal from "@/app/components/OrderSuccessModal";
 import { usePathname } from "next/navigation";
 import { getCurrentUserGold } from "@/app/profileFunctions";
+import { showErrorToast } from "@/app/customToast";
 
 export default function OrderPage() {
   const { carItems, getTotalCost, cleanCar, setCurrentGold } = useCarContext();
@@ -21,7 +22,7 @@ export default function OrderPage() {
 
   async function handleBuy() {
     if (!userName) {
-      toast.error("Login to order");
+      showErrorToast("Login to order");
     } else {
       const order: Order = {
         itemNames: carItems.map((item) => item.name),
@@ -34,7 +35,7 @@ export default function OrderPage() {
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
-        toast.error("Error making the order");
+        showErrorToast("Error making the order");
         return;
       }
       const leftGold: number | null = await getCurrentUserGold();

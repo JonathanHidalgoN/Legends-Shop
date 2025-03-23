@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
+import { showErrorToast } from "@/app/customToast";
 import {
   validateEmailInput,
   validatePasswordInput,
@@ -62,7 +63,7 @@ export default function SingupPage() {
   async function handleSingupSubmit(e: any): Promise<void> {
     e.preventDefault();
     if (formPassword1 !== formPassword2) {
-      toast.error("Passwords do not match!");
+      showErrorToast("Passwords do not match!")
       setDifferentPassword(true);
       return;
     } else {
@@ -150,9 +151,8 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => emailInputHandleChange(e.target.value)}
-            className={`border p-2 rounded ${
-              singupApiError || !validEmailInput.valid ? "border-red-500" : ""
-            }`}
+            className={`border p-2 rounded ${singupApiError || !validEmailInput.valid ? "border-red-500" : ""
+              }`}
           />
           {!validEmailInput.valid && (
             <span className="text-red-500 text-sm mt-1">
@@ -237,9 +237,8 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${
-              singupApiError ? "border-red-500" : ""
-            }`}
+            className={`border p-2 rounded ${singupApiError ? "border-red-500" : ""
+              }`}
           />
           {singupApiError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">

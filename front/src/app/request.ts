@@ -3,6 +3,7 @@ import { APIError, APIProfileInfoResponse } from "./interfaces/APIResponse";
 import { Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
 import toast from "react-hot-toast";
+import { showErrorToast } from "./customToast";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
@@ -46,7 +47,7 @@ export async function createAPIError(response: Response, errorMsg: string): Prom
 
 async function throwAPIError(response: Response, errorMsg: string) {
   const apiError: APIError = await createAPIError(response, errorMsg);
-  toast.error(errorMsg);
+  showErrorToast(errorMsg);
   throw apiError;
 }
 

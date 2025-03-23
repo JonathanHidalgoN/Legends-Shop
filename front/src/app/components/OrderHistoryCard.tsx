@@ -5,6 +5,7 @@ import { useStaticData } from "./StaticDataContext";
 import { cancelOrderRequest } from "../request";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { showErrorToast } from "../customToast";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
   const { items } = useStaticData();
@@ -28,12 +29,12 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
 
   async function cancelOrder() {
     if (order.status !== "PENDING" && order.status !== "SHIPPED") {
-      toast.error("Error canceling order");
+      showErrorToast("Error canceling order");
       return;
     }
     const response = await cancelOrderRequest(order.id, "client");
     if (!response.ok) {
-      toast.error("Error canceling order");
+      showErrorToast("Error canceling order");
     }
     order.status = OrderStatus.CANCELED;
     setOrderStatus(order.status);
@@ -133,11 +134,10 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
         <div className="mt-4">
           <button
             className={`px-4 py-2 rounded transition-colors 
-                       w-full md:w-auto ${
-                         orderStatus === "PENDING"
-                           ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                       }`}
+                       w-full md:w-auto ${orderStatus === "PENDING"
+                ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             onClick={cancelOrder}
             disabled={orderStatus !== "PENDING"}
           >

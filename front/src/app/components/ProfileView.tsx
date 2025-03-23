@@ -13,7 +13,6 @@ export default function ProfileView() {
     ["profile-client", "client"],
     getProfileInfoRequest
   );
-  console.log(data);
   useErrorRedirect(error);
 
 
