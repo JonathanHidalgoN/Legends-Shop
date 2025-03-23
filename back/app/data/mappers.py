@@ -55,7 +55,7 @@ def mapItemTableToItem(
         tags=tags,
         stats=stats,
         effect=effects,
-        id=0,
+        id=itemTable.id,
         image=itemTable.image,
         imageUrl=itemTable.imageUrl,
         description=itemTable.description,
