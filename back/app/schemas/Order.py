@@ -10,6 +10,11 @@ class OrderStatus(str, Enum):
     DELIVERED = "DELIVERED"
     CANCELED = "CANCELED"
 
+class CarStatus(str, Enum):
+    ADDED = "ADDED"
+    DELETED = "DELETED"
+    ORDERED = "ORDERED"
+
 
 class Order(BaseModel):
     id: int
