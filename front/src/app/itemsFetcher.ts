@@ -85,6 +85,7 @@ function parseItemNodeIntoItem(itemNode: ItemNode): Item {
     tags: tags,
     effects: effects,
     img: itemNode.imageUrl,
+    id: itemNode.id
   };
 }
 

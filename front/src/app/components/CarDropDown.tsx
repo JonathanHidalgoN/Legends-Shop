@@ -3,6 +3,7 @@
 import { Item } from "../interfaces/Item";
 import Image from "next/image";
 import { useCarContext } from "./CarContext";
+import { CartItem } from "../interfaces/Order";
 
 type ItemSummary = {
   count: number;
@@ -21,15 +22,15 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
   const itemCount: Record<string, ItemSummary> = {};
   const totalCost: number = getTotalCost();
 
-  carItems.forEach((item: Item) => {
-    if (item.name in itemCount) {
-      itemCount[item.name].count += 1;
-      itemCount[item.name].total += item.gold.base;
+  carItems.forEach((cartItem: CartItem) => {
+    if (cartItem.item.name in itemCount) {
+      itemCount[cartItem.item.name].count += 1;
+      itemCount[cartItem.item.name].total += cartItem.item.gold.base;
     } else {
-      itemCount[item.name] = {
+      itemCount[cartItem.item.name] = {
         count: 1,
-        total: item.gold.base,
-        itemSample: item,
+        total: cartItem.item.gold.base,
+        itemSample: cartItem.item,
       };
     }
   });

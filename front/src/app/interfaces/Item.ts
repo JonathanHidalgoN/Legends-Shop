@@ -35,4 +35,5 @@ export interface Item {
   tags: string[];
   effects: Effect[];
   img: string;
+  id: number;
 }

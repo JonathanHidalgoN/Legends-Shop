@@ -1,12 +1,12 @@
 import { Item } from "../interfaces/Item";
 import { useCarContext } from "./CarContext";
-import { showErrorToast, showSuccessToast } from "../customToast";
+import { showSuccessToast } from "../customToast";
 
 export default function AddToCarButton({ item }: { item: Item }) {
-  const { carItems, setCarItems } = useCarContext();
+  const { addOneItemToCar } = useCarContext();
 
   function handleBuyClick() {
-    setCarItems([...carItems, item]);
+    addOneItemToCar(item);
     showSuccessToast(`${item.name} added to car`)
   }
 

@@ -23,4 +23,5 @@ export interface ItemNode {
   stats: StatNode[];
   description: string;
   imageUrl: string;
+  id: number;
 }

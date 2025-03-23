@@ -2,7 +2,6 @@ import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
 import { APIError, APIProfileInfoResponse } from "./interfaces/APIResponse";
 import { Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
-import toast from "react-hot-toast";
 import { showErrorToast } from "./customToast";
 
 //TODO: how to improve this solution?
@@ -18,6 +17,7 @@ export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
 export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
+export const ENDPOINT_CAR_ADD_ITEMS: string = `car/add_items`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;

@@ -1,9 +1,24 @@
+import { Item } from "./Item";
+
 export enum OrderStatus {
   SHIPPED = "SHIPPED",
   PENDING = "PENDING",
   DELIVERED = "DELIVERED",
   CANCELED = "CANCELED",
   ALL = "ALL"
+}
+
+export enum CartStatus {
+  ADDED = "ADDED",
+  DELETED = "DELETED",
+  ORDERED = "ORDERED",
+  PENDING = "PENDING"
+}
+
+export interface CartItem {
+  id: number | null;
+  status: CartStatus;
+  item: Item
 }
 
 export enum FilterSortField {

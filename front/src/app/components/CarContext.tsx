@@ -2,10 +2,11 @@
 
 import React, { createContext, useContext, useState } from "react";
 import { Item } from "../interfaces/Item";
+import { CartItem, CartStatus } from "../interfaces/Order";
 
 interface CarContextType {
-  carItems: Item[];
-  setCarItems: (items: Item[]) => void;
+  carItems: CartItem[];
+  setCarItems: (cartItems: CartItem[]) => void;
   /**
    * Deletes one instance of an item from the cart.
    * @param item - The item to be removed.
@@ -43,7 +44,7 @@ export function CarContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [carItems, setCarItems] = useState<Item[]>([]);
+  const [carItems, setCarItems] = useState<CartItem[]>([]);
   const [currentGold, setCurrentGold] = useState<number | null>(null);
 
   /**
@@ -52,7 +53,7 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteOneItemFromCar(item: Item): void {
-    const index = carItems.findIndex((cartItem) => cartItem.name === item.name);
+    const index = carItems.findIndex((i) => i.item.id === item.id);
     if (index !== -1) {
       setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
     }
@@ -63,7 +64,7 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteAllItemFromCar(item: Item): void {
-    setCarItems(carItems.filter((carItem: Item) => carItem.name !== item.name));
+    setCarItems(carItems.filter((i: CartItem) => i.item.id !== item.id));
   }
 
   /**
@@ -71,7 +72,12 @@ export function CarContextProvider({
    * @param item - The item to add.
    */
   function addOneItemToCar(item: Item): void {
-    setCarItems([...carItems, item]);
+    const cartItem: CartItem = {
+      id: null,
+      status: CartStatus.PENDING,
+      item: item
+    };
+    setCarItems([...carItems, cartItem]);
   }
 
   /**
@@ -80,7 +86,7 @@ export function CarContextProvider({
    * @returns The total cost as a number.
    */
   function getTotalCost(): number {
-    return carItems.reduce((total, item) => total + item.gold.base, 0);
+    return carItems.reduce((total, item) => total + item.item.gold.base, 0);
   }
 
   /**
