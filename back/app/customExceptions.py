@@ -82,3 +82,6 @@ class InvalidUserGoldFieldException(Exception):
 
 class InvalidPasswordException(Exception):
     pass
+
+class CartProcessorException(Exception):
+    pass
