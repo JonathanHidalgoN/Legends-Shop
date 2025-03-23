@@ -36,13 +36,13 @@ export default function OrderHistory() {
 
 
   const { data, error } = useSWR<APIOrderResponse[]>(
-    "client",
+    ["orders-client", "client"],
     getOrderHistoryWithCredentialsRequest,
   );
 
   useErrorRedirect(error);
 
-  if (!data) {
+  if (!data || error) {
     return <div>Loading...</div>;
   }
 
