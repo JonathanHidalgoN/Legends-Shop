@@ -17,7 +17,7 @@ class CartStatus(str, Enum):
     PENDING = "PENDING"
 
 class CartItem(BaseModel):
-    id:int
+    id:int | None 
     itemId:int
     status:CartStatus
 
