@@ -21,7 +21,7 @@ interface CarContextType {
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
-  addOneItemToCar: (item: Item) => void;
+  addOneItemToCar: (carItem: CartItem) => void;
   /**
    * Calculates and returns the total cost of all items in the cart.
    * Assumes each item has a cost defined in item.gold.base.
@@ -71,12 +71,7 @@ export function CarContextProvider({
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
-  function addOneItemToCar(item: Item): void {
-    const cartItem: CartItem = {
-      id: null,
-      status: CartStatus.PENDING,
-      item: item
-    };
+  function addOneItemToCar(cartItem: CartItem): void {
     setCarItems([...carItems, cartItem]);
   }
 
