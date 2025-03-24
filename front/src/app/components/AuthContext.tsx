@@ -17,12 +17,11 @@ import {
 } from "../interfaces/APIResponse";
 import { showErrorToast } from "../customToast";
 import { useCarContext } from "./CarContext";
-import { getCurrentUserGold } from "../profileFunctions";
 
 interface AuthContextType {
   userName: string | null;
   setUserName: (userName: string | null) => void;
-  loginAndInitialize: (userName: string, password: string) => Promise<APILoginResponse>;
+  login: (userName: string, password: string) => Promise<APILoginResponse>;
   logOut: () => void;
   refreshToken: () => Promise<void>;
   singup: (
@@ -41,7 +40,6 @@ export function AuthContextProvider({
   children: React.ReactNode;
 }) {
   const [userName, setUserName] = useState<string | null>(null);
-  const { carItems, setCarItems, currentGold, setCurrentGold } = useCarContext();
   const router = useRouter();
 
   function createAPIResponseLogin(
@@ -106,24 +104,6 @@ export function AuthContextProvider({
     toast.success(`Welcome ${userName}!`);
     return result;
   }
-
-  async function loginAndInitialize(userName: string, password: string): Promise<APILoginResponse> {
-    const apiResponse: APILoginResponse = await login(
-      userName,
-      password,
-    );
-    if (apiResponse.status !== 200) {
-      return apiResponse;
-    }
-    const userGold: number | null = await getCurrentUserGold();
-    if (!userGold) {
-      apiResponse.errorType = LoginError.CURRENTGOLDERROR;
-      return apiResponse;
-    }
-    setCurrentGold(userGold);
-    return apiResponse;
-  }
-
   function createAPIResponseSingup(
     response: Response,
     data: any,
@@ -249,7 +229,7 @@ export function AuthContextProvider({
         userName,
         setUserName,
         logOut,
-        loginAndInitialize,
+        login,
         refreshToken,
         singup,
       }}

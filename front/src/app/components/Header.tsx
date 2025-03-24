@@ -12,7 +12,7 @@ import { handleClickOutside } from "../functions";
 import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
 
 export default function Header({ items }: { items: Item[] }) {
-  const { userName, logOut, loginAndInitialize } = useAuthContext();
+  const { userName, logOut, login } = useAuthContext();
   const { carItems, currentGold } = useCarContext();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
@@ -31,7 +31,7 @@ export default function Header({ items }: { items: Item[] }) {
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const apiResponse: APILoginResponse = await loginAndInitialize(
+    const apiResponse: APILoginResponse = await login(
       formUserName,
       formPassword,
     );

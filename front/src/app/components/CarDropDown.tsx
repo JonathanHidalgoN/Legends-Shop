@@ -16,7 +16,7 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
     carItems,
     deleteOneItemFromCar,
     deleteAllItemFromCar,
-    addOneItemToCar,
+    handleClientAddingItemToCar: addOneItemToCar,
     getTotalCost,
   } = useCarContext();
   const itemCount: Record<string, ItemSummary> = {};
@@ -56,13 +56,8 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
                 />
               </div>
               <div className="flex flex-col">
-                <p
-                  className={
-                    tiny
-                      ? `font-semibold text-sm truncate w-16`
-                      : `font-semibold text-sm truncate w-32`
-                  }
-                >
+                <p className={tiny ? `font-semibold text-sm truncate w-16`
+                  : `font-semibold text-sm truncate w-32`}>
                   {summary.itemSample.name}
                 </p>
                 <p className="text-xs text-gray-600 w-8">
