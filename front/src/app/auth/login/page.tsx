@@ -5,6 +5,8 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { APILoginResponse, LoginError } from "@/app/interfaces/APIResponse";
 import Link from "next/link";
+import { useCarContext } from "@/app/components/CarContext";
+import { getCurrentUserGold } from "@/app/profileFunctions";
 
 export default function LogInPage() {
   const { login } = useAuthContext();
@@ -15,6 +17,7 @@ export default function LogInPage() {
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<LoginError | null>(null);
+  const { carItems, setCarItems, currentGold, setCurrentGold } = useCarContext();
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
@@ -23,6 +26,12 @@ export default function LogInPage() {
       formPassword,
     );
     if (apiResponse.status === 200) {
+      const currentGold: number | null = await getCurrentUserGold();
+      if (!currentGold) {
+        apiResponse.errorType = LoginError.CURRENTGOLDERROR;
+      } else {
+        setCurrentGold(currentGold);
+      }
       setFormUserName("");
       setFormPassword("");
       setLoginError(null);

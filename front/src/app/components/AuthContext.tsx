@@ -16,7 +16,6 @@ import {
   SingupError,
 } from "../interfaces/APIResponse";
 import { showErrorToast } from "../customToast";
-import { useCarContext } from "./CarContext";
 
 interface AuthContextType {
   userName: string | null;

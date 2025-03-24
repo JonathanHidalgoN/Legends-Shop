@@ -10,10 +10,11 @@ import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
 import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
+import { getCurrentUserGold } from "../profileFunctions";
 
 export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut, login } = useAuthContext();
-  const { carItems, currentGold } = useCarContext();
+  const { carItems, setCarItems, currentGold, setCurrentGold } = useCarContext();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
@@ -36,6 +37,12 @@ export default function Header({ items }: { items: Item[] }) {
       formPassword,
     );
     if (apiResponse.status === 200) {
+      const currentGold: number | null = await getCurrentUserGold();
+      if (!currentGold) {
+        apiResponse.errorType = LoginError.CURRENTGOLDERROR;
+      } else {
+        setCurrentGold(currentGold);
+      }
       setShowLoginDropdown(false);
       setFormUserName("");
       setFormPassword("");
