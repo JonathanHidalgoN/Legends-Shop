@@ -9,12 +9,11 @@ import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
-import { getCurrentUserGold } from "../profileFunctions";
 import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
 
 export default function Header({ items }: { items: Item[] }) {
-  const { userName, logOut, login } = useAuthContext();
-  const { carItems, currentGold, setCurrentGold } = useCarContext();
+  const { userName, logOut, loginAndInitialize } = useAuthContext();
+  const { carItems, currentGold } = useCarContext();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
@@ -32,7 +31,7 @@ export default function Header({ items }: { items: Item[] }) {
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const apiResponse: APILoginResponse = await login(
+    const apiResponse: APILoginResponse = await loginAndInitialize(
       formUserName,
       formPassword,
     );
@@ -48,25 +47,10 @@ export default function Header({ items }: { items: Item[] }) {
 
   useEffect(() => {
     setIsMounted(true);
-    async function fetchUserGold() {
-      if (userName) {
-        const userGold: number | null = await getCurrentUserGold();
-        if (userGold !== null) {
-          setCurrentGold(userGold);
-        } else {
-          setCurrentGold(null);
-        }
-      } else {
-        setCurrentGold(null);
-      }
-    }
-    fetchUserGold();
-
     const handleClick = (event: MouseEvent) => {
       handleClickOutside(event, loginDropDownRef, setShowLoginDropdown);
       handleClickOutside(event, carDropDownRef, setShowCartDropdown);
     };
-
     document.addEventListener("mousedown", handleClick);
     return () => {
       document.removeEventListener("mousedown", handleClick);
