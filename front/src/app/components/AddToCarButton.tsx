@@ -16,21 +16,18 @@ export default function AddToCarButton({ item }: { item: Item }) {
     const apiCartItem: APICartItemResponse = {
       id: null,
       status: CartStatus.PENDING,
-      itemId: item.id,
+      itemId: item.id
     };
     try {
       console.log("here");
-      const data: APICartItemResponse = await addToCarRequest(
-        "client",
-        apiCartItem,
-      );
-      const cartItem: CartItem = mapAPICartItemResponseToCartItem(
-        apiCartItem,
-        item,
-      );
+      const data: APICartItemResponse = await addToCarRequest("client", apiCartItem);
+      const cartItem: CartItem = mapAPICartItemResponseToCartItem(apiCartItem, item);
       addOneItemToCar(cartItem);
-      showSuccessToast(`${item.name} added to car`);
-    } catch (error) {}
+      showSuccessToast(`${item.name} added to car`)
+    } catch (error) {
+
+    }
+
   }
 
   return (
