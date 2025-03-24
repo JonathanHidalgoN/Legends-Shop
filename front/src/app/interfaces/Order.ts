@@ -13,6 +13,7 @@ export enum CartStatus {
   DELETED = "DELETED",
   ORDERED = "ORDERED",
   PENDING = "PENDING",
+  INCLIENT = "INCLIENT",
 }
 
 export interface CartItem {
