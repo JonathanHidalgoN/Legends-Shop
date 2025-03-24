@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
 import { useAuthContext } from "./AuthContext";
@@ -26,7 +26,7 @@ interface CarContextType {
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
-  addOneItemToCar: (item: Item) => Promise<void>;
+  handleClientAddingItemToCar: (item: Item) => Promise<void>;
   /**
    * Calculates and returns the total cost of all items in the cart.
    * Assumes each item has a cost defined in item.gold.base.
@@ -49,11 +49,76 @@ export function CarContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [carItems, setCarItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [currentGold, setCurrentGold] = useState<number | null>(null);
   const [carItemsNotInServerCount, setCarItemsNotInServerCout] = useState<number>(0);
   const { userName } = useAuthContext();
   const isAuthenticated: boolean = userName !== null;
+
+  async function addItemToCartInServer(item: Item): Promise<APICartItemResponse> {
+    const apiCartItem: APICartItemResponse = {
+      id: null,
+      status: CartStatus.PENDING,
+      itemId: item.id
+    };
+    const data = await addToCarRequest("client", apiCartItem);
+    return data;
+  }
+
+  async function addInClientCarItemsToServer(cartItem: CartItem): Promise<CartItem | null> {
+    try {
+      const apiCartItem: APICartItemResponse = await addItemToCartInServer(cartItem.item);
+      const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(apiCartItem, cartItem.item);
+      return serverCartItem
+    } catch (error) {
+      showErrorToast(`Error adding ${cartItem.item.name} to car`)
+      return null;
+    }
+  }
+
+  async function handleClientAddingItemToCar(item: Item): Promise<void> {
+    const warningFlagTurn: boolean = carItemsNotInServerCount % 5 == 0;
+    let cartItem: CartItem = {
+      id: null,
+      status: CartStatus.INCLIENT,
+      item: item
+    };
+    if (!isAuthenticated) {
+      if (warningFlagTurn) {
+        showWarningToast(`Tip: Login so we can remember your cart`)
+      }
+      setCarItemsNotInServerCout(carItemsNotInServerCount + 1);
+    } else {
+      const serverCartItem = await addInClientCarItemsToServer(cartItem);
+      if (!serverCartItem) {
+        return;
+      }
+    }
+    setCartItems([...cartItems, cartItem]);
+    if (!warningFlagTurn) {
+      showSuccessToast(`${cartItem.item.name} added to cart`)
+    }
+  }
+
+
+  useEffect(() => {
+    async function handleLogInWithCartClientItems(): Promise<void> {
+      const updatedItems = await Promise.all(
+        cartItems.map(async (cartItem) => {
+          if (cartItem.status === CartStatus.INCLIENT) {
+            const serverCartItem = await addInClientCarItemsToServer(cartItem);
+            return serverCartItem ? serverCartItem : cartItem;
+          }
+          return cartItem;
+        })
+      );
+      setCartItems(updatedItems);
+    }
+
+    if (isAuthenticated) {
+      handleLogInWithCartClientItems();
+    }
+  }, [isAuthenticated]);
 
   /**
    * Removes one instance of an item from the cart.
@@ -61,9 +126,9 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteOneItemFromCar(item: Item): void {
-    const index = carItems.findIndex((i) => i.item.id === item.id);
+    const index = cartItems.findIndex((i) => i.item.id === item.id);
     if (index !== -1) {
-      setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
+      setCartItems([...cartItems.slice(0, index), ...cartItems.slice(index + 1)]);
     }
   }
 
@@ -72,48 +137,9 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteAllItemFromCar(item: Item): void {
-    setCarItems(carItems.filter((i: CartItem) => i.item.id !== item.id));
+    setCartItems(cartItems.filter((i: CartItem) => i.item.id !== item.id));
   }
 
-
-  async function saveItemInCarServer(item: Item): Promise<APICartItemResponse> {
-    const apiCartItem: APICartItemResponse = {
-      id: null,
-      status: CartStatus.PENDING,
-      itemId: item.id
-    };
-    const data: APICartItemResponse = await addToCarRequest("client", apiCartItem);
-    return data;
-  }
-
-  /**
-   * Adds one instance of an item to the cart.
-   * @param item - The item to add.
-   */
-  async function addOneItemToCar(item: Item): Promise<void> {
-    if (isAuthenticated) {
-      try {
-        const data: APICartItemResponse = await saveItemInCarServer(item);
-        const mappedCartItem: CartItem = mapAPICartItemResponseToCartItem(data, item);
-        setCarItems([...carItems, mappedCartItem]);
-        showSuccessToast(`${mappedCartItem.item.name} added to cart`)
-      } catch (error) {
-        showErrorToast(`${item.name} could not be added to the cart`)
-      }
-    } else {
-      if (carItemsNotInServerCount % 5 == 0) {
-        showWarningToast(`Tip: Login so we can remember your cart`)
-      }
-      const cartItem: CartItem = {
-        id: null,
-        status: CartStatus.INCLIENT,
-        item: item
-      }
-      setCarItems([...carItems, cartItem]);
-      setCarItemsNotInServerCout(carItemsNotInServerCount + 1);
-      showSuccessToast(`${cartItem.item.name} added to cart`)
-    }
-  }
 
   /**
    * Calculates the total cost of items in the cart.
@@ -121,24 +147,24 @@ export function CarContextProvider({
    * @returns The total cost as a number.
    */
   function getTotalCost(): number {
-    return carItems.reduce((total, item) => total + item.item.gold.base, 0);
+    return cartItems.reduce((total, item) => total + item.item.gold.base, 0);
   }
 
   /**
    * Deletes all car items
    */
   function cleanCar(): void {
-    setCarItems([]);
+    setCartItems([]);
   }
 
   return (
     <CarContext.Provider
       value={{
-        carItems,
-        setCarItems,
+        carItems: cartItems,
+        setCarItems: setCartItems,
         deleteOneItemFromCar,
         deleteAllItemFromCar,
-        addOneItemToCar,
+        handleClientAddingItemToCar,
         getTotalCost,
         cleanCar,
         currentGold,
