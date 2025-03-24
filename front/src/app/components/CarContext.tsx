@@ -3,6 +3,11 @@
 import React, { createContext, useContext, useState } from "react";
 import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
+import { useAuthContext } from "./AuthContext";
+import { APICartItemResponse } from "../interfaces/APIResponse";
+import { addToCarRequest } from "../request";
+import { mapAPICartItemResponseToCartItem } from "../mappers";
+import { showErrorToast, showSuccessToast, showWarningToast } from "../customToast";
 
 interface CarContextType {
   carItems: CartItem[];
@@ -21,7 +26,7 @@ interface CarContextType {
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
-  addOneItemToCar: (carItem: CartItem) => void;
+  addOneItemToCar: (item: Item) => Promise<void>;
   /**
    * Calculates and returns the total cost of all items in the cart.
    * Assumes each item has a cost defined in item.gold.base.
@@ -46,6 +51,9 @@ export function CarContextProvider({
 }) {
   const [carItems, setCarItems] = useState<CartItem[]>([]);
   const [currentGold, setCurrentGold] = useState<number | null>(null);
+  const [carItemsNotInServerCount, setCarItemsNotInServerCout] = useState<number>(0);
+  const { userName } = useAuthContext();
+  const isAuthenticated: boolean = userName !== null;
 
   /**
    * Removes one instance of an item from the cart.
@@ -71,8 +79,34 @@ export function CarContextProvider({
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
-  function addOneItemToCar(cartItem: CartItem): void {
-    setCarItems([...carItems, cartItem]);
+  async function addOneItemToCar(item: Item): Promise<void> {
+    if (isAuthenticated) {
+      const apiCartItem: APICartItemResponse = {
+        id: null,
+        status: CartStatus.PENDING,
+        itemId: item.id
+      };
+      try {
+        const data: APICartItemResponse = await addToCarRequest("client", apiCartItem);
+        const mappedCartItem: CartItem = mapAPICartItemResponseToCartItem(data, item);
+        setCarItems([...carItems, mappedCartItem]);
+        showSuccessToast(`${mappedCartItem.item.name} added to car`)
+      } catch (error) {
+        showErrorToast(`${item.name} could not be added to the car`)
+      }
+    } else {
+      if (carItemsNotInServerCount % 5 == 0) {
+        showWarningToast(`Login so we can remember you added ${item.name} to car`)
+      }
+      const cartItem: CartItem = {
+        id: null,
+        status: CartStatus.ADDED,
+        item: item
+      }
+      setCarItems([...carItems, cartItem]);
+      setCarItemsNotInServerCout(carItemsNotInServerCount + 1);
+      showSuccessToast(`${cartItem.item.name} added to car`)
+    }
   }
 
   /**
