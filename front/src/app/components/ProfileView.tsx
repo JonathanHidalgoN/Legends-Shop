@@ -11,10 +11,9 @@ import { mapAPIProfileInfoResponseToProfileInfo } from "../mappers";
 export default function ProfileView() {
   const { data, error } = useSWR<APIProfileInfoResponse>(
     ["profile-client", "client"],
-    getProfileInfoRequest
+    getProfileInfoRequest,
   );
   useErrorRedirect(error);
-
 
   if (!data || error) {
     return <div className="text-center py-10">Loading...</div>;
@@ -27,7 +26,8 @@ export default function ProfileView() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">
-        Check your profile, <span className="text-[var(--orange)]">{user.userName}.</span>
+        Check your profile,{" "}
+        <span className="text-[var(--orange)]">{user.userName}.</span>
       </h1>
 
       <div className="bg-white shadow rounded-lg p-6 mb-8">
@@ -93,7 +93,9 @@ export default function ProfileView() {
             <tbody className="bg-white divide-y divide-gray-200">
               {ordersInfo.map((order, index) => (
                 <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap">{order.itemName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {order.itemName}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     ${order.basePrice}
                   </td>

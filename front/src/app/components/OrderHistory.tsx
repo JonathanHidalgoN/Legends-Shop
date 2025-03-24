@@ -1,6 +1,12 @@
 "use client";
 import OrderHistoryCard from "@/app/components/OrderHistoryCard";
-import { FilterSortField, FilterSortOrder, OptionType, Order, OrderStatus } from "@/app/interfaces/Order";
+import {
+  FilterSortField,
+  FilterSortOrder,
+  OptionType,
+  Order,
+  OrderStatus,
+} from "@/app/interfaces/Order";
 import { APIOrderResponse } from "../interfaces/APIResponse";
 import { mapAPIOrderResponseToOrder } from "../mappers";
 import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
@@ -9,7 +15,6 @@ import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
 import { useErrorRedirect } from "./useErrorRedirect";
-
 
 export default function OrderHistory() {
   const { items } = useStaticData();
@@ -23,17 +28,22 @@ export default function OrderHistory() {
     label: item.name,
   }));
 
-  const [filterOrderStatus, setFilterOrderStatus] = useState<OrderStatus>(OrderStatus.ALL);
+  const [filterOrderStatus, setFilterOrderStatus] = useState<OrderStatus>(
+    OrderStatus.ALL,
+  );
   const [filterMinOrderDate, setFilterMinOrderDate] = useState<Date>(MIN_DATE);
   const [filterMaxOrderDate, setFilterMaxOrderDate] = useState<Date>(TODAY);
   const [filterMinDeliveryDate, setFilterMinDeliveryDate] =
     useState<Date>(MIN_DATE);
   const [filterMaxDeliveryDate, setFilterMaxDeliveryDate] =
     useState<Date>(TODAY_2WEEKS);
-  const [sortField, setSortField] = useState<FilterSortField>(FilterSortField.ORDERDATE);
-  const [sortOrder, setSortOrder] = useState<FilterSortOrder>(FilterSortOrder.DESC);
+  const [sortField, setSortField] = useState<FilterSortField>(
+    FilterSortField.ORDERDATE,
+  );
+  const [sortOrder, setSortOrder] = useState<FilterSortOrder>(
+    FilterSortOrder.DESC,
+  );
   const [filterItemNames, setFilterItemName] = useState<string[]>([]);
-
 
   const { data, error } = useSWR<APIOrderResponse[]>(
     ["orders-client", "client"],
@@ -46,23 +56,29 @@ export default function OrderHistory() {
     return <div>Loading...</div>;
   }
 
-  function orderMatchItemNames(orderItemNames: string[], filterItemNames: string[]): boolean {
+  function orderMatchItemNames(
+    orderItemNames: string[],
+    filterItemNames: string[],
+  ): boolean {
     if (filterItemNames.length == 0) {
       return true;
     } else {
-      return orderItemNames.some(name => filterItemNames.includes(name));
+      return orderItemNames.some((name) => filterItemNames.includes(name));
     }
   }
 
   const orders: Order[] = data
     .map((apiOrder: APIOrderResponse) => mapAPIOrderResponseToOrder(apiOrder))
-    .filter((order: Order) =>
-      (filterOrderStatus === "ALL" ? true : order.status === filterOrderStatus) &&
-      order.orderDate >= filterMinOrderDate &&
-      order.orderDate <= filterMaxOrderDate &&
-      order.deliveryDate >= filterMinDeliveryDate &&
-      order.deliveryDate <= filterMaxDeliveryDate &&
-      orderMatchItemNames(order.itemNames, filterItemNames)
+    .filter(
+      (order: Order) =>
+        (filterOrderStatus === "ALL"
+          ? true
+          : order.status === filterOrderStatus) &&
+        order.orderDate >= filterMinOrderDate &&
+        order.orderDate <= filterMaxOrderDate &&
+        order.deliveryDate >= filterMinDeliveryDate &&
+        order.deliveryDate <= filterMaxDeliveryDate &&
+        orderMatchItemNames(order.itemNames, filterItemNames),
     )
     .sort((a, b) => {
       let comparison: number = 0;

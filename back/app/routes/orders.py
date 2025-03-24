@@ -1,5 +1,5 @@
-from typing import Annotated, List 
-from fastapi import APIRouter, Depends, HTTPException , Request
+from typing import Annotated, List
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.customExceptions import (
     DifferentTotal,

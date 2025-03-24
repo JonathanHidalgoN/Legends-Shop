@@ -1,5 +1,9 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
-import { APICartItemResponse, APIError, APIProfileInfoResponse } from "./interfaces/APIResponse";
+import {
+  APICartItemResponse,
+  APIError,
+  APIProfileInfoResponse,
+} from "./interfaces/APIResponse";
 import { CartItem, Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
 import { showErrorToast } from "./customToast";
@@ -30,19 +34,15 @@ function makeUrl(from: string, endpoint: string): string {
   return url;
 }
 
-export async function createAPIError(response: Response, errorMsg: string): Promise<APIError> {
+export async function createAPIError(
+  response: Response,
+  errorMsg: string,
+): Promise<APIError> {
   if (response.status == 401) {
-    return new APIError(
-      "Unauthorized",
-      401,
-    )
+    return new APIError("Unauthorized", 401);
   } else {
     const data = await response.json();
-    return new APIError(
-      data?.message || errorMsg,
-      response.status,
-      data
-    )
+    return new APIError(data?.message || errorMsg, response.status, data);
   }
 }
 
@@ -107,7 +107,6 @@ export async function refreshTokenRequest(from: string = "server") {
   });
 }
 
-
 /**
  * Makes a GET request to fetch a subset of items.
  *
@@ -158,7 +157,6 @@ export async function orderRequest(order: Order, from: string = "server") {
   });
 }
 
-
 /**
  * Makes a GET request to fetch user history.
  */
@@ -175,7 +173,9 @@ export async function getOrderHistoryWithCredentialsRequest(
   return await response.json();
 }
 
-export async function getProfileInfoRequest(from: string = "server"): Promise<APIProfileInfoResponse> {
+export async function getProfileInfoRequest(
+  from: string = "server",
+): Promise<APIProfileInfoResponse> {
   const url: string = makeUrl(from, ENDPOINT_PROFILE_INFO);
   const response = await fetch(url, {
     credentials: "include",
@@ -186,7 +186,10 @@ export async function getProfileInfoRequest(from: string = "server"): Promise<AP
   return await response.json();
 }
 
-export async function addToCarRequest(from: string = "server", apiCartItem: APICartItemResponse): Promise<APICartItemResponse> {
+export async function addToCarRequest(
+  from: string = "server",
+  apiCartItem: APICartItemResponse,
+): Promise<APICartItemResponse> {
   const url: string = makeUrl(from, ENDPOINT_CART_ADD_ITEM);
   const response = await fetch(url, {
     method: "POST",
@@ -223,4 +226,3 @@ export async function getCurrentUserGoldRequest(from: string = "server") {
     credentials: "include",
   });
 }
-

@@ -89,9 +89,7 @@ export default function LogInPage() {
             >
               Log In
             </button>
-            <span className="text-center text-m">
-              Are you new?
-            </span>
+            <span className="text-center text-m">Are you new?</span>
             <Link
               href="/auth/signup"
               className="w-full text-center bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition"

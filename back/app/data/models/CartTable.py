@@ -1,7 +1,8 @@
-from sqlalchemy import  ForeignKey 
-from sqlalchemy.orm import Mapped, mapped_column 
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 from app.data.database import base
 from app.schemas.Order import CartStatus
+
 
 class CartTable(base):
     __tablename__ = "cart_table"

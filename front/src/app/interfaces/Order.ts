@@ -5,32 +5,32 @@ export enum OrderStatus {
   PENDING = "PENDING",
   DELIVERED = "DELIVERED",
   CANCELED = "CANCELED",
-  ALL = "ALL"
+  ALL = "ALL",
 }
 
 export enum CartStatus {
   ADDED = "ADDED",
   DELETED = "DELETED",
   ORDERED = "ORDERED",
-  PENDING = "PENDING"
+  PENDING = "PENDING",
 }
 
 export interface CartItem {
   id: number | null;
   status: CartStatus;
-  item: Item
+  item: Item;
 }
 
 export enum FilterSortField {
   PRICE = "Price",
   ORDERDATE = "Order date",
   DELIVERYDATE = "Deliver date",
-  QUANTITY = "Quantity"
+  QUANTITY = "Quantity",
 }
 
 export enum FilterSortOrder {
   ASC = "asc",
-  DESC = "desc"
+  DESC = "desc",
 }
 
 export interface Order {

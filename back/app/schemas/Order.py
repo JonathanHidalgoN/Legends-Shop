@@ -10,16 +10,19 @@ class OrderStatus(str, Enum):
     DELIVERED = "DELIVERED"
     CANCELED = "CANCELED"
 
+
 class CartStatus(str, Enum):
     ADDED = "ADDED"
     DELETED = "DELETED"
     ORDERED = "ORDERED"
     PENDING = "PENDING"
 
+
 class CartItem(BaseModel):
-    id:int | None 
-    itemId:int
-    status:CartStatus
+    id: int | None
+    itemId: int
+    status: CartStatus
+
 
 class Order(BaseModel):
     id: int

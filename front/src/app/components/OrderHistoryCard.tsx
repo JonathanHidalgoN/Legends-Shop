@@ -134,10 +134,11 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
         <div className="mt-4">
           <button
             className={`px-4 py-2 rounded transition-colors 
-                       w-full md:w-auto ${orderStatus === "PENDING"
-                ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+                       w-full md:w-auto ${
+                         orderStatus === "PENDING"
+                           ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                       }`}
             onClick={cancelOrder}
             disabled={orderStatus !== "PENDING"}
           >

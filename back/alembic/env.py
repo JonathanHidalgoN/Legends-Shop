@@ -16,7 +16,7 @@ from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.UserTable import UserTable
 from app.data.models.StatsMappingTable import StatsMappingTable
 from app.data.models.OrderTable import OrderTable
-from app.data.models.CartTable import CartTable 
+from app.data.models.CartTable import CartTable
 
 from app.envVariables import DATABASE_ALEMBIC_URL
 

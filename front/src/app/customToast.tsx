@@ -1,16 +1,18 @@
-import Image from 'next/image';
-import toast from 'react-hot-toast';
+import Image from "next/image";
+import toast from "react-hot-toast";
 
 const SUCCESS_ICONS = ["/jhinIcon.png", "/luxIcon.png", "/zingsIcon.png"];
 const ERROR_ICONS = ["/sadAmumu.png"];
 
 export function showSuccessToast(msg: string) {
-  const img: string = SUCCESS_ICONS[Math.floor(Math.random() * SUCCESS_ICONS.length)];
+  const img: string =
+    SUCCESS_ICONS[Math.floor(Math.random() * SUCCESS_ICONS.length)];
   toast.custom(
     (t) => (
       <div
-        className={`${t.visible ? 'animate-enter' : 'animate-leave'
-          } bg-white text-black p-4 rounded border border-black`}
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } bg-white text-black p-4 rounded border border-black`}
       >
         <div className="flex items-center">
           <div className="bg-green-500 rounded-full p-1">
@@ -47,18 +49,19 @@ export function showSuccessToast(msg: string) {
     ),
     {
       duration: 3000,
-    }
+    },
   );
 }
 
-
 export function showErrorToast(msg: string) {
-  const img: string = ERROR_ICONS[Math.floor(Math.random() * ERROR_ICONS.length)];
+  const img: string =
+    ERROR_ICONS[Math.floor(Math.random() * ERROR_ICONS.length)];
   toast.custom(
     (t) => (
       <div
-        className={`${t.visible ? 'animate-enter' : 'animate-leave'
-          } bg-white text-black p-4 rounded border border-black`}
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } bg-white text-black p-4 rounded border border-black`}
       >
         <div className="flex items-center">
           <div className="bg-red-500 rounded-full p-1">
@@ -95,6 +98,6 @@ export function showErrorToast(msg: string) {
     ),
     {
       duration: 3000,
-    }
+    },
   );
 }

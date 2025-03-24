@@ -1,10 +1,16 @@
-import { APICartItemResponse, APIOrderResponse, APIOrderSummaryResponse, APIProfileInfoResponse, APIUserInfoResponse } from "./interfaces/APIResponse";
+import {
+  APICartItemResponse,
+  APIOrderResponse,
+  APIOrderSummaryResponse,
+  APIProfileInfoResponse,
+  APIUserInfoResponse,
+} from "./interfaces/APIResponse";
 import { Item } from "./interfaces/Item";
 import { CartItem, Order, OrderSummary } from "./interfaces/Order";
 import { ProfileInfo, UserInfo } from "./interfaces/profileInterfaces";
 
 export function mapAPIOrderSummaryToOrderSummary(
-  apiOrderSummary: APIOrderSummaryResponse
+  apiOrderSummary: APIOrderSummaryResponse,
 ): OrderSummary {
   return {
     itemName: apiOrderSummary.itemName,
@@ -16,7 +22,7 @@ export function mapAPIOrderSummaryToOrderSummary(
 }
 
 export function mapAPIUserInfoToUserInDB(
-  apiUser: APIUserInfoResponse
+  apiUser: APIUserInfoResponse,
 ): UserInfo {
   return {
     userName: apiUser.userName,
@@ -30,12 +36,12 @@ export function mapAPIUserInfoToUserInDB(
 }
 
 export function mapAPIProfileInfoResponseToProfileInfo(
-  apiProfile: APIProfileInfoResponse
+  apiProfile: APIProfileInfoResponse,
 ): ProfileInfo {
   return {
     user: mapAPIUserInfoToUserInDB(apiProfile.user),
     ordersInfo: apiProfile.ordersInfo.map((apiOrderSummary) =>
-      mapAPIOrderSummaryToOrderSummary(apiOrderSummary)
+      mapAPIOrderSummaryToOrderSummary(apiOrderSummary),
     ),
   };
 }
@@ -48,11 +54,14 @@ export function mapAPIOrderResponseToOrder(apiOrder: APIOrderResponse): Order {
     total: apiOrder.total,
     userName: apiOrder.userName,
     orderDate: new Date(apiOrder.orderDate),
-    deliveryDate: new Date(apiOrder.deliveryDate)
-  }
+    deliveryDate: new Date(apiOrder.deliveryDate),
+  };
 }
 
-export function mapAPICartItemResponseToCartItem(apiCartItem: APICartItemResponse, item: Item): CartItem {
+export function mapAPICartItemResponseToCartItem(
+  apiCartItem: APICartItemResponse,
+  item: Item,
+): CartItem {
   return {
     id: apiCartItem.id,
     status: apiCartItem.status,
@@ -60,10 +69,12 @@ export function mapAPICartItemResponseToCartItem(apiCartItem: APICartItemRespons
   };
 }
 
-export function mapCartItemToAPICartItemResponse(cartItem: CartItem): APICartItemResponse {
+export function mapCartItemToAPICartItemResponse(
+  cartItem: CartItem,
+): APICartItemResponse {
   return {
     id: null,
     status: cartItem.status,
-    itemId: cartItem.item.id
-  }
+    itemId: cartItem.item.id,
+  };
 }
