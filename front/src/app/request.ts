@@ -1,6 +1,6 @@
 import { SERVER_DOMAIN, CLIENT_DOMAIN } from "./envVariables";
-import { APIError, APIProfileInfoResponse } from "./interfaces/APIResponse";
-import { Order } from "./interfaces/Order";
+import { APICartItemResponse, APIError, APIProfileInfoResponse } from "./interfaces/APIResponse";
+import { CartItem, Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
 import { showErrorToast } from "./customToast";
 
@@ -17,7 +17,8 @@ export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
 export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
-export const ENDPOINT_CAR_ADD_ITEMS: string = `car/add_items`;
+export const ENDPOINT_CART_ADD_ITEMS: string = `cart/add_items`;
+export const ENDPOINT_CART_ADD_ITEM: string = `cart/add_item`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -106,6 +107,7 @@ export async function refreshTokenRequest(from: string = "server") {
   });
 }
 
+
 /**
  * Makes a GET request to fetch a subset of items.
  *
@@ -180,6 +182,23 @@ export async function getProfileInfoRequest(from: string = "server"): Promise<AP
   });
   if (!response.ok) {
     await throwAPIError(response, "Failed to get the profile info");
+  }
+  return await response.json();
+}
+
+export async function addToCarRequest(from: string = "server", apiCartItem: APICartItemResponse): Promise<APICartItemResponse> {
+  const url: string = makeUrl(from, ENDPOINT_CART_ADD_ITEM);
+  const response = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(apiCartItem),
+  });
+
+  if (!response.ok) {
+    await throwAPIError(response, "Failed to register item in cart");
   }
   return await response.json();
 }
