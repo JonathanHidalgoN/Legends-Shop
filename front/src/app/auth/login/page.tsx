@@ -7,7 +7,7 @@ import { APILoginResponse, LoginError } from "@/app/interfaces/APIResponse";
 import Link from "next/link";
 
 export default function LogInPage() {
-  const { login } = useAuthContext();
+  const { loginAndInitialize } = useAuthContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
@@ -18,7 +18,7 @@ export default function LogInPage() {
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
-    const apiResponse: APILoginResponse = await login(
+    const apiResponse: APILoginResponse = await loginAndInitialize(
       formUserName,
       formPassword,
     );
