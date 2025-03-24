@@ -1,5 +1,6 @@
-import { APIOrderResponse, APIOrderSummaryResponse, APIProfileInfoResponse, APIUserInfoResponse } from "./interfaces/APIResponse";
-import { Order, OrderSummary } from "./interfaces/Order";
+import { APICartItemResponse, APIOrderResponse, APIOrderSummaryResponse, APIProfileInfoResponse, APIUserInfoResponse } from "./interfaces/APIResponse";
+import { Item } from "./interfaces/Item";
+import { CartItem, Order, OrderSummary } from "./interfaces/Order";
 import { ProfileInfo, UserInfo } from "./interfaces/profileInterfaces";
 
 export function mapAPIOrderSummaryToOrderSummary(
@@ -48,5 +49,21 @@ export function mapAPIOrderResponseToOrder(apiOrder: APIOrderResponse): Order {
     userName: apiOrder.userName,
     orderDate: new Date(apiOrder.orderDate),
     deliveryDate: new Date(apiOrder.deliveryDate)
+  }
+}
+
+export function mapAPICartItemResponseToCartItem(apiCartItem: APICartItemResponse, item: Item): CartItem {
+  return {
+    id: apiCartItem.id,
+    status: apiCartItem.status,
+    item: item,
+  };
+}
+
+export function mapCartItemToAPICartItemResponse(cartItem: CartItem): APICartItemResponse {
+  return {
+    id: null,
+    status: cartItem.status,
+    itemId: cartItem.item.id
   }
 }
