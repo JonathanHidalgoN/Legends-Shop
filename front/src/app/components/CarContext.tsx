@@ -75,37 +75,43 @@ export function CarContextProvider({
     setCarItems(carItems.filter((i: CartItem) => i.item.id !== item.id));
   }
 
+
+  async function saveItemInCarServer(item: Item): Promise<APICartItemResponse> {
+    const apiCartItem: APICartItemResponse = {
+      id: null,
+      status: CartStatus.PENDING,
+      itemId: item.id
+    };
+    const data: APICartItemResponse = await addToCarRequest("client", apiCartItem);
+    return data;
+  }
+
   /**
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
   async function addOneItemToCar(item: Item): Promise<void> {
     if (isAuthenticated) {
-      const apiCartItem: APICartItemResponse = {
-        id: null,
-        status: CartStatus.PENDING,
-        itemId: item.id
-      };
       try {
-        const data: APICartItemResponse = await addToCarRequest("client", apiCartItem);
+        const data: APICartItemResponse = await saveItemInCarServer(item);
         const mappedCartItem: CartItem = mapAPICartItemResponseToCartItem(data, item);
         setCarItems([...carItems, mappedCartItem]);
-        showSuccessToast(`${mappedCartItem.item.name} added to car`)
+        showSuccessToast(`${mappedCartItem.item.name} added to cart`)
       } catch (error) {
-        showErrorToast(`${item.name} could not be added to the car`)
+        showErrorToast(`${item.name} could not be added to the cart`)
       }
     } else {
       if (carItemsNotInServerCount % 5 == 0) {
-        showWarningToast(`Login so we can remember you added ${item.name} to car`)
+        showWarningToast(`Tip: Login so we can remember your cart`)
       }
       const cartItem: CartItem = {
         id: null,
-        status: CartStatus.ADDED,
+        status: CartStatus.INCLIENT,
         item: item
       }
       setCarItems([...carItems, cartItem]);
       setCarItemsNotInServerCout(carItemsNotInServerCount + 1);
-      showSuccessToast(`${cartItem.item.name} added to car`)
+      showSuccessToast(`${cartItem.item.name} added to cart`)
     }
   }
 
