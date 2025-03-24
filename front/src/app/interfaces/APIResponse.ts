@@ -1,4 +1,4 @@
-import { Order, OrderStatus, OrderSummary } from "./Order";
+import { CartStatus, Order, OrderStatus, OrderSummary } from "./Order";
 
 export enum SingupError {
   USERNAMEEXIST = "USERNAMEEXIST",
@@ -56,6 +56,12 @@ export interface APIUserInfoResponse {
   goldSpend: number;
   currentGold: number;
   birthDate: string;
+}
+
+export interface APICartItemResponse {
+  id: number | null;
+  status: CartStatus;
+  itemId: number;
 }
 
 export interface APIProfileInfoResponse {
