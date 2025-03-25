@@ -5,6 +5,8 @@ from app.logger import logger
 from app.data.models.CartTable import CartTable
 from app.schemas.Order import CartItem, CartStatus
 from app.customExceptions import CartProcessorException
+from app.data.queries.cartQueries import getAddedCartItemsWithUserId
+from app.data.mappers import mapCartTableToCartItem
 
 
 class CartProceesor:
@@ -61,4 +63,16 @@ class CartProceesor:
         except SQLAlchemyError as e:
             await self.dbSession.rollback()
             logger.error(f"Error adding car item {e}")
-            raise CartProcessorException(f"Error adding items to car") from e
+            raise CartProcessorException(f"Error adding items to cart") from e
+
+    async def getAddedUserCart(self, userId:int)-> List[CartItem]:
+        try:
+            logger.debug(f"Getting user id {userId} added cart items")
+            userCartTables: List[CartTable] = await getAddedCartItemsWithUserId(self.dbSession, userId)
+            userCart : List[CartItem] = [mapCartTableToCartItem(cartTable) for cartTable in userCartTables]
+            logger.debug(f"Got user id {userId} added cart items sucessfully")
+            return userCart
+        except SQLAlchemyError as e:
+            logger.error(f"Error getting user id {userId} added cart items, Exception:  {e}")
+            raise CartProcessorException(f"Error getting cart added cart items") from e
+
