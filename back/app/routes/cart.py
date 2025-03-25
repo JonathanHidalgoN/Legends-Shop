@@ -73,3 +73,21 @@ async def getAddedUserCartItems(
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.delete("/delete_cart_item/{cart_item_id}")
+async def cancelCartItem(
+    cart_item_id:int,
+    request: Request,
+    userId: Annotated[int, Depends(getUserIdFromName)],
+    cartProcessor: Annotated[CartProceesor, Depends(getCartProcessor)],
+):
+    try:
+        logger.debug(f"Request to {request.url.path} from user {userId}")
+        await cartProcessor.deleteCartItem(userId, cart_item_id)
+        logger.debug(f"Request to {request.url.path} from user {userId} completed")
+    except CartProcessorException as e:
+        logger.error(f"Request to {request.url.path} caused exception: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
