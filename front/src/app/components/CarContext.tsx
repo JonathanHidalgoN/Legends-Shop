@@ -1,13 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
 import { useAuthContext } from "./AuthContext";
 import { APICartItemResponse } from "../interfaces/APIResponse";
 import { addToCarRequest, deleteCartItemRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
-import { showErrorToast, showSuccessToast, showWarningToast } from "../customToast";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "../customToast";
 
 interface CarContextType {
   carItems: CartItem[];
@@ -57,16 +67,25 @@ export function CarContextProvider({
   let pendingServerDeletedCartItems = useRef<CartItem[]>([]);
   const isAuthenticated: boolean = userName !== null;
 
-  async function addInClientCarItemsToServer(cartItem: CartItem): Promise<CartItem | null> {
+  async function addInClientCarItemsToServer(
+    cartItem: CartItem,
+  ): Promise<CartItem | null> {
     try {
       const apiCartItem: APICartItemResponse = {
         id: null,
         status: CartStatus.INCLIENT,
-        itemId: cartItem.item.id
+        itemId: cartItem.item.id,
       };
-      const serverCartItemResponse: APICartItemResponse = await addToCarRequest("client", apiCartItem, `Error adding ${cartItem.item.name} to car`);
-      const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(serverCartItemResponse, cartItem.item);
-      return serverCartItem
+      const serverCartItemResponse: APICartItemResponse = await addToCarRequest(
+        "client",
+        apiCartItem,
+        `Error adding ${cartItem.item.name} to car`,
+      );
+      const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(
+        serverCartItemResponse,
+        cartItem.item,
+      );
+      return serverCartItem;
     } catch (error) {
       return null;
     }
@@ -77,11 +96,11 @@ export function CarContextProvider({
     let cartItem: CartItem = {
       id: null,
       status: CartStatus.INCLIENT,
-      item: item
+      item: item,
     };
     if (!isAuthenticated) {
       if (warningFlagTurn) {
-        showWarningToast(`Tip: Login so we can remember your cart`)
+        showWarningToast(`Tip: Login so we can remember your cart`);
       }
       cartItemsNotInServerCount.current = cartItemsNotInServerCount.current + 1;
     } else {
@@ -93,7 +112,7 @@ export function CarContextProvider({
     }
     setCartItems([...cartItems, cartItem]);
     if (isAuthenticated || !warningFlagTurn) {
-      showSuccessToast(`${cartItem.item.name} added to cart`)
+      showSuccessToast(`${cartItem.item.name} added to cart`);
     }
   }
 
@@ -101,11 +120,15 @@ export function CarContextProvider({
     if (cartItem.status == CartStatus.ADDED && cartItem.id) {
       if (isAuthenticated) {
         try {
-          await deleteCartItemRequest("client", cartItem.id, `Error deleting ${cartItem.item.name}`)
+          await deleteCartItemRequest(
+            "client",
+            cartItem.id,
+            `Error deleting ${cartItem.item.name}`,
+          );
           return;
         } catch (error) {
           //The request display the error msg, then add to the list the item pending to delete
-          //maybe add a timer to try again? 
+          //maybe add a timer to try again?
         }
       }
       pendingServerDeletedCartItems.current.push(cartItem);
@@ -121,7 +144,7 @@ export function CarContextProvider({
             return serverCartItem ? serverCartItem : cartItem;
           }
           return cartItem;
-        })
+        }),
       );
       setCartItems(updatedItems);
     }
@@ -134,7 +157,7 @@ export function CarContextProvider({
             await deleteCartItemRequest(
               "client",
               cartItem.id,
-              `Error deleting ${cartItem.item.name}`
+              `Error deleting ${cartItem.item.name}`,
             );
           } catch (error) {
             newPending.push(cartItem);
@@ -165,7 +188,10 @@ export function CarContextProvider({
       if (selectedCartItem) {
         checkIfAddCartItemIdToPendingToDeleteList(selectedCartItem);
       }
-      setCartItems([...cartItems.slice(0, index), ...cartItems.slice(index + 1)]);
+      setCartItems([
+        ...cartItems.slice(0, index),
+        ...cartItems.slice(index + 1),
+      ]);
     }
   }
 
@@ -174,13 +200,14 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteAllItemFromCar(item: Item): void {
-    const filterCartItems: CartItem[] = cartItems.filter((i: CartItem) => i.item.id !== item.id);
-    filterCartItems.forEach((cartItem: CartItem) => (
-      checkIfAddCartItemIdToPendingToDeleteList(cartItem)
-    ));
+    const filterCartItems: CartItem[] = cartItems.filter(
+      (i: CartItem) => i.item.id !== item.id,
+    );
+    filterCartItems.forEach((cartItem: CartItem) =>
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem),
+    );
     setCartItems(cartItems.filter((i: CartItem) => i.item.id !== item.id));
   }
-
 
   /**
    * Calculates the total cost of items in the cart.
@@ -195,9 +222,9 @@ export function CarContextProvider({
    * Deletes all car items
    */
   function cleanCar(): void {
-    cartItems.forEach((cartItem: CartItem) => (
-      checkIfAddCartItemIdToPendingToDeleteList(cartItem)
-    ));
+    cartItems.forEach((cartItem: CartItem) =>
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem),
+    );
     setCartItems([]);
   }
 

@@ -10,8 +10,9 @@ export function showSuccessToast(msg: string) {
   toast.custom(
     (t) => (
       <div
-        className={`${t.visible ? "animate-enter" : "animate-leave"
-          } bg-white text-black p-4 rounded border border-black`}
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } bg-white text-black p-4 rounded border border-black`}
       >
         <div className="flex items-center">
           <div className="bg-green-500 rounded-full p-1">
@@ -58,8 +59,9 @@ export function showErrorToast(msg: string) {
   toast.custom(
     (t) => (
       <div
-        className={`${t.visible ? "animate-enter" : "animate-leave"
-          } bg-white text-black p-4 rounded border border-black`}
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } bg-white text-black p-4 rounded border border-black`}
       >
         <div className="flex items-center">
           <div className="bg-red-500 rounded-full p-1">
@@ -107,8 +109,9 @@ export function showWarningToast(msg: string) {
   toast.custom(
     (t) => (
       <div
-        className={`${t.visible ? "animate-enter" : "animate-leave"
-          } bg-white text-black p-4 rounded border border-yellow-500`}
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } bg-white text-black p-4 rounded border border-yellow-500`}
       >
         <div className="flex items-center">
           <div className="bg-yellow-400 rounded-full p-1">
@@ -146,6 +149,6 @@ export function showWarningToast(msg: string) {
     ),
     {
       duration: 3000,
-    }
+    },
   );
 }

@@ -14,12 +14,16 @@ from app.logger import logger
 
 app = FastAPI()
 
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     logger.info(f"Incoming request: {request.method} {request.url}")
     response = await call_next(request)
-    logger.info(f"Response status: {response.status_code} for {request.method} {request.url}")
+    logger.info(
+        f"Response status: {response.status_code} for {request.method} {request.url}"
+    )
     return response
+
 
 origins = [
     FRONTEND_HOST

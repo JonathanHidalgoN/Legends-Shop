@@ -102,10 +102,9 @@ def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
     )
     return orderTable
 
-def mapCartTableToCartItem(cartTable:CartTable) -> CartItem:
-    cartItem : CartItem = CartItem(
-       id=cartTable.id,
-        itemId=cartTable.item_id,
-        status= cartTable.status
+
+def mapCartTableToCartItem(cartTable: CartTable) -> CartItem:
+    cartItem: CartItem = CartItem(
+        id=cartTable.id, itemId=cartTable.item_id, status=cartTable.status
     )
-    return cartItem 
+    return cartItem

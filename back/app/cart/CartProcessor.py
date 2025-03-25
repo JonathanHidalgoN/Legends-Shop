@@ -67,23 +67,36 @@ class CartProceesor:
             logger.error(f"Error adding car item {e}")
             raise CartProcessorException(f"Error adding items to cart") from e
 
-    async def getAddedUserCart(self, userId:int)-> List[CartItem]:
+    async def getAddedUserCart(self, userId: int) -> List[CartItem]:
         try:
             logger.debug(f"Getting user id {userId} added cart items")
-            userCartTables: List[CartTable] = await getAddedCartItemsWithUserId(self.dbSession, userId)
-            userCart : List[CartItem] = [mapCartTableToCartItem(cartTable) for cartTable in userCartTables]
+            userCartTables: List[CartTable] = await getAddedCartItemsWithUserId(
+                self.dbSession, userId
+            )
+            userCart: List[CartItem] = [
+                mapCartTableToCartItem(cartTable) for cartTable in userCartTables
+            ]
             logger.debug(f"Got user id {userId} added cart items sucessfully")
             return userCart
         except SQLAlchemyError as e:
-            logger.error(f"Error getting user id {userId} added cart items, Exception:  {e}")
+            logger.error(
+                f"Error getting user id {userId} added cart items, Exception:  {e}"
+            )
             raise CartProcessorException(f"Error getting cart added cart items") from e
 
-    async def deleteCartItem(self, userId:int, cartId:int)->None:
+    async def deleteCartItem(self, userId: int, cartId: int) -> None:
         try:
-            logger.debug(f"Changing cart item row with id {cartId} and use id {userId} to 'DELETED' status")
+            logger.debug(
+                f"Changing cart item row with id {cartId} and use id {userId} to 'DELETED' status"
+            )
             await changeCartItemStatusToDeleted(self.dbSession, userId, cartId)
-            logger.debug(f"Changed cart item row with id {cartId} and use id {userId} to 'DELETED' status sucessfully")
+            logger.debug(
+                f"Changed cart item row with id {cartId} and use id {userId} to 'DELETED' status sucessfully"
+            )
         except SQLAlchemyError as e:
-            logger.error(f"Error chaning cart item row with id {cartId} from user id {userId} to deleted status, exception {e}")
-            raise CartProcessorException(f"Error chaning cart item status to deleted") from e
-
+            logger.error(
+                f"Error chaning cart item row with id {cartId} from user id {userId} to deleted status, exception {e}"
+            )
+            raise CartProcessorException(
+                f"Error chaning cart item status to deleted"
+            ) from e

@@ -191,7 +191,7 @@ export async function getProfileInfoRequest(
 export async function addToCarRequest(
   from: string = "server",
   apiCartItem: APICartItemResponse,
-  errorMsg: string
+  errorMsg: string,
 ): Promise<APICartItemResponse> {
   const url: string = makeUrl(from, ENDPOINT_CART_ADD_ITEM);
   const response = await fetch(url, {
@@ -230,7 +230,9 @@ export async function getCurrentUserGoldRequest(from: string = "server") {
   });
 }
 
-export async function getAddedCartItemsRequest(from: string = "server"): Promise<APICartItemResponse[]> {
+export async function getAddedCartItemsRequest(
+  from: string = "server",
+): Promise<APICartItemResponse[]> {
   const url: string = makeUrl(from, ENDPOINT_CART_ADDED_CART_ITEMS);
   const response = await fetch(url, {
     credentials: "include",
@@ -244,9 +246,12 @@ export async function getAddedCartItemsRequest(from: string = "server"): Promise
 export async function deleteCartItemRequest(
   from: string = "server",
   cartItemId: number,
-  errorMsg: string
+  errorMsg: string,
 ): Promise<void> {
-  const url: string = makeUrl(from, `${ENDPOINT_CART_DELETE_ITEM}/${cartItemId}`);
+  const url: string = makeUrl(
+    from,
+    `${ENDPOINT_CART_DELETE_ITEM}/${cartItemId}`,
+  );
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
