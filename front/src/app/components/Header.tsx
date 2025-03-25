@@ -9,8 +9,11 @@ import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
-import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
+import { APICartItemResponse, APILoginResponse, LoginError } from "../interfaces/APIResponse";
 import { getCurrentUserGold } from "../profileFunctions";
+import { CartItem } from "../interfaces/Order";
+import { getAddedCartItemsRequest } from "../request";
+import { mapAPICartItemResponseToCartItem } from "../mappers";
 
 export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut, login } = useAuthContext();
@@ -42,6 +45,19 @@ export default function Header({ items }: { items: Item[] }) {
         apiResponse.errorType = LoginError.CURRENTGOLDERROR;
       } else {
         setCurrentGold(currentGold);
+      }
+      try {
+        const apiCartItems: APICartItemResponse[] = await getAddedCartItemsRequest("client");
+        const serverCartItems: CartItem[] = apiCartItems.map((apiCartItem: APICartItemResponse) => {
+          const matchItem: Item | undefined = items.find((item: Item) => item.id == apiCartItem.itemId);
+          if (!matchItem) {
+            throw Error("Error");
+          }
+          return mapAPICartItemResponseToCartItem(apiCartItem, matchItem)
+        })
+        setCarItems(serverCartItems);
+      } catch (error) {
+        //todo: what to do in this error?
       }
       setShowLoginDropdown(false);
       setFormUserName("");

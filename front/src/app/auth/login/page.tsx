@@ -3,10 +3,15 @@
 import { useAuthContext } from "@/app/components/AuthContext";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { APILoginResponse, LoginError } from "@/app/interfaces/APIResponse";
+import { APICartItemResponse, APILoginResponse, LoginError } from "@/app/interfaces/APIResponse";
 import Link from "next/link";
 import { useCarContext } from "@/app/components/CarContext";
 import { getCurrentUserGold } from "@/app/profileFunctions";
+import { CartItem } from "@/app/interfaces/Order";
+import { getAddedCartItemsRequest } from "@/app/request";
+import { mapAPICartItemResponseToCartItem } from "@/app/mappers";
+import { useStaticData } from "@/app/components/StaticDataContext";
+import { Item } from "@/app/interfaces/Item";
 
 export default function LogInPage() {
   const { login } = useAuthContext();
@@ -17,7 +22,8 @@ export default function LogInPage() {
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<LoginError | null>(null);
-  const { carItems, setCarItems, currentGold, setCurrentGold } = useCarContext();
+  const { setCarItems, setCurrentGold } = useCarContext();
+  const { items } = useStaticData();
 
   async function handleLoginSubmit(e: any): Promise<void> {
     e.preventDefault();
@@ -31,6 +37,19 @@ export default function LogInPage() {
         apiResponse.errorType = LoginError.CURRENTGOLDERROR;
       } else {
         setCurrentGold(currentGold);
+      }
+      try {
+        const apiCartItems: APICartItemResponse[] = await getAddedCartItemsRequest("client");
+        const serverCartItems: CartItem[] = apiCartItems.map((apiCartItem: APICartItemResponse) => {
+          const matchItem: Item | undefined = items.find((item: Item) => item.id == apiCartItem.itemId);
+          if (!matchItem) {
+            throw Error("Error");
+          }
+          return mapAPICartItemResponseToCartItem(apiCartItem, matchItem)
+        })
+        setCarItems(serverCartItems);
+      } catch (error) {
+        //todo: what to do in this error?
       }
       setFormUserName("");
       setFormPassword("");
