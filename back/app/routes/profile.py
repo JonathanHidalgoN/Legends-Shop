@@ -26,9 +26,7 @@ async def getUserGold(
     userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userName}")
         userGold: int = await profileWorker.getUserGoldWithUserName(userName)
-        logger.debug(f"Request to {request.url.path} completed")
         return {"userGold": userGold}
     except ProfileWorkerException:
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -44,9 +42,7 @@ async def getProfileInfo(
     profileWorker: Annotated[ProfileWorker, Depends(getProfileWorker)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userName}")
         profileInfo: ProfileInfo = await profileWorker.getProfileInfo(userName)
-        logger.debug(f"Request to {request.url.path} completed")
         return profileInfo
     except ProfileWorkerException:
         raise HTTPException(status_code=500, detail="Internal server error")

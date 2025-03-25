@@ -18,11 +18,9 @@ router = APIRouter()
 async def getAllItems(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
-    logger.debug(f"Request to items/all, getting all items in database")
     items: List[Item] = []
     try:
         items = await getAllItemTableRowsAnMapToItems(db)
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"items": items}
     except Exception as e:
         logger.error(
@@ -37,11 +35,9 @@ async def getAllItems(
 async def getSomeItems(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
-    logger.debug(f"Request to {request.url.path}, getting some items in database")
     items: List[Item] = []
     try:
         items = await getSomeItemTableRowsAnMapToItems(db)
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"items": items}
     except Exception as e:
         logger.error(
@@ -57,11 +53,9 @@ async def getSomeItems(
 async def getUniqueTags(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
-    logger.debug(f"Request to {request.url.path}, getting unique in the from database")
     tagNames: Set[str] = set()
     try:
         tagNames = await getAllTagsTableNames(db)
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"tagNames": tagNames}
     except Exception as e:
         logger.error(

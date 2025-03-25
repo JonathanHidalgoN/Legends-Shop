@@ -31,7 +31,6 @@ async def order(
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userId}")
         orderId: int = await orderProcessor.makeOrder(order, userId)
     except (InvalidItemException, DifferentTotal, NotEnoughGoldException) as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -39,7 +38,6 @@ async def order(
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Unexpected exception")
-    logger.debug(f"Request to {request.url.path} completed")
     return {"order_id": f"{orderId}"}
 
 
@@ -50,9 +48,7 @@ async def getOrderHistory(
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userId}")
         orders: List[Order] = await orderProcessor.getOrderHistory(userId)
-        logger.debug(f"Request to {request.url.path} completed")
         return orders
     except ProcessOrderException as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
@@ -66,10 +62,8 @@ async def cancelOrder(
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
-    logger.debug(f"Request to {request.url.path} from user {userId}")
     try:
         await orderProcessor.cancelOrder(userId, order_id)
-        logger.debug(f"Request to {request.url.path} completed")
     except ProcessOrderException as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

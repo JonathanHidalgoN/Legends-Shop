@@ -36,7 +36,6 @@ oauth2Scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def getCurrentUserTokenFlow(request: Request):
-    logger.debug(f"Request to {request.url.path}, checking token...")
     token: str | None = request.cookies.get("access_token")
     if token is None:
         logger.error(f"Error in {request.url.path} token is None")
@@ -53,7 +52,6 @@ def getCurrentUserTokenFlow(request: Request):
             detail="Invalid credentials",
             headers={"WW-Authenticate": "Bearer"},
         )
-    logger.debug(f"Request to {request.url.path}, authenticated")
     return userName
 
 
@@ -76,7 +74,6 @@ async def getToken(
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
-        logger.debug(f"Request to {request.url.path}, authenticating...")
         matchUser: UserInDB | None = await getUserInDB(db, dataForm.username)
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
@@ -123,7 +120,6 @@ async def getToken(
         path="/",
     )
     await updateLastSingInWithUserName(db, dataForm.username, datetime.now().date())
-    logger.debug(f"Request to {request.url.path} completed successfully")
 
 
 @router.get("/token_refresh")
@@ -134,14 +130,12 @@ async def tokenRefresh(
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
-        logger.debug(f"Request to {request.url.path}")
         matchUser: UserInDB | None = await getUserInDB(db, userName)
         if not matchUser:
             logger.error(f"Error in {request.url.path}, {userName} do not exit")
             raise HTTPException(
                 status_code=401, detail="Incorrect username or password"
             )
-        logger.debug(f"Request to {request.url.path} completed successfully")
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected error {e}")
         raise HTTPException(status_code=500, detail="Error login out")
@@ -158,9 +152,6 @@ async def tokenRefresh(
         path="/",
     )
     await updateLastSingInWithUserName(db, userName, datetime.now().date())
-    logger.debug(
-        f"Request to {request.url.path} completed successfully, token in response"
-    )
 
 
 @router.post("/singup")
@@ -173,7 +164,6 @@ async def singUp(
     birthDate: str = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
-    logger.debug(f"Request to {request.url.path}")
 
     try:
         birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
@@ -274,7 +264,6 @@ async def singUp(
         )
     try:
         await insertUser(db, userInDB)
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"message": "nice"}
     except Exception as e:
         logger.error(
@@ -286,9 +275,7 @@ async def singUp(
 @router.get("/logout")
 async def logoutRequest(request: Request, response: Response):
     try:
-        logger.debug(f"Request to {request.url.path}")
         response.delete_cookie("access_token", path="/")
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"detail": "Logged out successfully"}
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected error {e}")

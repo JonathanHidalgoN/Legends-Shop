@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException
+from httpx import Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data import database
@@ -9,8 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 from app.routes import profile
 from app.routes import cart
+from app.logger import logger
 
 app = FastAPI()
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"Response status: {response.status_code} for {request.method} {request.url}")
+    return response
+
 origins = [
     FRONTEND_HOST
     # TODO: add env variable to website that host the frontend client

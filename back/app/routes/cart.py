@@ -26,11 +26,9 @@ async def addItems(
     cartProcessor: Annotated[CartProceesor, Depends(getCartProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userId}")
         processCart: List[CartItem] = await cartProcessor.addItemsToCar(
             cartItems, userId
         )
-        logger.debug(f"Request to {request.url.path} from user {userId} completed")
         return processCart
     except CartProcessorException as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
@@ -47,9 +45,7 @@ async def addItem(
     cartProcessor: Annotated[CartProceesor, Depends(getCartProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userId}")
         processCart: CartItem = await cartProcessor.addItemToCar(cartItem, userId)
-        logger.debug(f"Request to {request.url.path} from user {userId} completed")
         return processCart
     except CartProcessorException as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
@@ -64,9 +60,7 @@ async def getAddedUserCartItems(
     cartProcessor: Annotated[CartProceesor, Depends(getCartProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userId}")
         userCart: List[CartItem] = await cartProcessor.getAddedUserCart(userId)
-        logger.debug(f"Request to {request.url.path} from user {userId} completed")
         return userCart 
     except CartProcessorException as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
@@ -83,9 +77,7 @@ async def cancelCartItem(
     cartProcessor: Annotated[CartProceesor, Depends(getCartProcessor)],
 ):
     try:
-        logger.debug(f"Request to {request.url.path} from user {userId}")
         await cartProcessor.deleteCartItem(userId, cart_item_id)
-        logger.debug(f"Request to {request.url.path} from user {userId} completed")
     except CartProcessorException as e:
         logger.error(f"Request to {request.url.path} caused exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
