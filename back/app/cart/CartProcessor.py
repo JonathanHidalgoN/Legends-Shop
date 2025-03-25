@@ -7,6 +7,7 @@ from app.schemas.Order import CartItem, CartStatus
 from app.customExceptions import CartProcessorException
 from app.data.queries.cartQueries import getAddedCartItemsWithUserId
 from app.data.mappers import mapCartTableToCartItem
+from app.data.queries.cartQueries import changeCartItemStatusToDeleted
 
 
 class CartProceesor:
@@ -24,6 +25,7 @@ class CartProceesor:
             self.dbSession.add(cartTable)
             await self.dbSession.flush()
             carItem.id = cartTable.id
+            carItem.status = cartTable.status
             logger.debug(
                 f"Added a new record to order cart table userId:{userId}, orderId:{cartTable.id}"
             )
@@ -75,4 +77,13 @@ class CartProceesor:
         except SQLAlchemyError as e:
             logger.error(f"Error getting user id {userId} added cart items, Exception:  {e}")
             raise CartProcessorException(f"Error getting cart added cart items") from e
+
+    async def deleteCartItem(self, userId:int, cartId:int)->None:
+        try:
+            logger.debug(f"Changing cart item row with id {cartId} and use id {userId} to 'DELETED' status")
+            await changeCartItemStatusToDeleted(self.dbSession, userId, cartId)
+            logger.debug(f"Changed cart item row with id {cartId} and use id {userId} to 'DELETED' status sucessfully")
+        except SQLAlchemyError as e:
+            logger.error(f"Error chaning cart item row with id {cartId} from user id {userId} to deleted status, exception {e}")
+            raise CartProcessorException(f"Error chaning cart item status to deleted") from e
 
