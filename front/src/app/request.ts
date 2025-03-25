@@ -24,6 +24,7 @@ export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
 export const ENDPOINT_CART_ADD_ITEMS: string = `cart/add_items`;
 export const ENDPOINT_CART_ADD_ITEM: string = `cart/add_item`;
 export const ENDPOINT_CART_ADDED_CART_ITEMS: string = `cart/added_cart_items`;
+export const ENDPOINT_CART_DELETE_ITEM: string = `cart/delete_cart_item`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -236,6 +237,23 @@ export async function getAddedCartItemsRequest(from: string = "server"): Promise
   });
   if (!response.ok) {
     await throwAPIError(response, "Error getting cart items");
+  }
+  return await response.json();
+}
+
+export async function deleteCartItemRequest(
+  from: string = "server",
+  cartItemId: number,
+  errorMsg: string
+): Promise<void> {
+  const url: string = makeUrl(from, `${ENDPOINT_CART_DELETE_ITEM}/${cartItemId}`);
+  const response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    await throwAPIError(response, errorMsg);
   }
   return await response.json();
 }
