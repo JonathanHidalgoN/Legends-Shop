@@ -12,7 +12,6 @@ export enum CartStatus {
   ADDED = "ADDED",
   DELETED = "DELETED",
   ORDERED = "ORDERED",
-  PENDING = "PENDING",
   INCLIENT = "INCLIENT",
 }
 
