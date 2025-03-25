@@ -5,7 +5,8 @@ from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
 from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Item import Effects, Gold, Item, Stat
-from app.schemas.Order import Order
+from app.schemas.Order import CartItem, Order
+from app.data.models.CartTable import CartTable
 
 
 def mapGoldToGoldTable(gold: Gold) -> GoldTable:
@@ -100,3 +101,11 @@ def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
         status=order.status,
     )
     return orderTable
+
+def mapCartTableToCartItem(cartTable:CartTable) -> CartItem:
+    cartItem : CartItem = CartItem(
+       id=cartTable.id,
+        itemId=cartTable.item_id,
+        status= cartTable.status
+    )
+    return cartItem 
