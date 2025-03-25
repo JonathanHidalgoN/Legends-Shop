@@ -54,6 +54,7 @@ export function CarContextProvider({
   const { userName } = useAuthContext();
 
   let cartItemsNotInServerCount = useRef<number>(0);
+  let pendingServerDeletedCartItemsIds = useRef<number[]>([]);
   const isAuthenticated: boolean = userName !== null;
 
   async function addInClientCarItemsToServer(cartItem: CartItem): Promise<CartItem | null> {
@@ -96,6 +97,12 @@ export function CarContextProvider({
     }
   }
 
+  function checkIfAddCartItemIdToPendingToDeleteList(cartItem: CartItem) {
+    if (cartItem.status == CartStatus.ADDED && cartItem.id) {
+      pendingServerDeletedCartItemsIds.current.push(cartItem.id);
+    }
+  }
+
   //If an item is delete and it has added status, add the id to a list.
   //When logged in change the status to deelte on the backed, if its not 
   //on the server we can delete it on the fronted, 
@@ -129,6 +136,11 @@ export function CarContextProvider({
   function deleteOneItemFromCar(item: Item): void {
     const index = cartItems.findIndex((i) => i.item.id === item.id);
     if (index !== -1) {
+      const selectedCartItem: CartItem | undefined = cartItems.at(index);
+      //Have to do the if for the liner ):
+      if (selectedCartItem) {
+        checkIfAddCartItemIdToPendingToDeleteList(selectedCartItem);
+      }
       setCartItems([...cartItems.slice(0, index), ...cartItems.slice(index + 1)]);
     }
   }
@@ -138,6 +150,10 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteAllItemFromCar(item: Item): void {
+    const filterCartItems: CartItem[] = cartItems.filter((i: CartItem) => i.item.id !== item.id);
+    filterCartItems.forEach((cartItem: CartItem) => (
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem)
+    ));
     setCartItems(cartItems.filter((i: CartItem) => i.item.id !== item.id));
   }
 
@@ -155,6 +171,9 @@ export function CarContextProvider({
    * Deletes all car items
    */
   function cleanCar(): void {
+    cartItems.forEach((cartItem: CartItem) => (
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem)
+    ));
     setCartItems([]);
   }
 
