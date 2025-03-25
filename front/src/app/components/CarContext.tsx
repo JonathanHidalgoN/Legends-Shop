@@ -5,7 +5,7 @@ import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
 import { useAuthContext } from "./AuthContext";
 import { APICartItemResponse } from "../interfaces/APIResponse";
-import { addToCarRequest } from "../request";
+import { addToCarRequest, deleteCartItemRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import { showErrorToast, showSuccessToast, showWarningToast } from "../customToast";
 
@@ -54,7 +54,7 @@ export function CarContextProvider({
   const { userName } = useAuthContext();
 
   let cartItemsNotInServerCount = useRef<number>(0);
-  let pendingServerDeletedCartItemsIds = useRef<number[]>([]);
+  let pendingServerDeletedCartItems = useRef<CartItem[]>([]);
   const isAuthenticated: boolean = userName !== null;
 
   async function addInClientCarItemsToServer(cartItem: CartItem): Promise<CartItem | null> {
@@ -97,20 +97,23 @@ export function CarContextProvider({
     }
   }
 
-  function checkIfAddCartItemIdToPendingToDeleteList(cartItem: CartItem) {
+  async function checkIfAddCartItemIdToPendingToDeleteList(cartItem: CartItem) {
     if (cartItem.status == CartStatus.ADDED && cartItem.id) {
-      pendingServerDeletedCartItemsIds.current.push(cartItem.id);
+      if (isAuthenticated) {
+        try {
+          await deleteCartItemRequest("client", cartItem.id, `Error deleting ${cartItem.item.name}`)
+          return;
+        } catch (error) {
+          //The request display the error msg, then add to the list the item pending to delete
+          //maybe add a timer to try again? 
+        }
+      }
+      pendingServerDeletedCartItems.current.push(cartItem);
     }
   }
 
-  //If an item is delete and it has added status, add the id to a list.
-  //When logged in change the status to deelte on the backed, if its not 
-  //on the server we can delete it on the fronted, 
-
-
-
   useEffect(() => {
-    async function handleLogInWithCartClientItems(): Promise<void> {
+    async function handleLoginWithCartClientItems(): Promise<void> {
       const updatedItems = await Promise.all(
         cartItems.map(async (cartItem) => {
           if (cartItem.status === CartStatus.INCLIENT) {
@@ -123,8 +126,29 @@ export function CarContextProvider({
       setCartItems(updatedItems);
     }
 
+    async function handleLoginWithPendingItemsToDelete(): Promise<void> {
+      const newPending: CartItem[] = [];
+      for (const cartItem of pendingServerDeletedCartItems.current) {
+        if (cartItem.id) {
+          try {
+            await deleteCartItemRequest(
+              "client",
+              cartItem.id,
+              `Error deleting ${cartItem.item.name}`
+            );
+          } catch (error) {
+            newPending.push(cartItem);
+          }
+        } else {
+          newPending.push(cartItem);
+        }
+      }
+      pendingServerDeletedCartItems.current = newPending;
+    }
+
     if (isAuthenticated) {
-      handleLogInWithCartClientItems();
+      handleLoginWithCartClientItems();
+      handleLoginWithPendingItemsToDelete();
     }
   }, [isAuthenticated]);
 
