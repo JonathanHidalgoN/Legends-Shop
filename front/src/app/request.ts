@@ -23,6 +23,7 @@ export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
 export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
 export const ENDPOINT_CART_ADD_ITEMS: string = `cart/add_items`;
 export const ENDPOINT_CART_ADD_ITEM: string = `cart/add_item`;
+export const ENDPOINT_CART_ADDED_CART_ITEMS: string = `cart/added_cart_items`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -189,6 +190,7 @@ export async function getProfileInfoRequest(
 export async function addToCarRequest(
   from: string = "server",
   apiCartItem: APICartItemResponse,
+  errorMsg: string
 ): Promise<APICartItemResponse> {
   const url: string = makeUrl(from, ENDPOINT_CART_ADD_ITEM);
   const response = await fetch(url, {
@@ -201,7 +203,7 @@ export async function addToCarRequest(
   });
 
   if (!response.ok) {
-    await throwAPIError(response, "Failed to register item in cart");
+    await throwAPIError(response, errorMsg);
   }
   return await response.json();
 }
@@ -225,4 +227,15 @@ export async function getCurrentUserGoldRequest(from: string = "server") {
   return await fetch(url, {
     credentials: "include",
   });
+}
+
+export async function getAddedCartItemsRequest(from: string = "server"): Promise<APICartItemResponse[]> {
+  const url: string = makeUrl(from, ENDPOINT_CART_ADDED_CART_ITEMS);
+  const response = await fetch(url, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    await throwAPIError(response, "Error getting cart items");
+  }
+  return await response.json();
 }
