@@ -55,23 +55,17 @@ export function CarContextProvider({
   const { userName } = useAuthContext();
   const isAuthenticated: boolean = userName !== null;
 
-  async function addItemToCartInServer(item: Item): Promise<APICartItemResponse> {
-    const apiCartItem: APICartItemResponse = {
-      id: null,
-      status: CartStatus.PENDING,
-      itemId: item.id
-    };
-    const data = await addToCarRequest("client", apiCartItem);
-    return data;
-  }
-
   async function addInClientCarItemsToServer(cartItem: CartItem): Promise<CartItem | null> {
     try {
-      const apiCartItem: APICartItemResponse = await addItemToCartInServer(cartItem.item);
-      const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(apiCartItem, cartItem.item);
+      const apiCartItem: APICartItemResponse = {
+        id: null,
+        status: CartStatus.INCLIENT,
+        itemId: cartItem.item.id
+      };
+      const serverCartItemResponse: APICartItemResponse = await addToCarRequest("client", apiCartItem, `Error adding ${cartItem.item.name} to car`);
+      const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(serverCartItemResponse, cartItem.item);
       return serverCartItem
     } catch (error) {
-      showErrorToast(`Error adding ${cartItem.item.name} to car`)
       return null;
     }
   }
@@ -93,9 +87,10 @@ export function CarContextProvider({
       if (!serverCartItem) {
         return;
       }
+      cartItem = serverCartItem;
     }
     setCartItems([...cartItems, cartItem]);
-    if (!warningFlagTurn) {
+    if (isAuthenticated || !warningFlagTurn) {
       showSuccessToast(`${cartItem.item.name} added to cart`)
     }
   }
