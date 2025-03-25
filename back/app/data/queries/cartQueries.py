@@ -1,5 +1,6 @@
 from typing import List
-from sqlalchemy import select
+from sqlalchemy import select, update
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.data.models.CartTable import CartTable
@@ -15,3 +16,15 @@ async def getAddedCartItemsWithUserId(
         ))
     cartTableRows : List[CartTable] = [row for row in result.scalars().all()]
     return cartTableRows 
+
+async def changeCartItemStatusToDeleted(asyncSession:AsyncSession, userId:int, cartRowId:int)->None:
+    await asyncSession.execute(
+        update(CartTable)
+        .where(
+            (CartTable.id == cartRowId) &
+            (CartTable.user_id == userId) & 
+            (CartTable.status == CartStatus.ADDED)
+        )
+        .values(status=CartStatus.DELETED)
+    )
+    await asyncSession.commit()
