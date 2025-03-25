@@ -15,7 +15,7 @@ class CartStatus(str, Enum):
     ADDED = "ADDED"
     DELETED = "DELETED"
     ORDERED = "ORDERED"
-    PENDING = "PENDING"
+    INCLIENT = "INCLIENT"
 
 
 class CartItem(BaseModel):
