@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
 import { useAuthContext } from "./AuthContext";
@@ -51,8 +51,9 @@ export function CarContextProvider({
 }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [currentGold, setCurrentGold] = useState<number | null>(null);
-  const [carItemsNotInServerCount, setCarItemsNotInServerCout] = useState<number>(0);
   const { userName } = useAuthContext();
+
+  let cartItemsNotInServerCount = useRef<number>(0);
   const isAuthenticated: boolean = userName !== null;
 
   async function addInClientCarItemsToServer(cartItem: CartItem): Promise<CartItem | null> {
@@ -71,7 +72,7 @@ export function CarContextProvider({
   }
 
   async function handleClientAddingItemToCar(item: Item): Promise<void> {
-    const warningFlagTurn: boolean = carItemsNotInServerCount % 5 == 0;
+    const warningFlagTurn: boolean = cartItemsNotInServerCount.current % 5 == 0;
     let cartItem: CartItem = {
       id: null,
       status: CartStatus.INCLIENT,
@@ -81,7 +82,7 @@ export function CarContextProvider({
       if (warningFlagTurn) {
         showWarningToast(`Tip: Login so we can remember your cart`)
       }
-      setCarItemsNotInServerCout(carItemsNotInServerCount + 1);
+      cartItemsNotInServerCount.current = cartItemsNotInServerCount.current + 1;
     } else {
       const serverCartItem = await addInClientCarItemsToServer(cartItem);
       if (!serverCartItem) {
@@ -94,6 +95,11 @@ export function CarContextProvider({
       showSuccessToast(`${cartItem.item.name} added to cart`)
     }
   }
+
+  //If an item is delete and it has added status, add the id to a list.
+  //When logged in change the status to deelte on the backed, if its not 
+  //on the server we can delete it on the fronted, 
+
 
 
   useEffect(() => {
