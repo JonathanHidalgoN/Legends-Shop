@@ -36,6 +36,7 @@ from app.data.queries.itemQueries import (
 )
 from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
+from app.auth.functions import logMethod
 
 
 # TODO: remove commits just one needed
@@ -58,7 +59,8 @@ class ItemsLoader:
         self.version: str = ""
         self.itemsUrl: str = ""
 
-    async def getJson(self, url: str, entitiesName: str) -> dict | list:
+    @logMethod
+    async def getJson(self, url: str) -> dict | list:
         """
         Fetches JSON data from the provided URL.
 
@@ -72,25 +74,18 @@ class ItemsLoader:
         Raises:
             JsonFetchError: If an error occurs while fetching or parsing the JSON.
         """
-        logger.debug(f"Getting {entitiesName} json in {url}")
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(url)
                 response.raise_for_status()
                 data = response.json()
-                logger.debug("Fetched json successfully")
                 return data
         except (json.JSONDecodeError, httpx.RequestError) as e:
-            logger.exception(
-                f"Json decode error fetching {entitiesName} json in {url}, exception: {e}"
-            )
             raise JsonFetchError from e
         except Exception as e:
-            logger.exception(
-                f"Unexpected exception fetching {entitiesName} json in {url}, exception: {e}"
-            )
             raise JsonFetchError from e
 
+    @logMethod
     async def getLastVersion(self) -> str:
         """
         Retrieves the latest version of the game from the version list.
@@ -102,14 +97,12 @@ class ItemsLoader:
             JsonParseError: If the version list is empty or if fetching the JSON fails.
         """
         # This is a list, use union to avoid typing error
-        logger.debug("Getting current game version")
-        versionJson: list | dict = await self.getJson(self.VERSION_URL, "versions")
+        versionJson: list | dict = await self.getJson(self.VERSION_URL)
         if not versionJson:
-            logger.error("Version json is empty")
             raise JsonParseError("Version json is empty")
-        logger.debug(f"Current game version is {versionJson[0]}")
         return versionJson[0]
 
+    @logMethod
     def makeItemsUlr(self, version: str) -> str:
         """
         Constructs the item data URL based on the provided game version.
@@ -120,13 +113,12 @@ class ItemsLoader:
         Returns:
             str: The constructed item data URL.
         """
-        logger.debug("Making items url")
         itemsUrl: str = (
             f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/item.json"
         )
-        logger.debug(f"Items url is {itemsUrl}")
         return itemsUrl
 
+    @logMethod
     async def updateItems(self) -> None:
         """
         Updates the database with the latest game items.
@@ -146,13 +138,11 @@ class ItemsLoader:
         self.version = await self.getLastVersion()
         await self.updateDbVersion(self.version)
         self.itemsUrl = self.makeItemsUlr(self.version)
-        itemsJson: dict | list = await self.getJson(self.itemsUrl, "items")
+        itemsJson: dict | list = await self.getJson(self.itemsUrl)
         if not itemsJson:
-            logger.error("Items Json is empty")
             raise ItemsLoaderError("Items Json is empty!")
         itemsList: List[Item] = await self.parseItemsJsonIntoItemList(itemsJson)
         if not itemsList:
-            logger.error("Items list is empty")
             raise ItemsLoaderError("Items Json is empty!")
         # Here again linter gives an error but the pidantic default constructor is an empty container
         # not none, I think this will be fine
@@ -167,6 +157,7 @@ class ItemsLoader:
         await self.updateEffectsInDataBase(uniqueEffects)
         await self.updateItemsInDataBase(itemsList)
 
+    @logMethod
     def getUniqueStats(self, items: List[Item]) -> Set[Stat]:
         # I dont like this function because the stats are store as a catalog in the database,
         # the objective of this function is to get the unique stats in the list of items to update that catalog
@@ -191,6 +182,7 @@ class ItemsLoader:
                     uniqueStats.add(stat)
         return uniqueStats
 
+    @logMethod
     async def updateDbVersion(self, version: str) -> None:
         """
         Updates the metadata version in the database.
@@ -205,22 +197,18 @@ class ItemsLoader:
             await updateVersion(self.dbSession, version)
         except Exception as e:
             await self.dbSession.rollback()
-            logger.error(
-                f"An error occurred while updating the version in MetaDataTable, exception: {e}"
-            )
             raise JsonParseError() from e
 
+    @logMethod
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
         """
         Parses the json with items into a list of items.
         Raises JsonParseError if there is no 'data' node
         """
-        logger.debug("Parsing json with items into a list of items")
         itemsList: List[Item] = []
         await self.updateDbVersion(itemsJson.get("version"))
         itemsData: dict | None = itemsJson.get("data")
         if itemsData is None:
-            logger.error("Error, the items JSON has no data node!")
             raise JsonParseError("Error, the items JSON has no data node!")
         itemNames: Set[str] = set()
         noneCounter: int = 0
@@ -238,12 +226,10 @@ class ItemsLoader:
                 itemNames.add(item.name)
                 itemsList.append(item)
                 parsedItems += 1
-        logger.debug(
-            f"Parsed items Json successfully, with {parsedItems} parsed items and {noneCounter} items that could not be parsed"
-        )
         return itemsList
 
     # This could be static but for now its ok
+    @logMethod
     def createMappingStatsDict(
         self, statsMappingTable: List[StatsMappingTable]
     ) -> Dict[str, str]:
@@ -256,6 +242,7 @@ class ItemsLoader:
             mapping[row.original_name] = row.mapped_name
         return mapping
 
+    @logMethod
     async def parseDataNodeIntoItem(
         self, itemId: int, itemData, itemNames: Set[str], statMapping: Dict[str, str]
     ) -> Item | None:
@@ -300,11 +287,9 @@ class ItemsLoader:
                 ),
             )
         except Exception as e:
-            logger.exception(
-                f"Error, the item with id {itemId} and item data {itemData} had a problem while parsing the json into an Item, this item will be ingnore, exception : {e}"
-            )
             return None
 
+    @logMethod
     def parseStatsNodeIntoStats(
         self, statsNode: Dict[str, int | float], statMappingDict: Dict[str, str]
     ) -> Set[Stat]:
@@ -328,12 +313,14 @@ class ItemsLoader:
             stats.add(stat)
         return stats
 
+    @logMethod
     def buildImageUrl(self, imageName: str) -> str:
         """
         Build the image url given the version and image name
         """
         return f"https://ddragon.leagueoflegends.com/cdn/{self.version}/img/item/{imageName}"
 
+    @logMethod
     async def updateTagsInDataBase(self, tagsToAdd: Set[str]) -> None:
         """
         Updates the tags table by adding new unique tags.
@@ -344,17 +331,10 @@ class ItemsLoader:
         Raises:
             UpdateTagsError: If fetching or updating tags fails.
         """
-        logger.debug("Updating tags table")
         try:
-            logger.debug("Getting existing tags in the database")
             existingTagNames: Set[str] = await getAllTagsTableNames(self.dbSession)
-            logger.debug(f"Got {len(existingTagNames)} from database")
         except Exception as e:
-            logger.error(
-                f"Error, could not get existing tag names in the database: {e}"
-            )
             raise UpdateTagsError() from e
-        logger.debug(f"Adding {len(tagsToAdd)} tags, just new tags will be added")
         newAditions: int = 0
         for tag in tagsToAdd:
             isNew: bool = self.addTagInDataBaseIfNew(tag, existingTagNames)
@@ -363,11 +343,10 @@ class ItemsLoader:
         try:
             await self.dbSession.commit()
         except Exception as e:
-            logger.error(f"An error occurred while commiting tags update: {e}")
             await self.dbSession.rollback()
             raise UpdateTagsError() from e
-        logger.debug(f"Updated tags table successfully, {newAditions} new tags added")
 
+    @logMethod
     def addTagInDataBaseIfNew(self, tag: str, existingTagNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
@@ -391,25 +370,18 @@ class ItemsLoader:
             else:
                 return False
         except Exception as e:
-            logger.error(f"Error while updating tag {tag}, exception: {e}")
             raise UpdateTagsError() from e
 
+    @logMethod
     async def updateStatsInDataBase(self, statsToAdd: Set[Stat]) -> None:
         """
         Given a set of unique stats, iterate over them and update the stats table
         Raise UpdateStatsError
         """
-        logger.debug("Updating stats table")
         try:
-            logger.debug("Getting existing stats in the database")
             existingStatNames: Set[str] = await getAllStatsTableNames(self.dbSession)
-            logger.debug(f"Got {len(existingStatNames)} from database")
         except SQLAlchemyError as e:
-            logger.error(
-                f"Error, could not get existing stat names in the database: {e}"
-            )
             raise UpdateStatsError() from e
-        logger.debug(f"Adding {len(statsToAdd)} stats, just new stats will be added")
         newAditions: int = 0
         for stat in statsToAdd:
             isNew: bool = self.addStatInDataBaseIfNew(stat, existingStatNames)
@@ -418,32 +390,22 @@ class ItemsLoader:
         try:
             await self.dbSession.commit()
         except Exception as e:
-            logger.error(f"An error occurred while commiting stats update: {e}")
             await self.dbSession.rollback()
             raise UpdateStatsError() from e
-        logger.debug(f"Updated stats table successfully, {newAditions} new stats added")
 
+    @logMethod
     async def updateEffectsInDataBase(self, effectsToAdd: Set[str]) -> None:
         """
         Given a set of unique effects, iterate over them and update the effects table.
         Raises UpdateEffectsError.
         """
-        logger.debug("Updating effects table")
         try:
-            logger.debug("Getting existing effects from the database")
             existingEffectNames: Set[str] = await getAllEffectsTableNames(
                 self.dbSession
             )
-            logger.debug(f"Got {len(existingEffectNames)} from database")
         except SQLAlchemyError as e:
-            logger.error(
-                f"Error, could not get existing effect names in the database: {e}"
-            )
             raise UpdateEffectsError() from e
 
-        logger.debug(
-            f"Adding {len(effectsToAdd)} effects, only new effects will be added"
-        )
         newAdditions: int = 0
         for effect in effectsToAdd:
             isNew: bool = self.addEffectInDataBaseIfNew(effect, existingEffectNames)
@@ -452,13 +414,10 @@ class ItemsLoader:
         try:
             await self.dbSession.commit()
         except Exception as e:
-            logger.error(f"An error occurred while committing effects update: {e}")
             await self.dbSession.rollback()
             raise UpdateEffectsError() from e
-        logger.debug(
-            f"Updated effects table successfully, {newAdditions} new effects added"
-        )
 
+    @logMethod
     def addEffectInDataBaseIfNew(
         self, effect: str, existingEffectNames: Set[str]
     ) -> bool:
@@ -475,9 +434,9 @@ class ItemsLoader:
             else:
                 return False
         except Exception as e:
-            logger.error(f"Error while updating effect {effect}, exception: {e}")
             raise UpdateEffectsError() from e
 
+    @logMethod
     def addStatInDataBaseIfNew(self, stat: Stat, existingstatNames: Set[str]) -> bool:
         ##TODO: CAN THIS BE ASYNC AND THE LOOP STILL RUN?
         """
@@ -492,40 +451,29 @@ class ItemsLoader:
             else:
                 return False
         except Exception as e:
-            logger.error(
-                f"Error while updating stat {stat.name}, kind {stat.kind}, exception: {e}"
-            )
             raise UpdateStatsError() from e
 
+    @logMethod
     async def updateItemsInDataBase(self, itemsList: List[Item]) -> None:
         """
         Updates the items in the database, transactions are added in a batch,
         if the insert/update fails then the transacion fails and changes are rollback.
         """
-        logger.debug(f"Updating {len(itemsList)} items in the database")
-        currentItemName: str = ""
         try:
             for item in itemsList:
-                currentItemName = item.name
                 existingItem: ItemTable | None = await getItemTableGivenItemName(
                     self.dbSession, item.name
                 )
                 await self.insertOrUpdateItemTable(item, existingItem)
             await self.dbSession.commit()
-            logger.debug(f"Updated {len(itemsList)} items successfully")
         except SQLAlchemyError as e:
-            logger.error(
-                f"Error getting the item from the database with name {currentItemName}, exception: {e}"
-            )
             await self.dbSession.rollback()
             raise UpdateItemsError() from e
         except Exception as e:
-            logger.error(
-                f"Error inserting/updating an item in the database with name {currentItemName}, exception: {e}"
-            )
             await self.dbSession.rollback()
             raise UpdateItemsError() from e
 
+    @logMethod
     async def insertOrUpdateItemTable(
         self, item: Item, existingItem: ItemTable | None
     ) -> None:
@@ -563,11 +511,9 @@ class ItemsLoader:
         except UpdateItemsError as e:
             raise e
         except Exception as e:
-            logger.error(
-                f"Unexpected exception happened insering/updating the item {item.name}, exception : {e}"
-            )
             raise UpdateItemsError() from e
 
+    @logMethod
     async def addItemStatsRelations(self, itemId: int, stats: Set[Stat]) -> None:
         """
         This function inserts the relations given the itemId and stats
@@ -576,7 +522,6 @@ class ItemsLoader:
         for stat in stats:
             statId: int | None = await getStatIdWithStatName(self.dbSession, stat.name)
             if statId is None:
-                logger.error(f"Stat with name {stat} was not found in the dabatase")
                 raise UpdateItemsError("Stat was not found in the database")
             else:
                 itemStatValues: dict = {
@@ -588,13 +533,11 @@ class ItemsLoader:
                     ins = insert(ItemStatAssociation).values(**itemStatValues)
                     await self.dbSession.execute(ins)
                 except Exception as e:
-                    logger.error(
-                        f"Could not insert a relation item-stat, itemId: {itemId}, statId: {statId}, statName: {stat}, exception: {e}"
-                    )
                     raise UpdateItemsError(
                         "Could not insert a relation item-stat"
                     ) from e
 
+    @logMethod
     async def addItemEffectsRelations(self, itemId: int, effects: Effects) -> None:
         """
         This function inserts the relations given the itemId and effects.
@@ -605,7 +548,6 @@ class ItemsLoader:
                 self.dbSession, effect
             )
             if effectId is None:
-                logger.error(f"Effect with name {effect} was not found in the database")
                 raise UpdateItemsError("Effect was not found in the database")
             else:
                 itemEffectValues: dict = {
@@ -617,13 +559,11 @@ class ItemsLoader:
                     ins = insert(ItemEffectAssociation).values(**itemEffectValues)
                     await self.dbSession.execute(ins)
                 except Exception as e:
-                    logger.error(
-                        f"Could not insert a relation item-effect, itemId: {itemId}, effectId: {effectId}, effectName: {effect}, exception: {e}"
-                    )
                     raise UpdateItemsError(
                         "Could not insert a relation item-effect"
                     ) from e
 
+    @logMethod
     async def addItemTagsRelations(self, itemId: int, tags: Set[str]) -> None:
         """
         This function inserts the relations given the itemId and tags
@@ -632,18 +572,15 @@ class ItemsLoader:
         for tag in tags:
             tagId: int | None = await getTagIdWithtTagName(self.dbSession, tag)
             if tagId is None:
-                logger.error(f"Tag with name {tag} was not found in the dabatase")
                 raise UpdateItemsError("Tag was not found in the database")
             itemtagsValues: dict = {"item_id": itemId, "tags_id": tagId}
             try:
                 ins = insert(ItemTagsAssociation).values(**itemtagsValues)
                 await self.dbSession.execute(ins)
             except Exception as e:
-                logger.error(
-                    f"Could not insert a relation item-tag, itemId: {itemId}, tagId: {tagId}, tagName: {tag}, exception: {e}"
-                )
                 raise UpdateItemsError("Could not insert a relation item-tag") from e
 
+    @logMethod
     async def deleteItemTagsExistingRelations(self, itemId) -> None:
         """
         This function deletes the many to many relation of an item with
@@ -656,11 +593,9 @@ class ItemsLoader:
         try:
             await self.dbSession.execute(delInstruction)
         except Exception as e:
-            logger.error(
-                f"Error while deleting tags associations for item id {itemId}: {e}"
-            )
             raise UpdateItemsError("Error while deleting tags associations for item")
 
+    @logMethod
     async def deleteItemStatsExistingRelations(self, itemId) -> None:
         """
         This function deletes the many to many relation of an item with
@@ -673,11 +608,9 @@ class ItemsLoader:
         try:
             await self.dbSession.execute(delInstruction)
         except Exception as e:
-            logger.error(
-                f"Error while deleting stats associations for item id {itemId}: {e}"
-            )
             raise UpdateItemsError("Error while deleting stats associations for item")
 
+    @logMethod
     async def deleteItemEffectsExistingRelations(self, itemId) -> None:
         """
         This function deletes the many-to-many relation of an item with
@@ -690,11 +623,9 @@ class ItemsLoader:
         try:
             await self.dbSession.execute(delInstruction)
         except Exception as e:
-            logger.error(
-                f"Error while deleting effects associations for item id {itemId}: {e}"
-            )
             raise UpdateItemsError("Error while deleting effects associations for item")
 
+    @logMethod
     async def insertOrUpdateGoldTable(
         self, createNewGoldTable: bool, gold: Gold, itemId: int | None = None
     ) -> int:
@@ -703,9 +634,6 @@ class ItemsLoader:
         Raises UpdateItemsError
         """
         if (itemId is None) and (createNewGoldTable is False):
-            logger.error(
-                "Error trying to updating a gold table the item id can not be None"
-            )
             raise UpdateItemsError("Can not update a gold table with no item id")
         newGoldTable: GoldTable = mapGoldToGoldTable(gold)
         if (createNewGoldTable is False) and (itemId is not None):
@@ -713,9 +641,6 @@ class ItemsLoader:
                 self.dbSession, itemId
             )
             if existingGoldTableId is None:
-                logger.error(
-                    f"Error updating the row in gold table with item id {itemId}, did not find the row with goldId {existingGoldTableId}"
-                )
                 raise UpdateItemsError("Tried to update a gold row that do not exist")
             newGoldTable.id = existingGoldTableId
         try:
@@ -723,7 +648,6 @@ class ItemsLoader:
             await self.dbSession.flush()
             return newGoldTable.id
         except Exception as e:
-            logger.error(f"Error updating/inserting a gold table, exception: {e}")
             raise UpdateItemsError(
                 "Unexpected exception happened while inserting/updating a gold row"
             ) from e
