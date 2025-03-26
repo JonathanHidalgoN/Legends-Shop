@@ -1,3 +1,5 @@
+import asyncio
+import os
 from typing import Dict, List, Set
 import json
 import httpx
@@ -32,11 +34,13 @@ from app.data.queries.itemQueries import (
     getStatIdWithStatName,
     getStatsMappingTable,
     getTagIdWithtTagName,
+    updateItemImageHDPathWithItemName,
     updateVersion,
 )
 from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
 from app.auth.functions import logMethod
+from urllib.parse import quote
 
 
 # TODO: remove commits just one needed
@@ -651,3 +655,33 @@ class ItemsLoader:
             raise UpdateItemsError(
                 "Unexpected exception happened while inserting/updating a gold row"
             ) from e
+
+    async def dowloadItemHDImage(self, itemName:str, destFolder:str, imageFile:str)->bool:
+        baseUrl = "https://leagueoflegends.fandom.com/wiki"
+        url = f"{baseUrl}/{itemName}?file={imageFile}"
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, timeout=10)
+                response.raise_for_status()
+        except Exception as e:
+            return False
+        file_path = os.path.join(destFolder, imageFile)
+        with open(file_path, "wb") as f:
+            f.write(response.content)
+        return True
+
+    async def downloadHDImageParallel(self, itemName:str, destDir:str):
+        PARALLEL_DOWLOADS : int = 5
+        semaphore = asyncio.Semaphore(PARALLEL_DOWLOADS)
+        urlEncodedItemName:str = quote(itemName) 
+        imageFile = f"{urlEncodedItemName}_item_HD.png"
+        async with semaphore:
+            dowloaded:bool = await self.dowloadItemHDImage(urlEncodedItemName, destDir, imageFile)
+            if dowloaded:
+                await updateItemImageHDPathWithItemName(self.dbSession, itemName, imageFile)
+
+    async def getHDItemImages(self, itemNames:List[str])->None:
+        destDir = "hd_images"
+        os.makedirs(destDir, exist_ok=True)
+        await asyncio.gather(*(self.downloadHDImageParallel(itemName, destDir) for itemName in itemNames))       
+

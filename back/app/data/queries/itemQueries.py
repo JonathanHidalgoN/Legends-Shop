@@ -1,5 +1,5 @@
 from typing import Dict, List, Set, Tuple
-from sqlalchemy import Row
+from sqlalchemy import Row, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.MetaDataTable import MetaDataTable
@@ -344,3 +344,13 @@ async def checkItemExist(asyncSession: AsyncSession, itemName: str):
     if not result:
         return False
     return True
+
+async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
+    await asyncSession.execute(
+        update(ItemTable.imageHDPath)
+        .where(
+            ItemTable.name == itemName
+        )
+        .values(imageHDPath = path)
+    )
+    await asyncSession.commit()

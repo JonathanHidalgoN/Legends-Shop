@@ -12,6 +12,7 @@ class ItemTable(base):
     description: Mapped[str] = mapped_column(String(1500), nullable=False)
     image: Mapped[str] = mapped_column(String(100), nullable=False)
     imageUrl: Mapped[str] = mapped_column(String(100), nullable=False)
+    imageHDPath: Mapped[str] = mapped_column(String(100), nullable=True)
     updated: Mapped[bool] = mapped_column(Boolean, nullable=False)
     gold_id: Mapped[int] = mapped_column(ForeignKey("gold_table.id"), nullable=False)
 
