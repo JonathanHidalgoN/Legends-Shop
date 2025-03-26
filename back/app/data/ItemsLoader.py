@@ -1,5 +1,3 @@
-import asyncio
-import os
 from typing import Dict, List, Set
 import json
 import httpx
@@ -12,6 +10,7 @@ from app.customExceptions import (
     ItemsLoaderError,
     JsonFetchError,
     JsonParseError,
+    SameVersionUpdateError,
     UpdateEffectsError,
     UpdateItemsError,
     UpdateStatsError,
@@ -34,7 +33,8 @@ from app.data.queries.itemQueries import (
     getStatIdWithStatName,
     getStatsMappingTable,
     getTagIdWithtTagName,
-    updateItemImageHDPathWithItemName,
+    getVersion,
+    insertVersion,
     updateVersion,
 )
 from app.schemas.Item import Effects, Gold, Item, Stat
@@ -123,13 +123,24 @@ class ItemsLoader:
         return itemsUrl
 
     @logMethod
-    async def updateItems(self) -> None:
+    async def updateItems(self)->None:
+        currentVersion: str | None = await getVersion(self.dbSession)
+        lastVersion: str = await self.getLastVersion()
+        if currentVersion == lastVersion:
+            raise SameVersionUpdateError(f"Current items version {currentVersion} and API items version {lastVersion} is the same")
+        elif currentVersion is None:
+            await insertVersion(self.dbSession, lastVersion)
+        elif currentVersion != lastVersion:
+            await self.updateDbVersion(lastVersion)
+        self.version = lastVersion
+        await self.updateItemsStepsJob()
+
+    @logMethod
+    async def updateItemsStepsJob(self) -> None:
         """
         Updates the database with the latest game items.
 
         This method performs the following steps:
-        - Fetches the latest game version.
-        - Updates the metadata version in the database.
         - Builds the item data URL.
         - Fetches item JSON data.
         - Parses item JSON data into a list of item objects.
@@ -139,8 +150,6 @@ class ItemsLoader:
         Raises:
             ItemsLoaderError: If any error occurs during the update process.
         """
-        self.version = await self.getLastVersion()
-        await self.updateDbVersion(self.version)
         self.itemsUrl = self.makeItemsUlr(self.version)
         itemsJson: dict | list = await self.getJson(self.itemsUrl)
         if not itemsJson:
@@ -195,13 +204,13 @@ class ItemsLoader:
             version (str): The game version to store in the metadata.
 
         Raises:
-            JsonParseError: If updating the version fails.
+            ItemsLoaderError: If updating the version fails.
         """
         try:
             await updateVersion(self.dbSession, version)
         except Exception as e:
             await self.dbSession.rollback()
-            raise JsonParseError() from e
+            raise ItemsLoaderError() from e
 
     @logMethod
     async def parseItemsJsonIntoItemList(self, itemsJson: Json) -> List[Item]:
@@ -210,7 +219,6 @@ class ItemsLoader:
         Raises JsonParseError if there is no 'data' node
         """
         itemsList: List[Item] = []
-        await self.updateDbVersion(itemsJson.get("version"))
         itemsData: dict | None = itemsJson.get("data")
         if itemsData is None:
             raise JsonParseError("Error, the items JSON has no data node!")
@@ -656,32 +664,32 @@ class ItemsLoader:
                 "Unexpected exception happened while inserting/updating a gold row"
             ) from e
 
-    async def dowloadItemHDImage(self, itemName:str, destFolder:str, imageFile:str)->bool:
-        baseUrl = "https://leagueoflegends.fandom.com/wiki"
-        url = f"{baseUrl}/{itemName}?file={imageFile}"
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url, timeout=10)
-                response.raise_for_status()
-        except Exception as e:
-            return False
-        file_path = os.path.join(destFolder, imageFile)
-        with open(file_path, "wb") as f:
-            f.write(response.content)
-        return True
-
-    async def downloadHDImageParallel(self, itemName:str, destDir:str):
-        PARALLEL_DOWLOADS : int = 5
-        semaphore = asyncio.Semaphore(PARALLEL_DOWLOADS)
-        urlEncodedItemName:str = quote(itemName) 
-        imageFile = f"{urlEncodedItemName}_item_HD.png"
-        async with semaphore:
-            dowloaded:bool = await self.dowloadItemHDImage(urlEncodedItemName, destDir, imageFile)
-            if dowloaded:
-                await updateItemImageHDPathWithItemName(self.dbSession, itemName, imageFile)
-
-    async def getHDItemImages(self, itemNames:List[str])->None:
-        destDir = "hd_images"
-        os.makedirs(destDir, exist_ok=True)
-        await asyncio.gather(*(self.downloadHDImageParallel(itemName, destDir) for itemName in itemNames))       
-
+    # async def dowloadItemHDImage(self, itemName:str, destFolder:str, imageFile:str)->bool:
+    #     baseUrl = "https://leagueoflegends.fandom.com/wiki"
+    #     url = f"{baseUrl}/{itemName}?file={imageFile}"
+    #     try:
+    #         async with httpx.AsyncClient() as client:
+    #             response = await client.get(url, timeout=10)
+    #             response.raise_for_status()
+    #     except Exception as e:
+    #         return False
+    #     file_path = os.path.join(destFolder, imageFile)
+    #     with open(file_path, "wb") as f:
+    #         f.write(response.content)
+    #     return True
+    #
+    # async def downloadHDImageParallel(self, itemName:str, destDir:str):
+    #     PARALLEL_DOWLOADS : int = 5
+    #     semaphore = asyncio.Semaphore(PARALLEL_DOWLOADS)
+    #     urlEncodedItemName:str = quote(itemName) 
+    #     imageFile = f"{urlEncodedItemName}_item_HD.png"
+    #     async with semaphore:
+    #         dowloaded:bool = await self.dowloadItemHDImage(urlEncodedItemName, destDir, imageFile)
+    #         if dowloaded:
+    #             await updateItemImageHDPathWithItemName(self.dbSession, itemName, imageFile)
+    #
+    # async def getHDItemImages(self, itemNames:List[str])->None:
+    #     destDir = "hd_images"
+    #     os.makedirs(destDir, exist_ok=True)
+    #     await asyncio.gather(*(self.downloadHDImageParallel(itemName, destDir) for itemName in itemNames))       
+    #
