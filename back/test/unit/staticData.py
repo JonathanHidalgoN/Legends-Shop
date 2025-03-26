@@ -264,6 +264,14 @@ STATIC_ORDER_SUMMARY1: OrderSummary = OrderSummary(
     orderDates=[datetime(2025,1,1)]
 )
 
+STATIC_ORDER_SUMMARY2: OrderSummary = OrderSummary(
+    itemName="genericItemName2",
+    basePrice=200,
+    timesOrdered=3,
+    totalSpend=600,
+    orderDates=[datetime(2022,1,1)]
+)
+
 STATIC_PROFILE_INFO1: ProfileInfo = ProfileInfo(
     user=STATIC_DATA_USER_IN_DB1,
     ordersInfo=[STATIC_ORDER_SUMMARY1]
