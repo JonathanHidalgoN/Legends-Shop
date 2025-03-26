@@ -1,6 +1,8 @@
-from datetime import datetime
+from datetime import date, datetime
 from app.schemas.Item import Effects, Gold, Item, Stat
-from app.schemas.Order import Order, OrderStatus
+from app.schemas.Order import Order, OrderStatus, OrderSummary
+from app.schemas.AuthSchemas import UserInDB
+from app.schemas.profileSchemas import ProfileInfo
 
 STATIC_DATA_ITEMS_JSON: dict = {
     "type": "item",
@@ -240,4 +242,29 @@ STATIC_DATA_ORDER2: Order = Order(
     orderDate=datetime(2025, 1, 1, 12, 0, 0),
     deliveryDate=datetime(2026, 1, 1, 12, 0, 0),
     status=OrderStatus.CANCELED,
+)
+
+STATIC_DATA_USER_IN_DB1 : UserInDB = UserInDB(
+    userName="fakeUsername",
+    email="example@hotmail.com",
+    created= date(2025,1,1),
+    lastSingIn=date(2025,1,1),
+    goldSpend=5000,
+    currentGold=6000,
+    birthDate=date(2024,1,1),
+    password="genericpassword",
+    hashedPassword="hashedgenericpassword"
+)
+
+STATIC_ORDER_SUMMARY1: OrderSummary = OrderSummary(
+    itemName="genericItemName",
+    basePrice=500,
+    timesOrdered=2,
+    totalSpend=1000,
+    orderDates=[datetime(2025,1,1)]
+)
+
+STATIC_PROFILE_INFO1: ProfileInfo = ProfileInfo(
+    user=STATIC_DATA_USER_IN_DB1,
+    ordersInfo=[STATIC_ORDER_SUMMARY1]
 )
