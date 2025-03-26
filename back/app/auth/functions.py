@@ -49,7 +49,10 @@ def logMethod(func):
             logger.debug(f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs} returned successfully.")
             return result
         except Exception as e:
-            logger.error(f"{className} - {funcName} error with args: {args[1:]}, kwargs: {kwargs} - {e}")
+            logger.error(
+                f"{className} - {funcName} error with args: {args[1:]}, kwargs: {kwargs} - {e}",
+                exc_info=True
+            )
             raise
 
     @functools.wraps(func)
@@ -62,7 +65,10 @@ def logMethod(func):
             logger.debug(f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs} returned successfully.")
             return result
         except Exception as e:
-            logger.error(f"{className} - {funcName} error with args: {args[1:]}, kwargs: {kwargs} - {e}")
+            logger.error(
+                f"{className} - {funcName} error with args: {args[1:]}, kwargs: {kwargs} - {e}",
+                exc_info=True
+            )
             raise
 
     if asyncio.iscoroutinefunction(func):
