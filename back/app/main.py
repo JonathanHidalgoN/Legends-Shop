@@ -1,16 +1,17 @@
+from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException
 from httpx import Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data import database
 from app.data.ItemsLoader import ItemsLoader
-from app.data.queries.itemQueries import getVersion
 from app.routes import items, auth, orders
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 from app.routes import profile
 from app.routes import cart
 from app.logger import logger
+from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
 
 app = FastAPI()
 
@@ -47,6 +48,11 @@ app.include_router(profile.router, prefix="/profile")
 app.include_router(cart.router, prefix="/cart")
 
 
+def getItemsLoader(
+    db: AsyncSession = Depends(database.getDbSession),
+) -> ItemsLoader:
+    return ItemsLoader(db)
+
 @app.get("/")
 async def root():
     return {"message": "up"}
@@ -66,7 +72,7 @@ async def db_status(db: AsyncSession = Depends(database.getDbSession)):
 @app.get("/testUpdateTagsTable")
 async def testUpdateTagsTable(db: AsyncSession = Depends(database.getDbSession)):
     itemsLoader: ItemsLoader = ItemsLoader(db)
-    await itemsLoader.updateItems()
+    await itemsLoader.updateItemsStepsJob()
     return {"message": "tested"}
 
 
@@ -75,3 +81,16 @@ async def testUpdateVersion(db: AsyncSession = Depends(database.getDbSession)):
     itemsLoader: ItemsLoader = ItemsLoader(db)
     version = await itemsLoader.getLastVersion()
     return {"message": version}
+
+@app.put("/updateItems", include_in_schema=False)
+async def updateItems(
+        itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)]
+):
+    try:
+        await itemsLoader.updateItems()
+    except SameVersionUpdateError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except ItemsLoaderError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Unexpected error")
