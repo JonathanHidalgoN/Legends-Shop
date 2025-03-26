@@ -12,17 +12,30 @@ import { getCurrentUserGold } from "@/app/profileFunctions";
 import { showErrorToast } from "@/app/customToast";
 
 export default function OrderPage() {
-  const { carItems, getTotalCost, cleanCar, setCurrentGold } = useCarContext();
+  const { carItems, getTotalCost, cleanCar, setCurrentGold, currentGold } = useCarContext();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
 
+  function checkIfcanBuy(orderTotal: number, currentGold: number | null): boolean {
+    if (!currentGold) {
+      return false;
+    }
+    return orderTotal <= currentGold;
+  }
+
   async function handleBuy() {
     if (!userName) {
       showErrorToast("Login to order");
     } else {
+      const orderTotalCost: number = getTotalCost();
+      const canBuy: boolean = checkIfcanBuy(orderTotalCost, currentGold);
+      if (!canBuy) {
+        showErrorToast("Farm more gold to buy");
+        return;
+      }
       const order: Order = {
         itemNames: carItems.map((carItem: CartItem) => carItem.item.name),
         total: getTotalCost(),
