@@ -1,5 +1,5 @@
 from typing import Dict, List, Set, Tuple
-from sqlalchemy import Row, update
+from sqlalchemy import Row, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.MetaDataTable import MetaDataTable
@@ -322,13 +322,24 @@ async def getVersion(asyncSession: AsyncSession) -> str | None:
         logger.warning(f"Tried to get version but None was found")
     return version if version else None
 
-
 async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
     """Update the application version in the metadata table."""
-    async with asyncSession.begin():
-        versionRow: MetaDataTable = MetaDataTable(field_name="version", value=version)
-        await asyncSession.merge(versionRow)
+    await asyncSession.execute(
+        update(MetaDataTable)
+        .where(
+            MetaDataTable.field_name == "version"
+        )
+        .values(value=version)
+    )
+    await asyncSession.commit()
 
+async def insertVersion(asyncSession: AsyncSession, version: str) -> None:
+    """Update the application version in the metadata table."""
+    await asyncSession.execute(
+        insert(MetaDataTable)
+        .values(field_name="version", value=version)
+    )
+    await asyncSession.commit()
 
 async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingTable]:
     """Get the stats mapping table"""
@@ -345,12 +356,12 @@ async def checkItemExist(asyncSession: AsyncSession, itemName: str):
         return False
     return True
 
-async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
-    await asyncSession.execute(
-        update(ItemTable.imageHDPath)
-        .where(
-            ItemTable.name == itemName
-        )
-        .values(imageHDPath = path)
-    )
-    await asyncSession.commit()
+# async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
+#     await asyncSession.execute(
+#         update(ItemTable.imageHDPath)
+#         .where(
+#             ItemTable.name == itemName
+#         )
+#         .values(imageHDPath = path)
+#     )
+#     await asyncSession.commit()
