@@ -14,6 +14,8 @@ import {
   StatNode,
 } from "./interfaces/ItemRequest";
 import { allTagsRequet, someItemsRequest } from "./request";
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Parses a JSON node into a Gold object.
@@ -65,6 +67,16 @@ function parseEffectsNodeIntoEffects(effectsNode: EffectsNode): Effect[] {
   return effects;
 }
 
+export function checkIfHDImageAvailable(itemName: string, serverImagePath: string): string {
+  const fileName = `${itemName}.png`;
+  const filePath = path.join(process.cwd(), 'public', 'hd_images', fileName);
+  if (fs.existsSync(filePath)) {
+    return `/hd_images/${fileName}`;
+  } else {
+    return serverImagePath;
+  }
+}
+
 /**
  * Parses an item JSON node into an Item object.
  *
@@ -84,7 +96,7 @@ function parseItemNodeIntoItem(itemNode: ItemNode): Item {
     stats: stats,
     tags: tags,
     effects: effects,
-    img: itemNode.imageUrl,
+    img: checkIfHDImageAvailable(itemNode.name, itemNode.imageUrl),
     id: itemNode.id,
   };
 }
