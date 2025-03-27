@@ -39,7 +39,7 @@ export default function ItemPreView({ item }: { item: Item }) {
         <div className="m-2">
           <EpicLegendMap itemName={item.name} />
         </div>
-        <DescriptionTextMapper description={item.description} maxLen={300} />
+        <DescriptionTextMapper description={item.description} />
         {item.tags.length > 0 && (
           <div className="mt-3">
             <span className="text-sm font-medium text-gray-700">Tags: </span>

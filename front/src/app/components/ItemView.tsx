@@ -33,7 +33,6 @@ export default function ItemView({ itemName }: { itemName: string }) {
           <span className="font-bold">Description: </span>
           <DescriptionTextMapper
             description={item.description}
-            maxLen={999999}
           />
         </div>
 
