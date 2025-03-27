@@ -155,6 +155,11 @@ async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
     existingTags: Set[str] = set(tag for tag in result.scalars().all())
     return existingTags
 
+async def getAllItemNames(asyncSession: AsyncSession) -> Set[str]:
+    """Return a set of item names from the Item table."""
+    result = await asyncSession.execute(select(ItemTable.name))
+    itemNames: Set[str] = set(itemName for itemName in result.scalars().all())
+    return itemNames
 
 async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
     """Fetch all stat records from the StatsTable."""
