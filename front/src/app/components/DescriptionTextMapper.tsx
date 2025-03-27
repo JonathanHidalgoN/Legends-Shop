@@ -1,318 +1,91 @@
-export interface TagTransformation {
-  openerTag: string;
-  endingTag: string;
-  openerChange: string;
-  endingChange: string;
-}
+export function mapDescriptionToHtml(description: string): string {
 
-export const activeTransformation: TagTransformation = {
-  openerTag: "<active>",
-  endingTag: "</active>",
-  openerChange: '<span style="color: var(--pink2)"><strong>',
-  endingChange: "</strong></span>",
-};
+  // /<(\w+)>\s*<\/\1>/g
+  // <(\w+)>: Matches an opening tag like <stats>, <br>, <mainText>, etc.
+  // \w+ matches one or more "word characters" (letters, numbers, underscore).
+  // () creates a capture group, which can be referenced later.
+  // <\/\1>: Matches a closing tag like </stats> where:
+  // \s*: Matches zero or more whitespace characters (spaces, tabs, newlines) — this is the content between the tags.
+  // \/ is an escaped forward slash.
+  // \1 refers back to the same tag name as in the opening tag (from the first (\w+)).
+  // The g flag means it applies globally (finds all such occurrences in the string).
+  let html = description.replace(/<(\w+)>\s*<\/\1>/g, "");
 
-export const passiveTransformation: TagTransformation = {
-  openerTag: "<passive>",
-  endingTag: "</passive>",
-  openerChange: '<span style="color: var(--pink2)"><strong> (Passive) ',
-  endingChange: "</strong></span>",
-};
+  // /(<br>\s*){2,}/g
+  // Collapses multiple <br> tags in a row into just one.
+  // <br>\s*: Matches a <br> followed by optional whitespace.
+  // {2,}: Looks for two or more of those in a row.
+  // Replaces them with just a single <br>.
 
-export const mainTextTransformation: TagTransformation = {
-  openerTag: "<mainText>",
-  endingTag: "</mainText>",
-  openerChange: "",
-  endingChange: "",
-};
+  ///^<br>/
+  // Purpose:
+  // Removes a <br> if it appears at the very start of the string.
+  //  Explanation:
+  // ^: Anchors the match to the start of the string.
 
-export const statsTransformation: TagTransformation = {
-  openerTag: "<stats>",
-  endingTag: "</stats>",
-  openerChange: "",
-  endingChange: "",
-};
+  //<br>$/
+  //  Purpose:
+  // Removes a <br> if it appears at the very end of the string.
+  //  Explanation:
+  // <br>: Matches the literal string.
+  // $: Anchors the match to the end of the string./ <br>: Matches that literal string.
+  html = html
+    .replace(/(<br>\s*){2,}/g, "<br>")
+    .replace(/^<br>/, "")
+    .replace(/<br>$/, "");
 
-export const atentionTransformation: TagTransformation = {
-  openerTag: "<attention>",
-  endingTag: "</attention>",
-  openerChange: '<span style="color: var(--orange)"><strong>&nbsp',
-  endingChange: "</strong></span>&nbsp;",
-};
 
-export const healingTransformation: TagTransformation = {
-  openerTag: "<healing>",
-  endingTag: "</healing>",
-  openerChange: '<span style="color: green"><strong>',
-  endingChange: "</strong></span>",
-};
+  const tagMap: Record<string, { tag: "span" | "div"; className: string }> = {
+    attention: { tag: "span", className: "text-red-600 font-extrabold" },
+    passive: { tag: "span", className: "text-purple-600 font-bold italic tracking-wide" },
+    gold: { tag: "span", className: "text-yellow-400 font-extrabold drop-shadow" },
+    spellName: { tag: "span", className: "text-indigo-600 font-bold" },
+    speed: { tag: "span", className: "text-sky-400 font-medium" },
+    slow: { tag: "span", className: "text-cyan-500 font-medium italic" },
+    shield: { tag: "span", className: "text-blue-500 font-medium" },
+    active: { tag: "span", className: "text-blue-500 font-semibold italic" },
+    rarityMythic: { tag: "span", className: "text-pink-500 font-bold uppercase tracking-widest" },
+    rarityLegendary: { tag: "span", className: "text-violet-500 font-semibold uppercase" },
+    scaleHealt: { tag: "span", className: "text-teal-500 font-medium" },
+    scaleAD: { tag: "span", className: "text-orange-400 font-medium" },
+    scaleAP: { tag: "span", className: "text-fuchsia-500 font-medium" },
+    scaleArmor: { tag: "span", className: "text-yellow-600 font-medium" },
+    scaleMR: { tag: "span", className: "text-emerald-500 font-medium" },
+    scaleMana: { tag: "span", className: "text-blue-400 font-medium" },
+    scaleLevel: { tag: "span", className: "text-gray-500 font-medium italic" },
+    healing: { tag: "span", className: "text-green-500 font-semibold" },
+    scaleHealth: { tag: "span", className: "text-green-300 font-semibold" },
+    lifeSteal: { tag: "span", className: "text-green-400 font-semibold italic" },
+    attackSpeed: { tag: "span", className: "text-lime-500 font-semibold" },
+    physicalDamage: { tag: "span", className: "text-rose-500 font-semibold" },
+    magicDamage: { tag: "span", className: "text-purple-500 font-semibold" },
+    trueDamage: { tag: "span", className: "text-blue-500 font-semibold " },
+    OnHit: { tag: "span", className: "text-amber-400 font-semibold" },
+    rules: { tag: "span", className: "text-gray-500 italic text-sm" },
+    stats: { tag: "span", className: "text-gray-700 font-medium" },
+    buffedStat: { tag: "span", className: "text-green-400 font-medium" },
+    mainText: {
+      tag: "div",
+      className: "max-h-60 overflow-auto p-2 bg-var(--white) rounded",
+    },
+  };
 
-export const brTransformation: TagTransformation = {
-  openerTag: "<br>",
-  endingTag: "</br>",
-  openerChange: "",
-  endingChange: "",
-};
+  for (const [tag, { tag: htmlTag, className }] of Object.entries(tagMap)) {
+    const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, "gis");
+    html = html.replace(
+      regex,
+      (_, content) => `<${htmlTag} class="${className}">${content}</${htmlTag}>`
+    );
+  }
 
-export const spellNameTransformation: TagTransformation = {
-  openerTag: "<spellName>",
-  endingTag: "</spellName>",
-  openerChange: '<span style="color: var(--pink1)"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const fontTransformation: TagTransformation = {
-  openerTag: "<font>",
-  endingTag: "</font>",
-  openerChange: '<span style="color: var(--pink1)"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const magicDamageTransformation: TagTransformation = {
-  openerTag: "<magicDamage>",
-  endingTag: "</magicDamage>",
-  openerChange: '<span style="color: blue"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const rulesTransformation: TagTransformation = {
-  openerTag: "<rules>",
-  endingTag: "</rules>",
-  openerChange: '<span style="color: gray"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const shieldTransformation: TagTransformation = {
-  openerTag: "<shield>",
-  endingTag: "</shield>",
-  openerChange: '<span style="color: brown"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const lifeStealTransformation: TagTransformation = {
-  openerTag: "<lifeSteal>",
-  endingTag: "</lifeSteal>",
-  openerChange: '<span style="color: red"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const scaleADTransformation: TagTransformation = {
-  openerTag: "<scaleAD>",
-  endingTag: "</scaleAD>",
-  openerChange: '<span style="color: red"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const scaleAPTransformation: TagTransformation = {
-  openerTag: "<scaleAP>",
-  endingTag: "</scaleAP>",
-  openerChange: '<span style="color: blue"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const scaleManaTransformation: TagTransformation = {
-  openerTag: "<scaleMana>",
-  endingTag: "</scaleMana>",
-  openerChange: '<span style="color: blue"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const scaleMRTransformation: TagTransformation = {
-  openerTag: "<scaleMR>",
-  endingTag: "</scaleMR>",
-  openerChange: '<span style="color: aqua"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const scaleArmorTransformation: TagTransformation = {
-  openerTag: "<scaleArmor>",
-  endingTag: "</scaleArmor>",
-  openerChange: '<span style="color: olive"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const slowTransformation: TagTransformation = {
-  openerTag: "<slow>",
-  endingTag: "</slow>",
-  openerChange: '<span style="color: orange"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const scaleLevelTransformation: TagTransformation = {
-  openerTag: "<scaleLevel>",
-  endingTag: "</scaleLevel>",
-  openerChange: '<span style="color: fuchsia"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const physicalDamageTransformation: TagTransformation = {
-  openerTag: "<physicalDamage>",
-  endingTag: "</physicalDamage>",
-  openerChange: '<span style="color: red"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const attackSpeedTransformation: TagTransformation = {
-  openerTag: "<attackSpeed>",
-  endingTag: "</attackSpeed>",
-  openerChange: '<span style="color: indianRed"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const speedTransformation: TagTransformation = {
-  openerTag: "<speed>",
-  endingTag: "</speed>",
-  openerChange: '<span style="color: skyBlue"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const keywordMajorTransformation: TagTransformation = {
-  openerTag: "<keywordMajor>",
-  endingTag: "</keywordMajor>",
-  openerChange: '<span style="color: darkRed"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const buffedStatTransformation: TagTransformation = {
-  openerTag: "<buffedStat>",
-  endingTag: "</buffedStat>",
-  openerChange: '<span style="color: blueViolet"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const onHitTransformation: TagTransformation = {
-  openerTag: "<OnHit>",
-  endingTag: "</OnHit>",
-  openerChange: '<span style="color: darkStateGray"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export const keywordTransformation: TagTransformation = {
-  openerTag: "<keyword>",
-  endingTag: "</keyword>",
-  openerChange: '<span style="color: plum"><strong>',
-  endingChange: "</strong></span>",
-};
-
-export function descriptionMapper(description: string): string {
-  let newDescription = description
-    .replace(new RegExp("<br></br>", "g"), "")
-    .replace(new RegExp("<stats></stats>", "g"), "")
-    .replace(new RegExp("<font\\b[^>]*>", "g"), "<font>")
-    .replace(new RegExp("<li>", "g"), "")
-    .replace(new RegExp("(0s)", "g"), "")
-    .replace(new RegExp("()", "g"), "");
-  newDescription = applyTagTransformation(newDescription, activeTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    mainTextTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, statsTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    atentionTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, brTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    passiveTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    spellNameTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, fontTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    healingTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    magicDamageTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, rulesTransformation);
-  newDescription = applyTagTransformation(newDescription, shieldTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    lifeStealTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    scaleADTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    scaleAPTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    scaleManaTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    scaleArmorTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    scaleMRTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, slowTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    scaleLevelTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    physicalDamageTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    attackSpeedTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, speedTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    keywordMajorTransformation,
-  );
-  newDescription = applyTagTransformation(
-    newDescription,
-    buffedStatTransformation,
-  );
-  newDescription = applyTagTransformation(newDescription, onHitTransformation);
-  newDescription = applyTagTransformation(
-    newDescription,
-    keywordTransformation,
-  );
-  return newDescription;
-}
-
-export function applyTagTransformation(
-  text: string,
-  tagTransformation: TagTransformation,
-) {
-  let newText = text;
-  newText = newText.replace(
-    new RegExp(tagTransformation.openerTag, "g"),
-    tagTransformation.openerChange,
-  );
-  newText = newText.replace(
-    new RegExp(tagTransformation.endingTag, "g"),
-    tagTransformation.endingChange,
-  );
-  return newText;
+  return html;
 }
 
 export default function DescriptionTextMapper({
   description,
-  maxLen = 700,
 }: {
   description: string;
-  maxLen: number;
 }) {
-  const trimmedDescription: string =
-    description.length > maxLen
-      ? description.substring(0, maxLen) + "..."
-      : description;
-  const mappedDescription: string = descriptionMapper(trimmedDescription);
-  return <div dangerouslySetInnerHTML={{ __html: mappedDescription }} />;
+  const mappedHtmlDescription = mapDescriptionToHtml(description);
+  return <div dangerouslySetInnerHTML={{ __html: mappedHtmlDescription }} />;
 }
