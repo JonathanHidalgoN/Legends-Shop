@@ -222,16 +222,6 @@ export default function Header({ items }: { items: Item[] }) {
             bg-[var(--orange)] text-[var(--white)]"
           >
             Car
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M16 11V7a4 4 0 00-8 0v4"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5 11h14l1 9H4l1-9z"
-            />
           </button>
           {showCartDropdown && (
             <div
