@@ -10,8 +10,11 @@ async function downloadItemHDImage(
   destFolder: string,
   imageFile: string
 ): Promise<boolean> {
-  const baseUrl = "https://leagueoflegends.fandom.com/wiki";
-  const url = `${baseUrl}/${itemName}?file=${imageFile}`;
+  const baseUrl = "https://wiki.leagueoflegends.com/en-us/images";
+  const formattedItemName = itemName.replace(/ /g, '_');
+  const urlEncodedName = encodeURIComponent(formattedItemName);
+  const url = `${baseUrl}/${urlEncodedName}_item_HD.png`;
+  console.log(url);
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!response.ok) {
@@ -24,16 +27,15 @@ async function downloadItemHDImage(
     return true;
   } catch (error) {
     return false;
+
   }
 }
-
 async function downloadHDImageParallel(
   itemName: string,
   destDir: string
 ): Promise<void> {
-  const urlEncodedItemName = encodeURIComponent(itemName);
-  const imageFile = `${itemName}_item_HD.png`;
-  const filePath = path.join(destDir, imageFile);
+  const imageFile = `${itemName}.png`;
+  const filePath = path.join(destDir, itemName);
 
   try {
     await fs.access(filePath);
@@ -41,7 +43,7 @@ async function downloadHDImageParallel(
   } catch {
   }
 
-  await downloadItemHDImage(urlEncodedItemName, destDir, imageFile);
+  await downloadItemHDImage(itemName, destDir, imageFile);
 }
 
 export async function getHDItemImages(itemNames: string[]): Promise<void> {
