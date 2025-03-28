@@ -37,21 +37,27 @@ def verifyToken(token: str) -> str | None:
     except JWSError:
         return None
 
+
 def logMethod(func):
     """Decorator to log function call, success, and error with class name and arguments."""
+
     @functools.wraps(func)
     async def asyncWrapper(*args, **kwargs):
         className = args[0].__class__.__name__ if args else ""
         funcName = func.__name__
-        logger.debug(f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs}")
+        logger.debug(
+            f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs}"
+        )
         try:
             result = await func(*args, **kwargs)
-            logger.debug(f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs} returned successfully.")
+            logger.debug(
+                f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs} returned successfully."
+            )
             return result
         except Exception as e:
             logger.error(
                 f"{className} - {funcName} error with args: {args[1:]}, kwargs: {kwargs} - {e}",
-                exc_info=True
+                exc_info=True,
             )
             raise
 
@@ -59,15 +65,19 @@ def logMethod(func):
     def syncWrapper(*args, **kwargs):
         className = args[0].__class__.__name__ if args else ""
         funcName = func.__name__
-        logger.debug(f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs}")
+        logger.debug(
+            f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs}"
+        )
         try:
             result = func(*args, **kwargs)
-            logger.debug(f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs} returned successfully.")
+            logger.debug(
+                f"{className} - {funcName} called with args: {args[1:]}, kwargs: {kwargs} returned successfully."
+            )
             return result
         except Exception as e:
             logger.error(
                 f"{className} - {funcName} error with args: {args[1:]}, kwargs: {kwargs} - {e}",
-                exc_info=True
+                exc_info=True,
             )
             raise
 

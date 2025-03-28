@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import pLimit from 'p-limit';
+import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
+import pLimit from "p-limit";
 
 const PARALLEL_DOWNLOADS = 5;
 
 async function downloadItemHDImage(
   itemName: string,
   destFolder: string,
-  imageFile: string
+  imageFile: string,
 ): Promise<boolean> {
   const baseUrl = "https://wiki.leagueoflegends.com/en-us/images";
-  const formattedItemName = itemName.replace(/ /g, '_');
+  const formattedItemName = itemName.replace(/ /g, "_");
   const urlEncodedName = encodeURIComponent(formattedItemName);
   const url = `${baseUrl}/${urlEncodedName}_item_HD.png`;
   try {
@@ -26,12 +26,11 @@ async function downloadItemHDImage(
     return true;
   } catch (error) {
     return false;
-
   }
 }
 async function downloadHDImageParallel(
   itemName: string,
-  destDir: string
+  destDir: string,
 ): Promise<void> {
   const imageFile = `${itemName}.png`;
   const filePath = path.join(destDir, itemName);
@@ -39,19 +38,18 @@ async function downloadHDImageParallel(
   try {
     await fs.access(filePath);
     return;
-  } catch {
-  }
+  } catch {}
 
   await downloadItemHDImage(itemName, destDir, imageFile);
 }
 
 export async function getHDItemImages(itemNames: string[]): Promise<void> {
-  const destDir = path.join(process.cwd(), 'public', 'hd_images');
+  const destDir = path.join(process.cwd(), "public", "hd_images");
   await fs.mkdir(destDir, { recursive: true });
 
   const limit = pLimit(PARALLEL_DOWNLOADS);
-  const downloadPromises = itemNames.map(itemName =>
-    limit(() => downloadHDImageParallel(itemName, destDir))
+  const downloadPromises = itemNames.map((itemName) =>
+    limit(() => downloadHDImageParallel(itemName, destDir)),
   );
   await Promise.all(downloadPromises);
 }
@@ -60,11 +58,17 @@ export async function PUT(request: Request) {
   try {
     const { itemNames } = await request.json();
     if (!Array.isArray(itemNames)) {
-      return NextResponse.json({ error: 'itemNames must be an array' }, { status: 400 });
+      return NextResponse.json(
+        { error: "itemNames must be an array" },
+        { status: 400 },
+      );
     }
     await getHDItemImages(itemNames);
-    return NextResponse.json({ message: 'HD images downloaded successfully.' });
+    return NextResponse.json({ message: "HD images downloaded successfully." });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

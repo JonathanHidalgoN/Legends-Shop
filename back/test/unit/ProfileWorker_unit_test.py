@@ -5,7 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.profile.ProfileWorker import ProfileWorker
 from app.customExceptions import ProfileWorkerException, UserNoGoldRow
-from staticData import STATIC_DATA_USER_IN_DB1, STATIC_ORDER_SUMMARY1, STATIC_ORDER_SUMMARY2, STATIC_PROFILE_INFO1
+from staticData import (
+    STATIC_DATA_USER_IN_DB1,
+    STATIC_ORDER_SUMMARY1,
+    STATIC_ORDER_SUMMARY2,
+    STATIC_PROFILE_INFO1,
+)
 
 
 @pytest.fixture
@@ -52,32 +57,47 @@ async def test_getUserGoldWithUserName_sqlalchemy_error(worker: ProfileWorker):
             await worker.getUserGoldWithUserName(userName)
         assert "SQLAlchemyError" in str(excinfo.value)
 
+
 @pytest.mark.asyncio
 async def test_getProfileInfo_success(worker: ProfileWorker):
     userName = "testuser"
-    fakeUser = STATIC_DATA_USER_IN_DB1 
+    fakeUser = STATIC_DATA_USER_IN_DB1
     fakeOrderSummaryList = [STATIC_ORDER_SUMMARY1]
     expectedProfileInfo = STATIC_PROFILE_INFO1
-    with patch("app.profile.ProfileWorker.getUserInDB", new=AsyncMock(return_value=fakeUser)):
-        with patch.object(worker, "buildOrderSummaryForUser", new=AsyncMock(return_value=fakeOrderSummaryList)):
+    with patch(
+        "app.profile.ProfileWorker.getUserInDB", new=AsyncMock(return_value=fakeUser)
+    ):
+        with patch.object(
+            worker,
+            "buildOrderSummaryForUser",
+            new=AsyncMock(return_value=fakeOrderSummaryList),
+        ):
             result = await worker.getProfileInfo(userName)
             assert result == expectedProfileInfo
+
 
 @pytest.mark.asyncio
 async def test_getProfileInfo_none_user(worker: ProfileWorker):
     userName = "testuser"
-    with patch("app.profile.ProfileWorker.getUserInDB", new=AsyncMock(return_value=None)):
+    with patch(
+        "app.profile.ProfileWorker.getUserInDB", new=AsyncMock(return_value=None)
+    ):
         with pytest.raises(ProfileWorkerException) as excinfo:
             await worker.getProfileInfo(userName)
         assert "None value in user info" in str(excinfo.value)
 
+
 @pytest.mark.asyncio
 async def test_getProfileInfo_sqlalchemy_error(worker: ProfileWorker):
     userName = "testuser"
-    with patch("app.profile.ProfileWorker.getUserInDB", new=AsyncMock(side_effect=SQLAlchemyError("DB error"))):
+    with patch(
+        "app.profile.ProfileWorker.getUserInDB",
+        new=AsyncMock(side_effect=SQLAlchemyError("DB error")),
+    ):
         with pytest.raises(ProfileWorkerException) as excinfo:
             await worker.getProfileInfo(userName)
         assert "SQLAlchemyError" in str(excinfo.value)
+
 
 @pytest.mark.asyncio
 async def test_buildOrderSummaryForUser_success(worker: ProfileWorker):
@@ -86,23 +106,23 @@ async def test_buildOrderSummaryForUser_success(worker: ProfileWorker):
         STATIC_ORDER_SUMMARY1,
         STATIC_ORDER_SUMMARY2,
     ]
-    
+
     with patch(
         "app.profile.ProfileWorker.getUniqueItemNamesQuantityAndBasePriceByUserName",
-        new=AsyncMock(return_value=fakeOrderSummaryList)
+        new=AsyncMock(return_value=fakeOrderSummaryList),
     ):
         result = await worker.buildOrderSummaryForUser(userName)
         assert result == fakeOrderSummaryList
 
+
 @pytest.mark.asyncio
 async def test_buildOrderSummaryForUser_sqlalchemy_error(worker: ProfileWorker):
     userName = "testuser"
-    
+
     with patch(
         "app.profile.ProfileWorker.getUniqueItemNamesQuantityAndBasePriceByUserName",
-        new=AsyncMock(side_effect=SQLAlchemyError("DB error"))
+        new=AsyncMock(side_effect=SQLAlchemyError("DB error")),
     ):
         with pytest.raises(ProfileWorkerException) as excinfo:
             await worker.buildOrderSummaryForUser(userName)
         assert "SQLAlchemyError" in str(excinfo.value)
-

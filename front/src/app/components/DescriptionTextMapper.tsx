@@ -1,5 +1,4 @@
 export function mapDescriptionToHtml(description: string): string {
-
   // /<(\w+)>\s*<\/\1>/g
   // <(\w+)>: Matches an opening tag like <stats>, <br>, <mainText>, etc.
   // \w+ matches one or more "word characters" (letters, numbers, underscore).
@@ -34,18 +33,29 @@ export function mapDescriptionToHtml(description: string): string {
     .replace(/^<br>/, "")
     .replace(/<br>$/, "");
 
-
   const tagMap: Record<string, { tag: "span" | "div"; className: string }> = {
     attention: { tag: "span", className: "text-red-600 font-extrabold" },
-    passive: { tag: "span", className: "text-purple-600 font-bold italic tracking-wide" },
-    gold: { tag: "span", className: "text-yellow-400 font-extrabold drop-shadow" },
+    passive: {
+      tag: "span",
+      className: "text-purple-600 font-bold italic tracking-wide",
+    },
+    gold: {
+      tag: "span",
+      className: "text-yellow-400 font-extrabold drop-shadow",
+    },
     spellName: { tag: "span", className: "text-indigo-600 font-bold" },
     speed: { tag: "span", className: "text-sky-400 font-medium" },
     slow: { tag: "span", className: "text-cyan-500 font-medium italic" },
     shield: { tag: "span", className: "text-blue-500 font-medium" },
     active: { tag: "span", className: "text-blue-500 font-semibold italic" },
-    rarityMythic: { tag: "span", className: "text-pink-500 font-bold uppercase tracking-widest" },
-    rarityLegendary: { tag: "span", className: "text-violet-500 font-semibold uppercase" },
+    rarityMythic: {
+      tag: "span",
+      className: "text-pink-500 font-bold uppercase tracking-widest",
+    },
+    rarityLegendary: {
+      tag: "span",
+      className: "text-violet-500 font-semibold uppercase",
+    },
     scaleHealt: { tag: "span", className: "text-teal-500 font-medium" },
     scaleAD: { tag: "span", className: "text-orange-400 font-medium" },
     scaleAP: { tag: "span", className: "text-fuchsia-500 font-medium" },
@@ -55,7 +65,10 @@ export function mapDescriptionToHtml(description: string): string {
     scaleLevel: { tag: "span", className: "text-gray-500 font-medium italic" },
     healing: { tag: "span", className: "text-green-500 font-semibold" },
     scaleHealth: { tag: "span", className: "text-green-300 font-semibold" },
-    lifeSteal: { tag: "span", className: "text-green-400 font-semibold italic" },
+    lifeSteal: {
+      tag: "span",
+      className: "text-green-400 font-semibold italic",
+    },
     attackSpeed: { tag: "span", className: "text-lime-500 font-semibold" },
     physicalDamage: { tag: "span", className: "text-rose-500 font-semibold" },
     magicDamage: { tag: "span", className: "text-purple-500 font-semibold" },
@@ -74,7 +87,8 @@ export function mapDescriptionToHtml(description: string): string {
     const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, "gis");
     html = html.replace(
       regex,
-      (_, content) => `<${htmlTag} class="${className}">${content}</${htmlTag}>`
+      (_, content) =>
+        `<${htmlTag} class="${className}">${content}</${htmlTag}>`,
     );
   }
 

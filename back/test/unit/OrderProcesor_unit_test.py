@@ -317,19 +317,19 @@ async def test_updateTotalUserSpendGold_sqlalchemy_error_on_update(processor):
             with pytest.raises(ProcessOrderException):
                 await processor.updateTotalUserSpendGold(userId, toAdd)
 
+
 @pytest.mark.asyncio
 async def test_getOrderHistory_success(processor):
     userId = 1
-    fakeOrders = [
-        STATIC_DATA_ORDER1, STATIC_DATA_ORDER2
-    ]
+    fakeOrders = [STATIC_DATA_ORDER1, STATIC_DATA_ORDER2]
 
     with patch(
         "app.orders.OrderProcessor.getOrderHistoryByUserId",
-        new=AsyncMock(return_value=fakeOrders)
+        new=AsyncMock(return_value=fakeOrders),
     ):
         result = await processor.getOrderHistory(userId)
         assert result == fakeOrders
+
 
 @pytest.mark.asyncio
 async def test_getOrderHistory_sqlalchemy_error(processor):
@@ -337,7 +337,7 @@ async def test_getOrderHistory_sqlalchemy_error(processor):
 
     with patch(
         "app.orders.OrderProcessor.getOrderHistoryByUserId",
-        new=AsyncMock(side_effect=SQLAlchemyError("DB error"))
+        new=AsyncMock(side_effect=SQLAlchemyError("DB error")),
     ):
         with pytest.raises(ProcessOrderException):
             await processor.getOrderHistory(userId)

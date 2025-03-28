@@ -53,6 +53,7 @@ def getItemsLoader(
 ) -> ItemsLoader:
     return ItemsLoader(db)
 
+
 @app.get("/")
 async def root():
     return {"message": "up"}
@@ -82,10 +83,9 @@ async def testUpdateVersion(db: AsyncSession = Depends(database.getDbSession)):
     version = await itemsLoader.getLastVersion()
     return {"message": version}
 
+
 @app.put("/updateItems", include_in_schema=False)
-async def updateItems(
-        itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)]
-):
+async def updateItems(itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)]):
     try:
         await itemsLoader.updateItems()
     except SameVersionUpdateError as e:

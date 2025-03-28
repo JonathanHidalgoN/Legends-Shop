@@ -69,7 +69,9 @@ export default function SelectedItems({
     setFilterEffectNames(effectNames);
     setCurrentPage(1);
   }
-  const handleSortItemFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSortItemFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setSortField(e.target.value as FilterItemSortField);
     setCurrentPage(1);
   };
@@ -79,20 +81,33 @@ export default function SelectedItems({
     setCurrentPage(1);
   };
 
-  function checkItemsAttributeInFilterList(itemsAttribute: string[], filterStrings: string[]) {
+  function checkItemsAttributeInFilterList(
+    itemsAttribute: string[],
+    filterStrings: string[],
+  ) {
     if (filterStrings.length == 0) {
       return true;
     } else {
-      return itemsAttribute.some((attr: string) => filterStrings.includes(attr));
+      return itemsAttribute.some((attr: string) =>
+        filterStrings.includes(attr),
+      );
     }
   }
 
-  const filteredItems: Item[] = items.filter((item: Item) => (
-    (checkItemsAttributeInFilterList(item.effects.map(e => e.name), filterEffectNames)) &&
-    (checkItemsAttributeInFilterList(item.tags, filterTagNames)) &&
-    (filterItemNames.length == 0 ? true : filterItemNames.includes(item.name)) &&
-    (item.gold.base <= filterMaxPrice && item.gold.base >= filterMinPrice)
-  ))
+  const filteredItems: Item[] = items
+    .filter(
+      (item: Item) =>
+        checkItemsAttributeInFilterList(
+          item.effects.map((e) => e.name),
+          filterEffectNames,
+        ) &&
+        checkItemsAttributeInFilterList(item.tags, filterTagNames) &&
+        (filterItemNames.length == 0
+          ? true
+          : filterItemNames.includes(item.name)) &&
+        item.gold.base <= filterMaxPrice &&
+        item.gold.base >= filterMinPrice,
+    )
     .sort((a, b) => {
       let comparison: number = 0;
       switch (sortField) {
@@ -107,8 +122,6 @@ export default function SelectedItems({
       }
       return sortOrder === FilterSortOrder.DESC ? -comparison : comparison;
     });
-
-
 
   //For example 20 items on pages of six need 4 pages ceil(20/6) = 4
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -180,7 +193,6 @@ export default function SelectedItems({
           </label>
         </div>
 
-
         <div className="mt-4">
           <label htmlFor="minPrice" className="block font-bold mb-1">
             Min Price:
@@ -229,7 +241,6 @@ export default function SelectedItems({
           onChange={handleEffectFilterChange}
           placeholder="Select effects..."
         />
-
       </aside>
 
       <div className="p-4 ml-8 flex items-center flex-col gap-y-2">

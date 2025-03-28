@@ -17,6 +17,7 @@ from app.schemas.Item import Stat
 
 # TODO: CHECK QUERYS THAT CAN BE SIMPLIFY with a join
 
+
 async def getAllTagsTable(asyncSession: AsyncSession) -> List[TagsTable]:
     """Fetch all tags from the TagsTable."""
     result = await asyncSession.execute(select(TagsTable))
@@ -154,17 +155,20 @@ async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
     existingTags: Set[str] = set(result.scalars().all())
     return existingTags
 
+
 async def getAllEffectsTableName(asyncSession: AsyncSession) -> Set[str]:
     """Return a set of unique effect names from the EffectsTable."""
     result = await asyncSession.execute(select(distinct(EffectsTable.name)))
     existingEffects: Set[str] = set(result.scalars().all())
     return existingEffects
 
+
 async def getAllItemNames(asyncSession: AsyncSession) -> Set[str]:
     """Return a set of item names from the Item table."""
     result = await asyncSession.execute(select(ItemTable.name))
     itemNames: Set[str] = set(itemName for itemName in result.scalars().all())
     return itemNames
+
 
 async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
     """Fetch all stat records from the StatsTable."""
@@ -218,11 +222,12 @@ async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
 
 async def getSomeItems(asyncSession: AsyncSession) -> List[ItemTable]:
     """Fetch some items from the ItemTable."""
-    result = await asyncSession.execute(select(ItemTable)
-                        .join(GoldTable, GoldTable.id == ItemTable.gold_id) 
-                        .where((GoldTable.purchaseable) &
-                               (GoldTable.base_cost > 0))
-                        .limit(300))
+    result = await asyncSession.execute(
+        select(ItemTable)
+        .join(GoldTable, GoldTable.id == ItemTable.gold_id)
+        .where((GoldTable.purchaseable) & (GoldTable.base_cost > 0))
+        .limit(300)
+    )
     items: List[ItemTable] = [item for item in result.scalars().all()]
     return items
 
@@ -336,24 +341,24 @@ async def getVersion(asyncSession: AsyncSession) -> str | None:
         logger.warning(f"Tried to get version but None was found")
     return version if version else None
 
+
 async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
     """Update the application version in the metadata table."""
     await asyncSession.execute(
         update(MetaDataTable)
-        .where(
-            MetaDataTable.field_name == "version"
-        )
+        .where(MetaDataTable.field_name == "version")
         .values(value=version)
     )
     await asyncSession.commit()
 
+
 async def insertVersion(asyncSession: AsyncSession, version: str) -> None:
     """Update the application version in the metadata table."""
     await asyncSession.execute(
-        insert(MetaDataTable)
-        .values(field_name="version", value=version)
+        insert(MetaDataTable).values(field_name="version", value=version)
     )
     await asyncSession.commit()
+
 
 async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingTable]:
     """Get the stats mapping table"""
@@ -369,6 +374,7 @@ async def checkItemExist(asyncSession: AsyncSession, itemName: str):
     if not result:
         return False
     return True
+
 
 # async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
 #     await asyncSession.execute(

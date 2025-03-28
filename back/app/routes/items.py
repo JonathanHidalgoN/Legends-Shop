@@ -2,7 +2,11 @@ from typing import List, Set
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.data.queries.itemQueries import getAllEffectsTableName, getAllItemNames, getAllTagsTableNames
+from app.data.queries.itemQueries import (
+    getAllEffectsTableName,
+    getAllItemNames,
+    getAllTagsTableNames,
+)
 from app.data.utils import (
     getAllItemTableRowsAnMapToItems,
     getSomeItemTableRowsAnMapToItems,
@@ -14,7 +18,7 @@ from app.schemas.Item import Item
 router = APIRouter()
 
 
-#TODO: Create a class to handle item fetching logic 
+# TODO: Create a class to handle item fetching logic
 @router.get("/all")
 async def getAllItems(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
@@ -67,6 +71,7 @@ async def getUniqueTags(
             detail=f"Error fetching {request.url.path} from the database",
         )
 
+
 @router.get("/item_names", response_model=Set[str])
 async def getItemNames(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
@@ -74,7 +79,7 @@ async def getItemNames(
     itemNames: Set[str] = set()
     try:
         itemNames = await getAllItemNames(db)
-        return itemNames 
+        return itemNames
     except Exception as e:
         logger.error(
             f"Error while trying to query {request.url.path} from database: {e}"
@@ -85,7 +90,7 @@ async def getItemNames(
         )
 
 
-@router.get("/unique_effects",response_model=Set[str])
+@router.get("/unique_effects", response_model=Set[str])
 async def getUniqueTags(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):

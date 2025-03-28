@@ -244,16 +244,16 @@ STATIC_DATA_ORDER2: Order = Order(
     status=OrderStatus.CANCELED,
 )
 
-STATIC_DATA_USER_IN_DB1 : UserInDB = UserInDB(
+STATIC_DATA_USER_IN_DB1: UserInDB = UserInDB(
     userName="fakeUsername",
     email="example@hotmail.com",
-    created= date(2025,1,1),
-    lastSingIn=date(2025,1,1),
+    created=date(2025, 1, 1),
+    lastSingIn=date(2025, 1, 1),
     goldSpend=5000,
     currentGold=6000,
-    birthDate=date(2024,1,1),
+    birthDate=date(2024, 1, 1),
     password="genericpassword",
-    hashedPassword="hashedgenericpassword"
+    hashedPassword="hashedgenericpassword",
 )
 
 STATIC_ORDER_SUMMARY1: OrderSummary = OrderSummary(
@@ -261,7 +261,7 @@ STATIC_ORDER_SUMMARY1: OrderSummary = OrderSummary(
     basePrice=500,
     timesOrdered=2,
     totalSpend=1000,
-    orderDates=[datetime(2025,1,1)]
+    orderDates=[datetime(2025, 1, 1)],
 )
 
 STATIC_ORDER_SUMMARY2: OrderSummary = OrderSummary(
@@ -269,10 +269,9 @@ STATIC_ORDER_SUMMARY2: OrderSummary = OrderSummary(
     basePrice=200,
     timesOrdered=3,
     totalSpend=600,
-    orderDates=[datetime(2022,1,1)]
+    orderDates=[datetime(2022, 1, 1)],
 )
 
 STATIC_PROFILE_INFO1: ProfileInfo = ProfileInfo(
-    user=STATIC_DATA_USER_IN_DB1,
-    ordersInfo=[STATIC_ORDER_SUMMARY1]
+    user=STATIC_DATA_USER_IN_DB1, ordersInfo=[STATIC_ORDER_SUMMARY1]
 )

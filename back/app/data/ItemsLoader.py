@@ -122,11 +122,13 @@ class ItemsLoader:
         return itemsUrl
 
     @logMethod
-    async def updateItems(self)->None:
+    async def updateItems(self) -> None:
         currentVersion: str | None = await getVersion(self.dbSession)
         lastVersion: str = await self.getLastVersion()
         if currentVersion == lastVersion:
-            raise SameVersionUpdateError(f"Current items version {currentVersion} and API items version {lastVersion} is the same")
+            raise SameVersionUpdateError(
+                f"Current items version {currentVersion} and API items version {lastVersion} is the same"
+            )
         elif currentVersion is None:
             await insertVersion(self.dbSession, lastVersion)
         elif currentVersion != lastVersion:

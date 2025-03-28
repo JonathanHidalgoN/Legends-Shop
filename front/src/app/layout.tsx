@@ -34,7 +34,11 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <AuthContextProvider>
-          <StaticDataContextProvider items={items} tags={tags} effects={effects}>
+          <StaticDataContextProvider
+            items={items}
+            tags={tags}
+            effects={effects}
+          >
             <CarContextProvider>
               <Header items={items} />
               <Toaster position="top-left" />

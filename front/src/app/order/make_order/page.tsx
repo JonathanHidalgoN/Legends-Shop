@@ -12,14 +12,18 @@ import { getCurrentUserGold } from "@/app/profileFunctions";
 import { showErrorToast } from "@/app/customToast";
 
 export default function OrderPage() {
-  const { carItems, getTotalCost, cleanCar, setCurrentGold, currentGold } = useCarContext();
+  const { carItems, getTotalCost, cleanCar, setCurrentGold, currentGold } =
+    useCarContext();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
 
-  function checkIfcanBuy(orderTotal: number, currentGold: number | null): boolean {
+  function checkIfcanBuy(
+    orderTotal: number,
+    currentGold: number | null,
+  ): boolean {
     if (!currentGold) {
       return false;
     }

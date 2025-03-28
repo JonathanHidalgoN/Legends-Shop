@@ -266,7 +266,9 @@ export async function deleteCartItemRequest(
   return await response.json();
 }
 
-export async function updateItemsRequest(from: string = "server"): Promise<void> {
+export async function updateItemsRequest(
+  from: string = "server",
+): Promise<void> {
   const url: string = makeUrl(from, ENDPOINT_UPDATE_ITEMS);
   const response = await fetch(url, {
     method: "PUT",
@@ -276,11 +278,13 @@ export async function updateItemsRequest(from: string = "server"): Promise<void>
   }
 }
 
-export async function specialDownloadImagesRequest(itemNames: string[]): Promise<void> {
-  const response = await fetch('/api/scrapeImages', {
+export async function specialDownloadImagesRequest(
+  itemNames: string[],
+): Promise<void> {
+  const response = await fetch("/api/scrapeImages", {
     method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ itemNames }),
   });
@@ -290,7 +294,9 @@ export async function specialDownloadImagesRequest(itemNames: string[]): Promise
   }
 }
 
-export async function getAllItemNamesRequest(from: string = "server"): Promise<string[]> {
+export async function getAllItemNamesRequest(
+  from: string = "server",
+): Promise<string[]> {
   const url: string = makeUrl(from, ENDPOINT_ALL_ITEM_NAMES);
   const response = await fetch(url);
   if (!response.ok) {
@@ -299,7 +305,9 @@ export async function getAllItemNamesRequest(from: string = "server"): Promise<s
   return await response.json();
 }
 
-export async function getAllEffectNamesRequest(from: string = "server"): Promise<string[]> {
+export async function getAllEffectNamesRequest(
+  from: string = "server",
+): Promise<string[]> {
   const url: string = makeUrl(from, ENDPOINT_ALL_EFFECT_NAMES);
   const response = await fetch(url);
   if (!response.ok) {
