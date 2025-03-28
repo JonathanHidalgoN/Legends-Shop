@@ -5,6 +5,7 @@ import { Item } from "../interfaces/Item";
 interface StaticDataContextType {
   items: Item[];
   tags: string[];
+  effects: string[];
 }
 
 const StaticDataContext = createContext<StaticDataContextType | undefined>(
@@ -14,14 +15,16 @@ const StaticDataContext = createContext<StaticDataContextType | undefined>(
 export function StaticDataContextProvider({
   items,
   tags,
+  effects,
   children,
 }: {
   items: Item[];
   tags: string[];
+  effects: string[];
   children: React.ReactNode;
 }) {
   return (
-    <StaticDataContext.Provider value={{ items, tags }}>
+    <StaticDataContext.Provider value={{ items, tags, effects }}>
       {children}
     </StaticDataContext.Provider>
   );
