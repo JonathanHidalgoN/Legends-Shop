@@ -27,7 +27,7 @@ export default function SelectedItems({
     FilterItemSortField.NAME,
   );
   const [sortOrder, setSortOrder] = useState<FilterSortOrder>(
-    FilterSortOrder.DESC,
+    FilterSortOrder.ASC,
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
@@ -145,7 +145,7 @@ export default function SelectedItems({
         className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
         bg-[var(--white)] text-[var(--black)] sticky top-0"
       >
-        <h2 className="text-lg font-bold mb-2">Sort By</h2>
+        <h2 className="text-lg text-[var(--orange)] font-bold mb-2">Sort By</h2>
         <div className="flex flex-col gap-2">
           <label className="flex items-center">
             <input
@@ -155,7 +155,7 @@ export default function SelectedItems({
               checked={sortField === FilterItemSortField.PRICE}
               onChange={handleSortItemFieldChange}
             />
-            <span className="ml-2">Price</span>
+            <span className="ml-2 ">Price</span>
           </label>
           <label className="flex items-center">
             <input
@@ -169,7 +169,7 @@ export default function SelectedItems({
           </label>
         </div>
 
-        <h2 className="text-lg font-bold mt-4 mb-2">Sort Order</h2>
+        <h2 className="text-lg font-bold mt-4 mb-2 text-[var(--orange)]">Sort Order</h2>
         <div className="flex items-center gap-4">
           <label className="flex items-center">
             <input
@@ -194,7 +194,7 @@ export default function SelectedItems({
         </div>
 
         <div className="mt-4">
-          <label htmlFor="minPrice" className="block font-bold mb-1">
+          <label htmlFor="minPrice" className="block font-bold mb-1 text-[var(--orange)]">
             Min Price:
           </label>
           <input
@@ -206,7 +206,7 @@ export default function SelectedItems({
           />
         </div>
         <div>
-          <label htmlFor="maxPrice" className="block font-bold mb-1">
+          <label htmlFor="maxPrice" className="block font-bold mb-1 text-[var(--orange)]">
             Max Price:
           </label>
           <input
@@ -218,7 +218,7 @@ export default function SelectedItems({
           />
         </div>
 
-        <h2 className="font-bold mb-2 my-2">Items</h2>
+        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Items</h2>
         <Select
           isMulti
           options={itemNameSelectOptions}
@@ -226,7 +226,7 @@ export default function SelectedItems({
           placeholder="Select item names..."
         />
 
-        <h2 className="font-bold mb-2 my-2">Tags</h2>
+        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Tags</h2>
         <Select
           isMulti
           options={itemTagSelectOptions}
@@ -234,7 +234,7 @@ export default function SelectedItems({
           placeholder="Select tags..."
         />
 
-        <h2 className="font-bold mb-2 my-2">Effects</h2>
+        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Effects</h2>
         <Select
           isMulti
           options={itemEffectSelectOptions}
