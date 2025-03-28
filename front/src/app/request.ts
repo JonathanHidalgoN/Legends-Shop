@@ -17,6 +17,7 @@ export const ENDPOINT_ITEMS_ALL: string = `items/all`;
 export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 export const ENDPOINT_ALL_ITEM_NAMES: string = `items/item_names`;
+export const ENDPOINT_ALL_EFFECT_NAMES: string = `items/unique_effects`;
 export const ENDPOINT_ORDER: string = `orders/order`;
 export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
@@ -294,6 +295,15 @@ export async function getAllItemNamesRequest(from: string = "server"): Promise<s
   const response = await fetch(url);
   if (!response.ok) {
     await throwAPIError(response, "Error fetching item names");
+  }
+  return await response.json();
+}
+
+export async function getAllEffectNamesRequest(from: string = "server"): Promise<string[]> {
+  const url: string = makeUrl(from, ENDPOINT_ALL_EFFECT_NAMES);
+  const response = await fetch(url);
+  if (!response.ok) {
+    await throwAPIError(response, "Error fetching effect names");
   }
   return await response.json();
 }
