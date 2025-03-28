@@ -14,7 +14,6 @@ async function downloadItemHDImage(
   const formattedItemName = itemName.replace(/ /g, '_');
   const urlEncodedName = encodeURIComponent(formattedItemName);
   const url = `${baseUrl}/${urlEncodedName}_item_HD.png`;
-  console.log(url);
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!response.ok) {
