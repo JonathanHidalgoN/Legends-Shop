@@ -2,7 +2,7 @@ from typing import List, Set
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.data.queries.itemQueries import getAllItemNames, getAllTagsTableNames
+from app.data.queries.itemQueries import getAllEffectsTableName, getAllItemNames, getAllTagsTableNames
 from app.data.utils import (
     getAllItemTableRowsAnMapToItems,
     getSomeItemTableRowsAnMapToItems,
@@ -75,6 +75,24 @@ async def getItemNames(
     try:
         itemNames = await getAllItemNames(db)
         return itemNames 
+    except Exception as e:
+        logger.error(
+            f"Error while trying to query {request.url.path} from database: {e}"
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching {request.url.path} from the database",
+        )
+
+
+@router.get("/unique_effects",response_model=Set[str])
+async def getUniqueTags(
+    request: Request, db: AsyncSession = Depends(database.getDbSession)
+):
+    effectNames: Set[str] = set()
+    try:
+        effectNames = await getAllEffectsTableName(db)
+        return effectNames
     except Exception as e:
         logger.error(
             f"Error while trying to query {request.url.path} from database: {e}"
