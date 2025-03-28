@@ -1,38 +1,114 @@
 "use client";
 import { useState, useEffect } from "react";
 import ItemPreView from "./ItemPreView";
-import { Item } from "../interfaces/Item";
+import { FilterItemSortField, FilterSortOrder, Item } from "../interfaces/Item";
+import { ActionMeta, MultiValue } from "react-select";
+import { OptionType } from "../interfaces/Order";
+import dynamic from "next/dynamic";
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 export default function SelectedItems({
   items,
   tags,
+  effects,
 }: {
   items: Item[];
   tags: string[];
+  effects: string[];
 }) {
   const maxPrice = Math.max(...items.map((item) => item.gold.base));
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [price, setPrice] = useState<number>(maxPrice);
+  const minPrice = Math.min(...items.map((item) => item.gold.base));
+  const [filterItemNames, setFilterItemName] = useState<string[]>([]);
+  const [filterMinPrice, setFilterMinPrice] = useState<number>(minPrice);
+  const [filterMaxPrice, setFilterMaxPrice] = useState<number>(maxPrice);
+  const [filterTagNames, setFilterTagNames] = useState<string[]>([]);
+  const [filterEffectNames, setFilterEffectNames] = useState<string[]>([]);
+  const [sortField, setSortField] = useState<FilterItemSortField>(
+    FilterItemSortField.NAME,
+  );
+  const [sortOrder, setSortOrder] = useState<FilterSortOrder>(
+    FilterSortOrder.DESC,
+  );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
 
-  //Check if add the tag or remove it
-  const handleTagToggle = (tag: string) => {
-    setSelectedTags((tagList) =>
-      tagList.includes(tag)
-        ? tagList.filter((tagToRemove) => tagToRemove !== tag)
-        : [...tagList, tag],
-    );
-    //Reset the page
+  const itemNameSelectOptions: OptionType[] = items.map((item) => ({
+    value: item.name,
+    label: item.name,
+  }));
+  const itemTagSelectOptions: OptionType[] = tags.map((tag: string) => ({
+    value: tag,
+    label: tag,
+  }));
+  const itemEffectSelectOptions: OptionType[] = effects.map((tag: string) => ({
+    value: tag,
+    label: tag,
+  }));
+
+  function handleItemNameFilterChange(
+    selectedNames: MultiValue<OptionType>,
+    _actionMeta: ActionMeta<OptionType>,
+  ) {
+    const itemNames = selectedNames.map((option) => option.value);
+    setFilterItemName(itemNames);
+    setCurrentPage(1);
+  }
+  function handleTagFilterChange(
+    selectedNames: MultiValue<OptionType>,
+    _actionMeta: ActionMeta<OptionType>,
+  ) {
+    const tagNames = selectedNames.map((option) => option.value);
+    setFilterTagNames(tagNames);
+    setCurrentPage(1);
+  }
+  function handleEffectFilterChange(
+    selectedNames: MultiValue<OptionType>,
+    _actionMeta: ActionMeta<OptionType>,
+  ) {
+    const effectNames = selectedNames.map((option) => option.value);
+    setFilterEffectNames(effectNames);
+    setCurrentPage(1);
+  }
+  const handleSortItemFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSortField(e.target.value as FilterItemSortField);
     setCurrentPage(1);
   };
 
-  const filteredItems: Item[] = items
-    .filter((item) => {
-      if (selectedTags.length === 0) return true;
-      return selectedTags.every((tag) => item.tags.includes(tag));
-    })
-    .filter((item) => item.gold.base <= price);
+  const handleSortOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSortOrder(e.target.value as FilterSortOrder);
+    setCurrentPage(1);
+  };
+
+  function checkItemsAttributeInFilterList(itemsAttribute: string[], filterStrings: string[]) {
+    if (filterStrings.length == 0) {
+      return true;
+    } else {
+      return itemsAttribute.some((attr: string) => filterStrings.includes(attr));
+    }
+  }
+
+  const filteredItems: Item[] = items.filter((item: Item) => (
+    (checkItemsAttributeInFilterList(item.effects.map(e => e.name), filterEffectNames)) &&
+    (checkItemsAttributeInFilterList(item.tags, filterTagNames)) &&
+    (filterItemNames.length == 0 ? true : filterItemNames.includes(item.name)) &&
+    (item.gold.base <= filterMaxPrice && item.gold.base >= filterMinPrice)
+  ))
+    .sort((a, b) => {
+      let comparison: number = 0;
+      switch (sortField) {
+        case FilterItemSortField.PRICE:
+          comparison = a.gold.base - b.gold.base;
+          break;
+        case FilterItemSortField.NAME:
+          comparison = a.name.localeCompare(b.name);
+          break;
+        default:
+          break;
+      }
+      return sortOrder === FilterSortOrder.DESC ? -comparison : comparison;
+    });
+
+
 
   //For example 20 items on pages of six need 4 pages ceil(20/6) = 4
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -53,59 +129,107 @@ export default function SelectedItems({
   return (
     <div className="grid grid-cols-2 grid-cols-[13%_80%] gap-4 h-full">
       <aside
-        className="p-2 flex flex-col shadow-lg overflow-y-auto h-screen 
+        className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
         bg-[var(--white)] text-[var(--black)] sticky top-0"
       >
-        <div className="mb-6">
-          <h2 className="font-bold mb-2">Price</h2>
-          <div className="flex items-center flex-col md:flex-row items-center">
-            <span className="mr-2">0</span>
+        <h2 className="text-lg font-bold mb-2">Sort By</h2>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center">
             <input
-              type="range"
-              min="0"
-              max={maxPrice}
-              value={price}
-              onChange={(e) => {
-                setPrice(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="flex-grow accent-[var(--yellow)] h-2 rounded-lg bg-yellow-100 outline-none transition-all duration-300 cursor-pointer"
+              type="radio"
+              name="sortField"
+              value={FilterItemSortField.PRICE}
+              checked={sortField === FilterItemSortField.PRICE}
+              onChange={handleSortItemFieldChange}
             />
-            <span className="ml-2">{price}</span>
-          </div>
+            <span className="ml-2">Price</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="sortField"
+              value={FilterItemSortField.NAME}
+              checked={sortField === FilterItemSortField.NAME}
+              onChange={handleSortItemFieldChange}
+            />
+            <span className="ml-2">Name</span>
+          </label>
         </div>
 
-        <div className="flex-grow overflow-y-auto custom-scrollbar">
-          <ul className="space-y-2">
-            {tags.map((tag, index) => (
-              <li
-                key={index}
-                className="flex items-center p-2 rounded hover:bg-orange-100
-                hover:text-orange-500
-                transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  className="
-    w-5 h-5 mr-2 cursor-pointer 
-    appearance-none border border-black-300 rounded-sm
-    checked:bg-orange-200 checked:border-orange-200
-    flex items-center justify-center relative
-    checked:before:content-['x'] checked:before:text-white 
-    checked:before:absolute checked:before:text-m checked:before:font-bold
-    checked:before:inset-0 checked:before:flex 
-                  checked:before:items-center checked:before:justify-center
-  "
-                  onChange={() => handleTagToggle(tag)}
-                  checked={selectedTags.includes(tag)}
-                />
-                <span className="hover:opacity-80 transition-colors">
-                  {tag}
-                </span>
-              </li>
-            ))}
-          </ul>
+        <h2 className="text-lg font-bold mt-4 mb-2">Sort Order</h2>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="sortOrder"
+              value="asc"
+              checked={sortOrder === "asc"}
+              onChange={handleSortOrderChange}
+            />
+            <span className="ml-2">Ascending</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="sortOrder"
+              value="desc"
+              checked={sortOrder === "desc"}
+              onChange={handleSortOrderChange}
+            />
+            <span className="ml-2">Descending</span>
+          </label>
         </div>
+
+
+        <div className="mt-4">
+          <label htmlFor="minPrice" className="block font-bold mb-1">
+            Min Price:
+          </label>
+          <input
+            id="minPrice"
+            type="number"
+            value={filterMinPrice}
+            onChange={(e) => setFilterMinPrice(Number(e.target.value))}
+            className="w-full border rounded px-2 py-1"
+          />
+        </div>
+        <div>
+          <label htmlFor="maxPrice" className="block font-bold mb-1">
+            Max Price:
+          </label>
+          <input
+            id="maxPrice"
+            type="number"
+            value={filterMaxPrice}
+            onChange={(e) => setFilterMaxPrice(Number(e.target.value))}
+            className="w-full border rounded px-2 py-1"
+          />
+        </div>
+
+        <h2 className="font-bold mb-2 my-2">Items</h2>
+        <Select
+          isMulti
+          options={itemNameSelectOptions}
+          onChange={handleItemNameFilterChange}
+          placeholder="Select item names..."
+        />
+
+        <h2 className="font-bold mb-2 my-2">Tags</h2>
+        <Select
+          isMulti
+          options={itemTagSelectOptions}
+          onChange={handleTagFilterChange}
+          placeholder="Select tags..."
+        />
+
+        <h2 className="font-bold mb-2 my-2">Effects</h2>
+        <Select
+          isMulti
+          options={itemEffectSelectOptions}
+          onChange={handleEffectFilterChange}
+          placeholder="Select effects..."
+        />
+
       </aside>
 
       <div className="p-4 ml-8 flex items-center flex-col gap-y-2">
