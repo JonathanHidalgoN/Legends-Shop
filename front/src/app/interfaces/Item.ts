@@ -37,3 +37,13 @@ export interface Item {
   img: string;
   id: number;
 }
+
+export enum FilterItemSortField {
+  PRICE = "Price",
+  NAME = "Name",
+}
+
+export enum FilterSortOrder {
+  ASC = "asc",
+  DESC = "desc",
+}
