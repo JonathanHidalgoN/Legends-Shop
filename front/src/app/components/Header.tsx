@@ -19,6 +19,7 @@ import { CartItem } from "../interfaces/Order";
 import { getAddedCartItemsRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import LoginForm from "./LoginForm";
+import LoadingButton from "./LoadingButton";
 
 export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut, login } = useAuthContext();
@@ -31,6 +32,7 @@ export default function Header({ items }: { items: Item[] }) {
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<LoginError | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
@@ -90,6 +92,12 @@ export default function Header({ items }: { items: Item[] }) {
       document.removeEventListener("mousedown", handleClick);
     };
   }, [userName]);
+
+  const handleNavigation = async (path: string) => {
+    setIsNavigating(true);
+    await router.push(path);
+    setIsNavigating(false);
+  };
 
   return (
     <header
@@ -160,13 +168,14 @@ export default function Header({ items }: { items: Item[] }) {
           )}
         </div>
         <div className="relative">
-          <button
+          <LoadingButton
             onClick={() => setShowCartDropdown((prev) => !prev)}
+            isLoading={false}
             className="px-4 py-2 rounded-lg flex items-center hover:bg-[var(--pink1)] transition-all duration-200
             bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
           >
             Car
-          </button>
+          </LoadingButton>
           {showCartDropdown && (
             <div
               ref={carDropDownRef}
@@ -176,17 +185,18 @@ export default function Header({ items }: { items: Item[] }) {
               {carItems.length > 0 ? (
                 <>
                   <CarDropDown tiny={true} />
-                  <button
+                  <LoadingButton
+                    onClick={() => {
+                      handleNavigation("/order/make_order/");
+                      setShowCartDropdown(false);
+                    }}
+                    isLoading={isNavigating}
                     className="mt-4 bg-[var(--orange)] 
                     text-[var(--white)] rounded-lg hover:bg-[var(--pink1)] 
                     transition-all duration-200 w-full py-2 shadow-sm hover:shadow-md"
-                    onClick={() => {
-                      router.push("/order/make_order/");
-                      setShowCartDropdown(false);
-                    }}
                   >
                     Order now!
-                  </button>
+                  </LoadingButton>
                 </>
               ) : (
                 <div className="text-center text-gray-500 py-4">Cart is empty</div>
@@ -198,12 +208,14 @@ export default function Header({ items }: { items: Item[] }) {
         {userName && (
           <div className="relative">
             {isMounted ? (
-              <Link href={`/order/order_history/${userName}`}>
-                <button className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200 
-                bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md">
-                  Orders
-                </button>
-              </Link>
+              <LoadingButton
+                onClick={() => handleNavigation(`/order/order_history/${userName}`)}
+                isLoading={isNavigating}
+                className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200 
+                bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
+              >
+                Orders
+              </LoadingButton>
             ) : null}
           </div>
         )}
