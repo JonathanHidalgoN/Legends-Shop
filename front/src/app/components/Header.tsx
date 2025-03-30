@@ -18,6 +18,7 @@ import { getCurrentUserGold } from "../profileFunctions";
 import { CartItem } from "../interfaces/Order";
 import { getAddedCartItemsRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
+import LoginForm from "./LoginForm";
 
 export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut, login } = useAuthContext();
@@ -144,72 +145,14 @@ export default function Header({ items }: { items: Item[] }) {
           {!userName && showLoginDropdown && (
             <div ref={loginDropDownRef}>
               <div
-                className="absolute right-0 mt-2 w-40 p-2 
+                className="absolute right-0 mt-2 w-96 p-2 
               rounded shadow-lg bg-[var(--white)] z-10"
               >
-                <div className=" flex flex-col items-center justify-center p-4">
-                  <form
-                    onSubmit={handleLoginSubmit}
-                    className="w-full max-w-md space-y-4"
-                  >
-                    <div className="flex flex-col">
-                      <label
-                        htmlFor="username"
-                        className="mb-1 font-bold 
-            text-[var(--orange)]"
-                      >
-                        Username
-                      </label>
-                      <input
-                        id="username"
-                        placeholder="Username"
-                        name="username"
-                        value={formUserName}
-                        onChange={(e) => setFormUserName(e.target.value)}
-                        className={`border p-2 rounded ${loginError ? "border-red-500" : ""}`}
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <label
-                        htmlFor="password"
-                        className="mb-1 font-bold text-[var(--orange)]"
-                      >
-                        Password
-                      </label>
-                      <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        placeholder="Password"
-                        value={formPassword}
-                        onChange={(e) => setFormPassword(e.target.value)}
-                        className={`border p-2 rounded ${loginError ? "border-red-500" : ""}`}
-                      />
-                      {loginError && (
-                        <span className="text-red-500 text-sm mt-1">
-                          Incorrect user or password
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-center w-full">
-                      <button
-                        type="submit"
-                        className="w-full max-w-md bg-[var(--orange)] text-white py-1 rounded hover:opacity-80 transition"
-                      >
-                        Log In
-                      </button>
-                      <div className="my-2 text-center">Are you new?</div>
-                      <button
-                        onClick={() => {
-                          setShowLoginDropdown(false);
-                          router.push("/auth/singup/");
-                        }}
-                        className="w-full max-w-md bg-[var(--orange)] text-white py-1 rounded hover:opacity-80 transition"
-                      >
-                        Sign Up
-                      </button>
-                    </div>
-                  </form>
+                <div className="flex flex-col items-center justify-center p-4">
+                  <LoginForm 
+                    onSuccess={() => setShowLoginDropdown(false)}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
