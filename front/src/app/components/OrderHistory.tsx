@@ -135,172 +135,216 @@ export default function OrderHistory() {
 
   return (
     <div className="grid grid-cols-2 grid-cols-[17%_auto] gap-4 h-full">
-      <aside className="p-2 flex flex-col shadow-lg overflow-y-auto h-screen 
-        bg-[var(--white)] text-[var(--black)] sticky top-0">
-        <div className="p-4">
-          <h2 className="text-lg text-[var(--orange)] font-bold mb-2">Sort By</h2>
-          <div className="flex flex-col gap-2">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="sortField"
-                value={FilterSortField.PRICE}
-                checked={sortField === FilterSortField.PRICE}
-                onChange={handleSortFieldChange}
-              />
-              <span className="ml-2">Price</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="sortField"
-                value={FilterSortField.ORDERDATE}
-                checked={sortField === FilterSortField.ORDERDATE}
-                onChange={handleSortFieldChange}
-              />
-              <span className="ml-2">Order Date</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="sortField"
-                value={FilterSortField.DELIVERYDATE}
-                checked={sortField === FilterSortField.DELIVERYDATE}
-                onChange={handleSortFieldChange}
-              />
-              <span className="ml-2">Delivery Date</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="sortField"
-                value={FilterSortField.QUANTITY}
-                checked={sortField === FilterSortField.QUANTITY}
-                onChange={handleSortFieldChange}
-              />
-              <span className="ml-2">Quantity</span>
-            </label>
-          </div>
-
-          <h2 className="text-lg font-bold mt-4 mb-2 text-[var(--orange)]">Sort Order</h2>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="sortOrder"
-                value="asc"
-                checked={sortOrder === "asc"}
-                onChange={handleSortOrderChange}
-              />
-              <span className="ml-2">Ascending</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="sortOrder"
-                value="desc"
-                checked={sortOrder === "desc"}
-                onChange={handleSortOrderChange}
-              />
-              <span className="ml-2">Descending</span>
-            </label>
-          </div>
-        </div>
-
-        <h2 className="font-bold mb-2 text-[var(--orange)]">Order status</h2>
-        <select
-          className="p-2 border rounded bg-[var(--white)]"
-          value={filterOrderStatus}
-          onChange={(e) => setFilterOrderStatus(e.target.value as OrderStatus)}
-        >
-          <option key={"ALL"} value={"ALL"}>
-            {"ALL"}
-          </option>
-          {Object.values(OrderStatus).map((status: string) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-
-        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Items</h2>
-        <Select
-          isMulti
-          options={itemNameSelectOptions}
-          onChange={handleItemNameFilterChange}
-          placeholder="Select item names..."
-        />
-
-        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Order Date</h2>
-        <div className="flex gap-4">
+      <aside className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0 rounded-lg">
+        <div className="space-y-6">
           <div>
-            <label className="block font-semibold">From</label>
-            <input
-              className="border rounded bg-[var(--white)] p-1"
-              type="date"
-              value={filterMinOrderDate.toISOString().substring(0, 10)}
-              onChange={(e) => setFilterMinOrderDate(new Date(e.target.value))}
+            <h2 className="text-lg text-[var(--orange)] font-bold mb-4">Sort By</h2>
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortField"
+                  value={FilterSortField.PRICE}
+                  checked={sortField === FilterSortField.PRICE}
+                  onChange={handleSortFieldChange}
+                  className="mr-2"
+                />
+                <span>Price</span>
+              </label>
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortField"
+                  value={FilterSortField.ORDERDATE}
+                  checked={sortField === FilterSortField.ORDERDATE}
+                  onChange={handleSortFieldChange}
+                  className="mr-2"
+                />
+                <span>Order Date</span>
+              </label>
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortField"
+                  value={FilterSortField.DELIVERYDATE}
+                  checked={sortField === FilterSortField.DELIVERYDATE}
+                  onChange={handleSortFieldChange}
+                  className="mr-2"
+                />
+                <span>Delivery Date</span>
+              </label>
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortField"
+                  value={FilterSortField.QUANTITY}
+                  checked={sortField === FilterSortField.QUANTITY}
+                  onChange={handleSortFieldChange}
+                  className="mr-2"
+                />
+                <span>Quantity</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-bold mb-4 text-[var(--orange)]">Sort Order</h2>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortOrder"
+                  value="asc"
+                  checked={sortOrder === "asc"}
+                  onChange={handleSortOrderChange}
+                  className="mr-2"
+                />
+                <span>Ascending</span>
+              </label>
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortOrder"
+                  value="desc"
+                  checked={sortOrder === "desc"}
+                  onChange={handleSortOrderChange}
+                  className="mr-2"
+                />
+                <span>Descending</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Order Status</h2>
+            <select
+              className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                transition-colors duration-200"
+              value={filterOrderStatus}
+              onChange={(e) => setFilterOrderStatus(e.target.value as OrderStatus)}
+            >
+              <option key={"ALL"} value={"ALL"}>
+                {"ALL"}
+              </option>
+              {Object.values(OrderStatus).map((status: string) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Items</h2>
+            <Select
+              isMulti
+              options={itemNameSelectOptions}
+              onChange={handleItemNameFilterChange}
+              placeholder="Select item names..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderColor: 'var(--orange)',
+                  '&:hover': {
+                    borderColor: 'var(--pink1)',
+                  },
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
+                  color: state.isSelected ? 'white' : 'black',
+                  '&:hover': {
+                    backgroundColor: 'var(--pink1)',
+                  },
+                }),
+              }}
             />
           </div>
-          <div>
-            <label className="block font-semibold">To</label>
-            <input
-              className="border rounded bg-[var(--white)] p-1"
-              type="date"
-              value={filterMaxOrderDate.toISOString().substring(0, 10)}
-              onChange={(e) => setFilterMaxOrderDate(new Date(e.target.value))}
-            />
-          </div>
-        </div>
 
-        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Delivery Date</h2>
-        <div className="flex gap-4">
           <div>
-            <label className="block font-semibold">From</label>
-            <input
-              className="border rounded bg-[var(--white)] p-1"
-              type="date"
-              value={filterMinDeliveryDate.toISOString().substring(0, 10)}
-              onChange={(e) =>
-                setFilterMinDeliveryDate(new Date(e.target.value))
-              }
-            />
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Order Date</h2>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block font-semibold mb-1">From</label>
+                <input
+                  className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                    focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                    transition-colors duration-200"
+                  type="date"
+                  value={filterMinOrderDate.toISOString().substring(0, 10)}
+                  onChange={(e) => setFilterMinOrderDate(new Date(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">To</label>
+                <input
+                  className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                    focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                    transition-colors duration-200"
+                  type="date"
+                  value={filterMaxOrderDate.toISOString().substring(0, 10)}
+                  onChange={(e) => setFilterMaxOrderDate(new Date(e.target.value))}
+                />
+              </div>
+            </div>
           </div>
+
           <div>
-            <label className="block font-semibold">To</label>
-            <input
-              className="border rounded bg-[var(--white)] p-1"
-              type="date"
-              value={filterMaxDeliveryDate.toISOString().substring(0, 10)}
-              onChange={(e) =>
-                setFilterMaxDeliveryDate(new Date(e.target.value))
-              }
-            />
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Delivery Date</h2>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block font-semibold mb-1">From</label>
+                <input
+                  className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                    focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                    transition-colors duration-200"
+                  type="date"
+                  value={filterMinDeliveryDate.toISOString().substring(0, 10)}
+                  onChange={(e) => setFilterMinDeliveryDate(new Date(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">To</label>
+                <input
+                  className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                    focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                    transition-colors duration-200"
+                  type="date"
+                  value={filterMaxDeliveryDate.toISOString().substring(0, 10)}
+                  onChange={(e) => setFilterMaxDeliveryDate(new Date(e.target.value))}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </aside>
 
       {orders && (
-        <div className="flex flex-col items-center gap-4 p-4">
+        <div className="flex flex-col items-center gap-6 p-4">
           {paginatedOrders.length > 0 ? (
             <>
               {paginatedOrders.map((order) => (
                 <OrderHistoryCard key={order.id} order={order} />
               ))}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-4">
+                <div className="flex justify-center items-center gap-4 mt-6">
                   <button
                     onClick={() => {
                       setCurrentPage((prev) => Math.max(prev - 1, 1));
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
-                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                    shadow-sm hover:shadow-md"
                   >
                     Previous
                   </button>
-                  <span className="text-gray-600">
+                  <span className="text-gray-600 font-medium">
                     Page {currentPage} of {totalPages}
                   </span>
                   <button
@@ -309,8 +353,9 @@ export default function OrderHistory() {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
-                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                    shadow-sm hover:shadow-md"
                   >
                     Next
                   </button>
@@ -318,7 +363,9 @@ export default function OrderHistory() {
               )}
             </>
           ) : (
-            <div className="text-center text-gray-500 py-8">No orders found.</div>
+            <div className="text-center text-gray-500 py-12 text-lg">
+              No orders found matching your criteria.
+            </div>
           )}
         </div>
       )}
