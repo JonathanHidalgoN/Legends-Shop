@@ -11,14 +11,16 @@ export default function SelectedItems({
   items,
   tags,
   effects,
+  initialSearch,
 }: {
   items: Item[];
   tags: string[];
   effects: string[];
+  initialSearch?: string | null;
 }) {
   const maxPrice = Math.max(...items.map((item) => item.gold.base));
   const minPrice = Math.min(...items.map((item) => item.gold.base));
-  const [filterItemNames, setFilterItemName] = useState<string[]>([]);
+  const [filterItemNames, setFilterItemName] = useState<string[]>(initialSearch ? [initialSearch] : []);
   const [filterMinPrice, setFilterMinPrice] = useState<number>(minPrice);
   const [filterMaxPrice, setFilterMaxPrice] = useState<number>(maxPrice);
   const [filterTagNames, setFilterTagNames] = useState<string[]>([]);
@@ -31,6 +33,13 @@ export default function SelectedItems({
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
+
+  // Update filterItemNames when initialSearch changes
+  useEffect(() => {
+    if (initialSearch) {
+      setFilterItemName([initialSearch]);
+    }
+  }, [initialSearch]);
 
   const itemNameSelectOptions: OptionType[] = items.map((item) => ({
     value: item.name,
@@ -104,7 +113,9 @@ export default function SelectedItems({
         checkItemsAttributeInFilterList(item.tags, filterTagNames) &&
         (filterItemNames.length == 0
           ? true
-          : filterItemNames.includes(item.name)) &&
+          : filterItemNames.some(name => 
+              item.name.toLowerCase().includes(name.toLowerCase())
+            )) &&
         item.gold.base <= filterMaxPrice &&
         item.gold.base >= filterMinPrice,
     )
@@ -222,7 +233,7 @@ export default function SelectedItems({
         <Select
           isMulti
           options={itemNameSelectOptions}
-          onChange={handleItemNameFilterChange}
+          onChange={handleItemNameFilterChange as any}
           placeholder="Select item names..."
         />
 
@@ -230,7 +241,7 @@ export default function SelectedItems({
         <Select
           isMulti
           options={itemTagSelectOptions}
-          onChange={handleTagFilterChange}
+          onChange={handleTagFilterChange as any}
           placeholder="Select tags..."
         />
 
@@ -238,7 +249,7 @@ export default function SelectedItems({
         <Select
           isMulti
           options={itemEffectSelectOptions}
-          onChange={handleEffectFilterChange}
+          onChange={handleEffectFilterChange as any}
           placeholder="Select effects..."
         />
       </aside>
