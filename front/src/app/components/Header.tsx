@@ -94,11 +94,11 @@ export default function Header({ items }: { items: Item[] }) {
   return (
     <header
       className="w-full flex items-center justify-between p-4 
-      bg-[var(--white2)]"
+      bg-[var(--white2)] shadow-md sticky top-0 z-50"
     >
       <div
-        className={`text-xl ${sigmar.className} ml-12 mr-12
-                    bg-[var(--white2)] text-[var(--orange)]`}
+        className={`text-2xl ${sigmar.className} ml-12 mr-12
+                    bg-[var(--white2)] text-[var(--orange)] hover:text-[var(--pink1)] transition-colors duration-200`}
       >
         <Link href="/">Legends Shop</Link>
       </div>
@@ -106,28 +106,29 @@ export default function Header({ items }: { items: Item[] }) {
         <SearchBar items={items} />
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-6">
         <div className="relative">
           <button
             onClick={() => {
               setShowLoginDropdown((prev) => !prev);
             }}
-            className="p-2 rounded hover:opacity-80 transition
-            bg-[var(--orange)] text-[var(--white)]"
+            className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200
+            bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
           >
             {userName ? "Welcome " + userName : "Login"}
           </button>
           {userName && showLoginDropdown && (
             <div
               ref={loginDropDownRef}
-              className="absolute right-0 mt-2 w-40 p-2 rounded shadow-lg bg-white z-10"
+              className="absolute right-0 mt-2 w-48 p-2 rounded-lg shadow-lg bg-white z-10 
+              transform transition-all duration-200 ease-in-out"
             >
               <button
                 onClick={() => {
                   router.push(`/profile/${userName}`);
                   setShowLoginDropdown(false);
                 }}
-                className="block w-full text-left px-2 py-1 hover:bg-gray-100"
+                className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors duration-150"
               >
                 Profile
               </button>
@@ -136,7 +137,7 @@ export default function Header({ items }: { items: Item[] }) {
                   logOut();
                   setShowLoginDropdown(false);
                 }}
-                className="block w-full text-left px-2 py-1 hover:bg-gray-100"
+                className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors duration-150"
               >
                 Logout
               </button>
@@ -145,10 +146,10 @@ export default function Header({ items }: { items: Item[] }) {
           {!userName && showLoginDropdown && (
             <div ref={loginDropDownRef}>
               <div
-                className="absolute right-0 mt-2 w-96 p-2 
-              rounded shadow-lg bg-[var(--white)] z-10"
+                className="absolute right-0 mt-2 w-96 p-4 
+                rounded-lg shadow-lg bg-[var(--white)] z-10 transform transition-all duration-200 ease-in-out"
               >
-                <div className="flex flex-col items-center justify-center p-4">
+                <div className="flex flex-col items-center justify-center">
                   <LoginForm 
                     onSuccess={() => setShowLoginDropdown(false)}
                     className="w-full"
@@ -161,23 +162,24 @@ export default function Header({ items }: { items: Item[] }) {
         <div className="relative">
           <button
             onClick={() => setShowCartDropdown((prev) => !prev)}
-            className="p-2 rounded flex items-center hover:opacity-80 transition
-            bg-[var(--orange)] text-[var(--white)]"
+            className="px-4 py-2 rounded-lg flex items-center hover:bg-[var(--pink1)] transition-all duration-200
+            bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
           >
             Car
           </button>
           {showCartDropdown && (
             <div
               ref={carDropDownRef}
-              className="absolute right-2 mt-2 w-96 p-2 rounded shadow-lg bg-white z-10"
+              className="absolute right-2 mt-2 w-96 p-4 rounded-lg shadow-lg bg-white z-10 
+              transform transition-all duration-200 ease-in-out"
             >
               {carItems.length > 0 ? (
                 <>
                   <CarDropDown tiny={true} />
                   <button
-                    className="mt-2 bg-[var(--orange)] 
-                    text-[var(--white)] rounded hover:bg-[var(--pink1)] 
-                    transition-colors w-full"
+                    className="mt-4 bg-[var(--orange)] 
+                    text-[var(--white)] rounded-lg hover:bg-[var(--pink1)] 
+                    transition-all duration-200 w-full py-2 shadow-sm hover:shadow-md"
                     onClick={() => {
                       router.push("/order/make_order/");
                       setShowCartDropdown(false);
@@ -187,7 +189,7 @@ export default function Header({ items }: { items: Item[] }) {
                   </button>
                 </>
               ) : (
-                <div className="text-center text-xs">Cart is empty</div>
+                <div className="text-center text-gray-500 py-4">Cart is empty</div>
               )}
             </div>
           )}
@@ -197,7 +199,8 @@ export default function Header({ items }: { items: Item[] }) {
           <div className="relative">
             {isMounted ? (
               <Link href={`/order/order_history/${userName}`}>
-                <button className="p-2 rounded hover:opacity-80 transition bg-[var(--orange)] text-[var(--white)]">
+                <button className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200 
+                bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md">
                   Orders
                 </button>
               </Link>
@@ -206,7 +209,7 @@ export default function Header({ items }: { items: Item[] }) {
         )}
 
         {userName && currentGold != null && (
-          <div className="flex items-center border border-yellow-500 bg-white rounded p-2">
+          <div className="flex items-center border-2 border-yellow-500 bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-all duration-200">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-yellow-500 mr-2"
