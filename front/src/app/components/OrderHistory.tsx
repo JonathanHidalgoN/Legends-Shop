@@ -10,7 +10,7 @@ import {
 import { APIOrderResponse } from "../interfaces/APIResponse";
 import { mapAPIOrderResponseToOrder } from "../mappers";
 import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
@@ -44,6 +44,8 @@ export default function OrderHistory() {
     FilterSortOrder.DESC,
   );
   const [filterItemNames, setFilterItemName] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const ordersPerPage = 5;
 
   const { data, error } = useSWR<APIOrderResponse[]>(
     ["orders-client", "client"],
@@ -53,7 +55,11 @@ export default function OrderHistory() {
   useErrorRedirect(error);
 
   if (!data || error) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
+      </div>
+    );
   }
 
   function orderMatchItemNames(
@@ -100,6 +106,17 @@ export default function OrderHistory() {
       }
       return sortOrder === FilterSortOrder.DESC ? -comparison : comparison;
     });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const paginatedOrders = orders.slice(startIndex, startIndex + ordersPerPage);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterOrderStatus, filterMinOrderDate, filterMaxOrderDate, filterMinDeliveryDate, filterMaxDeliveryDate, filterItemNames, sortField, sortOrder]);
+
   function handleItemNameFilterChange(
     selectedNames: MultiValue<OptionType>,
     _actionMeta: ActionMeta<OptionType>,
@@ -116,13 +133,12 @@ export default function OrderHistory() {
     setSortOrder(e.target.value as FilterSortOrder);
   };
 
-  if (!data) return <div>Loading...</div>;
-
   return (
     <div className="grid grid-cols-2 grid-cols-[17%_auto] gap-4 h-full">
-      <aside className="p-2 flex h-screen flex-col shadow-lg bg-[var(--white)] text-[var(--black)]">
+      <aside className="p-2 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0">
         <div className="p-4">
-          <h2 className="text-lg font-bold mb-2">Sort By</h2>
+          <h2 className="text-lg text-[var(--orange)] font-bold mb-2">Sort By</h2>
           <div className="flex flex-col gap-2">
             <label className="flex items-center">
               <input
@@ -166,7 +182,7 @@ export default function OrderHistory() {
             </label>
           </div>
 
-          <h2 className="text-lg font-bold mt-4 mb-2">Sort Order</h2>
+          <h2 className="text-lg font-bold mt-4 mb-2 text-[var(--orange)]">Sort Order</h2>
           <div className="flex items-center gap-4">
             <label className="flex items-center">
               <input
@@ -191,9 +207,9 @@ export default function OrderHistory() {
           </div>
         </div>
 
-        <h2 className="font-bold mb-2">Order status</h2>
+        <h2 className="font-bold mb-2 text-[var(--orange)]">Order status</h2>
         <select
-          className="p-2 border rounded  bg-[var(--white)]"
+          className="p-2 border rounded bg-[var(--white)]"
           value={filterOrderStatus}
           onChange={(e) => setFilterOrderStatus(e.target.value as OrderStatus)}
         >
@@ -207,7 +223,7 @@ export default function OrderHistory() {
           ))}
         </select>
 
-        <h2 className="font-bold mb-2 my-2">Items</h2>
+        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Items</h2>
         <Select
           isMulti
           options={itemNameSelectOptions}
@@ -215,7 +231,7 @@ export default function OrderHistory() {
           placeholder="Select item names..."
         />
 
-        <h2 className="font-bold mb-2 my-2">Order Date</h2>
+        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Order Date</h2>
         <div className="flex gap-4">
           <div>
             <label className="block font-semibold">From</label>
@@ -237,7 +253,7 @@ export default function OrderHistory() {
           </div>
         </div>
 
-        <h2 className="font-bold mb-2 my-2">Delivery Date</h2>
+        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Delivery Date</h2>
         <div className="flex gap-4">
           <div>
             <label className="block font-semibold">From</label>
@@ -266,12 +282,43 @@ export default function OrderHistory() {
 
       {orders && (
         <div className="flex flex-col items-center gap-4 p-4">
-          {orders.length > 0 ? (
-            orders.map((order) => (
-              <OrderHistoryCard key={order.id} order={order} />
-            ))
+          {paginatedOrders.length > 0 ? (
+            <>
+              {paginatedOrders.map((order) => (
+                <OrderHistoryCard key={order.id} order={order} />
+              ))}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-4">
+                  <button
+                    onClick={() => {
+                      setCurrentPage((prev) => Math.max(prev - 1, 1));
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
-            <div>No orders found.</div>
+            <div className="text-center text-gray-500 py-8">No orders found.</div>
           )}
         </div>
       )}
