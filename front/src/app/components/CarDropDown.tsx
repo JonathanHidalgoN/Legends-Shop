@@ -83,8 +83,8 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
               >
                 +
               </button>
-              <div className="w-8 text-center">
-                <span className="text-sm">{summary.count}</span>
+              <div className="w-8 text-center bg-gray-100 rounded px-2 py-1">
+                <span className="text-sm font-medium">×{summary.count}</span>
               </div>
               <button
                 onClick={() => deleteOneItemFromCar(summary.itemSample)}
@@ -98,8 +98,8 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
               >
                 -
               </button>
-              <span className="text-base font-bold whitespace-nowrap w-16">
-                {summary.total} g
+              <span className="text-base font-bold whitespace-nowrap w-16 text-[var(--yellow)]">
+                {summary.total.toLocaleString()} g
               </span>
             </div>
           </div>
@@ -109,9 +109,9 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
       {!tiny && (
         <div className="mt-6 border-t pt-4">
           <div className="flex justify-between mb-4">
-            <span className="font-bold">Total:</span>
-            <span className="font-bold text-[var(--yellow)]">
-              {totalCost} g
+            <span className="font-bold text-lg">Total:</span>
+            <span className="font-bold text-lg text-[var(--yellow)]">
+              {totalCost.toLocaleString()} g
             </span>
           </div>
         </div>
