@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, RefObject } from "react";
 import Link from "next/link";
 import { Item } from "../interfaces/Item";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 function getItemMatches(query: string, items: Item[]): Item[] {
   if (query.length > 0) {
@@ -19,6 +20,7 @@ export default function SearchBar({ items }: { items: Item[] }) {
   const [suggestions, setSuggestions] = useState<Item[]>([]);
   const containerRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Update suggestions based on the query and items
   useEffect(() => {
@@ -54,16 +56,28 @@ export default function SearchBar({ items }: { items: Item[] }) {
     }
   }
 
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/items?search=${encodeURIComponent(query.trim())}`);
+      setQuery("");
+      setSuggestions([]);
+    }
+  };
+
   return (
     <div className="relative" ref={containerRef}>
-      <input
-        type="text"
-        placeholder="Search items..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={handleFocus}
-        className="p-2 border rounded w-full"
-      />
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Search items..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={handleFocus}
+          className="p-2 border rounded w-full"
+        />
+      </form>
       {query.length > 0 && suggestions.length > 0 && (
         <ul className="absolute bg-white border mt-1 w-full max-h-60 overflow-y-auto z-10 shadow-lg">
           {suggestions.map((item: Item, idx: number) => (
