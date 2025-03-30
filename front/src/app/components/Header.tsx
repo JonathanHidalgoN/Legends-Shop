@@ -131,15 +131,16 @@ export default function Header({ items }: { items: Item[] }) {
               className="absolute right-0 mt-2 w-48 p-2 rounded-lg shadow-lg bg-white z-10 
               transform transition-all duration-200 ease-in-out"
             >
-              <button
+              <LoadingButton
                 onClick={() => {
-                  router.push(`/profile/${userName}`);
+                  handleNavigation(`/profile/${userName}`);
                   setShowLoginDropdown(false);
                 }}
+                isLoading={isNavigating}
                 className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors duration-150"
               >
                 Profile
-              </button>
+              </LoadingButton>
               <button
                 onClick={() => {
                   logOut();
