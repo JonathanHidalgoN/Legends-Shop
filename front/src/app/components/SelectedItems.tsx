@@ -152,126 +152,204 @@ export default function SelectedItems({
 
   return (
     <div className="grid grid-cols-2 grid-cols-[13%_80%] gap-4 h-full">
-      <aside
-        className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
-        bg-[var(--white)] text-[var(--black)] sticky top-0"
-      >
-        <h2 className="text-lg text-[var(--orange)] font-bold mb-2">Sort By</h2>
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="sortField"
-              value={FilterItemSortField.PRICE}
-              checked={sortField === FilterItemSortField.PRICE}
-              onChange={handleSortItemFieldChange}
+      <aside className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0 rounded-lg">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg text-[var(--orange)] font-bold mb-4">Sort By</h2>
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortField"
+                  value={FilterItemSortField.PRICE}
+                  checked={sortField === FilterItemSortField.PRICE}
+                  onChange={handleSortItemFieldChange}
+                  className="mr-2"
+                />
+                <span>Price</span>
+              </label>
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortField"
+                  value={FilterItemSortField.NAME}
+                  checked={sortField === FilterItemSortField.NAME}
+                  onChange={handleSortItemFieldChange}
+                  className="mr-2"
+                />
+                <span>Name</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-bold mb-4 text-[var(--orange)]">Sort Order</h2>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortOrder"
+                  value="asc"
+                  checked={sortOrder === "asc"}
+                  onChange={handleSortOrderChange}
+                  className="mr-2"
+                />
+                <span>Ascending</span>
+              </label>
+              <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
+                <input
+                  type="radio"
+                  name="sortOrder"
+                  value="desc"
+                  checked={sortOrder === "desc"}
+                  onChange={handleSortOrderChange}
+                  className="mr-2"
+                />
+                <span>Descending</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Price Range</h2>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block font-semibold mb-1">Min Price</label>
+                <input
+                  id="minPrice"
+                  type="number"
+                  value={filterMinPrice}
+                  onChange={(e) => setFilterMinPrice(Number(e.target.value))}
+                  className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                    focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                    transition-colors duration-200"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Max Price</label>
+                <input
+                  id="maxPrice"
+                  type="number"
+                  value={filterMaxPrice}
+                  onChange={(e) => setFilterMaxPrice(Number(e.target.value))}
+                  className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
+                    focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
+                    transition-colors duration-200"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Items</h2>
+            <Select
+              isMulti
+              options={itemNameSelectOptions}
+              onChange={handleItemNameFilterChange as any}
+              placeholder="Select item names..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderColor: 'var(--orange)',
+                  '&:hover': {
+                    borderColor: 'var(--pink1)',
+                  },
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
+                  color: state.isSelected ? 'white' : 'black',
+                  '&:hover': {
+                    backgroundColor: 'var(--pink1)',
+                  },
+                }),
+              }}
             />
-            <span className="ml-2 ">Price</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="sortField"
-              value={FilterItemSortField.NAME}
-              checked={sortField === FilterItemSortField.NAME}
-              onChange={handleSortItemFieldChange}
+          </div>
+
+          <div>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Tags</h2>
+            <Select
+              isMulti
+              options={itemTagSelectOptions}
+              onChange={handleTagFilterChange as any}
+              placeholder="Select tags..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderColor: 'var(--orange)',
+                  '&:hover': {
+                    borderColor: 'var(--pink1)',
+                  },
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
+                  color: state.isSelected ? 'white' : 'black',
+                  '&:hover': {
+                    backgroundColor: 'var(--pink1)',
+                  },
+                }),
+              }}
             />
-            <span className="ml-2">Name</span>
-          </label>
-        </div>
+          </div>
 
-        <h2 className="text-lg font-bold mt-4 mb-2 text-[var(--orange)]">Sort Order</h2>
-        <div className="flex items-center gap-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="sortOrder"
-              value="asc"
-              checked={sortOrder === "asc"}
-              onChange={handleSortOrderChange}
+          <div>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">Effects</h2>
+            <Select
+              isMulti
+              options={itemEffectSelectOptions}
+              onChange={handleEffectFilterChange as any}
+              placeholder="Select effects..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderColor: 'var(--orange)',
+                  '&:hover': {
+                    borderColor: 'var(--pink1)',
+                  },
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
+                  color: state.isSelected ? 'white' : 'black',
+                  '&:hover': {
+                    backgroundColor: 'var(--pink1)',
+                  },
+                }),
+              }}
             />
-            <span className="ml-2">Ascending</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="sortOrder"
-              value="desc"
-              checked={sortOrder === "desc"}
-              onChange={handleSortOrderChange}
-            />
-            <span className="ml-2">Descending</span>
-          </label>
+          </div>
         </div>
-
-        <div className="mt-4">
-          <label htmlFor="minPrice" className="block font-bold mb-1 text-[var(--orange)]">
-            Min Price:
-          </label>
-          <input
-            id="minPrice"
-            type="number"
-            value={filterMinPrice}
-            onChange={(e) => setFilterMinPrice(Number(e.target.value))}
-            className="w-full border rounded px-2 py-1"
-          />
-        </div>
-        <div>
-          <label htmlFor="maxPrice" className="block font-bold mb-1 text-[var(--orange)]">
-            Max Price:
-          </label>
-          <input
-            id="maxPrice"
-            type="number"
-            value={filterMaxPrice}
-            onChange={(e) => setFilterMaxPrice(Number(e.target.value))}
-            className="w-full border rounded px-2 py-1"
-          />
-        </div>
-
-        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Items</h2>
-        <Select
-          isMulti
-          options={itemNameSelectOptions}
-          onChange={handleItemNameFilterChange as any}
-          placeholder="Select item names..."
-        />
-
-        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Tags</h2>
-        <Select
-          isMulti
-          options={itemTagSelectOptions}
-          onChange={handleTagFilterChange as any}
-          placeholder="Select tags..."
-        />
-
-        <h2 className="font-bold mb-2 my-2 text-[var(--orange)]">Effects</h2>
-        <Select
-          isMulti
-          options={itemEffectSelectOptions}
-          onChange={handleEffectFilterChange as any}
-          placeholder="Select effects..."
-        />
       </aside>
 
-      <div className="p-4 ml-8 flex items-center flex-col gap-y-2">
+      <div className="p-4 ml-8 flex items-center flex-col gap-y-4">
         {paginatedItems.map((item, index) => (
           <ItemPreView key={index} item={item} />
         ))}
 
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-4">
+          <div className="flex justify-center items-center gap-4 mt-6">
             <button
               onClick={() => {
                 setCurrentPage((prev) => Math.max(prev - 1, 1));
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+              className="px-6 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-sm hover:shadow-md"
             >
               Previous
             </button>
-            <span>
+            <span className="text-gray-600 font-medium">
               Page {currentPage} of {totalPages}
             </span>
             <button
@@ -280,7 +358,9 @@ export default function SelectedItems({
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+              className="px-6 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-sm hover:shadow-md"
             >
               Next
             </button>
