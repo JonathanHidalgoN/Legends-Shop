@@ -10,6 +10,8 @@ import { CartItem } from "../interfaces/Order";
 import { getAddedCartItemsRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import { Item } from "../interfaces/Item";
+import { validateUsernameInput, validatePasswordInput } from "../functions";
+import { ValidationResult, defaultValidationResult } from "../interfaces/Errors";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -27,14 +29,17 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<LoginError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [validUsernameInput, setValidUsernameInput] = useState<ValidationResult>(defaultValidationResult);
+  const [validPasswordInput, setValidPasswordInput] = useState<ValidationResult>(defaultValidationResult);
 
   const validateForm = () => {
-    if (!formUserName.trim()) {
-      setLoginError(LoginError.INVALIDUSERNAME);
-      return false;
-    }
-    if (!formPassword) {
-      setLoginError(LoginError.INVALIDPASSWORD);
+    const usernameValidation = validateUsernameInput(formUserName);
+    const passwordValidation = validatePasswordInput(formPassword);
+    
+    setValidUsernameInput(usernameValidation);
+    setValidPasswordInput(passwordValidation);
+
+    if (!usernameValidation.valid || !passwordValidation.valid) {
       return false;
     }
     return true;
@@ -78,6 +83,8 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
         setFormUserName("");
         setFormPassword("");
         setLoginError(null);
+        setValidUsernameInput(defaultValidationResult);
+        setValidPasswordInput(defaultValidationResult);
         
         if (onSuccess) {
           onSuccess();
@@ -110,10 +117,16 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
           onChange={(e) => {
             setFormUserName(e.target.value);
             setLoginError(null);
+            setValidUsernameInput(validateUsernameInput(e.target.value));
           }}
-          className={`border p-2 rounded ${loginError ? "border-red-500" : ""}`}
+          className={`border p-2 rounded ${loginError || !validUsernameInput.valid ? "border-red-500" : ""}`}
           disabled={isLoading}
         />
+        {!validUsernameInput.valid && (
+          <span className="text-red-500 text-sm mt-1">
+            {validUsernameInput.msg}
+          </span>
+        )}
       </div>
       <div className="flex flex-col">
         <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
@@ -128,10 +141,16 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
           onChange={(e) => {
             setFormPassword(e.target.value);
             setLoginError(null);
+            setValidPasswordInput(validatePasswordInput(e.target.value));
           }}
-          className={`border p-2 rounded ${loginError ? "border-red-500" : ""}`}
+          className={`border p-2 rounded ${loginError || !validPasswordInput.valid ? "border-red-500" : ""}`}
           disabled={isLoading}
         />
+        {!validPasswordInput.valid && (
+          <span className="text-red-500 text-sm mt-1">
+            {validPasswordInput.msg}
+          </span>
+        )}
         {loginError && (
           <span className="text-red-500 text-sm mt-1">
             {loginError === LoginError.INCORRECTCREDENTIALS
@@ -148,7 +167,7 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
         <button
           type="submit"
           className="w-full bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition disabled:opacity-50"
-          disabled={isLoading}
+          disabled={isLoading || !validUsernameInput.valid || !validPasswordInput.valid}
         >
           {isLoading ? "Logging in..." : "Log In"}
         </button>
