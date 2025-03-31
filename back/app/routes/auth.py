@@ -25,6 +25,7 @@ from app.data.queries.authQueries import (
     getUserInDB,
     insertUser,
 )
+from app.data.queries.locationQueries import getLocationById
 from app.schemas.AuthSchemas import LogInError, SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
@@ -157,14 +158,13 @@ async def tokenRefresh(
 @router.post("/singup")
 async def singUp(
     request: Request,
-    # This ... makes required in fastapi
     username: str = Form(...),
     password: str = Form(...),
     email: str = Form(...),
     birthDate: str = Form(...),
+    location_id: int = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
-
     try:
         birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
         userInDB: UserInDB = UserInDB(
@@ -176,10 +176,12 @@ async def singUp(
             currentGold=99999,
             birthDate=birthDateDate,
             lastSingIn=datetime.now().date(),
+            location_id=location_id,
             password=password,
         )
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
+        locationExist: bool = await getLocationById(db, location_id) is not None
     except InvalidUserNameException as e:
         logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
@@ -259,6 +261,16 @@ async def singUp(
             detail="Email exist, change it",
             headers={
                 "X-Error-Type": SingUpError.EMAILEXIST,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
+    if not locationExist:
+        logger.error(f"Error in {request.url.path}, location {location_id} does not exist")
+        raise HTTPException(
+            status_code=400,
+            detail="Location does not exist",
+            headers={
+                "X-Error-Type": SingUpError.INVALIDLOCATION,
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
