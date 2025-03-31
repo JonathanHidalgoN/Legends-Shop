@@ -1,4 +1,3 @@
-from datetime import date
 from typing import List, Optional, Tuple
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
