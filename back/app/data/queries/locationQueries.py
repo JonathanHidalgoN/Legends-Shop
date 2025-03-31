@@ -51,28 +51,24 @@ async def getLocationByCountryName(asyncSession: AsyncSession, countryName: str)
     return result.scalar_one_or_none()
 
 
-async def createLocation(asyncSession: AsyncSession, countryName: str) -> LocationTable:
+async def createLocation(asyncSession: AsyncSession, countryName: str) -> None:
     """Create a new location."""
     location = LocationTable(country_name=countryName)
     asyncSession.add(location)
     await asyncSession.flush()
-    return location
 
 
-async def updateLocation(asyncSession: AsyncSession, locationId: int, newCountryName: str) -> Optional[LocationTable]:
+async def updateLocation(asyncSession: AsyncSession, locationId: int, newCountryName: str) -> None:
     """Update a location's country name."""
     location = await getLocationById(asyncSession, locationId)
     if location:
         location.country_name = newCountryName
         await asyncSession.flush()
-    return location
 
 
-async def deleteLocation(asyncSession: AsyncSession, locationId: int) -> bool:
+async def deleteLocation(asyncSession: AsyncSession, locationId: int) -> None:
     """Delete a location by its ID."""
     location = await getLocationById(asyncSession, locationId)
     if location:
         await asyncSession.delete(location)
-        await asyncSession.flush()
-        return True
-    return False 
+        await asyncSession.flush() 
