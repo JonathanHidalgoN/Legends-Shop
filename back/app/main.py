@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data import database
 from app.data.ItemsLoader import ItemsLoader
-from app.routes import items, auth, orders, profile, cart, deliveryDates
+from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 from app.logger import logger
@@ -45,6 +45,7 @@ app.include_router(orders.router, prefix="/orders")
 app.include_router(profile.router, prefix="/profile")
 app.include_router(cart.router, prefix="/cart")
 app.include_router(deliveryDates.router, prefix="/delivery_dates")
+app.include_router(locations.router, prefix="/locations")
 
 
 def getItemsLoader(
