@@ -90,3 +90,19 @@ class InvalidPasswordException(Exception):
 
 class CartProcessorException(Exception):
     pass
+
+
+class DeliveryDateAssignerException(Exception):
+    pass
+
+
+class LocationNotFoundException(DeliveryDateAssignerException):
+    pass
+
+
+class ItemNotFoundException(DeliveryDateAssignerException):
+    pass
+
+
+class DeliveryDateAssignmentError(DeliveryDateAssignerException):
+    pass
