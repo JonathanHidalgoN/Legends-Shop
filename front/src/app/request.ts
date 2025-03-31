@@ -6,6 +6,7 @@ import {
 } from "./interfaces/APIResponse";
 import { Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
+import { Location } from "./interfaces/Location";
 import { showErrorToast } from "./customToast";
 
 //TODO: how to improve this solution?
@@ -18,6 +19,7 @@ export const ENDPOINT_SOME_ITEMS: string = `items/some`;
 export const ENDPOINT_ALL_TAGS: string = `items/uniqueTags`;
 export const ENDPOINT_ALL_ITEM_NAMES: string = `items/item_names`;
 export const ENDPOINT_ALL_EFFECT_NAMES: string = `items/unique_effects`;
+export const ENDPOINT_ALL_LOCATIONS: string = `locations/all`;
 export const ENDPOINT_ORDER: string = `orders/order`;
 export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
@@ -312,6 +314,17 @@ export async function getAllEffectNamesRequest(
   const response = await fetch(url);
   if (!response.ok) {
     await throwAPIError(response, "Error fetching effect names");
+  }
+  return await response.json();
+}
+
+export async function getAllLocationsRequest(
+  from: string = "server",
+): Promise<Location[]> {
+  const url: string = makeUrl(from, ENDPOINT_ALL_LOCATIONS);
+  const response = await fetch(url);
+  if (!response.ok) {
+    await throwAPIError(response, "Error fetching locations");
   }
   return await response.json();
 }
