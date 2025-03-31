@@ -90,6 +90,7 @@ export async function singupRequest(
   password: string,
   email: string,
   birthDate: Date,
+  location_id: number,
   from: string = "server",
 ) {
   const url: string = makeUrl(from, ENDPOINT_SINGUP);
@@ -98,6 +99,7 @@ export async function singupRequest(
   formData.append("password", password);
   formData.append("email", email);
   formData.append("birthDate", birthDate.toISOString().substring(0, 10));
+  formData.append("location_id", location_id.toString());
   return await fetch(url, {
     method: "POST",
     headers: {
