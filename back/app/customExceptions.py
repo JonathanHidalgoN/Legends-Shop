@@ -96,13 +96,28 @@ class DeliveryDateAssignerException(Exception):
     pass
 
 
-class LocationNotFoundException(DeliveryDateAssignerException):
-    pass
-
-
 class ItemNotFoundException(DeliveryDateAssignerException):
     pass
 
 
 class DeliveryDateAssignmentError(DeliveryDateAssignerException):
     pass
+
+class LocationManagerException(Exception):
+    pass
+
+
+class LocationNotFoundException(LocationManagerException):
+    pass
+
+
+class LocationAlreadyExistsException(LocationManagerException):
+    pass
+
+
+class LocationUpdateError(LocationManagerException):
+    pass
+
+
+class LocationDeleteError(LocationManagerException):
+    pass 
