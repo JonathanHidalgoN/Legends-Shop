@@ -88,7 +88,7 @@ async def getLocation(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/", response_model=List[Location])
+@router.get("/all", response_model=List[Location])
 async def getAllLocations(
     manager: Annotated[LocationManager, Depends(getLocationManager)],
 ):
