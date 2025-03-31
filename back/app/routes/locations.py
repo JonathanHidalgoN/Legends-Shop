@@ -1,16 +1,15 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.location.LocationManager import LocationManager
 from app.customExceptions import (
-    LocationAlreadyExistsException,
     LocationDeleteError,
     LocationManagerException,
     LocationNotFoundException,
     LocationUpdateError,
 )
 from app.data import database
+from app.schemas.Location import Location
 
 router = APIRouter(
     prefix="/locations",
@@ -19,66 +18,84 @@ router = APIRouter(
 )
 
 
-def getLocationManager(
-    db: AsyncSession = Depends(database.getDbSession),
+async def getLocationManager(
+    dbSession: Annotated[AsyncSession, Depends(database.getDbSession)]
 ) -> LocationManager:
-    return LocationManager(db)
+    return LocationManager(dbSession)
 
 
 @router.post("/create", include_in_schema=False)
 async def createLocation(
     countryName: str,
-    manager: Annotated[LocationManager, Depends(getLocationManager)]
-) -> dict:
-    """Hidden endpoint to create a new location."""
+    manager: Annotated[LocationManager, Depends(getLocationManager)],
+):
+    """
+    Create a new location.
+    """
     try:
-        location = await manager.createLocation(countryName)
-        return {"message": f"Location '{location.country_name}' created successfully", "id": location.id}
-    except LocationAlreadyExistsException as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        await manager.createLocation(countryName)
+        return {"message": "Location created successfully"}
     except LocationManagerException as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.put("/{locationId}/update", include_in_schema=False)
 async def updateLocation(
     locationId: int,
-    newCountryName: str,
-    manager: Annotated[LocationManager, Depends(getLocationManager)]
-) -> dict:
-    """Hidden endpoint to update a location."""
+    countryName: str,
+    manager: Annotated[LocationManager, Depends(getLocationManager)],
+):
+    """
+    Update an existing location.
+    """
     try:
-        location = await manager.updateLocation(locationId, newCountryName)
-        return {"message": f"Location updated successfully to '{location.country_name}'"}
+        await manager.updateLocation(locationId, countryName)
+        return {"message": "Location updated successfully"}
     except LocationNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
     except LocationUpdateError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/{locationId}", include_in_schema=False)
 async def deleteLocation(
     locationId: int,
-    manager: Annotated[LocationManager, Depends(getLocationManager)]
-) -> dict:
-    """Hidden endpoint to delete a location."""
+    manager: Annotated[LocationManager, Depends(getLocationManager)],
+):
+    """
+    Delete a location.
+    """
     try:
         await manager.deleteLocation(locationId)
-        return {"message": f"Location with ID {locationId} deleted successfully"}
+        return {"message": "Location deleted successfully"}
     except LocationNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
     except LocationDeleteError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/{locationId}", include_in_schema=False)
+@router.get("/{locationId}", response_model=Location)
 async def getLocation(
     locationId: int,
-    manager: Annotated[LocationManager, Depends(getLocationManager)]
-) -> dict:
-    """Hidden endpoint to get a location by ID."""
+    manager: Annotated[LocationManager, Depends(getLocationManager)],
+):
+    """
+    Get a location by ID.
+    """
     try:
-        location = await manager.getLocation(locationId)
-        return {"id": location.id, "country_name": location.country_name}
+        return await manager.getLocation(locationId)
     except LocationNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e)) 
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/", response_model=List[Location])
+async def getAllLocations(
+    manager: Annotated[LocationManager, Depends(getLocationManager)],
+):
+    """
+    Get all locations.
+    """
+    try:
+        return await manager.getAllLocations()
+    except LocationManagerException as e:
+        raise HTTPException(status_code=400, detail=str(e)) 
