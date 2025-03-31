@@ -48,6 +48,7 @@ class User(BaseModel):
     goldSpend: Annotated[int, AfterValidator(isPositive)]
     currentGold: Annotated[int, AfterValidator(isPositive)]
     birthDate: date
+    location_id: int
     password: Annotated[Optional[str], AfterValidator(passwordValidation)] = None
 
 
@@ -73,6 +74,7 @@ class SingUpError(str, Enum):
     INVALIDUSERGOLD = "INVALIDUSERGOLD"
     INTERNALSERVERERROR = "INTERNALSERVERERROR"
     INVALIDPASSWORD = "INVALIDPASSWORD"
+    INVALIDLOCATION = "INVALIDLOCATION"
 
 
 class LogInError(str, Enum):
