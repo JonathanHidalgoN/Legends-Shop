@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Table
-from datetime import date
+from sqlalchemy import Column, Integer, ForeignKey, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.data.database import base
 from app.data.models.ItemTable import ItemTable
@@ -10,7 +9,7 @@ ItemLocationDeliveryAssociation = Table(
     base.metadata,
     Column("item_id", Integer, ForeignKey("item_table.id"), primary_key=True),
     Column("location_id", Integer, ForeignKey("location_table.id"), primary_key=True),
-    Column("delivery_date", Date, nullable=False),
+    Column("days_plus", Integer, nullable=False),
 )
 
 class DeliveryDatesTable(base):
@@ -21,10 +20,10 @@ class DeliveryDatesTable(base):
     )
     item_id: Mapped[int] = mapped_column(ForeignKey("item_table.id"), nullable=False)
     location_id: Mapped[int] = mapped_column(ForeignKey("location_table.id"), nullable=False)
-    delivery_date: Mapped[date] = mapped_column(nullable=False)
+    days_plus: Mapped[int] = mapped_column(nullable=False)
     
     item: Mapped["ItemTable"] = relationship("ItemTable")
     location: Mapped["LocationTable"] = relationship("LocationTable")
 
     def __repr__(self) -> str:
-        return f"<DeliveryDatesTable(id={self.id}, item_id={self.item_id}, location_id={self.location_id}, delivery_date={self.delivery_date!r})>" 
+        return f"<DeliveryDatesTable(id={self.id}, item_id={self.item_id}, location_id={self.location_id}, days_plus={self.days_plus!r})>" 
