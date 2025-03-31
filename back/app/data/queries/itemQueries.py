@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Sequence, Set, Tuple
 from sqlalchemy import Row, distinct, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -375,6 +375,12 @@ async def checkItemExist(asyncSession: AsyncSession, itemName: str):
         return False
     return True
 
+
+async def getAllItemIds(asyncSession: AsyncSession) -> Sequence[int]:
+    """Return a list of location IDs."""
+    result = await asyncSession.execute(select(ItemTable.id))
+    itemIds: Sequence[int] = result.scalars().all()
+    return itemIds
 
 # async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
 #     await asyncSession.execute(
