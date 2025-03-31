@@ -1,4 +1,4 @@
-from sqlalchemy import Date, Text, String
+from sqlalchemy import Date, ForeignKey, Text, String
 from sqlalchemy.orm import Mapped, mapped_column
 from app.data.database import base
 
@@ -15,3 +15,4 @@ class UserTable(base):
     current_gold: Mapped[int] = mapped_column(nullable=False, default=0)
     email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     birthdate: Mapped[Date] = mapped_column(Date, nullable=False)
+    location_id: Mapped[int] = mapped_column(ForeignKey("location_table.id"), nullable=False, default=1)
