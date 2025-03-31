@@ -28,6 +28,7 @@ interface AuthContextType {
     password: string,
     email: string,
     birthDate: Date,
+    location_id: number,
   ) => Promise<APISingupResponse>;
 }
 
@@ -140,6 +141,9 @@ export function AuthContextProvider({
         if (errorTypeHeader === SingupError.INVALIDPASSWORD) {
           errorType = SingupError.INVALIDPASSWORD;
         }
+        if (errorTypeHeader === SingupError.INVALIDLOCATION) {
+          errorType = SingupError.INVALIDLOCATION;
+        }
         return {
           status: response.status,
           errorType: errorType,
@@ -160,30 +164,17 @@ export function AuthContextProvider({
     password: string,
     email: string,
     birthDate: Date,
+    location_id: number,
   ): Promise<APISingupResponse> {
     const response = await singupRequest(
       userName,
       password,
       email,
       birthDate,
-      "client",
+      location_id,
     );
-    if (!response.ok) {
-      const data = await response.json();
-      const result: APISingupResponse = createAPIResponseSingup(response, data);
-      if (result.status == 400) {
-        showErrorToast(result.message);
-      } else if (result.status == 500) {
-        showErrorToast("Internal server error login");
-      } else {
-        showErrorToast("Unexpected error");
-      }
-      return result;
-    }
-    const result: APISingupResponse = createAPIResponseSingup(response, null);
-    toast.success(`Singup succesfully ${userName}!`);
-    await login(userName, password);
-    return result;
+    const data = await response.json();
+    return createAPIResponseSingup(response, data);
   }
 
   async function refreshToken(): Promise<void> {
