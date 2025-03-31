@@ -3,9 +3,11 @@ from app.data.models.OrderTable import OrderTable
 from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
+from app.data.models.LocationTable import LocationTable
 from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Item import Effects, Gold, Item, Stat
 from app.schemas.Order import CartItem, Order
+from app.schemas.Location import Location
 from app.data.models.CartTable import CartTable
 
 
@@ -108,3 +110,19 @@ def mapCartTableToCartItem(cartTable: CartTable) -> CartItem:
         id=cartTable.id, itemId=cartTable.item_id, status=cartTable.status
     )
     return cartItem
+
+
+def mapLocationToLocationTable(location: Location) -> LocationTable:
+    locationTable = LocationTable(
+        id=location.id,
+        country_name=location.country_name
+    )
+    return locationTable
+
+
+def mapLocationTableToLocation(locationTable: LocationTable) -> Location:
+    location = Location(
+        id=locationTable.id,
+        country_name=locationTable.country_name
+    )
+    return location
