@@ -17,6 +17,8 @@ from app.data.models.UserTable import UserTable
 from app.data.models.StatsMappingTable import StatsMappingTable
 from app.data.models.OrderTable import OrderTable
 from app.data.models.CartTable import CartTable
+from app.data.models.DeliveryDatesTable import DeliveryDatesTable 
+from app.data.models.LocationTable import LocationTable 
 
 from app.envVariables import DATABASE_ALEMBIC_URL
 
