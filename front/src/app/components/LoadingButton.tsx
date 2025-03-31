@@ -8,12 +8,12 @@ interface LoadingButtonProps {
   disabled?: boolean;
 }
 
-export default function LoadingButton({ 
-  onClick, 
-  isLoading, 
-  children, 
-  className = "", 
-  disabled = false 
+export default function LoadingButton({
+  onClick,
+  isLoading,
+  children,
+  className = "",
+  disabled = false
 }: LoadingButtonProps) {
   return (
     <button
