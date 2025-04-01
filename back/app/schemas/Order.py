@@ -32,6 +32,7 @@ class Order(BaseModel):
     orderDate: datetime
     deliveryDate: datetime
     status: OrderStatus
+    location_id: int
 
 
 class OrderDataPerItem(BaseModel):

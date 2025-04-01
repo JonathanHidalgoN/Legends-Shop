@@ -13,7 +13,7 @@ import { showErrorToast } from "@/app/customToast";
 import Image from "next/image";
 
 export default function OrderPage() {
-  const { carItems, getTotalCost, cleanCar, setCurrentGold, currentGold } =
+  const { carItems, getTotalCost, cleanCar, setCurrentGold, currentGold, currentLocation } =
     useCarContext();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<number | null>(null);
@@ -34,6 +34,8 @@ export default function OrderPage() {
   async function handleBuy() {
     if (!userName) {
       showErrorToast("Login to order");
+    } else if (!currentLocation) {
+      showErrorToast("Please select a delivery location");
     } else {
       const orderTotalCost: number = getTotalCost();
       const canBuy: boolean = checkIfcanBuy(orderTotalCost, currentGold);
@@ -49,6 +51,7 @@ export default function OrderPage() {
         id: 0,
         status: OrderStatus.PENDING,
         deliveryDate: new Date(),
+        locationId: currentLocation.id
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
