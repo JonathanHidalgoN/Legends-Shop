@@ -2,6 +2,7 @@ from typing import List, Sequence, Tuple, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.models.LocationTable import LocationTable
+from app.data.models.UserTable import UserTable
 
 
 async def getAllLocationIds(asyncSession: AsyncSession) -> Sequence[int]:
@@ -71,4 +72,14 @@ async def deleteLocation(asyncSession: AsyncSession, locationId: int) -> None:
     location = await getLocationById(asyncSession, locationId)
     if location:
         await asyncSession.delete(location)
-        await asyncSession.flush() 
+        await asyncSession.flush()
+
+
+async def getUserLocation(asyncSession: AsyncSession, userId: int) -> Optional[LocationTable]:
+    """Get a user's location by their user ID."""
+    result = await asyncSession.execute(
+        select(LocationTable)
+        .join(UserTable, UserTable.location_id == LocationTable.id)
+        .where(UserTable.id == userId)
+    )
+    return result.scalar_one_or_none() 
