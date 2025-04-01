@@ -1,5 +1,5 @@
 import random
-from typing import Sequence
+from typing import Dict, List, Sequence
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.models.DeliveryDatesTable import ItemLocationDeliveryAssociation
@@ -13,6 +13,7 @@ from app.data.queries.itemQueries import getAllItemIds
 from app.data.queries.locationQueries import getAllLocationIds
 from datetime import datetime, timedelta
 from app.schemas.DeliveryDate import DeliveryDate
+from app.data.queries.deliveryDatesQueries import getAllDeliveryDatesByLocationId
 
 
 class DeliveryDateAssigner:
@@ -24,29 +25,11 @@ class DeliveryDateAssigner:
         return random.randint(1, 14)
 
     @logMethod
-    async def getDeliveryDates(self, itemIds: list[int], locationId: int) -> list[DeliveryDate]:
+    async def getItemDeliveryDates(self, locationId: int) -> List[DeliveryDate]:
         """Get delivery dates for a list of items based on location."""
         try:
-            # Query the delivery dates for the given items and location
-            query = select(ItemLocationDeliveryAssociation).where(
-                ItemLocationDeliveryAssociation.item_id.in_(itemIds),
-                ItemLocationDeliveryAssociation.location_id == locationId
-            )
-            result = await self.dbSession.execute(query)
-            associations = result.scalars().all()
-
-            # Calculate delivery dates based on days_plus
-            today = datetime.now().date()
-            delivery_dates = []
-            for association in associations:
-                delivery_date = today + timedelta(days=association.days_plus)
-                delivery_dates.append(DeliveryDate(
-                    itemId=association.item_id,
-                    locationId=association.location_id,
-                    deliveryDate=delivery_date
-                ))
-
-            return delivery_dates
+            deliveryDates: List[DeliveryDate] = await getAllDeliveryDatesByLocationId(self.dbSession, locationId)
+            return deliveryDates 
 
         except Exception as e:
             raise DeliveryDateAssignerException(f"Failed to get delivery dates: {str(e)}")
