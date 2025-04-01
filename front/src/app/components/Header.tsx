@@ -9,29 +9,18 @@ import { useAuthContext } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import CarDropDown from "./CarDropDown";
 import { handleClickOutside } from "../functions";
-import {
-  APICartItemResponse,
-  APILoginResponse,
-  LoginError,
-} from "../interfaces/APIResponse";
-import { getCurrentUserGold } from "../profileFunctions";
-import { CartItem } from "../interfaces/Order";
-import { getAddedCartItemsRequest } from "../request";
-import { mapAPICartItemResponseToCartItem } from "../mappers";
 import LoginForm from "./LoginForm";
 import LoadingButton from "./LoadingButton";
+import { useStaticData } from "./StaticDataContext";
 
 export default function Header({ items }: { items: Item[] }) {
-  const { userName, logOut, login } = useAuthContext();
-  const { carItems, setCarItems, currentGold, setCurrentGold } =
-    useCarContext();
+  const { userName, logOut } = useAuthContext();
+  const { carItems, currentGold, currentLocation, setCurrentLocation } = useCarContext();
+  const { locations } = useStaticData();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [formUserName, setFormUserName] = useState<string>("");
-  const [formPassword, setFormPassword] = useState<string>("");
-  const [loginError, setLoginError] = useState<LoginError | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
@@ -40,46 +29,6 @@ export default function Header({ items }: { items: Item[] }) {
     useRef<HTMLDivElement>(null);
 
   const router = useRouter();
-
-  async function handleLoginSubmit(e: any): Promise<void> {
-    e.preventDefault();
-    const apiResponse: APILoginResponse = await login(
-      formUserName,
-      formPassword,
-    );
-    if (apiResponse.status === 200) {
-      const currentGold: number | null = await getCurrentUserGold();
-      if (!currentGold) {
-        apiResponse.errorType = LoginError.CURRENTGOLDERROR;
-      } else {
-        setCurrentGold(currentGold);
-      }
-      try {
-        const apiCartItems: APICartItemResponse[] =
-          await getAddedCartItemsRequest("client");
-        const serverCartItems: CartItem[] = apiCartItems.map(
-          (apiCartItem: APICartItemResponse) => {
-            const matchItem: Item | undefined = items.find(
-              (item: Item) => item.id == apiCartItem.itemId,
-            );
-            if (!matchItem) {
-              throw Error("Error");
-            }
-            return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
-          },
-        );
-        setCarItems(serverCartItems);
-      } catch (error) {
-        //todo: what to do in this error?
-      }
-      setShowLoginDropdown(false);
-      setFormUserName("");
-      setFormPassword("");
-      setLoginError(null);
-    } else if (apiResponse.status === 401) {
-      setLoginError(apiResponse.errorType);
-    }
-  }
 
   useEffect(() => {
     setIsMounted(true);
@@ -95,8 +44,15 @@ export default function Header({ items }: { items: Item[] }) {
 
   const handleNavigation = async (path: string) => {
     setIsNavigating(true);
-    await router.push(path);
+    router.push(path);
     setIsNavigating(false);
+  };
+
+  const handleLocationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLocation = locations.find(loc => loc.id === parseInt(event.target.value));
+    if (selectedLocation) {
+      setCurrentLocation(selectedLocation);
+    }
   };
 
   return (
@@ -115,6 +71,21 @@ export default function Header({ items }: { items: Item[] }) {
       </div>
 
       <div className="flex items-center space-x-6">
+        {locations.length > 0 && (
+          <div className="relative">
+            <select
+              value={currentLocation?.id || ""}
+              onChange={handleLocationChange}
+              className="px-4 py-2 rounded-lg bg-[var(--white)] border border-[var(--orange)] text-[var(--orange)] focus:outline-none focus:ring-2 focus:ring-[var(--pink1)]"
+            >
+              {locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.country_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="relative">
           <button
             onClick={() => {
@@ -159,7 +130,7 @@ export default function Header({ items }: { items: Item[] }) {
                 rounded-lg shadow-lg bg-[var(--white)] z-10 transform transition-all duration-200 ease-in-out"
               >
                 <div className="flex flex-col items-center justify-center">
-                  <LoginForm 
+                  <LoginForm
                     onSuccess={() => setShowLoginDropdown(false)}
                     className="w-full"
                   />
