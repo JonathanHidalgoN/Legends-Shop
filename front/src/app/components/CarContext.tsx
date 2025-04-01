@@ -11,13 +11,16 @@ import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
 import { useAuthContext } from "./AuthContext";
 import { APICartItemResponse } from "../interfaces/APIResponse";
-import { addToCarRequest, deleteCartItemRequest } from "../request";
+import { addToCarRequest, deleteCartItemRequest, getDeliveryDatesRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import {
   showErrorToast,
   showSuccessToast,
   showWarningToast,
 } from "../customToast";
+import { Location } from "../interfaces/Location";
+import { DeliveryDate } from "../interfaces/DeliveryDate";
+import { useStaticData } from "./StaticDataContext";
 
 interface CarContextType {
   carItems: CartItem[];
@@ -50,6 +53,10 @@ interface CarContextType {
   cleanCar: () => void;
   currentGold: number | null;
   setCurrentGold: (value: number | null) => void;
+  currentLocation: Location | null;
+  setCurrentLocation: (location: Location) => void;
+  deliveryDates: DeliveryDate[];
+  setDeliveryDates: (dates: DeliveryDate[]) => void;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -61,11 +68,42 @@ export function CarContextProvider({
 }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [currentGold, setCurrentGold] = useState<number | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
+  const [deliveryDates, setDeliveryDates] = useState<DeliveryDate[]>([]);
   const { userName } = useAuthContext();
+  const { locations } = useStaticData();
 
   let cartItemsNotInServerCount = useRef<number>(0);
   let pendingServerDeletedCartItems = useRef<CartItem[]>([]);
   const isAuthenticated: boolean = userName !== null;
+
+  useEffect(() => {
+    // Set default location to first location or null if no locations exist
+    if (locations.length > 0) {
+      setCurrentLocation(locations[0]);
+    }
+  }, [locations]);
+
+  useEffect(() => {
+    if (currentLocation && cartItems.length > 0) {
+      fetchDeliveryDates();
+    }
+  }, [currentLocation, cartItems]);
+
+  async function fetchDeliveryDates() {
+    if (!currentLocation) return;
+
+    try {
+      const dates = await getDeliveryDatesRequest(
+        cartItems.map(item => item.item.id),
+        currentLocation.id
+      );
+      setDeliveryDates(dates);
+    } catch (error) {
+      console.error("Error fetching delivery dates:", error);
+      showErrorToast("Failed to fetch delivery dates");
+    }
+  }
 
   async function addInClientCarItemsToServer(
     cartItem: CartItem,
@@ -240,6 +278,10 @@ export function CarContextProvider({
         cleanCar,
         currentGold,
         setCurrentGold,
+        currentLocation,
+        setCurrentLocation,
+        deliveryDates,
+        setDeliveryDates,
       }}
     >
       {children}
