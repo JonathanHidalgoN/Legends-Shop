@@ -10,12 +10,12 @@ from app.customExceptions import (
 )
 from app.data import database
 from app.schemas.Location import Location
+from app.routes.auth import getUserIdFromName
+from app.data.mappers import mapLocationTableToLocation
+from app.data.queries.locationQueries import getUserLocation
 
-router = APIRouter(
-    prefix="/locations",
-    tags=["locations"],
-    responses={404: {"description": "Not found"}},
-)
+router = APIRouter()
+
 
 
 async def getLocationManager(
@@ -23,6 +23,17 @@ async def getLocationManager(
 ) -> LocationManager:
     return LocationManager(dbSession)
 
+@router.get("/all", response_model=List[Location])
+async def getAllLocations(
+    manager: Annotated[LocationManager, Depends(getLocationManager)],
+):
+    """
+    Get all locations.
+    """
+    try:
+        return await manager.getAllLocations()
+    except LocationManagerException as e:
+        raise HTTPException(status_code=400, detail=str(e)) 
 
 @router.post("/create", include_in_schema=False)
 async def createLocation(
@@ -88,14 +99,22 @@ async def getLocation(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/all", response_model=List[Location])
-async def getAllLocations(
-    manager: Annotated[LocationManager, Depends(getLocationManager)],
+@router.get("/user", response_model=Location)
+async def getUserLocationEndpoint(
+    userId: Annotated[int | None, Depends(getUserIdFromName)],
+    dbSession: Annotated[AsyncSession, Depends(database.getDbSession)],
 ):
     """
-    Get all locations.
+    Get the location for the current user.
     """
+    if userId is None:
+        raise HTTPException(status_code=401, detail="User not authenticated")
     try:
-        return await manager.getAllLocations()
-    except LocationManagerException as e:
-        raise HTTPException(status_code=400, detail=str(e)) 
+        location = await getUserLocation(dbSession, userId)
+        if location is None:
+            raise HTTPException(status_code=404, detail="User location not found")
+        return mapLocationTableToLocation(location)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
