@@ -12,6 +12,7 @@ import { mapAPICartItemResponseToCartItem } from "../mappers";
 import { Item } from "../interfaces/Item";
 import { validateUsernameInput, validatePasswordInput } from "../functions";
 import { ValidationResult, defaultValidationResult } from "../interfaces/Errors";
+import { Location } from "../interfaces/Location";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -22,7 +23,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSuccess, redirectPath, className = "" }: LoginFormProps) {
   const { login } = useAuthContext();
   const router = useRouter();
-  const { setCarItems, setCurrentGold } = useCarContext();
+  const { setCarItems, setCurrentGold, setCurrentLocation } = useCarContext();
   const { items } = useStaticData();
 
   const [formUserName, setFormUserName] = useState<string>("");
@@ -35,7 +36,7 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
   const validateForm = () => {
     const usernameValidation = validateUsernameInput(formUserName);
     const passwordValidation = validatePasswordInput(formPassword);
-    
+
     setValidUsernameInput(usernameValidation);
     setValidPasswordInput(passwordValidation);
 
@@ -47,7 +48,7 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
 
   async function handleLoginSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -55,7 +56,7 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
     setIsLoading(true);
     try {
       const apiResponse: APILoginResponse = await login(formUserName, formPassword);
-      
+
       if (apiResponse.status === 200) {
         const currentGold: number | null = await getCurrentUserGold();
         if (!currentGold) {
@@ -81,8 +82,8 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
         }
 
         try {
-          const userLocation = await getUserLocationRequest("client");
-          console.log("User location:", userLocation);
+          const userLocation: Location = await getUserLocationRequest("client");
+          setCurrentLocation(userLocation);
         } catch (error) {
           console.error("Error fetching user location:", error);
         }
@@ -92,11 +93,11 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
         setLoginError(null);
         setValidUsernameInput(defaultValidationResult);
         setValidPasswordInput(defaultValidationResult);
-        
+
         if (onSuccess) {
           onSuccess();
         }
-        
+
         if (redirectPath) {
           router.push(redirectPath);
         }
@@ -163,10 +164,10 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
             {loginError === LoginError.INCORRECTCREDENTIALS
               ? "Incorrect username or password"
               : loginError === LoginError.INVALIDUSERNAME
-              ? "Username is required"
-              : loginError === LoginError.INVALIDPASSWORD
-              ? "Password is required"
-              : "An error occurred. Please try again."}
+                ? "Username is required"
+                : loginError === LoginError.INVALIDPASSWORD
+                  ? "Password is required"
+                  : "An error occurred. Please try again."}
           </span>
         )}
       </div>
