@@ -63,6 +63,7 @@ class TokenData(BaseModel):
 
 class UserInDB(User):
     hashedPassword: str
+    location_id: Optional[int] = None
 
 
 class SingUpError(str, Enum):
