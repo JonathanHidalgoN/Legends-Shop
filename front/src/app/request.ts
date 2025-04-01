@@ -7,6 +7,7 @@ import {
 import { Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
 import { Location } from "./interfaces/Location";
+import { DeliveryDate } from "./interfaces/DeliveryDate";
 import { showErrorToast } from "./customToast";
 
 //TODO: how to improve this solution?
@@ -30,6 +31,8 @@ export const ENDPOINT_CART_ADD_ITEM: string = `cart/add_item`;
 export const ENDPOINT_CART_ADDED_CART_ITEMS: string = `cart/added_cart_items`;
 export const ENDPOINT_CART_DELETE_ITEM: string = `cart/delete_cart_item`;
 export const ENDPOINT_UPDATE_ITEMS: string = `/updateItems`;
+export const ENDPOINT_USER_LOCATION: string = `locations/user`;
+export const ENDPOINT_DELIVERY_DATES: string = `delivery_dates/get_dates`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -327,6 +330,47 @@ export async function getAllLocationsRequest(
   const response = await fetch(url);
   if (!response.ok) {
     await throwAPIError(response, "Error fetching locations");
+  }
+  return await response.json();
+}
+
+export async function getUserLocationRequest(
+  from: string = "client",
+): Promise<Location> {
+  const url: string = makeUrl(from, ENDPOINT_USER_LOCATION);
+  const response = await fetch(url, {
+    credentials: 'include',
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
+  if (!response.ok) {
+    if (from === "client") {
+      await throwAPIError(response, "Error fetching user location");
+    } else {
+      console.error("Error fetching user location:", response.status);
+      throw new Error("Failed to fetch user location");
+    }
+  }
+  return await response.json();
+}
+
+export async function getDeliveryDatesRequest(
+  itemIds: number[],
+  locationId: number,
+  from: string = "client"
+): Promise<DeliveryDate[]> {
+  const url: string = makeUrl(from, ENDPOINT_DELIVERY_DATES);
+  const response = await fetch(url, {
+    method: "POST",
+    credentials: 'include',
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ itemIds, locationId }),
+  });
+  if (!response.ok) {
+    await throwAPIError(response, "Error fetching delivery dates");
   }
   return await response.json();
 }
