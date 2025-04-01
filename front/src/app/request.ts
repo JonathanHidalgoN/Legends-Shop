@@ -32,7 +32,7 @@ export const ENDPOINT_CART_ADDED_CART_ITEMS: string = `cart/added_cart_items`;
 export const ENDPOINT_CART_DELETE_ITEM: string = `cart/delete_cart_item`;
 export const ENDPOINT_UPDATE_ITEMS: string = `/updateItems`;
 export const ENDPOINT_USER_LOCATION: string = `locations/user`;
-export const ENDPOINT_DELIVERY_DATES: string = `delivery_dates/get_dates`;
+export const ENDPOINT_DELIVERY_DATES: string = `delivery_dates/dates`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -340,34 +340,20 @@ export async function getUserLocationRequest(
   const url: string = makeUrl(from, ENDPOINT_USER_LOCATION);
   const response = await fetch(url, {
     credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    }
   });
   if (!response.ok) {
-    if (from === "client") {
-      await throwAPIError(response, "Error fetching user location");
-    } else {
-      console.error("Error fetching user location:", response.status);
-      throw new Error("Failed to fetch user location");
-    }
+    await throwAPIError(response, "Error fetching user location");
   }
   return await response.json();
 }
 
 export async function getDeliveryDatesRequest(
-  itemIds: number[],
   locationId: number,
   from: string = "client"
 ): Promise<DeliveryDate[]> {
-  const url: string = makeUrl(from, ENDPOINT_DELIVERY_DATES);
+  const url: string = makeUrl(from, `${ENDPOINT_DELIVERY_DATES}/${locationId}`);
   const response = await fetch(url, {
-    method: "POST",
-    credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ itemIds, locationId }),
+    method: "GET",
   });
   if (!response.ok) {
     await throwAPIError(response, "Error fetching delivery dates");
