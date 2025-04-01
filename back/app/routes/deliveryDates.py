@@ -1,22 +1,34 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
 from app.customExceptions import DeliveryDateAssignerException
 from app.data import database
+from app.schemas.DeliveryDate import DeliveryDate
 
-router = APIRouter(
-    prefix="/delivery_dates",
-    tags=["delivery_dates"],
-    responses={404: {"description": "Not found"}},
-)
+router = APIRouter()
 
 
 def getDeliveryDateAssigner(
     db: AsyncSession = Depends(database.getDbSession),
 ) -> DeliveryDateAssigner:
     return DeliveryDateAssigner(db)
+
+
+@router.post("/get_dates", response_model=List[DeliveryDate])
+async def getDeliveryDates(
+    itemIds: List[int],
+    locationId: int,
+    assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)]
+) -> List[DeliveryDate]:
+    """
+    Get delivery dates for a list of items based on location.
+    """
+    try:
+        return await assigner.getDeliveryDates(itemIds, locationId)
+    except DeliveryDateAssignerException as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/populate", include_in_schema=False)
