@@ -7,7 +7,7 @@ import { useStaticData } from "./StaticDataContext";
 import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
 import { getCurrentUserGold } from "../profileFunctions";
 import { CartItem } from "../interfaces/Order";
-import { getAddedCartItemsRequest } from "../request";
+import { getAddedCartItemsRequest, getUserLocationRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import { Item } from "../interfaces/Item";
 import { validateUsernameInput, validatePasswordInput } from "../functions";
@@ -78,6 +78,13 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
           setCarItems(serverCartItems);
         } catch (error) {
           console.error("Error fetching cart items:", error);
+        }
+
+        try {
+          const userLocation = await getUserLocationRequest("client");
+          console.log("User location:", userLocation);
+        } catch (error) {
+          console.error("Error fetching user location:", error);
         }
 
         setFormUserName("");
