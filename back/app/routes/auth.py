@@ -176,7 +176,7 @@ async def singUp(
             currentGold=99999,
             birthDate=birthDateDate,
             lastSingIn=datetime.now().date(),
-            location_id=location_id,
+            locationId=location_id,
             password=password,
         )
         userExist: bool = await checkUserExistInDB(db, username)

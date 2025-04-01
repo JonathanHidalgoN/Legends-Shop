@@ -90,6 +90,7 @@ def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
         goldSpend=userTable.gold_spend,
         currentGold=userTable.current_gold,
         birthDate=userTable.birthdate,
+        locationId=userTable.location_id
     )
     return userInDB
 
