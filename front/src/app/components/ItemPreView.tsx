@@ -7,13 +7,22 @@ import AddToCarButton from "./AddToCarButton";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import EpicLegendMap from "./EpicLegendMap";
+import { useCarContext } from "./CarContext";
+import { DeliveryDate } from "../interfaces/DeliveryDate";
 
 export default function ItemPreView({ item }: { item: Item }) {
   const targetLink = `/items/${item.name}`;
   const router = useRouter();
+  const { deliveryDates } = useCarContext();
 
   const handleCardClick = () => {
     router.push(targetLink);
+  };
+
+  const getDeliveryDate = (): string => {
+    const deliveryDate = deliveryDates.find(date => date.itemId === item.id);
+    if (!deliveryDate) return "Not available";
+    return new Date(deliveryDate.deliveryDate).toLocaleDateString();
   };
 
   return (
@@ -41,6 +50,10 @@ export default function ItemPreView({ item }: { item: Item }) {
         </div>
         <div className="mb-2">
           <DescriptionTextMapper description={item.description} />
+        </div>
+        <div className="mt-2 text-sm text-gray-600">
+          <span className="font-medium">Expected Delivery: </span>
+          <span>{getDeliveryDate()}</span>
         </div>
         {item.tags.length > 0 && (
           <div>
