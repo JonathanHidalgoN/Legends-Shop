@@ -59,6 +59,7 @@ export interface APIUserInfoResponse {
   goldSpend: number;
   currentGold: number;
   birthDate: string;
+  locationId: number;
 }
 
 export interface APICartItemResponse {

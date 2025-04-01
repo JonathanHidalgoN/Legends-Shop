@@ -8,6 +8,7 @@ export interface UserInfo {
   goldSpend: number;
   currentGold: number;
   birthDate: Date;
+  locationId: number;
 }
 
 export interface ProfileInfo {

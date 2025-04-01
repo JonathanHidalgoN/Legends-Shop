@@ -32,6 +32,7 @@ export function mapAPIUserInfoToUserInDB(
     goldSpend: apiUser.goldSpend,
     currentGold: apiUser.currentGold,
     birthDate: new Date(apiUser.birthDate),
+    locationId: apiUser.locationId
   };
 }
 

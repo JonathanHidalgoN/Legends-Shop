@@ -4,15 +4,16 @@ import useSWR from "swr";
 import { APIProfileInfoResponse } from "../interfaces/APIResponse";
 import { getProfileInfoRequest } from "../request";
 import { useErrorRedirect } from "./useErrorRedirect";
-import { useState } from "react";
 import { ProfileInfo } from "../interfaces/profileInterfaces";
 import { mapAPIProfileInfoResponseToProfileInfo } from "../mappers";
+import { useStaticData } from "./StaticDataContext";
 
 export default function ProfileView() {
   const { data, error } = useSWR<APIProfileInfoResponse>(
     ["profile-client", "client"],
     getProfileInfoRequest,
   );
+  const { locations } = useStaticData();
   useErrorRedirect(error);
 
   if (!data || error) {
@@ -25,6 +26,8 @@ export default function ProfileView() {
 
   const profileInfo: ProfileInfo = mapAPIProfileInfoResponseToProfileInfo(data);
   const { user, ordersInfo } = profileInfo;
+  
+  const userLocation = locations.find(loc => loc.id === user.locationId);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -46,6 +49,10 @@ export default function ProfileView() {
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-gray-600">Email:</span>
                   <span className="text-gray-800">{user.email}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="font-semibold text-gray-600">Location:</span>
+                  <span className="text-[var(--orange)] font-medium">{userLocation?.country_name || "Not set"}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-gray-600">Created:</span>
