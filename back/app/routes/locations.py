@@ -35,6 +35,26 @@ async def getAllLocations(
     except LocationManagerException as e:
         raise HTTPException(status_code=400, detail=str(e)) 
 
+@router.get("/user", response_model=Location)
+async def getUserLocationEndpoint(
+    userId: Annotated[int | None, Depends(getUserIdFromName)],
+    dbSession: Annotated[AsyncSession, Depends(database.getDbSession)],
+):
+    """
+    Get the location for the current user.
+    """
+    if userId is None:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+    try:
+        location = await getUserLocation(dbSession, userId)
+        if location is None:
+            raise HTTPException(status_code=404, detail="User location not found")
+        return mapLocationTableToLocation(location)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 @router.post("/create", include_in_schema=False)
 async def createLocation(
     countryName: str,
@@ -97,24 +117,5 @@ async def getLocation(
         return await manager.getLocation(locationId)
     except LocationNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.get("/user", response_model=Location)
-async def getUserLocationEndpoint(
-    userId: Annotated[int | None, Depends(getUserIdFromName)],
-    dbSession: Annotated[AsyncSession, Depends(database.getDbSession)],
-):
-    """
-    Get the location for the current user.
-    """
-    if userId is None:
-        raise HTTPException(status_code=401, detail="User not authenticated")
-    try:
-        location = await getUserLocation(dbSession, userId)
-        if location is None:
-            raise HTTPException(status_code=404, detail="User location not found")
-        return mapLocationTableToLocation(location)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
