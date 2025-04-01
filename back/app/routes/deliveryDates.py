@@ -16,17 +16,16 @@ def getDeliveryDateAssigner(
     return DeliveryDateAssigner(db)
 
 
-@router.post("/get_dates", response_model=List[DeliveryDate])
+@router.get("/dates/{location_id}", response_model=List[DeliveryDate])
 async def getDeliveryDates(
-    itemIds: List[int],
-    locationId: int,
+    location_id: int,
     assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)]
 ) -> List[DeliveryDate]:
     """
     Get delivery dates for a list of items based on location.
     """
     try:
-        return await assigner.getDeliveryDates(itemIds, locationId)
+        return await assigner.getItemDeliveryDates(location_id)
     except DeliveryDateAssignerException as e:
         raise HTTPException(status_code=500, detail=str(e))
 
