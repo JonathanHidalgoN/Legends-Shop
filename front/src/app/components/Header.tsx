@@ -53,13 +53,6 @@ export default function Header({ items }: { items: Item[] }) {
     setIsNavigating(false);
   };
 
-  const handleLocationChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedLocation = locations.find(loc => loc.id === parseInt(event.target.value));
-    if (selectedLocation) {
-      setCurrentLocation(selectedLocation);
-    }
-  };
-
   return (
     <header
       className="w-full flex items-center justify-between p-4 
@@ -238,7 +231,7 @@ export default function Header({ items }: { items: Item[] }) {
                 </span>
               </div>
             </div>
-            {showLocationDropdown && (
+            {isMounted && showLocationDropdown && (
               <div
                 className="absolute top-full left-0 w-64 bg-white shadow-lg rounded-lg mt-2 z-50"
                 ref={locationDropdownRef}
