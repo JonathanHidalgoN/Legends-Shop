@@ -71,21 +71,6 @@ export default function Header({ items }: { items: Item[] }) {
       </div>
 
       <div className="flex items-center space-x-6">
-        {locations.length > 0 && (
-          <div className="relative">
-            <select
-              value={currentLocation?.id || ""}
-              onChange={handleLocationChange}
-              className="px-4 py-2 rounded-lg bg-[var(--white)] border border-[var(--orange)] text-[var(--orange)] focus:outline-none focus:ring-2 focus:ring-[var(--pink1)]"
-            >
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.country_name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         <div className="relative">
           <button
             onClick={() => {
@@ -139,6 +124,7 @@ export default function Header({ items }: { items: Item[] }) {
             </div>
           )}
         </div>
+
         <div className="relative">
           <LoadingButton
             onClick={() => setShowCartDropdown((prev) => !prev)}
@@ -211,6 +197,54 @@ export default function Header({ items }: { items: Item[] }) {
             <span className="text-yellow-500 text-xl font-bold">
               {currentGold.toLocaleString()} g
             </span>
+          </div>
+        )}
+
+        {locations.length > 0 && (
+          <div className="relative flex items-center group">
+            <div className="flex items-center cursor-pointer px-2 py-1.5 rounded hover:bg-gray-100 transition-colors duration-200">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-gray-600 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">Deliver to</span>
+                <span className="text-sm font-medium text-[var(--orange)]">
+                  {currentLocation?.country_name || "Select location"}
+                </span>
+              </div>
+            </div>
+            <div className="absolute top-full left-0 w-64 bg-white shadow-lg rounded-lg mt-2 hidden group-hover:block z-50">
+              <div className="p-2">
+                <select
+                  value={currentLocation?.id || ""}
+                  onChange={handleLocationChange}
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--orange)]"
+                >
+                  {locations.map((location) => (
+                    <option key={location.id} value={location.id}>
+                      {location.country_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         )}
       </div>
