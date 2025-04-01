@@ -71,22 +71,26 @@ export function CarContextProvider({
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [deliveryDates, setDeliveryDates] = useState<DeliveryDate[]>([]);
   const { userName } = useAuthContext();
-  const { locations } = useStaticData();
+  const { locations, items } = useStaticData();
 
   let cartItemsNotInServerCount = useRef<number>(0);
   let pendingServerDeletedCartItems = useRef<CartItem[]>([]);
   const isAuthenticated: boolean = userName !== null;
 
   useEffect(() => {
-    // Set default location to first location or null if no locations exist
     if (locations.length > 0) {
       setCurrentLocation(locations[0]);
     }
   }, [locations]);
 
   useEffect(() => {
-    if (currentLocation && cartItems.length > 0) {
-      fetchDeliveryDates();
+    if (currentLocation && items.length > 0) {
+      const locationId = currentLocation.id;
+      const currentDeliveryLocationId = deliveryDates[0]?.locationId;
+      
+      if (!currentDeliveryLocationId || currentDeliveryLocationId !== locationId) {
+        fetchDeliveryDates();
+      }
     }
   }, [currentLocation, cartItems]);
 
@@ -95,7 +99,6 @@ export function CarContextProvider({
 
     try {
       const dates = await getDeliveryDatesRequest(
-        cartItems.map(item => item.item.id),
         currentLocation.id
       );
       setDeliveryDates(dates);
