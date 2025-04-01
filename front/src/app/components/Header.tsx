@@ -17,15 +17,19 @@ export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut } = useAuthContext();
   const { carItems, currentGold, currentLocation, setCurrentLocation } = useCarContext();
   const { locations } = useStaticData();
+  console.log(locations);
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
   const carDropDownRef: RefObject<HTMLDivElement | null> =
+    useRef<HTMLDivElement>(null);
+  const locationDropdownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
 
   const router = useRouter();
@@ -35,6 +39,7 @@ export default function Header({ items }: { items: Item[] }) {
     const handleClick = (event: MouseEvent) => {
       handleClickOutside(event, loginDropDownRef, setShowLoginDropdown);
       handleClickOutside(event, carDropDownRef, setShowCartDropdown);
+      handleClickOutside(event, locationDropdownRef, setShowLocationDropdown);
     };
     document.addEventListener("mousedown", handleClick);
     return () => {
@@ -201,8 +206,11 @@ export default function Header({ items }: { items: Item[] }) {
         )}
 
         {locations.length > 0 && (
-          <div className="relative flex items-center group">
-            <div className="flex items-center cursor-pointer px-2 py-1.5 rounded hover:bg-gray-100 transition-colors duration-200">
+          <div className="relative flex items-center">
+            <div
+              className="flex items-center cursor-pointer px-2 py-1.5 rounded hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => setShowLocationDropdown(prev => !prev)}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 text-gray-600 mr-1"
@@ -230,21 +238,28 @@ export default function Header({ items }: { items: Item[] }) {
                 </span>
               </div>
             </div>
-            <div className="absolute top-full left-0 w-64 bg-white shadow-lg rounded-lg mt-2 hidden group-hover:block z-50">
-              <div className="p-2">
-                <select
-                  value={currentLocation?.id || ""}
-                  onChange={handleLocationChange}
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--orange)]"
-                >
+            {showLocationDropdown && (
+              <div
+                className="absolute top-full left-0 w-64 bg-white shadow-lg rounded-lg mt-2 z-50"
+                ref={locationDropdownRef}
+              >
+                <div className="p-2">
                   {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
+                    <div
+                      key={location.id}
+                      onClick={() => {
+                        setCurrentLocation(location);
+                        setShowLocationDropdown(false);
+                      }}
+                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${currentLocation?.id === location.id ? 'bg-gray-50' : ''
+                        }`}
+                    >
                       {location.country_name}
-                    </option>
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
