@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import List, Set
 from sqlalchemy import insert
 from app.data.mappers import mapOrderToOrderTable
@@ -23,6 +23,7 @@ from app.data.queries.profileQueries import (
     updateUserSpendGoldWithUserId,
 )
 from app.auth.functions import logMethod
+from app.data.queries.deliveryDatesQueries import getDeliveryDateForItemAndLocation
 
 
 class OrderProcessor:
@@ -76,10 +77,34 @@ class OrderProcessor:
         return ref + timedelta(days=days)
 
     @logMethod
+    async def determineDeliveryDate(self, order: Order) -> date:
+        furthestDeliveryDate = None
+        for itemName in order.itemNames:
+            itemId = await getItemIdByItemName(self.dbSession, itemName)
+            if itemId is None:
+                raise InvalidItemException(f"Item {itemName} is not in the database")
+            deliveryDate : date | None = await getDeliveryDateForItemAndLocation(
+                self.dbSession,
+                itemId,
+                order.location_id, 
+                order.orderDate
+            )
+            if deliveryDate is None:
+                raise ProcessOrderException(
+                    f"No delivery date found for item {itemName} at location {order.location_id}"
+                )
+            if furthestDeliveryDate is None or deliveryDate > furthestDeliveryDate:
+                furthestDeliveryDate = deliveryDate
+        if furthestDeliveryDate is None:
+            raise ProcessOrderException("Could not determine delivery date for order")
+        return furthestDeliveryDate
+
+
+    @logMethod
     async def addOrder(self, order: Order, userId: int) -> int:
         try:
             order.status = OrderStatus.PENDING
-            order.deliveryDate = self.creteaRandomDate(order.orderDate)
+            order.deliveryDate = datetime.combine((await self.determineDeliveryDate(order)), datetime.min.time())
             orderTable: OrderTable = mapOrderToOrderTable(order, userId)
             self.dbSession.add(orderTable)
             await self.dbSession.flush()
