@@ -21,6 +21,7 @@ async def getOrderHistoryByUserId(
             OrderTable.order_date,
             OrderTable.delivery_date,
             OrderTable.status,
+            OrderTable.location_id,
             ItemTable.name,
             UserTable.userName,
             OrderItemAssociation.c.quantity,
@@ -42,6 +43,7 @@ async def getOrderHistoryByUserId(
         order_date,
         delivery_date,
         status,
+        location_id,
         item_name,
         user_name,
         quantity,
@@ -55,6 +57,7 @@ async def getOrderHistoryByUserId(
                 "orderDate": order_date,
                 "deliveryDate": delivery_date,
                 "status": status,
+                "location_id": location_id,
             }
         else:
             orders_dict[order_id]["itemNames"].append(item_name)
