@@ -225,23 +225,24 @@ STATIC_DATA_ITEM2: Item = Item(
 
 STATIC_DATA_ORDER1: Order = Order(
     id=1,
-    itemNames=["item1", "item2"],
-    userName="test1",
+    itemNames=["item1"],
+    userName="testUser",
     total=100,
-    orderDate=datetime(2025, 1, 1, 12, 0, 0),
-    deliveryDate=datetime(2026, 1, 1, 12, 0, 0),
+    orderDate=date(2025, 1, 1),
+    deliveryDate=date(2025, 1, 8),
     status=OrderStatus.PENDING,
+    location_id=1
 )
-
 
 STATIC_DATA_ORDER2: Order = Order(
     id=2,
-    itemNames=["item1", "item2", "item1"],
-    userName="test2",
+    itemNames=["item1", "item2"],
+    userName="testUser",
     total=200,
-    orderDate=datetime(2025, 1, 1, 12, 0, 0),
-    deliveryDate=datetime(2026, 1, 1, 12, 0, 0),
-    status=OrderStatus.CANCELED,
+    orderDate=date(2025, 1, 1),
+    deliveryDate=date(2025, 1, 8),
+    status=OrderStatus.PENDING,
+    location_id=1
 )
 
 STATIC_DATA_USER_IN_DB1: UserInDB = UserInDB(
