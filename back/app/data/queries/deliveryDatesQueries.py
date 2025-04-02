@@ -37,3 +37,34 @@ async def getAllDeliveryDatesByLocationId(
         for row in rows
     ]
     return delivery_dates
+
+
+async def getDeliveryDateForItemAndLocation(
+    asyncSession: AsyncSession,
+    itemId: int,
+    locationId: int,
+    orderDate: date
+) -> date | None:
+    """
+    Get the delivery date for a specific item and location.
+    
+    Args:
+        asyncSession: The database session.
+        itemId: The ID of the item.
+        locationId: The ID of the location.
+        orderDate: The date when the order was placed.
+        
+    Returns:
+        The computed delivery date based on the item and location.
+    """
+    query = select(ItemLocationDeliveryAssociation).where(
+        ItemLocationDeliveryAssociation.c.item_id == itemId,
+        ItemLocationDeliveryAssociation.c.location_id == locationId
+    )
+    result = await asyncSession.execute(query)
+    row = result.first()
+    
+    if row is None:
+        return None 
+        
+    return orderDate + timedelta(days=row.days_plus)
