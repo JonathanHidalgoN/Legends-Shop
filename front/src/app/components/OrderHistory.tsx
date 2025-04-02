@@ -54,6 +54,11 @@ export default function OrderHistory() {
 
   useErrorRedirect(error);
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterOrderStatus, filterMinOrderDate, filterMaxOrderDate, filterMinDeliveryDate, filterMaxDeliveryDate, filterItemNames, sortField, sortOrder]);
+
   if (!data || error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -111,11 +116,6 @@ export default function OrderHistory() {
   const totalPages = Math.ceil(orders.length / ordersPerPage);
   const startIndex = (currentPage - 1) * ordersPerPage;
   const paginatedOrders = orders.slice(startIndex, startIndex + ordersPerPage);
-
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filterOrderStatus, filterMinOrderDate, filterMaxOrderDate, filterMinDeliveryDate, filterMaxDeliveryDate, filterItemNames, sortField, sortOrder]);
 
   function handleItemNameFilterChange(
     selectedNames: MultiValue<OptionType>,
