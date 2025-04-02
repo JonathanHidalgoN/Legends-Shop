@@ -102,6 +102,7 @@ def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
         order_date=order.orderDate,
         delivery_date=order.deliveryDate,
         status=order.status,
+        location_id=order.location_id
     )
     return orderTable
 
