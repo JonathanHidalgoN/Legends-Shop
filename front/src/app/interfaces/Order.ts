@@ -41,7 +41,7 @@ export interface Order {
   userName: string;
   orderDate: Date;
   deliveryDate: Date;
-  locationId: number;
+  location_id: number;
 }
 
 export interface OrderSummary {

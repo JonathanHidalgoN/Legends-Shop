@@ -51,7 +51,7 @@ export default function OrderPage() {
         id: 0,
         status: OrderStatus.PENDING,
         deliveryDate: new Date(),
-        locationId: currentLocation.id
+        location_id: currentLocation.id
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
