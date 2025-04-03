@@ -1,0 +1,28 @@
+import pytest
+from unittest.mock import AsyncMock, MagicMock
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.OrderStatusProcessor import OrderStatusProcessor
+
+@pytest.fixture
+def processor() -> OrderStatusProcessor:
+    mockSession = MagicMock(spec=AsyncSession)
+    processor = OrderStatusProcessor(mockSession)
+    return processor
+
+@pytest.mark.asyncio
+async def test_update_order_statuses_no_orders(processor):
+    mock_result = MagicMock()
+    mock_result.scalars().all.return_value = []
+
+    processor.asyncSession.execute = AsyncMock(return_value=mock_result)
+            
+    await processor.update_order_statuses()
+    assert processor.asyncSession.execute.await_count == 2  # Just the two queries, no updates
+
+@pytest.mark.asyncio
+async def test_update_order_statuses_db_error(processor):
+    processor.asyncSession.execute = AsyncMock(side_effect=SQLAlchemyError("DB error"))
+    
+    with pytest.raises(SQLAlchemyError):
+        await processor.update_order_statuses() 
