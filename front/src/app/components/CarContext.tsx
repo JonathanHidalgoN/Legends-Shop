@@ -241,11 +241,11 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteAllItemFromCar(item: Item): void {
-    const filterCartItems: CartItem[] = cartItems.filter(
-      (i: CartItem) => i.item.id !== item.id,
+    const itemsToDelete = cartItems.filter(
+      (i: CartItem) => i.item.id === item.id
     );
-    filterCartItems.forEach((cartItem: CartItem) =>
-      checkIfAddCartItemIdToPendingToDeleteList(cartItem),
+    itemsToDelete.forEach((cartItem: CartItem) =>
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem)
     );
     setCartItems(cartItems.filter((i: CartItem) => i.item.id !== item.id));
   }
