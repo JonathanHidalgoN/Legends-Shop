@@ -1,4 +1,5 @@
 import { CartStatus, Order, OrderStatus, OrderSummary } from "./Order";
+import { Comment, Review } from "./Review";
 
 export enum SingupError {
   USERNAMEEXIST = "USERNAMEEXIST",
@@ -41,6 +42,8 @@ export interface APIOrderResponse {
   userName: string;
   orderDate: string;
   deliveryDate: string;
+  reviewed: boolean;
+  location_id: number;
 }
 
 export interface APIOrderSummaryResponse {
@@ -71,6 +74,25 @@ export interface APICartItemResponse {
 export interface APIProfileInfoResponse {
   user: APIUserInfoResponse;
   ordersInfo: APIOrderSummaryResponse[];
+}
+
+export interface APICommentResponse {
+  id: number;
+  reviewId: number;
+  userId: number;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface APIReviewResponse {
+  id: number;
+  orderId: number;
+  itemId: number;
+  rating: number;
+  createdAt: string;
+  updatedAt: string;
+  comments: APICommentResponse[];
 }
 
 export class APIError extends Error {
