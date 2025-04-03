@@ -149,3 +149,14 @@ async def updateOrderStatus(
         update(OrderTable).where(OrderTable.id == order_id).values(status=new_status)
     )
     await asyncSession.commit()
+
+
+async def getUserIdByOrderId(
+    asyncSession: AsyncSession,
+    orderId: int,
+) -> Optional[int]:
+    """Get the user_id associated with an order."""
+    result = await asyncSession.execute(
+        select(OrderTable.user_id).where(OrderTable.id == orderId)
+    )
+    return result.scalar_one_or_none()
