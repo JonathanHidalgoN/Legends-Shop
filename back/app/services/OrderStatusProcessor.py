@@ -17,15 +17,17 @@ class OrderStatusProcessor:
         today: date = date.today()
         tomorrow: date = today.replace(day=today.day + 1)
 
-        # Update PENDING to SHIPPED for orders with delivery date tomorrow
-        pendingOrders: List[OrderTable] = await getOrdersWithStatusAndDeliveryDate(
+        pendingOrdersTomorrow: List[OrderTable] = await getOrdersWithStatusAndDeliveryDate(
             self.asyncSession, tomorrow, OrderStatus.PENDING
         )
+        pendingOrdersToday: List[OrderTable] = await getOrdersWithStatusAndDeliveryDate(
+            self.asyncSession, tomorrow, OrderStatus.PENDING
+        )
+        pendingOrders = pendingOrdersToday + pendingOrdersTomorrow
 
         for order in pendingOrders:
             await updateOrderStatus(self.asyncSession, order.id, OrderStatus.SHIPPED)
 
-        # Update SHIPPED to DELIVERED for orders with delivery date today
         shippedOrders: List[OrderTable] = await getOrdersWithStatusAndDeliveryDate(
             self.asyncSession, today, OrderStatus.SHIPPED
         )
