@@ -9,7 +9,7 @@ class ReviewTable(base):
     id: Mapped[int] = mapped_column(primary_key=True, nullable=False)
     order_id: Mapped[int] = mapped_column(ForeignKey("order_table.id"), nullable=False)
     item_id: Mapped[int] = mapped_column(ForeignKey("item_table.id"), nullable=False)
-    rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5 rating
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
