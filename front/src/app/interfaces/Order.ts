@@ -42,6 +42,7 @@ export interface Order {
   orderDate: Date;
   deliveryDate: Date;
   location_id: number;
+  reviewed: boolean;
 }
 
 export interface OrderSummary {
