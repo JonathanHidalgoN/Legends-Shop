@@ -30,7 +30,7 @@ async def test_addOrder_success(processor):
 
     # Mock determineDeliveryDate
     processor.determineDeliveryDate = AsyncMock(return_value=deliveryDate)
-    
+
     # Mock database operations
     addMock = MagicMock(return_value=None)
     flushMock = AsyncMock(return_value=None)
@@ -42,7 +42,9 @@ async def test_addOrder_success(processor):
         with patch.object(processor.dbSession, "flush", new=flushMock):
             result = await processor.addOrder(dummyOrder, userId)
             assert dummyOrder.status == OrderStatus.PENDING
-            assert dummyOrder.deliveryDate == datetime.combine(deliveryDate, datetime.min.time())
+            assert dummyOrder.deliveryDate == datetime.combine(
+                deliveryDate, datetime.min.time()
+            )
             assert result == expectedOrderId
 
 

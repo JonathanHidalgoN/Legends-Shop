@@ -128,10 +128,9 @@ async def getUniqueItemNamesQuantityAndBasePriceByUserName(
 
     return finalList
 
+
 async def getOrdersWithStatusAndDeliveryDate(
-    asyncSession: AsyncSession,
-    delivery_date: date,
-    status: OrderStatus
+    asyncSession: AsyncSession, delivery_date: date, status: OrderStatus
 ) -> List[OrderTable]:
     """Get orders that have a specific status and delivery date"""
     result = await asyncSession.execute(
@@ -141,15 +140,12 @@ async def getOrdersWithStatusAndDeliveryDate(
     )
     return list(result.scalars().all())
 
+
 async def updateOrderStatus(
-    asyncSession: AsyncSession,
-    order_id: int,
-    new_status: OrderStatus
+    asyncSession: AsyncSession, order_id: int, new_status: OrderStatus
 ) -> None:
     """Update the status of an order"""
     await asyncSession.execute(
-        update(OrderTable)
-        .where(OrderTable.id == order_id)
-        .values(status=new_status)
+        update(OrderTable).where(OrderTable.id == order_id).values(status=new_status)
     )
     await asyncSession.commit()

@@ -19,7 +19,7 @@ def getDeliveryDateAssigner(
 @router.get("/dates/{location_id}", response_model=List[DeliveryDate])
 async def getDeliveryDates(
     location_id: int,
-    assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)]
+    assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)],
 ) -> List[DeliveryDate]:
     """
     Get delivery dates for a list of items based on location.
@@ -32,7 +32,7 @@ async def getDeliveryDates(
 
 @router.post("/populate", include_in_schema=False)
 async def populateDeliveryDates(
-    assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)]
+    assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)],
 ) -> dict:
     """
     Hidden endpoint to populate the delivery dates table with random delivery days.
@@ -42,4 +42,4 @@ async def populateDeliveryDates(
         await assigner.assignDeliveryDates()
         return {"message": "Successfully populated delivery dates"}
     except DeliveryDateAssignerException as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))

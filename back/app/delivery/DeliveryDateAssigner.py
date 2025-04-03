@@ -28,11 +28,15 @@ class DeliveryDateAssigner:
     async def getItemDeliveryDates(self, locationId: int) -> List[DeliveryDate]:
         """Get delivery dates for a list of items based on location."""
         try:
-            deliveryDates: List[DeliveryDate] = await getAllDeliveryDatesByLocationId(self.dbSession, locationId)
-            return deliveryDates 
+            deliveryDates: List[DeliveryDate] = await getAllDeliveryDatesByLocationId(
+                self.dbSession, locationId
+            )
+            return deliveryDates
 
         except Exception as e:
-            raise DeliveryDateAssignerException(f"Failed to get delivery dates: {str(e)}")
+            raise DeliveryDateAssignerException(
+                f"Failed to get delivery dates: {str(e)}"
+            )
 
     @logMethod
     async def assignDeliveryDates(self) -> None:
@@ -54,7 +58,7 @@ class DeliveryDateAssigner:
                     association = {
                         "item_id": itemId,
                         "location_id": locationId,
-                        "days_plus": daysPlus
+                        "days_plus": daysPlus,
                     }
                     ins = insert(ItemLocationDeliveryAssociation).values(**association)
                     await self.dbSession.execute(ins)
@@ -63,4 +67,6 @@ class DeliveryDateAssigner:
 
         except Exception as e:
             await self.dbSession.rollback()
-            raise DeliveryDateAssignerException(f"Failed to assign delivery days: {str(e)}") 
+            raise DeliveryDateAssignerException(
+                f"Failed to assign delivery days: {str(e)}"
+            )

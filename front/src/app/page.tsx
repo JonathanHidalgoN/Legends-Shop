@@ -15,20 +15,22 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Load champion images
     const championFiles = [
-      '/blitzIcon.png',
-      '/jhinIcon.png',
-      '/luxIcon.png',
-      '/sadAmumu.png',
-      '/zingsIcon.png'
+      "/blitzIcon.png",
+      "/jhinIcon.png",
+      "/luxIcon.png",
+      "/sadAmumu.png",
+      "/zingsIcon.png",
     ];
-    
-    setChampionImages(championFiles.map(file => ({
-      src: file,
-      alt: file.replace(/\.png$/, '').replace(/^\//, '')
-    })));
+
+    setChampionImages(
+      championFiles.map((file) => ({
+        src: file,
+        alt: file.replace(/\.png$/, "").replace(/^\//, ""),
+      })),
+    );
   }, []);
 
   if (!mounted) return null;
@@ -37,9 +39,12 @@ export default function Home() {
     <main className="min-h-screen bg-[var(--white)] text-[var(--black)] overflow-hidden relative z-0">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff8c00' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff8c00' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="container mx-auto px-4 py-8 relative">
@@ -53,12 +58,13 @@ export default function Home() {
               Where champions come to gear up for battle
             </p>
             <p className="text-lg text-gray-600 animate-slide-up-more-delayed">
-              Discover the finest items from across Runeterra. From legendary weapons to mystical artifacts, 
-              find everything you need to dominate the battlefield.
+              Discover the finest items from across Runeterra. From legendary
+              weapons to mystical artifacts, find everything you need to
+              dominate the battlefield.
             </p>
             <div className="pt-4 animate-slide-up-more-delayed">
-              <Link 
-                href="/items" 
+              <Link
+                href="/items"
                 className="inline-block bg-[var(--orange)] text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105"
               >
                 Browse Items
@@ -74,11 +80,15 @@ export default function Home() {
                 <div
                   key={image.src}
                   className={`absolute animate-float ${
-                    index === 0 ? 'top-0 left-0' :
-                    index === 1 ? 'top-20 right-0' :
-                    index === 2 ? 'bottom-20 left-20' :
-                    index === 3 ? 'bottom-0 right-20' :
-                    'top-40 left-40'
+                    index === 0
+                      ? "top-0 left-0"
+                      : index === 1
+                        ? "top-20 right-0"
+                        : index === 2
+                          ? "bottom-20 left-20"
+                          : index === 3
+                            ? "bottom-0 right-20"
+                            : "top-40 left-40"
                   }`}
                 >
                   <Image
@@ -129,18 +139,33 @@ export default function Home() {
       {/* Add custom animations to global CSS */}
       <style jsx global>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
         }
 
         @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
 
         @keyframes slideUp {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
 
         .animate-float {

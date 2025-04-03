@@ -30,24 +30,30 @@ class LocationManager:
     async def createLocation(self, countryName: str) -> None:
         """
         Create a new location with the given country name.
-        
+
         Args:
             countryName (str): The name of the country for the new location.
-            
+
         Raises:
             LocationAlreadyExistsException: If a location with the same country name already exists.
             LocationManagerException: If there's an error creating the location.
         """
         try:
-            existingLocation = await getLocationByCountryName(self.dbSession, countryName)
+            existingLocation = await getLocationByCountryName(
+                self.dbSession, countryName
+            )
             if existingLocation:
-                raise LocationAlreadyExistsException(f"Location with country name '{countryName}' already exists")
-            
+                raise LocationAlreadyExistsException(
+                    f"Location with country name '{countryName}' already exists"
+                )
+
             await createLocation(self.dbSession, countryName)
             await self.dbSession.commit()
         except IntegrityError as e:
             await self.dbSession.rollback()
-            raise LocationAlreadyExistsException(f"Location with country name '{countryName}' already exists") from e
+            raise LocationAlreadyExistsException(
+                f"Location with country name '{countryName}' already exists"
+            ) from e
         except SQLAlchemyError as e:
             await self.dbSession.rollback()
             raise LocationManagerException(f"Error creating location: {str(e)}") from e
@@ -56,11 +62,11 @@ class LocationManager:
     async def updateLocation(self, locationId: int, newCountryName: str) -> None:
         """
         Update a location's country name.
-        
+
         Args:
             locationId (int): The ID of the location to update.
             newCountryName (str): The new country name for the location.
-            
+
         Raises:
             LocationNotFoundException: If the location is not found.
             LocationUpdateError: If there's an error updating the location.
@@ -68,8 +74,10 @@ class LocationManager:
         try:
             location = await getLocationById(self.dbSession, locationId)
             if not location:
-                raise LocationNotFoundException(f"Location with ID {locationId} not found")
-            
+                raise LocationNotFoundException(
+                    f"Location with ID {locationId} not found"
+                )
+
             await updateLocation(self.dbSession, locationId, newCountryName)
             await self.dbSession.commit()
         except SQLAlchemyError as e:
@@ -80,10 +88,10 @@ class LocationManager:
     async def deleteLocation(self, locationId: int) -> None:
         """
         Delete a location by its ID.
-        
+
         Args:
             locationId (int): The ID of the location to delete.
-            
+
         Raises:
             LocationNotFoundException: If the location is not found.
             LocationDeleteError: If there's an error deleting the location.
@@ -91,8 +99,10 @@ class LocationManager:
         try:
             location = await getLocationById(self.dbSession, locationId)
             if not location:
-                raise LocationNotFoundException(f"Location with ID {locationId} not found")
-            
+                raise LocationNotFoundException(
+                    f"Location with ID {locationId} not found"
+                )
+
             await deleteLocation(self.dbSession, locationId)
             await self.dbSession.commit()
         except SQLAlchemyError as e:
@@ -103,13 +113,13 @@ class LocationManager:
     async def getLocation(self, locationId: int) -> Location:
         """
         Get a location by its ID.
-        
+
         Args:
             locationId (int): The ID of the location to retrieve.
-            
+
         Returns:
             Location: The requested location.
-            
+
         Raises:
             LocationNotFoundException: If the location is not found.
         """
@@ -133,4 +143,6 @@ class LocationManager:
             locations = await getAllLocations(self.dbSession)
             return [mapLocationTableToLocation(location) for location in locations]
         except SQLAlchemyError as e:
-            raise LocationManagerException(f"Error retrieving locations: {str(e)}") from e 
+            raise LocationManagerException(
+                f"Error retrieving locations: {str(e)}"
+            ) from e

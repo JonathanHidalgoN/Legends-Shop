@@ -90,7 +90,7 @@ def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
         goldSpend=userTable.gold_spend,
         currentGold=userTable.current_gold,
         birthDate=userTable.birthdate,
-        locationId=userTable.location_id
+        locationId=userTable.location_id,
     )
     return userInDB
 
@@ -102,7 +102,7 @@ def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
         order_date=order.orderDate,
         delivery_date=order.deliveryDate,
         status=order.status,
-        location_id=order.location_id
+        location_id=order.location_id,
     )
     return orderTable
 
@@ -115,16 +115,10 @@ def mapCartTableToCartItem(cartTable: CartTable) -> CartItem:
 
 
 def mapLocationToLocationTable(location: Location) -> LocationTable:
-    locationTable = LocationTable(
-        id=location.id,
-        country_name=location.country_name
-    )
+    locationTable = LocationTable(id=location.id, country_name=location.country_name)
     return locationTable
 
 
 def mapLocationTableToLocation(locationTable: LocationTable) -> Location:
-    location = Location(
-        id=locationTable.id,
-        country_name=locationTable.country_name
-    )
+    location = Location(id=locationTable.id, country_name=locationTable.country_name)
     return location

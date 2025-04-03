@@ -20,7 +20,7 @@ export default function ItemPreView({ item }: { item: Item }) {
   };
 
   const getDeliveryDate = (): string => {
-    const deliveryDate = deliveryDates.find(date => date.itemId === item.id);
+    const deliveryDate = deliveryDates.find((date) => date.itemId === item.id);
     if (!deliveryDate) return "Not available";
     return new Date(deliveryDate.deliveryDate).toLocaleDateString();
   };

@@ -7,7 +7,7 @@ export default function ItemsPage() {
   const { items, tags, effects } = useStaticData();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const searchQuery = searchParams.get('search');
+  const searchQuery = searchParams.get("search");
 
   if (!items || items.length === 0) {
     router.push("/error/wrong");
@@ -19,5 +19,12 @@ export default function ItemsPage() {
     router.push("/error/wrong");
   }
 
-  return <SelectedItems items={items} tags={tags} effects={effects} initialSearch={searchQuery} />;
-} 
+  return (
+    <SelectedItems
+      items={items}
+      tags={tags}
+      effects={effects}
+      initialSearch={searchQuery}
+    />
+  );
+}

@@ -130,11 +130,15 @@ export default function OrderHistory() {
 
   return (
     <div className="grid grid-cols-2 grid-cols-[17%_auto] gap-4 h-full">
-      <aside className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
-        bg-[var(--white)] text-[var(--black)] sticky top-0 rounded-lg">
+      <aside
+        className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0 rounded-lg"
+      >
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg text-[var(--orange)] font-bold mb-4">Sort By</h2>
+            <h2 className="text-lg text-[var(--orange)] font-bold mb-4">
+              Sort By
+            </h2>
             <div className="flex flex-col gap-3">
               <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
                 <input
@@ -184,7 +188,9 @@ export default function OrderHistory() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold mb-4 text-[var(--orange)]">Sort Order</h2>
+            <h2 className="text-lg font-bold mb-4 text-[var(--orange)]">
+              Sort Order
+            </h2>
             <div className="flex items-center gap-6">
               <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
                 <input
@@ -212,13 +218,17 @@ export default function OrderHistory() {
           </div>
 
           <div>
-            <h2 className="font-bold mb-3 text-[var(--orange)]">Order Status</h2>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">
+              Order Status
+            </h2>
             <select
               className="w-full p-2 border rounded-lg bg-[var(--white)] hover:border-[var(--orange)] 
                 focus:outline-none focus:ring-2 focus:ring-[var(--orange)] focus:border-transparent
                 transition-colors duration-200"
               value={filterOrderStatus}
-              onChange={(e) => setFilterOrderStatus(e.target.value as OrderStatus)}
+              onChange={(e) =>
+                setFilterOrderStatus(e.target.value as OrderStatus)
+              }
             >
               <option key={"ALL"} value={"ALL"}>
                 {"ALL"}
@@ -243,17 +253,17 @@ export default function OrderHistory() {
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderColor: 'var(--orange)',
-                  '&:hover': {
-                    borderColor: 'var(--pink1)',
+                  borderColor: "var(--orange)",
+                  "&:hover": {
+                    borderColor: "var(--pink1)",
                   },
                 }),
                 option: (base, state) => ({
                   ...base,
-                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
-                  color: state.isSelected ? 'white' : 'black',
-                  '&:hover': {
-                    backgroundColor: 'var(--pink1)',
+                  backgroundColor: state.isSelected ? "var(--orange)" : "white",
+                  color: state.isSelected ? "white" : "black",
+                  "&:hover": {
+                    backgroundColor: "var(--pink1)",
                   },
                 }),
               }}
@@ -271,7 +281,9 @@ export default function OrderHistory() {
                     transition-colors duration-200"
                   type="date"
                   value={filterMinOrderDate.toISOString().substring(0, 10)}
-                  onChange={(e) => setFilterMinOrderDate(new Date(e.target.value))}
+                  onChange={(e) =>
+                    setFilterMinOrderDate(new Date(e.target.value))
+                  }
                 />
               </div>
               <div>
@@ -282,14 +294,18 @@ export default function OrderHistory() {
                     transition-colors duration-200"
                   type="date"
                   value={filterMaxOrderDate.toISOString().substring(0, 10)}
-                  onChange={(e) => setFilterMaxOrderDate(new Date(e.target.value))}
+                  onChange={(e) =>
+                    setFilterMaxOrderDate(new Date(e.target.value))
+                  }
                 />
               </div>
             </div>
           </div>
 
           <div>
-            <h2 className="font-bold mb-3 text-[var(--orange)]">Delivery Date</h2>
+            <h2 className="font-bold mb-3 text-[var(--orange)]">
+              Delivery Date
+            </h2>
             <div className="flex flex-col gap-3">
               <div>
                 <label className="block font-semibold mb-1">From</label>
@@ -299,7 +315,9 @@ export default function OrderHistory() {
                     transition-colors duration-200"
                   type="date"
                   value={filterMinDeliveryDate.toISOString().substring(0, 10)}
-                  onChange={(e) => setFilterMinDeliveryDate(new Date(e.target.value))}
+                  onChange={(e) =>
+                    setFilterMinDeliveryDate(new Date(e.target.value))
+                  }
                 />
               </div>
               <div>
@@ -310,7 +328,9 @@ export default function OrderHistory() {
                     transition-colors duration-200"
                   type="date"
                   value={filterMaxDeliveryDate.toISOString().substring(0, 10)}
-                  onChange={(e) => setFilterMaxDeliveryDate(new Date(e.target.value))}
+                  onChange={(e) =>
+                    setFilterMaxDeliveryDate(new Date(e.target.value))
+                  }
                 />
               </div>
             </div>

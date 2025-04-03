@@ -85,10 +85,7 @@ class OrderProcessor:
             if itemId is None:
                 raise InvalidItemException(f"Item {itemName} is not in the database")
             deliveryDate: Optional[date] = await getDeliveryDateForItemAndLocation(
-                self.dbSession,
-                itemId,
-                order.location_id, 
-                order.orderDate
+                self.dbSession, itemId, order.location_id, order.orderDate
             )
             if deliveryDate is None:
                 raise ProcessOrderException(
@@ -100,12 +97,13 @@ class OrderProcessor:
             raise ProcessOrderException("Could not determine delivery date for order")
         return furthestDeliveryDate
 
-
     @logMethod
     async def addOrder(self, order: Order, userId: int) -> int:
         try:
             order.status = OrderStatus.PENDING
-            order.deliveryDate = datetime.combine((await self.determineDeliveryDate(order)), datetime.min.time())
+            order.deliveryDate = datetime.combine(
+                (await self.determineDeliveryDate(order)), datetime.min.time()
+            )
             orderTable: OrderTable = mapOrderToOrderTable(order, userId)
             self.dbSession.add(orderTable)
             await self.dbSession.flush()

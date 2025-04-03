@@ -11,7 +11,11 @@ import { Item } from "../interfaces/Item";
 import { CartItem, CartStatus } from "../interfaces/Order";
 import { useAuthContext } from "./AuthContext";
 import { APICartItemResponse } from "../interfaces/APIResponse";
-import { addToCarRequest, deleteCartItemRequest, getDeliveryDatesRequest } from "../request";
+import {
+  addToCarRequest,
+  deleteCartItemRequest,
+  getDeliveryDatesRequest,
+} from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import {
   showErrorToast,
@@ -87,8 +91,11 @@ export function CarContextProvider({
     if (currentLocation && items.length > 0) {
       const locationId = currentLocation.id;
       const currentDeliveryLocationId = deliveryDates[0]?.locationId;
-      
-      if (!currentDeliveryLocationId || currentDeliveryLocationId !== locationId) {
+
+      if (
+        !currentDeliveryLocationId ||
+        currentDeliveryLocationId !== locationId
+      ) {
         fetchDeliveryDates();
       }
     }
@@ -98,9 +105,7 @@ export function CarContextProvider({
     if (!currentLocation) return;
 
     try {
-      const dates = await getDeliveryDatesRequest(
-        currentLocation.id
-      );
+      const dates = await getDeliveryDatesRequest(currentLocation.id);
       setDeliveryDates(dates);
     } catch (error) {
       console.error("Error fetching delivery dates:", error);
@@ -242,10 +247,10 @@ export function CarContextProvider({
    */
   function deleteAllItemFromCar(item: Item): void {
     const itemsToDelete = cartItems.filter(
-      (i: CartItem) => i.item.id === item.id
+      (i: CartItem) => i.item.id === item.id,
     );
     itemsToDelete.forEach((cartItem: CartItem) =>
-      checkIfAddCartItemIdToPendingToDeleteList(cartItem)
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem),
     );
     setCartItems(cartItems.filter((i: CartItem) => i.item.id !== item.id));
   }

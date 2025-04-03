@@ -13,8 +13,14 @@ import { showErrorToast } from "@/app/customToast";
 import Image from "next/image";
 
 export default function OrderPage() {
-  const { carItems, getTotalCost, cleanCar, setCurrentGold, currentGold, currentLocation } =
-    useCarContext();
+  const {
+    carItems,
+    getTotalCost,
+    cleanCar,
+    setCurrentGold,
+    currentGold,
+    currentLocation,
+  } = useCarContext();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
@@ -51,7 +57,7 @@ export default function OrderPage() {
         id: 0,
         status: OrderStatus.PENDING,
         deliveryDate: new Date(),
-        location_id: currentLocation.id
+        location_id: currentLocation.id,
       };
       const response = await orderRequest(order, "client");
       if (!response.ok) {
@@ -120,7 +126,9 @@ export default function OrderPage() {
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">After Purchase:</span>
+                    <span className="text-lg font-semibold">
+                      After Purchase:
+                    </span>
                     <span className="text-xl font-bold text-yellow-500">
                       {remainingGold?.toLocaleString()} g
                     </span>
@@ -138,9 +146,11 @@ export default function OrderPage() {
                     disabled={!canBuy}
                     className={`flex-1 py-3 px-6 rounded-lg transition-all duration-300 
                       transform hover:scale-105 font-semibold text-lg
-                      ${canBuy 
-                        ? 'bg-[var(--orange)] text-white hover:bg-opacity-90' 
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                      ${
+                        canBuy
+                          ? "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                   >
                     Confirm Purchase
                   </button>
@@ -169,7 +179,8 @@ export default function OrderPage() {
               </div>
               {userName && !canBuy && (
                 <p className="text-red-500 text-center text-sm">
-                  Not enough gold! You need {orderTotal.toLocaleString()} g but have {currentGold?.toLocaleString()} g
+                  Not enough gold! You need {orderTotal.toLocaleString()} g but
+                  have {currentGold?.toLocaleString()} g
                 </p>
               )}
             </div>

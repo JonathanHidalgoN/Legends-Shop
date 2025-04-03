@@ -265,7 +265,9 @@ async def singUp(
             },
         )
     if not locationExist:
-        logger.error(f"Error in {request.url.path}, location {location_id} does not exist")
+        logger.error(
+            f"Error in {request.url.path}, location {location_id} does not exist"
+        )
         raise HTTPException(
             status_code=400,
             detail="Location does not exist",

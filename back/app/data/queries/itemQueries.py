@@ -382,6 +382,7 @@ async def getAllItemIds(asyncSession: AsyncSession) -> Sequence[int]:
     itemIds: Sequence[int] = result.scalars().all()
     return itemIds
 
+
 # async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
 #     await asyncSession.execute(
 #         update(ItemTable.imageHDPath)

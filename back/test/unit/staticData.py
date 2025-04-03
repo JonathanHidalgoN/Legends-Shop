@@ -231,7 +231,7 @@ STATIC_DATA_ORDER1: Order = Order(
     orderDate=date(2025, 1, 1),
     deliveryDate=date(2025, 1, 8),
     status=OrderStatus.PENDING,
-    location_id=1
+    location_id=1,
 )
 
 STATIC_DATA_ORDER2: Order = Order(
@@ -242,7 +242,7 @@ STATIC_DATA_ORDER2: Order = Order(
     orderDate=date(2025, 1, 1),
     deliveryDate=date(2025, 1, 8),
     status=OrderStatus.PENDING,
-    location_id=1
+    location_id=1,
 )
 
 STATIC_DATA_USER_IN_DB1: UserInDB = UserInDB(

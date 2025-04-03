@@ -20,7 +20,9 @@ export default function SelectedItems({
 }) {
   const maxPrice = Math.max(...items.map((item) => item.gold.base));
   const minPrice = Math.min(...items.map((item) => item.gold.base));
-  const [filterItemNames, setFilterItemName] = useState<string[]>(initialSearch ? [initialSearch] : []);
+  const [filterItemNames, setFilterItemName] = useState<string[]>(
+    initialSearch ? [initialSearch] : [],
+  );
   const [filterMinPrice, setFilterMinPrice] = useState<number>(minPrice);
   const [filterMaxPrice, setFilterMaxPrice] = useState<number>(maxPrice);
   const [filterTagNames, setFilterTagNames] = useState<string[]>([]);
@@ -113,8 +115,8 @@ export default function SelectedItems({
         checkItemsAttributeInFilterList(item.tags, filterTagNames) &&
         (filterItemNames.length == 0
           ? true
-          : filterItemNames.some(name => 
-              item.name.toLowerCase().includes(name.toLowerCase())
+          : filterItemNames.some((name) =>
+              item.name.toLowerCase().includes(name.toLowerCase()),
             )) &&
         item.gold.base <= filterMaxPrice &&
         item.gold.base >= filterMinPrice,
@@ -152,11 +154,15 @@ export default function SelectedItems({
 
   return (
     <div className="grid grid-cols-2 grid-cols-[13%_80%] gap-4 h-full">
-      <aside className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
-        bg-[var(--white)] text-[var(--black)] sticky top-0 rounded-lg">
+      <aside
+        className="p-4 flex flex-col shadow-lg overflow-y-auto h-screen 
+        bg-[var(--white)] text-[var(--black)] sticky top-0 rounded-lg"
+      >
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg text-[var(--orange)] font-bold mb-4">Sort By</h2>
+            <h2 className="text-lg text-[var(--orange)] font-bold mb-4">
+              Sort By
+            </h2>
             <div className="flex flex-col gap-3">
               <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
                 <input
@@ -184,7 +190,9 @@ export default function SelectedItems({
           </div>
 
           <div>
-            <h2 className="text-lg font-bold mb-4 text-[var(--orange)]">Sort Order</h2>
+            <h2 className="text-lg font-bold mb-4 text-[var(--orange)]">
+              Sort Order
+            </h2>
             <div className="flex items-center gap-6">
               <label className="flex items-center cursor-pointer hover:text-[var(--orange)] transition-colors duration-200">
                 <input
@@ -253,17 +261,17 @@ export default function SelectedItems({
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderColor: 'var(--orange)',
-                  '&:hover': {
-                    borderColor: 'var(--pink1)',
+                  borderColor: "var(--orange)",
+                  "&:hover": {
+                    borderColor: "var(--pink1)",
                   },
                 }),
                 option: (base, state) => ({
                   ...base,
-                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
-                  color: state.isSelected ? 'white' : 'black',
-                  '&:hover': {
-                    backgroundColor: 'var(--pink1)',
+                  backgroundColor: state.isSelected ? "var(--orange)" : "white",
+                  color: state.isSelected ? "white" : "black",
+                  "&:hover": {
+                    backgroundColor: "var(--pink1)",
                   },
                 }),
               }}
@@ -282,17 +290,17 @@ export default function SelectedItems({
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderColor: 'var(--orange)',
-                  '&:hover': {
-                    borderColor: 'var(--pink1)',
+                  borderColor: "var(--orange)",
+                  "&:hover": {
+                    borderColor: "var(--pink1)",
                   },
                 }),
                 option: (base, state) => ({
                   ...base,
-                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
-                  color: state.isSelected ? 'white' : 'black',
-                  '&:hover': {
-                    backgroundColor: 'var(--pink1)',
+                  backgroundColor: state.isSelected ? "var(--orange)" : "white",
+                  color: state.isSelected ? "white" : "black",
+                  "&:hover": {
+                    backgroundColor: "var(--pink1)",
                   },
                 }),
               }}
@@ -311,17 +319,17 @@ export default function SelectedItems({
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderColor: 'var(--orange)',
-                  '&:hover': {
-                    borderColor: 'var(--pink1)',
+                  borderColor: "var(--orange)",
+                  "&:hover": {
+                    borderColor: "var(--pink1)",
                   },
                 }),
                 option: (base, state) => ({
                   ...base,
-                  backgroundColor: state.isSelected ? 'var(--orange)' : 'white',
-                  color: state.isSelected ? 'white' : 'black',
-                  '&:hover': {
-                    backgroundColor: 'var(--pink1)',
+                  backgroundColor: state.isSelected ? "var(--orange)" : "white",
+                  color: state.isSelected ? "white" : "black",
+                  "&:hover": {
+                    backgroundColor: "var(--pink1)",
                   },
                 }),
               }}

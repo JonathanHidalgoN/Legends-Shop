@@ -339,7 +339,7 @@ export async function getUserLocationRequest(
 ): Promise<Location> {
   const url: string = makeUrl(from, ENDPOINT_USER_LOCATION);
   const response = await fetch(url, {
-    credentials: 'include',
+    credentials: "include",
   });
   if (!response.ok) {
     await throwAPIError(response, "Error fetching user location");
@@ -349,7 +349,7 @@ export async function getUserLocationRequest(
 
 export async function getDeliveryDatesRequest(
   locationId: number,
-  from: string = "client"
+  from: string = "client",
 ): Promise<DeliveryDate[]> {
   const url: string = makeUrl(from, `${ENDPOINT_DELIVERY_DATES}/${locationId}`);
   const response = await fetch(url, {

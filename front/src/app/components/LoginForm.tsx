@@ -11,7 +11,10 @@ import { getAddedCartItemsRequest, getUserLocationRequest } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import { Item } from "../interfaces/Item";
 import { validateUsernameInput, validatePasswordInput } from "../functions";
-import { ValidationResult, defaultValidationResult } from "../interfaces/Errors";
+import {
+  ValidationResult,
+  defaultValidationResult,
+} from "../interfaces/Errors";
 import { Location } from "../interfaces/Location";
 
 interface LoginFormProps {
@@ -20,7 +23,11 @@ interface LoginFormProps {
   className?: string;
 }
 
-export default function LoginForm({ onSuccess, redirectPath, className = "" }: LoginFormProps) {
+export default function LoginForm({
+  onSuccess,
+  redirectPath,
+  className = "",
+}: LoginFormProps) {
   const { login } = useAuthContext();
   const router = useRouter();
   const { setCarItems, setCurrentGold, setCurrentLocation } = useCarContext();
@@ -30,8 +37,10 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<LoginError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [validUsernameInput, setValidUsernameInput] = useState<ValidationResult>(defaultValidationResult);
-  const [validPasswordInput, setValidPasswordInput] = useState<ValidationResult>(defaultValidationResult);
+  const [validUsernameInput, setValidUsernameInput] =
+    useState<ValidationResult>(defaultValidationResult);
+  const [validPasswordInput, setValidPasswordInput] =
+    useState<ValidationResult>(defaultValidationResult);
 
   const validateForm = () => {
     const usernameValidation = validateUsernameInput(formUserName);
@@ -55,7 +64,10 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
 
     setIsLoading(true);
     try {
-      const apiResponse: APILoginResponse = await login(formUserName, formPassword);
+      const apiResponse: APILoginResponse = await login(
+        formUserName,
+        formPassword,
+      );
 
       if (apiResponse.status === 200) {
         const currentGold: number | null = await getCurrentUserGold();
@@ -67,15 +79,17 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
 
         try {
           const apiCartItems = await getAddedCartItemsRequest("client");
-          const serverCartItems: CartItem[] = apiCartItems.map((apiCartItem) => {
-            const matchItem: Item | undefined = items.find(
-              (item: Item) => item.id == apiCartItem.itemId
-            );
-            if (!matchItem) {
-              throw Error("Error");
-            }
-            return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
-          });
+          const serverCartItems: CartItem[] = apiCartItems.map(
+            (apiCartItem) => {
+              const matchItem: Item | undefined = items.find(
+                (item: Item) => item.id == apiCartItem.itemId,
+              );
+              if (!matchItem) {
+                throw Error("Error");
+              }
+              return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
+            },
+          );
           setCarItems(serverCartItems);
         } catch (error) {
           console.error("Error fetching cart items:", error);
@@ -112,9 +126,15 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
   }
 
   return (
-    <form onSubmit={handleLoginSubmit} className={`w-full max-w-md space-y-4 ${className}`}>
+    <form
+      onSubmit={handleLoginSubmit}
+      className={`w-full max-w-md space-y-4 ${className}`}
+    >
       <div className="flex flex-col">
-        <label htmlFor="username" className="mb-1 font-bold text-[var(--orange)]">
+        <label
+          htmlFor="username"
+          className="mb-1 font-bold text-[var(--orange)]"
+        >
           Username
         </label>
         <input
@@ -137,7 +157,10 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
         )}
       </div>
       <div className="flex flex-col">
-        <label htmlFor="password" className="mb-1 font-bold text-[var(--orange)]">
+        <label
+          htmlFor="password"
+          className="mb-1 font-bold text-[var(--orange)]"
+        >
           Password
         </label>
         <input
@@ -175,7 +198,9 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
         <button
           type="submit"
           className="w-full bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition disabled:opacity-50"
-          disabled={isLoading || !validUsernameInput.valid || !validPasswordInput.valid}
+          disabled={
+            isLoading || !validUsernameInput.valid || !validPasswordInput.valid
+          }
         >
           {isLoading ? "Logging in..." : "Log In"}
         </button>
@@ -189,4 +214,4 @@ export default function LoginForm({ onSuccess, redirectPath, className = "" }: L
       </div>
     </form>
   );
-} 
+}

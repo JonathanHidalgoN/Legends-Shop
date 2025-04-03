@@ -17,11 +17,11 @@ from app.data.queries.locationQueries import getUserLocation
 router = APIRouter()
 
 
-
 async def getLocationManager(
-    dbSession: Annotated[AsyncSession, Depends(database.getDbSession)]
+    dbSession: Annotated[AsyncSession, Depends(database.getDbSession)],
 ) -> LocationManager:
     return LocationManager(dbSession)
+
 
 @router.get("/all", response_model=List[Location])
 async def getAllLocations(
@@ -33,7 +33,8 @@ async def getAllLocations(
     try:
         return await manager.getAllLocations()
     except LocationManagerException as e:
-        raise HTTPException(status_code=400, detail=str(e)) 
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/user", response_model=Location)
 async def getUserLocationEndpoint(
@@ -52,7 +53,6 @@ async def getUserLocationEndpoint(
         return mapLocationTableToLocation(location)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 @router.post("/create", include_in_schema=False)
@@ -117,5 +117,3 @@ async def getLocation(
         return await manager.getLocation(locationId)
     except LocationNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-

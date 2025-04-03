@@ -13,12 +13,14 @@ from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler = SchedulerService()
     scheduler.start()
     yield
     scheduler.scheduler.shutdown()
+
 
 app = FastAPI(lifespan=lifespan)
 

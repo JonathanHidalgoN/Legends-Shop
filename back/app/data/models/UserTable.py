@@ -15,4 +15,6 @@ class UserTable(base):
     current_gold: Mapped[int] = mapped_column(nullable=False, default=0)
     email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     birthdate: Mapped[Date] = mapped_column(Date, nullable=False)
-    location_id: Mapped[int] = mapped_column(ForeignKey("location_table.id"), nullable=False, default=1)
+    location_id: Mapped[int] = mapped_column(
+        ForeignKey("location_table.id"), nullable=False, default=1
+    )

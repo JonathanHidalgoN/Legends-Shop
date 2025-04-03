@@ -14,11 +14,11 @@ async def getAllDeliveryDatesByLocationId(
 ) -> List[DeliveryDate]:
     """
     Get all delivery dates for a specific location.
-    
+
     Args:
         asyncSession: The database session.
         locationId: The ID of the location to get delivery dates for.
-        
+
     Returns:
         A list of DeliveryDate objects containing itemId, locationId, and the computed deliveryDate.
     """
@@ -32,7 +32,7 @@ async def getAllDeliveryDatesByLocationId(
         DeliveryDate(
             itemId=row.item_id,
             locationId=row.location_id,
-            deliveryDate=date.today() + timedelta(days=row.days_plus)
+            deliveryDate=date.today() + timedelta(days=row.days_plus),
         )
         for row in rows
     ]
@@ -40,31 +40,28 @@ async def getAllDeliveryDatesByLocationId(
 
 
 async def getDeliveryDateForItemAndLocation(
-    asyncSession: AsyncSession,
-    itemId: int,
-    locationId: int,
-    orderDate: date
+    asyncSession: AsyncSession, itemId: int, locationId: int, orderDate: date
 ) -> date | None:
     """
     Get the delivery date for a specific item and location.
-    
+
     Args:
         asyncSession: The database session.
         itemId: The ID of the item.
         locationId: The ID of the location.
         orderDate: The date when the order was placed.
-        
+
     Returns:
         The computed delivery date based on the item and location.
     """
     query = select(ItemLocationDeliveryAssociation).where(
         ItemLocationDeliveryAssociation.c.item_id == itemId,
-        ItemLocationDeliveryAssociation.c.location_id == locationId
+        ItemLocationDeliveryAssociation.c.location_id == locationId,
     )
     result = await asyncSession.execute(query)
     row = result.first()
-    
+
     if row is None:
-        return None 
-        
+        return None
+
     return orderDate + timedelta(days=row.days_plus)

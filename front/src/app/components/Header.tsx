@@ -15,7 +15,8 @@ import { useStaticData } from "./StaticDataContext";
 
 export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut } = useAuthContext();
-  const { carItems, currentGold, currentLocation, setCurrentLocation } = useCarContext();
+  const { carItems, currentGold, currentLocation, setCurrentLocation } =
+    useCarContext();
   const { locations } = useStaticData();
   console.log(locations);
 
@@ -155,7 +156,9 @@ export default function Header({ items }: { items: Item[] }) {
                   </LoadingButton>
                 </>
               ) : (
-                <div className="text-center text-gray-500 py-4">Cart is empty</div>
+                <div className="text-center text-gray-500 py-4">
+                  Cart is empty
+                </div>
               )}
             </div>
           )}
@@ -165,7 +168,9 @@ export default function Header({ items }: { items: Item[] }) {
           <div className="relative">
             {isMounted ? (
               <LoadingButton
-                onClick={() => handleNavigation(`/order/order_history/${userName}`)}
+                onClick={() =>
+                  handleNavigation(`/order/order_history/${userName}`)
+                }
                 isLoading={isNavigating}
                 className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200 
                 bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
@@ -202,7 +207,7 @@ export default function Header({ items }: { items: Item[] }) {
           <div className="relative flex items-center">
             <div
               className="flex items-center cursor-pointer px-2 py-1.5 rounded hover:bg-gray-100 transition-colors duration-200"
-              onClick={() => setShowLocationDropdown(prev => !prev)}
+              onClick={() => setShowLocationDropdown((prev) => !prev)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -244,8 +249,9 @@ export default function Header({ items }: { items: Item[] }) {
                         setCurrentLocation(location);
                         setShowLocationDropdown(false);
                       }}
-                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${currentLocation?.id === location.id ? 'bg-gray-50' : ''
-                        }`}
+                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${
+                        currentLocation?.id === location.id ? "bg-gray-50" : ""
+                      }`}
                     >
                       {location.country_name}
                     </div>

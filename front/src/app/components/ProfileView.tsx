@@ -26,8 +26,8 @@ export default function ProfileView() {
 
   const profileInfo: ProfileInfo = mapAPIProfileInfoResponseToProfileInfo(data);
   const { user, ordersInfo } = profileInfo;
-  
-  const userLocation = locations.find(loc => loc.id === user.locationId);
+
+  const userLocation = locations.find((loc) => loc.id === user.locationId);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -44,7 +44,9 @@ export default function ProfileView() {
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">Account Details</h2>
+              <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">
+                Account Details
+              </h2>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-gray-600">Email:</span>
@@ -52,34 +54,52 @@ export default function ProfileView() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-gray-600">Location:</span>
-                  <span className="text-[var(--orange)] font-medium">{userLocation?.country_name || "Not set"}</span>
+                  <span className="text-[var(--orange)] font-medium">
+                    {userLocation?.country_name || "Not set"}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-gray-600">Created:</span>
-                  <span className="text-gray-800">{user.created.toLocaleDateString()}</span>
+                  <span className="text-gray-800">
+                    {user.created.toLocaleDateString()}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-gray-600">Last Sign-In:</span>
-                  <span className="text-gray-800">{user.lastSingIn.toLocaleDateString()}</span>
+                  <span className="font-semibold text-gray-600">
+                    Last Sign-In:
+                  </span>
+                  <span className="text-gray-800">
+                    {user.lastSingIn.toLocaleDateString()}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-gray-600">Birth Date:</span>
-                  <span className="text-gray-800">{user.birthDate.toLocaleDateString()}</span>
+                  <span className="font-semibold text-gray-600">
+                    Birth Date:
+                  </span>
+                  <span className="text-gray-800">
+                    {user.birthDate.toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">Gold Statistics</h2>
+              <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">
+                Gold Statistics
+              </h2>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-gray-600">Current Gold:</span>
+                  <span className="font-semibold text-gray-600">
+                    Current Gold:
+                  </span>
                   <span className="text-[var(--yellow)] font-bold text-xl">
                     {user.currentGold.toLocaleString()} g
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-gray-600">Total Gold Spent:</span>
+                  <span className="font-semibold text-gray-600">
+                    Total Gold Spent:
+                  </span>
                   <span className="text-[var(--yellow)] font-bold text-xl">
                     {user.goldSpend.toLocaleString()} g
                   </span>
@@ -91,7 +111,9 @@ export default function ProfileView() {
 
         {/* Orders Summary */}
         <div className="p-8 border-t border-gray-200">
-          <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">Orders Summary</h2>
+          <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">
+            Orders Summary
+          </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -112,7 +134,10 @@ export default function ProfileView() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {ordersInfo.map((order, index) => (
-                  <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {order.itemName}
                     </td>

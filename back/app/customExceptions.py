@@ -103,6 +103,7 @@ class ItemNotFoundException(DeliveryDateAssignerException):
 class DeliveryDateAssignmentError(DeliveryDateAssignerException):
     pass
 
+
 class LocationManagerException(Exception):
     pass
 
@@ -120,4 +121,4 @@ class LocationUpdateError(LocationManagerException):
 
 
 class LocationDeleteError(LocationManagerException):
-    pass 
+    pass
