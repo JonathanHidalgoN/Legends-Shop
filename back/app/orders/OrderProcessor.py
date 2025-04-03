@@ -1,7 +1,8 @@
 import random
 from datetime import date, datetime, timedelta
-from typing import List, Set
+from typing import List, Set, Optional
 from sqlalchemy import insert
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.mappers import mapOrderToOrderTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
 from app.data.queries.orderQueries import getOrderHistoryByUserId, getOrderWithId
@@ -28,7 +29,7 @@ from app.data.queries.deliveryDatesQueries import getDeliveryDateForItemAndLocat
 
 class OrderProcessor:
 
-    def __init__(self, dbSession) -> None:
+    def __init__(self, dbSession: AsyncSession) -> None:
         self.dbSession = dbSession
         pass
 
@@ -72,18 +73,18 @@ class OrderProcessor:
             raise ProcessOrderException("Internal server error") from e
 
     @logMethod
-    def creteaRandomDate(self, ref: datetime) -> datetime:
+    def createRandomDate(self, ref: datetime) -> datetime:
         days = random.randint(1, 14)
         return ref + timedelta(days=days)
 
     @logMethod
     async def determineDeliveryDate(self, order: Order) -> date:
-        furthestDeliveryDate = None
+        furthestDeliveryDate: Optional[date] = None
         for itemName in order.itemNames:
-            itemId = await getItemIdByItemName(self.dbSession, itemName)
+            itemId: Optional[int] = await getItemIdByItemName(self.dbSession, itemName)
             if itemId is None:
                 raise InvalidItemException(f"Item {itemName} is not in the database")
-            deliveryDate : date | None = await getDeliveryDateForItemAndLocation(
+            deliveryDate: Optional[date] = await getDeliveryDateForItemAndLocation(
                 self.dbSession,
                 itemId,
                 order.location_id, 
@@ -115,7 +116,7 @@ class OrderProcessor:
     @logMethod
     async def insertItemOrderData(
         self, orderId: int, orderDataPerItem: List[OrderDataPerItem]
-    ):
+    ) -> None:
         """
         Registersassociated items in the database.
 
@@ -131,7 +132,7 @@ class OrderProcessor:
             ProcessOrderException: If a database error occurs when adding the order or its items.
         """
         for data in orderDataPerItem:
-            val: dict = {
+            val: dict[str, int] = {
                 "order_id": orderId,
                 "item_id": data.itemId,
                 "quantity": data.quantity,
@@ -144,7 +145,7 @@ class OrderProcessor:
 
     @logMethod
     async def getOrderDataPerItem(
-        self, order: Order, orderTableId
+        self, order: Order, orderTableId: int
     ) -> List[OrderDataPerItem]:
         """
         Retrieves order data for each unique item in the order.
@@ -169,20 +170,20 @@ class OrderProcessor:
         orderDataPerItem: List[OrderDataPerItem] = []
         uniqueItemNames: Set[str] = set(order.itemNames)
         for itemName in uniqueItemNames:
-            itemId: int | None = await getItemIdByItemName(self.dbSession, itemName)
+            itemId: Optional[int] = await getItemIdByItemName(self.dbSession, itemName)
             if itemId is None:
                 raise InvalidItemException(f"Item {itemName} is not in the database")
             amountOfItemInOrder: int = len(
                 [e for e in order.itemNames if e == itemName]
             )
-            baseCostOfItem: int | None = await getGoldBaseWithItemId(
+            baseCostOfItem: Optional[int] = await getGoldBaseWithItemId(
                 self.dbSession, itemId
             )
             if baseCostOfItem is None:
                 raise InvalidItemException(
                     f"Could not find the base cost of item {itemName}"
                 )
-            total = int(amountOfItemInOrder * baseCostOfItem)
+            total: int = int(amountOfItemInOrder * baseCostOfItem)
             data: OrderDataPerItem = OrderDataPerItem(
                 itemId=itemId,
                 orderId=orderTableId,
@@ -194,7 +195,7 @@ class OrderProcessor:
 
     @logMethod
     def comparePrices(
-        self, orderDataPerItem: List[OrderDataPerItem], orderPrice
+        self, orderDataPerItem: List[OrderDataPerItem], orderPrice: int
     ) -> None:
         """
         Compares the computed total cost of the order items with the provided order total.
@@ -219,8 +220,8 @@ class OrderProcessor:
             )
 
     @logMethod
-    async def cancelOrder(self, userId: int, orderId: int):
-        orderTable = await getOrderWithId(self.dbSession, orderId)
+    async def cancelOrder(self, userId: int, orderId: int) -> None:
+        orderTable: Optional[OrderTable] = await getOrderWithId(self.dbSession, orderId)
         if orderTable is None:
             raise OrderNotFoundException("Order not found")
         if orderTable.user_id != userId:
@@ -239,7 +240,7 @@ class OrderProcessor:
 
     @logMethod
     async def computeUserChange(self, userId: int, total: int) -> int:
-        userCurrentGold: int | None = await getCurrentUserGoldWithUserId(
+        userCurrentGold: Optional[int] = await getCurrentUserGoldWithUserId(
             self.dbSession, userId
         )
         if userCurrentGold is None:
@@ -261,7 +262,7 @@ class OrderProcessor:
     @logMethod
     async def updateTotalUserSpendGold(self, userId: int, toAdd: int) -> None:
         try:
-            userSpendGold: int | None = await getTotalSpendUserGoldWithUserId(
+            userSpendGold: Optional[int] = await getTotalSpendUserGoldWithUserId(
                 self.dbSession, userId
             )
         except SQLAlchemyError as e:
