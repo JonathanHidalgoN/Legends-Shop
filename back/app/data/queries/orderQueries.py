@@ -1,12 +1,14 @@
 from typing import List, Optional, Tuple
-from sqlalchemy import func, select
+from sqlalchemy import func, select, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from app.data.models.UserTable import UserTable
 from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
 from app.schemas.Order import Order, OrderSummary
+from app.schemas.Order import OrderStatus
 
 
 async def getOrderHistoryByUserId(
@@ -125,3 +127,29 @@ async def getUniqueItemNamesQuantityAndBasePriceByUserName(
         finalList.append(ordSummary)
 
     return finalList
+
+async def getOrdersWithStatusAndDeliveryDate(
+    asyncSession: AsyncSession,
+    delivery_date: date,
+    status: OrderStatus
+) -> List[OrderTable]:
+    """Get orders that have a specific status and delivery date"""
+    result = await asyncSession.execute(
+        select(OrderTable).where(
+            (OrderTable.status == status) & (OrderTable.delivery_date == delivery_date)
+        )
+    )
+    return list(result.scalars().all())
+
+async def updateOrderStatus(
+    asyncSession: AsyncSession,
+    order_id: int,
+    new_status: OrderStatus
+) -> None:
+    """Update the status of an order"""
+    await asyncSession.execute(
+        update(OrderTable)
+        .where(OrderTable.id == order_id)
+        .values(status=new_status)
+    )
+    await asyncSession.commit()
