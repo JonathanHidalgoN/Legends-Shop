@@ -24,6 +24,7 @@ class OrderTable(base):
     location_id: Mapped[int] = mapped_column(
         ForeignKey("location_table.id"), nullable=False
     )
+    reviewed: Mapped[bool] = mapped_column(nullable=False, default=False)
 
     items: Mapped[list["ItemTable"]] = relationship(
         "ItemTable",
