@@ -122,3 +122,14 @@ class LocationUpdateError(LocationManagerException):
 
 class LocationDeleteError(LocationManagerException):
     pass
+
+
+class ReviewProcessorException(Exception):
+    pass
+
+
+class InvalidRatingException(ReviewProcessorException):
+    pass
+
+class InvalidUserReview(ReviewProcessorException):
+    pass
