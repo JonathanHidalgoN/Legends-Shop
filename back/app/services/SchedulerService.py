@@ -29,10 +29,10 @@ class SchedulerService:
                 logger.error(f"Error updating items: {str(e)}")
 
     def start(self):
-        # Schedule jobs to run every day at 00:00
+        # Schedule jobs to run every day at slightly different times
         self.scheduler.add_job(
             self.updateOrderStatusJob,
-            trigger=CronTrigger(hour=0, minute=0),
+            trigger=CronTrigger(hour=0, minute=0),  # 00:00
             id="update_order_statuses",
             name="Update order statuses",
             replace_existing=True,
@@ -40,7 +40,7 @@ class SchedulerService:
         
         self.scheduler.add_job(
             self.updateItemsJob,
-            trigger=CronTrigger(hour=0, minute=0),
+            trigger=CronTrigger(hour=0, minute=5),  # 00:05
             id="update_items",
             name="Update items from API",
             replace_existing=True,
