@@ -33,6 +33,7 @@ class Order(BaseModel):
     deliveryDate: datetime
     status: OrderStatus
     location_id: int
+    reviewed:bool = False
 
 
 class OrderDataPerItem(BaseModel):
