@@ -10,8 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 from app.logger import logger
 from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
+from app.services.SchedulerService import SchedulerService
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler = SchedulerService()
+    scheduler.start()
+    yield
+    scheduler.scheduler.shutdown()
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.middleware("http")
