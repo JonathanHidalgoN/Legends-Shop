@@ -34,6 +34,11 @@ class OrderProcessor:
         pass
 
     @logMethod
+    def checkReviewedStatus(self, order:Order) -> None:
+        if order.reviewed:
+            raise ProcessOrderException("Tried to make order with status reviewed")
+
+    @logMethod
     async def makeOrder(self, order: Order, userId: int) -> int:
         """
         Processes an order for a given user.
@@ -50,6 +55,7 @@ class OrderProcessor:
             ProcessOrderException: If the order cannot be processed or if there is a database error.
         """
         try:
+            self.checkReviewedStatus(order)
             orderId: int = await self.addOrder(order, userId)
             orderDataPerItem: List[OrderDataPerItem] = await self.getOrderDataPerItem(
                 order, orderId
