@@ -1,7 +1,9 @@
 from typing import Optional, List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from app.data.models.ReviewTable import ReviewTable, CommentTable
+from app.data.models.OrderTable import OrderTable
 
 
 async def addReview(
@@ -42,6 +44,20 @@ async def getReviewById(
         select(ReviewTable).where(ReviewTable.id == review_id)
     )
     return result.scalar_one_or_none()
+
+
+async def getReviewsByUserId(
+    asyncSession: AsyncSession,
+    userId: int,
+) -> List[ReviewTable]:
+    """Get a review by its ID."""
+    result = await asyncSession.execute(
+        select(ReviewTable)
+        .options(selectinload(ReviewTable.comments))
+        .join(OrderTable, OrderTable.id == ReviewTable.order_id)
+        .where(OrderTable.user_id == userId)
+    )
+    return list(result.scalars().all())
 
 
 async def getReviewsByOrderId(
