@@ -3,12 +3,14 @@ import {
   APICartItemResponse,
   APIError,
   APIProfileInfoResponse,
+  APIReviewResponse,
 } from "./interfaces/APIResponse";
 import { Order } from "./interfaces/Order";
 import { APIOrderResponse } from "./interfaces/APIResponse";
 import { Location } from "./interfaces/Location";
 import { DeliveryDate } from "./interfaces/DeliveryDate";
 import { showErrorToast } from "./customToast";
+import { Review } from "./interfaces/Review";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
@@ -33,6 +35,8 @@ export const ENDPOINT_CART_DELETE_ITEM: string = `cart/delete_cart_item`;
 export const ENDPOINT_UPDATE_ITEMS: string = `/updateItems`;
 export const ENDPOINT_USER_LOCATION: string = `locations/user`;
 export const ENDPOINT_DELIVERY_DATES: string = `delivery_dates/dates`;
+export const ENDPOINT_REVIEW: string = `review/add`;
+export const ENDPOINT_USER_REVIEWS: string = `review/user`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -357,6 +361,47 @@ export async function getDeliveryDatesRequest(
   });
   if (!response.ok) {
     await throwAPIError(response, "Error fetching delivery dates");
+  }
+  return await response.json();
+}
+
+export async function addReviewRequest(
+  review: Review,
+  from: string = "server",
+): Promise<void> {
+  const url: string = makeUrl(from, ENDPOINT_REVIEW);
+  const response = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(review),
+  });
+
+  if (!response.ok) {
+    await throwAPIError(response, "Error adding review");
+  }
+  return await response.json();
+}
+
+/**
+ * Get all reviews for the authenticated user.
+ * 
+ * @param from - The domain to make the request to ("server" or "client")
+ * @returns A Promise that resolves with an array of reviews
+ */
+export async function getUserReviewsRequest(
+  from: string = "server",
+): Promise<APIReviewResponse[]> {
+  const url: string = makeUrl(from, ENDPOINT_USER_REVIEWS);
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    await throwAPIError(response, "Error fetching user reviews");
   }
   return await response.json();
 }
