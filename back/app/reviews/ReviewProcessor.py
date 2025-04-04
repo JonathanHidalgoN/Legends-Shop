@@ -61,14 +61,26 @@ class ReviewProcessor:
                 review.rating
             )
             
-            # Handle comment update if available
+            # Handle comment update/creation if available
             if review.comments and len(review.comments) > 0:
                 comment_content = review.comments[0].content
-                await addComment(
-                    self.dbSession,
-                    review.id,
-                    userId,
-                    comment_content)
+                existing_comments = await getCommentsByReviewId(self.dbSession, review.id)
+                
+                if existing_comments:
+                    # Update existing comment
+                    await updateComment(
+                        self.dbSession,
+                        existing_comments[0].id,
+                        comment_content
+                    )
+                else:
+                    # Add new comment
+                    await addComment(
+                        self.dbSession,
+                        review.id,
+                        userId,
+                        comment_content
+                    )
             
         except InvalidUserReview as e:
             await self.dbSession.rollback()
