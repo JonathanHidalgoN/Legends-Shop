@@ -34,6 +34,29 @@ async def addReview(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.put("/update", status_code=200)
+async def updateReview(
+    review: Review,
+    userId: Annotated[int, Depends(getUserIdFromName)],
+    reviewProcessor: ReviewProcessor = Depends(getReviewProcessor),
+):
+    """
+    Update an existing review and its comments.
+    
+    This endpoint allows users to update their existing reviews, including the rating and comments.
+    The user must be the owner of the order associated with the review.
+    """
+    try:
+        await reviewProcessor.updateReviewAndComments(review, userId)
+        return {"message": "Review updated successfully"}
+    except InvalidRatingException as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except InvalidUserReview as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except ReviewProcessorException as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/user", status_code=200, response_model=List[Review])
 async def getReviewsByUserId(
     userId: Annotated[int, Depends(getUserIdFromName)],
