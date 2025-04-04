@@ -13,6 +13,8 @@ from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
 
+from app.routes import reviews
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -57,6 +59,7 @@ app.include_router(profile.router, prefix="/profile")
 app.include_router(cart.router, prefix="/cart")
 app.include_router(deliveryDates.router, prefix="/delivery_dates")
 app.include_router(locations.router, prefix="/locations")
+app.include_router(reviews.router, prefix="/review")
 
 
 def getItemsLoader(
