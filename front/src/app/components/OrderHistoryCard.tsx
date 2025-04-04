@@ -6,8 +6,10 @@ import { cancelOrderRequest } from "../request";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { showErrorToast } from "../customToast";
+import { useRouter } from "next/navigation";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
+  const router = useRouter();
   const { items } = useStaticData();
   const [orderStatus, setOrderStatus] = useState<string>(order.status);
 
@@ -131,7 +133,7 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
           </p>
           <p className="mt-1 text-sm font-bold">Status: {orderStatus}</p>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 flex gap-2">
           <button
             className={`px-4 py-2 rounded transition-colors 
                        w-full md:w-auto ${
@@ -144,6 +146,16 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
           >
             Cancel Order
           </button>
+          {orderStatus === OrderStatus.DELIVERED && !order.reviewed && (
+            <button
+              className="px-4 py-2 rounded bg-yellow-500 text-white 
+                       hover:bg-yellow-600 transition-all duration-300 
+                       transform hover:scale-105 w-full md:w-auto"
+              onClick={() => router.push(`/review/${order.id}`)}
+            >
+              Review
+            </button>
+          )}
         </div>
       </div>
     </div>
