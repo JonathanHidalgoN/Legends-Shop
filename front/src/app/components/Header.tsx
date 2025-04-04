@@ -25,12 +25,15 @@ export default function Header({ items }: { items: Item[] }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showOrdersDropdown, setShowOrdersDropdown] = useState(false);
 
   const loginDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
   const carDropDownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
   const locationDropdownRef: RefObject<HTMLDivElement | null> =
+    useRef<HTMLDivElement>(null);
+  const ordersDropdownRef: RefObject<HTMLDivElement | null> =
     useRef<HTMLDivElement>(null);
 
   const router = useRouter();
@@ -41,6 +44,7 @@ export default function Header({ items }: { items: Item[] }) {
       handleClickOutside(event, loginDropDownRef, setShowLoginDropdown);
       handleClickOutside(event, carDropDownRef, setShowCartDropdown);
       handleClickOutside(event, locationDropdownRef, setShowLocationDropdown);
+      handleClickOutside(event, ordersDropdownRef, setShowOrdersDropdown);
     };
     document.addEventListener("mousedown", handleClick);
     return () => {
@@ -167,16 +171,43 @@ export default function Header({ items }: { items: Item[] }) {
         {userName && (
           <div className="relative">
             {isMounted ? (
-              <LoadingButton
-                onClick={() =>
-                  handleNavigation(`/order/order_history/${userName}`)
-                }
-                isLoading={isNavigating}
-                className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200 
-                bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
-              >
-                Orders
-              </LoadingButton>
+              <>
+                <LoadingButton
+                  onClick={() => setShowOrdersDropdown((prev) => !prev)}
+                  isLoading={isNavigating}
+                  className="px-4 py-2 rounded-lg hover:bg-[var(--pink1)] transition-all duration-200 
+                  bg-[var(--orange)] text-[var(--white)] shadow-sm hover:shadow-md"
+                >
+                  Orders
+                </LoadingButton>
+                {showOrdersDropdown && (
+                  <div
+                    ref={ordersDropdownRef}
+                    className="absolute right-0 mt-2 w-48 p-2 rounded-lg shadow-lg bg-white z-10 
+                    transform transition-all duration-200 ease-in-out"
+                  >
+                    <LoadingButton
+                      onClick={() => {
+                        handleNavigation(`/order/order_history/${userName}`);
+                        setShowOrdersDropdown(false);
+                      }}
+                      isLoading={isNavigating}
+                      className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors duration-150"
+                    >
+                      Order History
+                    </LoadingButton>
+                    <button
+                      onClick={() => {
+                        handleNavigation(`/order/review_history/${userName}`);
+                        setShowOrdersDropdown(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors duration-150"
+                    >
+                      Reviews
+                    </button>
+                  </div>
+                )}
+              </>
             ) : null}
           </div>
         )}
@@ -249,9 +280,8 @@ export default function Header({ items }: { items: Item[] }) {
                         setCurrentLocation(location);
                         setShowLocationDropdown(false);
                       }}
-                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${
-                        currentLocation?.id === location.id ? "bg-gray-50" : ""
-                      }`}
+                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${currentLocation?.id === location.id ? "bg-gray-50" : ""
+                        }`}
                     >
                       {location.country_name}
                     </div>
