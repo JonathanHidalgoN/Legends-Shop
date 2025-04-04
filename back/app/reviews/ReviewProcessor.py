@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.auth.functions import logMethod
 from app.customExceptions import InvalidRatingException, InvalidUserReview, ReviewProcessorException
 from app.data.queries.reviewQueries import addReview, getReviewsByUserId, getCommentsByUserId
-from app.data.queries.reviewQueries import addComment
+from app.data.queries.reviewQueries import addComment, updateReview, updateComment, getCommentsByReviewId
 from app.data.queries.orderQueries import getUserIdByOrderId, markOrderAsReviewed
 from app.data.mappers import mapReviewTableToReview, mapCommentTableToComment
 from typing import List
@@ -36,6 +36,46 @@ class ReviewProcessor:
         except (Exception,SQLAlchemyError) as e:
             await self.dbSession.rollback()
             raise ReviewProcessorException("Internal server error") from e
+            
+    @logMethod
+    async def updateReviewAndComments(self, review: Review, userId: int) -> None:
+        """
+        Update an existing review and its comments.
+        
+        Args:
+            review (Review): The review object with updated rating and comments
+            userId (int): The ID of the user making the update
+            
+        Raises:
+            InvalidUserReview: If the user is not the owner of the review
+            ReviewProcessorException: If there's an error updating the review
+        """
+        try:
+            # Verify the user owns the order associated with this review
+            await self.checkSameUser(review.orderId, userId)
+            
+            # Update the review rating
+            await updateReview(
+                self.dbSession,
+                review.id,
+                review.rating
+            )
+            
+            # Handle comment update if available
+            if review.comments and len(review.comments) > 0:
+                comment_content = review.comments[0].content
+                await addComment(
+                    self.dbSession,
+                    review.id,
+                    userId,
+                    comment_content)
+            
+        except InvalidUserReview as e:
+            await self.dbSession.rollback()
+            raise e
+        except (Exception, SQLAlchemyError) as e:
+            await self.dbSession.rollback()
+            raise ReviewProcessorException("Error updating review") from e
             
     @logMethod
     async def getReviewsByUserId(self, userId: int) -> List[Review]:
