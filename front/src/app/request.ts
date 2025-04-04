@@ -36,6 +36,7 @@ export const ENDPOINT_UPDATE_ITEMS: string = `/updateItems`;
 export const ENDPOINT_USER_LOCATION: string = `locations/user`;
 export const ENDPOINT_DELIVERY_DATES: string = `delivery_dates/dates`;
 export const ENDPOINT_REVIEW: string = `review/add`;
+export const ENDPOINT_UPDATE_REVIEW: string = `review/update`;
 export const ENDPOINT_USER_REVIEWS: string = `review/user`;
 
 function makeUrl(from: string, endpoint: string): string {
@@ -402,6 +403,33 @@ export async function getUserReviewsRequest(
 
   if (!response.ok) {
     await throwAPIError(response, "Error fetching user reviews");
+  }
+  return await response.json();
+}
+
+/**
+ * Update an existing review.
+ * 
+ * @param review - The review object with updated rating and comments
+ * @param from - The domain to make the request to ("server" or "client")
+ * @returns A Promise that resolves with the response from the update request
+ */
+export async function updateReviewRequest(
+  review: Review,
+  from: string = "server",
+): Promise<void> {
+  const url: string = makeUrl(from, ENDPOINT_UPDATE_REVIEW);
+  const response = await fetch(url, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(review),
+  });
+
+  if (!response.ok) {
+    await throwAPIError(response, "Error updating review");
   }
   return await response.json();
 }
