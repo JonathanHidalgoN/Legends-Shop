@@ -24,6 +24,7 @@ async def getOrderHistoryByUserId(
             OrderTable.delivery_date,
             OrderTable.status,
             OrderTable.location_id,
+            OrderTable.reviewed,
             ItemTable.name,
             UserTable.userName,
             OrderItemAssociation.c.quantity,
@@ -46,6 +47,7 @@ async def getOrderHistoryByUserId(
         delivery_date,
         status,
         location_id,
+        reviewed,
         item_name,
         user_name,
         quantity,
@@ -60,6 +62,7 @@ async def getOrderHistoryByUserId(
                 "deliveryDate": delivery_date,
                 "status": status,
                 "location_id": location_id,
+                "reviewed": reviewed,
             }
         else:
             orders_dict[order_id]["itemNames"].append(item_name)
@@ -160,3 +163,15 @@ async def getUserIdByOrderId(
         select(OrderTable.user_id).where(OrderTable.id == orderId)
     )
     return result.scalar_one_or_none()
+
+
+async def markOrderAsReviewed(
+    asyncSession: AsyncSession, orderId: int
+) -> None:
+    """
+    Mark an order as reviewed by setting the reviewed attribute to True.
+    """
+    await asyncSession.execute(
+        update(OrderTable).where(OrderTable.id == orderId).values(reviewed=True)
+    )
+    await asyncSession.commit()
