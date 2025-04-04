@@ -6,11 +6,12 @@ import { mapAPIOrderResponseToOrder, mapAPIReviewResponseToReview } from "@/app/
 import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { addReviewRequest } from "@/app/request";
+import { addReviewRequest, updateReviewRequest } from "@/app/request";
 import { Review } from "@/app/interfaces/Review";
 import ReviewCard from "./ReviewCard";
 import { useStaticData } from "./StaticDataContext";
 import { useAuthContext } from "./AuthContext";
+import { showSuccessToast } from "@/app/customToast";
 
 export default function ReviewPage({ orderId, isNew = true }: { orderId: number; isNew?: boolean }) {
   const { data: orderData, error: orderError } = useSWR<APIOrderResponse[]>(
@@ -19,7 +20,7 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
   );
 
   // Use SWR for fetching reviews when not a new review
-  const { data: reviewData, error: reviewError } = useSWR<APIReviewResponse[]>(
+  const { data: reviewData, error: reviewError, mutate: mutateReviews } = useSWR<APIReviewResponse[]>(
     isNew ? null : ["reviews", "client"],
     getUserReviewsRequest
   );
@@ -32,12 +33,14 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
   const [reviews, setReviews] = useState<{ [key: string]: { rating: number; comment: string } }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [existingReviewIds, setExistingReviewIds] = useState<{ [key: string]: number }>({});
 
   // Load existing reviews if not a new review
   useEffect(() => {
     if (!isNew && reviewData) {
       console.log("Loading existing reviews for order:", orderId);
       const existingReviews: { [key: string]: { rating: number; comment: string } } = {};
+      const reviewIds: { [key: string]: number } = {};
 
       // Map API responses to Review objects
       const mappedReviews = reviewData.map(mapAPIReviewResponseToReview);
@@ -55,11 +58,13 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
             rating: review.rating,
             comment: review.comments.length > 0 ? review.comments[0].content : ""
           };
+          reviewIds[itemName] = review.id;
         }
       });
 
       console.log("Setting reviews state:", existingReviews);
       setReviews(existingReviews);
+      setExistingReviewIds(reviewIds);
       setIsLoading(false);
     } else if (isNew) {
       setIsLoading(false);
@@ -122,7 +127,7 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
         }
 
         const reviewData: Review = {
-          id: 0, // Will be set by backend
+          id: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing ID if updating
           orderId: order.id,
           itemId: itemId,
           rating: review.rating,
@@ -130,17 +135,30 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
           updatedAt: new Date(),
           comments: review.comment ? [{
             id: 0, // Will be set by backend
-            reviewId: 0, // Will be set by backend
+            reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
             userId: 0, // Will be set by backend
             content: review.comment,
             createdAt: new Date(),
             updatedAt: new Date()
           }] : []
         };
-        return addReviewRequest(reviewData, "client");
+
+        // Use the appropriate request function based on whether it's a new review or an update
+        if (isNew) {
+          return addReviewRequest(reviewData, "client");
+        } else {
+          return updateReviewRequest(reviewData, "client");
+        }
       });
 
       await Promise.all(reviewPromises);
+      
+      // Revalidate the reviews cache to ensure we have the latest data
+      if (!isNew && mutateReviews) {
+        await mutateReviews();
+      }
+      
+      showSuccessToast(isNew ? "Reviews submitted successfully!" : "Reviews updated successfully!");
       router.push(`/order/order_history/${userName}`);
     } catch (error) {
       console.error('Error submitting reviews:', error);
