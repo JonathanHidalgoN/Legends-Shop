@@ -69,7 +69,7 @@ async def getOrderHistoryByUserId(
     return [Order(**order_data) for order_data in orders_dict.values()]
 
 
-async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> None:
+async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> OrderTable | None:
     """
     Retrieve a single order record by its ID.
 
