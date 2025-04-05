@@ -9,6 +9,6 @@ export default async function ReviewPageRoute({
 }) {
   const idString: string = (await params).order_id;
   const isNew = searchParams.isNew === "true";
-  
+
   return <ReviewPage orderId={parseInt(idString)} isNew={isNew} />;
-} 
+}

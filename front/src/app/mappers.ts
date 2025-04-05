@@ -86,7 +86,7 @@ export function mapCartItemToAPICartItemResponse(
 }
 
 export function mapAPICommentResponseToComment(
-  apiComment: APICommentResponse
+  apiComment: APICommentResponse,
 ): Comment {
   return {
     id: apiComment.id,
@@ -99,7 +99,7 @@ export function mapAPICommentResponseToComment(
 }
 
 export function mapAPIReviewResponseToReview(
-  apiReview: APIReviewResponse
+  apiReview: APIReviewResponse,
 ): Review {
   return {
     id: apiReview.id,

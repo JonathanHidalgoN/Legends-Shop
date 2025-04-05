@@ -1,8 +1,17 @@
 "use client";
 import { Order } from "@/app/interfaces/Order";
-import { APIOrderResponse, APIReviewResponse } from "@/app/interfaces/APIResponse";
-import { getOrderHistoryWithCredentialsRequest, getUserReviewsRequest } from "@/app/request";
-import { mapAPIOrderResponseToOrder, mapAPIReviewResponseToReview } from "@/app/mappers";
+import {
+  APIOrderResponse,
+  APIReviewResponse,
+} from "@/app/interfaces/APIResponse";
+import {
+  getOrderHistoryWithCredentialsRequest,
+  getUserReviewsRequest,
+} from "@/app/request";
+import {
+  mapAPIOrderResponseToOrder,
+  mapAPIReviewResponseToReview,
+} from "@/app/mappers";
 import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -13,16 +22,26 @@ import { useStaticData } from "./StaticDataContext";
 import { useAuthContext } from "./AuthContext";
 import { showSuccessToast } from "@/app/customToast";
 
-export default function ReviewPage({ orderId, isNew = true }: { orderId: number; isNew?: boolean }) {
+export default function ReviewPage({
+  orderId,
+  isNew = true,
+}: {
+  orderId: number;
+  isNew?: boolean;
+}) {
   const { data: orderData, error: orderError } = useSWR<APIOrderResponse[]>(
     ["orders-client", "client"],
-    getOrderHistoryWithCredentialsRequest
+    getOrderHistoryWithCredentialsRequest,
   );
 
   // Use SWR for fetching reviews when not a new review
-  const { data: reviewData, error: reviewError, mutate: mutateReviews } = useSWR<APIReviewResponse[]>(
+  const {
+    data: reviewData,
+    error: reviewError,
+    mutate: mutateReviews,
+  } = useSWR<APIReviewResponse[]>(
     isNew ? null : ["reviews", "client"],
-    getUserReviewsRequest
+    getUserReviewsRequest,
   );
 
   const { items } = useStaticData();
@@ -30,16 +49,22 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
   const router = useRouter();
 
   // Initialize reviews state
-  const [reviews, setReviews] = useState<{ [key: string]: { rating: number; comment: string } }>({});
+  const [reviews, setReviews] = useState<{
+    [key: string]: { rating: number; comment: string };
+  }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [existingReviewIds, setExistingReviewIds] = useState<{ [key: string]: number }>({});
+  const [existingReviewIds, setExistingReviewIds] = useState<{
+    [key: string]: number;
+  }>({});
 
   // Load existing reviews if not a new review
   useEffect(() => {
     if (!isNew && reviewData) {
       console.log("Loading existing reviews for order:", orderId);
-      const existingReviews: { [key: string]: { rating: number; comment: string } } = {};
+      const existingReviews: {
+        [key: string]: { rating: number; comment: string };
+      } = {};
       const reviewIds: { [key: string]: number } = {};
 
       // Map API responses to Review objects
@@ -47,16 +72,19 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
       console.log("Mapped reviews:", mappedReviews);
 
       // Filter reviews for this order
-      const orderReviews = mappedReviews.filter(review => review.orderId === orderId);
+      const orderReviews = mappedReviews.filter(
+        (review) => review.orderId === orderId,
+      );
       console.log("Order reviews:", orderReviews);
 
       // Map reviews to the state format
-      orderReviews.forEach(review => {
-        const itemName = items.find(item => item.id === review.itemId)?.name;
+      orderReviews.forEach((review) => {
+        const itemName = items.find((item) => item.id === review.itemId)?.name;
         if (itemName) {
           existingReviews[itemName] = {
             rating: review.rating,
-            comment: review.comments.length > 0 ? review.comments[0].content : ""
+            comment:
+              review.comments.length > 0 ? review.comments[0].content : "",
           };
           reviewIds[itemName] = review.id;
         }
@@ -92,76 +120,96 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
   }
 
   // Group items by name and count their occurrences
-  const itemCounts = order.itemNames.reduce((acc, name) => {
-    acc[name] = (acc[name] || 0) + 1;
-    return acc;
-  }, {} as { [key: string]: number });
+  const itemCounts = order.itemNames.reduce(
+    (acc, name) => {
+      acc[name] = (acc[name] || 0) + 1;
+      return acc;
+    },
+    {} as { [key: string]: number },
+  );
 
   // Get unique item names
   const uniqueItemNames = Object.keys(itemCounts);
 
   // Map item names to their actual IDs
-  const itemNameToId = uniqueItemNames.reduce((acc, name) => {
-    const item = items.find(i => i.name === name);
-    if (item) {
-      acc[name] = item.id;
-    }
-    return acc;
-  }, {} as { [key: string]: number });
+  const itemNameToId = uniqueItemNames.reduce(
+    (acc, name) => {
+      const item = items.find((i) => i.name === name);
+      if (item) {
+        acc[name] = item.id;
+      }
+      return acc;
+    },
+    {} as { [key: string]: number },
+  );
 
-  const handleReviewChange = (itemName: string, rating: number, comment: string) => {
-    setReviews(prev => ({
+  const handleReviewChange = (
+    itemName: string,
+    rating: number,
+    comment: string,
+  ) => {
+    setReviews((prev) => ({
       ...prev,
-      [itemName]: { rating, comment }
+      [itemName]: { rating, comment },
     }));
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const reviewPromises = Object.entries(reviews).map(([itemName, review]) => {
-        const itemId = itemNameToId[itemName];
-        if (!itemId) {
-          console.error(`Item ID not found for ${itemName}`);
-          return Promise.resolve();
-        }
+      const reviewPromises = Object.entries(reviews).map(
+        ([itemName, review]) => {
+          const itemId = itemNameToId[itemName];
+          if (!itemId) {
+            console.error(`Item ID not found for ${itemName}`);
+            return Promise.resolve();
+          }
 
-        const reviewData: Review = {
-          id: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing ID if updating
-          orderId: order.id,
-          itemId: itemId,
-          rating: review.rating,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          comments: review.comment ? [{
-            id: 0, // Will be set by backend
-            reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
-            userId: 0, // Will be set by backend
-            content: review.comment,
+          const reviewData: Review = {
+            id: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing ID if updating
+            orderId: order.id,
+            itemId: itemId,
+            rating: review.rating,
             createdAt: new Date(),
-            updatedAt: new Date()
-          }] : []
-        };
+            updatedAt: new Date(),
+            comments: review.comment
+              ? [
+                  {
+                    id: 0, // Will be set by backend
+                    reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
+                    userId: 0, // Will be set by backend
+                    content: review.comment,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                  },
+                ]
+              : [],
+          };
 
-        // Use the appropriate request function based on whether it's a new review or an update
-        if (isNew) {
-          return addReviewRequest(reviewData, "client");
-        } else {
-          return updateReviewRequest(reviewData, "client");
-        }
-      });
+          // Use the appropriate request function based on whether it's a new review or an update
+          if (isNew) {
+            return addReviewRequest(reviewData, "client");
+          } else {
+            return updateReviewRequest(reviewData, "client");
+          }
+        },
+      );
 
       await Promise.all(reviewPromises);
-      
+
       // Revalidate the reviews cache to ensure we have the latest data
       if (!isNew && mutateReviews) {
         await mutateReviews();
       }
-      
-      showSuccessToast(isNew ? "Reviews submitted successfully!" : "Reviews updated successfully!");
+
+      showSuccessToast(
+        isNew
+          ? "Reviews submitted successfully!"
+          : "Reviews updated successfully!",
+      );
       router.push(`/order/order_history/${userName}`);
     } catch (error) {
-      console.error('Error submitting reviews:', error);
+      console.error("Error submitting reviews:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -191,7 +239,9 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
                 <p>{order.orderDate.toLocaleDateString()}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="font-medium text-[var(--orange)]">Delivery Date</p>
+                <p className="font-medium text-[var(--orange)]">
+                  Delivery Date
+                </p>
                 <p>{order.deliveryDate.toLocaleDateString()}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
@@ -213,7 +263,9 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
                   itemName={itemName}
                   itemId={itemNameToId[itemName] || 0}
                   quantity={itemCounts[itemName]}
-                  onReviewChange={(_, rating, comment) => handleReviewChange(itemName, rating, comment)}
+                  onReviewChange={(_, rating, comment) =>
+                    handleReviewChange(itemName, rating, comment)
+                  }
                   initialRating={reviews[itemName]?.rating || 0}
                   initialComment={reviews[itemName]?.comment || ""}
                 />
@@ -223,12 +275,17 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting || Object.keys(reviews).length === 0}
-                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${isSubmitting || Object.keys(reviews).length === 0
-                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-[var(--orange)] text-white hover:bg-opacity-90'
-                    }`}
+                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    isSubmitting || Object.keys(reviews).length === 0
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                  }`}
                 >
-                  {isSubmitting ? 'Submitting...' : isNew ? 'Submit Reviews' : 'Update Reviews'}
+                  {isSubmitting
+                    ? "Submitting..."
+                    : isNew
+                      ? "Submit Reviews"
+                      : "Update Reviews"}
                 </button>
               </div>
             </div>
@@ -237,4 +294,4 @@ export default function ReviewPage({ orderId, isNew = true }: { orderId: number;
       </div>
     </div>
   );
-} 
+}

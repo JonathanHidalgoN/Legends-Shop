@@ -15,4 +15,4 @@ export interface Review {
   createdAt: Date;
   updatedAt: Date;
   comments: Comment[];
-} 
+}

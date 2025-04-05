@@ -131,5 +131,6 @@ class ReviewProcessorException(Exception):
 class InvalidRatingException(ReviewProcessorException):
     pass
 
+
 class InvalidUserReview(ReviewProcessorException):
     pass

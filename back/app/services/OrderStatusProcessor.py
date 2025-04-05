@@ -17,8 +17,10 @@ class OrderStatusProcessor:
         today: date = date.today()
         tomorrow: date = today.replace(day=today.day + 1)
 
-        pendingOrdersTomorrow: List[OrderTable] = await getOrdersWithStatusAndDeliveryDate(
-            self.asyncSession, tomorrow, OrderStatus.PENDING
+        pendingOrdersTomorrow: List[OrderTable] = (
+            await getOrdersWithStatusAndDeliveryDate(
+                self.asyncSession, tomorrow, OrderStatus.PENDING
+            )
         )
         pendingOrdersToday: List[OrderTable] = await getOrdersWithStatusAndDeliveryDate(
             self.asyncSession, tomorrow, OrderStatus.PENDING

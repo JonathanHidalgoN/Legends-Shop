@@ -34,7 +34,7 @@ class OrderProcessor:
         pass
 
     @logMethod
-    def checkReviewedStatus(self, order:Order) -> None:
+    def checkReviewedStatus(self, order: Order) -> None:
         if order.reviewed:
             raise ProcessOrderException("Tried to make order with status reviewed")
 

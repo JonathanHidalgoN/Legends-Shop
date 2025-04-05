@@ -84,6 +84,19 @@ async def getReviewsByItemId(
     return list(result.scalars().all())
 
 
+async def getReviewsWithCommentsByItemId(
+    asyncSession: AsyncSession,
+    item_id: int,
+) -> List[ReviewTable]:
+    """Get all reviews with their comments for a specific item."""
+    result = await asyncSession.execute(
+        select(ReviewTable)
+        .options(selectinload(ReviewTable.comments))
+        .where(ReviewTable.item_id == item_id)
+    )
+    return list(result.scalars().all())
+
+
 async def addComment(
     asyncSession: AsyncSession,
     review_id: int,
@@ -144,4 +157,4 @@ async def getCommentsByUserId(
     result = await asyncSession.execute(
         select(CommentTable).where(CommentTable.user_id == user_id)
     )
-    return list(result.scalars().all()) 
+    return list(result.scalars().all())

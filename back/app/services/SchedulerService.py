@@ -37,7 +37,7 @@ class SchedulerService:
             name="Update order statuses",
             replace_existing=True,
         )
-        
+
         self.scheduler.add_job(
             self.updateItemsJob,
             trigger=CronTrigger(hour=0, minute=5),  # 00:05
@@ -45,5 +45,5 @@ class SchedulerService:
             name="Update items from API",
             replace_existing=True,
         )
-        
+
         self.scheduler.start()

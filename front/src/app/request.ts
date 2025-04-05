@@ -38,6 +38,8 @@ export const ENDPOINT_DELIVERY_DATES: string = `delivery_dates/dates`;
 export const ENDPOINT_REVIEW: string = `review/add`;
 export const ENDPOINT_UPDATE_REVIEW: string = `review/update`;
 export const ENDPOINT_USER_REVIEWS: string = `review/user`;
+export const ENDPOINT_ITEM_REVIEWS: string = `review/item`;
+export const ENDPOINT_CHAMPION_ICONS: string = `api/icons`;
 
 function makeUrl(from: string, endpoint: string): string {
   let url: string;
@@ -388,7 +390,7 @@ export async function addReviewRequest(
 
 /**
  * Get all reviews for the authenticated user.
- * 
+ *
  * @param from - The domain to make the request to ("server" or "client")
  * @returns A Promise that resolves with an array of reviews
  */
@@ -409,7 +411,7 @@ export async function getUserReviewsRequest(
 
 /**
  * Update an existing review.
- * 
+ *
  * @param review - The review object with updated rating and comments
  * @param from - The domain to make the request to ("server" or "client")
  * @returns A Promise that resolves with the response from the update request
@@ -431,5 +433,44 @@ export async function updateReviewRequest(
   if (!response.ok) {
     await throwAPIError(response, "Error updating review");
   }
+  return await response.json();
+}
+
+/**
+ * Get all reviews for a specific item.
+ *
+ * @param itemId - The ID of the item whose reviews to retrieve
+ * @param from - The domain to make the request to ("server" or "client")
+ * @returns A Promise that resolves with an array of reviews
+ */
+export async function getReviewsByItemIdRequest(
+  itemId: number,
+  from: string = "server",
+): Promise<APIReviewResponse[]> {
+  const url: string = makeUrl(from, `${ENDPOINT_ITEM_REVIEWS}/${itemId}`);
+  const response = await fetch(url, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    await throwAPIError(response, "Error fetching item reviews");
+  }
+  return await response.json();
+}
+
+/**
+ * Get champion icons from the Next.js API.
+ *
+ * @returns A Promise that resolves with an array of champion icons
+ */
+export async function getChampionIconsRequest(): Promise<
+  { src: string; alt: string }[]
+> {
+  const response = await fetch(`/${ENDPOINT_CHAMPION_ICONS}`);
+
+  if (!response.ok) {
+    await throwAPIError(response, "Error fetching champion icons");
+  }
+
   return await response.json();
 }

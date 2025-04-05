@@ -105,7 +105,7 @@ def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
         delivery_date=order.deliveryDate,
         status=order.status,
         location_id=order.location_id,
-        reviewed = order.reviewed
+        reviewed=order.reviewed,
     )
     return orderTable
 
@@ -136,7 +136,7 @@ def mapReviewTableToReview(reviewTable: ReviewTable) -> Review:
         rating=reviewTable.rating,
         createdAt=reviewTable.created_at,
         updatedAt=reviewTable.updated_at,
-        comments=comments
+        comments=comments,
     )
     return review
 
@@ -148,7 +148,7 @@ def mapCommentTableToComment(commentTable: CommentTable) -> Comment:
         userId=commentTable.user_id,
         content=commentTable.content,
         createdAt=commentTable.created_at,
-        updatedAt=commentTable.updated_at
+        updatedAt=commentTable.updated_at,
     )
     return comment
 
@@ -160,7 +160,7 @@ def mapReviewToReviewTable(review: Review) -> ReviewTable:
         item_id=review.itemId,
         rating=review.rating,
         created_at=review.createdAt,
-        updated_at=review.updatedAt
+        updated_at=review.updatedAt,
     )
     return reviewTable
 
@@ -172,6 +172,6 @@ def mapCommentToCommentTable(comment: Comment) -> CommentTable:
         user_id=comment.userId,
         content=comment.content,
         created_at=comment.createdAt,
-        updated_at=comment.updatedAt
+        updated_at=comment.updatedAt,
     )
     return commentTable

@@ -1,8 +1,13 @@
 import Image from "next/image";
 import toast from "react-hot-toast";
 
-const SUCCESS_ICONS = ["/jhinIcon.png", "/luxIcon.png", "/zingsIcon.png"];
-const ERROR_ICONS = ["/sadAmumu.png"];
+const SUCCESS_ICONS = [
+  "/icons/jhinIcon.png",
+  "/icons/luxIcon.png",
+  "/icons/zingsIcon.png",
+  "icons/leesin.png",
+];
+const ERROR_ICONS = ["/icons/sadAmumu.png", "icons/soraka.png"];
 
 export function showSuccessToast(msg: string) {
   const img: string =
@@ -24,8 +29,8 @@ export function showSuccessToast(msg: string) {
               stroke="currentColor"
             >
               <path
-                strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeLinecap="round"
                 strokeWidth="2"
                 d="M5 13l4 4L19 7"
               />

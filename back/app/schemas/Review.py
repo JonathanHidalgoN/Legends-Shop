@@ -3,10 +3,11 @@ from typing import Annotated, List
 from pydantic import AfterValidator, BaseModel
 from app.customExceptions import InvalidRatingException
 
-def validateRating(rating:int)->int:
-        if not 1 <= rating <= 5:
-            raise InvalidRatingException("Rating must be between 1 and 5")
-        return rating
+
+def validateRating(rating: int) -> int:
+    if not 1 <= rating <= 5:
+        raise InvalidRatingException("Rating must be between 1 and 5")
+    return rating
 
 
 class Comment(BaseModel):
@@ -25,4 +26,4 @@ class Review(BaseModel):
     rating: Annotated[int, AfterValidator(validateRating)]
     createdAt: datetime
     updatedAt: datetime
-    comments: List[Comment] = [] 
+    comments: List[Comment] = []

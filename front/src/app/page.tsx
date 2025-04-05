@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getChampionIconsRequest } from "./request";
 
 interface ImageItem {
   src: string;
@@ -12,25 +13,25 @@ interface ImageItem {
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [championImages, setChampionImages] = useState<ImageItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
 
-    // Load champion images
-    const championFiles = [
-      "/blitzIcon.png",
-      "/jhinIcon.png",
-      "/luxIcon.png",
-      "/sadAmumu.png",
-      "/zingsIcon.png",
-    ];
+    const fetchChampionIcons = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getChampionIconsRequest();
+        setChampionImages(data);
+      } catch (error) {
+        console.error("Error fetching champion icons:", error);
+        setChampionImages([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setChampionImages(
-      championFiles.map((file) => ({
-        src: file,
-        alt: file.replace(/\.png$/, "").replace(/^\//, ""),
-      })),
-    );
+    fetchChampionIcons();
   }, []);
 
   if (!mounted) return null;
@@ -72,34 +73,49 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Side - Image Showcase */}
           <div className="relative h-[600px] animate-fade-in">
-            {/* Champion Icons */}
             <div className="absolute top-0 left-0 w-full h-full">
-              {championImages.map((image, index) => (
-                <div
-                  key={image.src}
-                  className={`absolute animate-float ${
-                    index === 0
-                      ? "top-0 left-0"
-                      : index === 1
-                        ? "top-20 right-0"
-                        : index === 2
-                          ? "bottom-20 left-20"
-                          : index === 3
-                            ? "bottom-0 right-20"
-                            : "top-40 left-40"
-                  }`}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={100}
-                    height={100}
-                    className="rounded-full border-2 border-[var(--orange)] shadow-lg"
-                  />
+              {isLoading ? (
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
                 </div>
-              ))}
+              ) : championImages.length > 0 ? (
+                championImages.slice(0, 10).map((image, index) => {
+                  const positions = [
+                    { top: "5%", left: "10%" },
+                    { top: "5%", left: "40%" },
+                    { top: "5%", left: "70%" },
+                    { top: "40%", left: "10%" },
+                    { top: "20%", left: "20%" },
+                    { top: "40%", left: "70%" },
+                    { top: "75%", left: "10%" },
+                    { top: "75%", left: "40%" },
+                    { top: "75%", left: "70%" },
+                    { top: "75%", left: "90%" },
+                  ];
+                  const position = positions[index];
+
+                  return (
+                    <div
+                      key={image.src}
+                      className="absolute animate-float"
+                      style={position}
+                    >
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        width={100}
+                        height={100}
+                        className="rounded-full border-2 border-[var(--orange)] shadow-lg"
+                      />
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="flex justify-center items-center h-full">
+                  <p className="text-gray-500">No champion icons available</p>
+                </div>
+              )}
             </div>
 
             {/* Item Showcase */}

@@ -23,7 +23,7 @@ export default function ReviewCard({
   const [rating, setRating] = useState(initialRating);
   const [comment, setComment] = useState(initialComment);
 
-  const item = items.find(i => i.name === itemName);
+  const item = items.find((i) => i.name === itemName);
 
   const handleRatingChange = (newRating: number) => {
     setRating(newRating);
@@ -51,28 +51,34 @@ export default function ReviewCard({
         )}
         <div className="flex-grow w-full">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-[var(--orange)]">{itemName}</h2>
+            <h2 className="text-2xl font-bold text-[var(--orange)]">
+              {itemName}
+            </h2>
             <span className="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium mt-2 md:mt-0">
               Quantity: {quantity}
             </span>
           </div>
-          
+
           {item && (
             <div className="text-gray-700 mb-4">
               <span className="font-medium">Cost: </span>
-              <span className="text-[var(--orange)] font-semibold">{item.gold.total} gold</span>
+              <span className="text-[var(--orange)] font-semibold">
+                {item.gold.total} gold
+              </span>
             </div>
           )}
-          
+
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rating
+            </label>
             <div className="flex space-x-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   onClick={() => handleRatingChange(star)}
                   className={`text-2xl transition-transform duration-200 hover:scale-110 ${
-                    rating >= star ? 'text-[var(--orange)]' : 'text-gray-300'
+                    rating >= star ? "text-[var(--orange)]" : "text-gray-300"
                   }`}
                 >
                   ★
@@ -82,7 +88,9 @@ export default function ReviewCard({
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Comment</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Comment
+            </label>
             <textarea
               value={comment}
               onChange={handleCommentChange}
@@ -95,4 +103,4 @@ export default function ReviewCard({
       </div>
     </div>
   );
-} 
+}

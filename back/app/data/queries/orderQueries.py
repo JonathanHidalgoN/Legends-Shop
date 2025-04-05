@@ -165,9 +165,7 @@ async def getUserIdByOrderId(
     return result.scalar_one_or_none()
 
 
-async def markOrderAsReviewed(
-    asyncSession: AsyncSession, orderId: int
-) -> None:
+async def markOrderAsReviewed(asyncSession: AsyncSession, orderId: int) -> None:
     """
     Mark an order as reviewed by setting the reviewed attribute to True.
     """

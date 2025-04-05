@@ -26,7 +26,7 @@ export default function ReviewHistory() {
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       refreshInterval: 0, // No automatic refresh
-    }
+    },
   );
 
   // Handle errors with the error redirect hook
@@ -41,26 +41,35 @@ export default function ReviewHistory() {
   // Group reviews by orderId
   const reviewsByOrder = useMemo(() => {
     const grouped: Record<number, Review[]> = {};
-    
-    reviews.forEach(review => {
+
+    reviews.forEach((review) => {
       if (!grouped[review.orderId]) {
         grouped[review.orderId] = [];
       }
       grouped[review.orderId].push(review);
     });
-    
+
     return grouped;
   }, [reviews]);
 
   // Convert to array for pagination
-  const orderIds = useMemo(() => Object.keys(reviewsByOrder).map(Number), [reviewsByOrder]);
-  
+  const orderIds = useMemo(
+    () => Object.keys(reviewsByOrder).map(Number),
+    [reviewsByOrder],
+  );
+
   // Calculate pagination
-  const totalPages = useMemo(() => Math.ceil(orderIds.length / reviewsPerPage), [orderIds, reviewsPerPage]);
-  const startIndex = useMemo(() => (currentPage - 1) * reviewsPerPage, [currentPage, reviewsPerPage]);
-  const paginatedOrderIds = useMemo(() => 
-    orderIds.slice(startIndex, startIndex + reviewsPerPage), 
-    [orderIds, startIndex, reviewsPerPage]
+  const totalPages = useMemo(
+    () => Math.ceil(orderIds.length / reviewsPerPage),
+    [orderIds, reviewsPerPage],
+  );
+  const startIndex = useMemo(
+    () => (currentPage - 1) * reviewsPerPage,
+    [currentPage, reviewsPerPage],
+  );
+  const paginatedOrderIds = useMemo(
+    () => orderIds.slice(startIndex, startIndex + reviewsPerPage),
+    [orderIds, startIndex, reviewsPerPage],
   );
 
   // Handle navigation to review page
@@ -93,7 +102,9 @@ export default function ReviewHistory() {
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       <div className="flex justify-between items-center w-full max-w-2xl">
-        <h1 className="text-2xl font-bold text-[var(--orange)] mb-4">Your Reviews</h1>
+        <h1 className="text-2xl font-bold text-[var(--orange)] mb-4">
+          Your Reviews
+        </h1>
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
@@ -108,20 +119,29 @@ export default function ReviewHistory() {
             </>
           ) : (
             <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                  clipRule="evenodd"
+                />
               </svg>
               Refresh
             </>
           )}
         </button>
       </div>
-      
+
       {paginatedOrderIds.length > 0 ? (
         <>
           {paginatedOrderIds.map((orderId) => (
             <div key={orderId} className="w-full max-w-2xl">
-              <div 
+              <div
                 className="border rounded-lg shadow-md overflow-hidden mb-4 cursor-pointer hover:shadow-lg transition-shadow"
                 onClick={() => handleReviewClick(orderId)}
               >
@@ -137,7 +157,7 @@ export default function ReviewHistory() {
               </div>
             </div>
           ))}
-          
+
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-4 mt-6">
               <button
