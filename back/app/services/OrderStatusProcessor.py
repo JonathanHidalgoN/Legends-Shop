@@ -13,7 +13,7 @@ class OrderStatusProcessor:
     def __init__(self, asyncSession: AsyncSession) -> None:
         self.asyncSession = asyncSession
 
-    async def update_order_statuses(self) -> None:
+    async def updateOrderStatuses(self) -> None:
         today: date = date.today()
         tomorrow: date = today.replace(day=today.day + 1)
 

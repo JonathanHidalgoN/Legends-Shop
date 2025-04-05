@@ -3,7 +3,6 @@ from apscheduler.triggers.cron import CronTrigger
 from app.data.database import AsyncSessionLocal
 from app.services.OrderStatusProcessor import OrderStatusProcessor
 from app.data.ItemsLoader import ItemsLoader
-from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
 from app.customExceptions import SameVersionUpdateError
 from app.logger import logger
 
@@ -15,7 +14,7 @@ class SchedulerService:
     async def updateOrderStatusJob(self):
         async with AsyncSessionLocal() as db:
             processor = OrderStatusProcessor(db)
-            await processor.update_order_statuses()
+            await processor.updateOrderStatuses()
 
     async def updateItemsJob(self):
         async with AsyncSessionLocal() as db:
@@ -28,15 +27,6 @@ class SchedulerService:
             except Exception as e:
                 # Log the error but don't raise it to prevent the scheduler from stopping
                 logger.error(f"Error updating items: {str(e)}")
-
-    async def assignDeliveryDatesJob(self):
-        async with AsyncSessionLocal() as db:
-            try:
-                deliveryDateAssigner = DeliveryDateAssigner(db)
-                await deliveryDateAssigner.assignDeliveryDates()
-            except Exception as e:
-                # Log the error but don't raise it to prevent the scheduler from stopping
-                logger.error(f"Error assigning delivery dates: {str(e)}")
 
     def start(self):
         # Schedule jobs to run every day at slightly different times
@@ -53,14 +43,6 @@ class SchedulerService:
             trigger=CronTrigger(hour=0, minute=5),  # 00:05
             id="update_items",
             name="Update items from API",
-            replace_existing=True,
-        )
-        
-        self.scheduler.add_job(
-            self.assignDeliveryDatesJob,
-            trigger=CronTrigger(hour=0, minute=10),  # 00:10
-            id="assign_delivery_dates",
-            name="Assign delivery dates",
             replace_existing=True,
         )
 
