@@ -21,11 +21,13 @@ async def test_update_order_statuses_no_orders(processor):
 
     await processor.updateOrderStatuses()
     assert (
-        #One query for pending orders tomorrow
-        #One query for pending orders today 
-        #One query to update shipped to delivered
-        processor.asyncSession.execute.await_count == 3 
-    )  
+        # One query for pending orders tomorrow
+        # One query for pending orders today
+        # One query to update shipped to delivered
+        processor.asyncSession.execute.await_count
+        == 3
+    )
+
 
 @pytest.mark.asyncio
 async def test_update_order_statuses_db_error(processor):
