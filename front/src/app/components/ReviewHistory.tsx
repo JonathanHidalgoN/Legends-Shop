@@ -4,7 +4,7 @@ import ReviewHistoryCard from "@/app/components/ReviewHistoryCard";
 import { Review } from "@/app/interfaces/Review";
 import { APIReviewResponse } from "../interfaces/APIResponse";
 import { mapAPIReviewResponseToReview } from "../mappers";
-import { getUserReviewsRequest } from "@/app/request";
+import { FromValues, getUserReviewsRequest } from "@/app/request";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
 import { useErrorRedirect } from "./useErrorRedirect";
@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { showSuccessToast } from "@/app/customToast";
 
 export default function ReviewHistory() {
-  const { items } = useStaticData();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const reviewsPerPage = 5;
@@ -20,7 +19,7 @@ export default function ReviewHistory() {
 
   // Fetch reviews using SWR with revalidation on focus
   const { data, error, mutate } = useSWR<APIReviewResponse[]>(
-    ["reviews", "client"],
+    ["reviews", FromValues.CLIENT],
     getUserReviewsRequest,
     {
       revalidateOnFocus: true,
