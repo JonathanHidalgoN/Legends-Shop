@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.profile.ProfileWorker import ProfileWorker
 from app.customExceptions import ProfileWorkerException, UserNoGoldRow
 from staticData import (
-    STATIC_DATA_USER_IN_DB1,
     STATIC_ORDER_SUMMARY1,
     STATIC_ORDER_SUMMARY2,
     STATIC_PROFILE_INFO1,
+    STATIC_DATA_USER_IN_DB1,
 )
 
 
