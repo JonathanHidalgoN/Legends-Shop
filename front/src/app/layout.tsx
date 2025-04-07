@@ -3,17 +3,38 @@ import "./styles.css";
 import "./globals.css";
 import { Item } from "./interfaces/Item";
 import { Location } from "./interfaces/Location";
-import { fetchItems, fetchTags } from "./itemsFetcher";
 import { StaticDataContextProvider } from "./components/StaticDataContext";
 import { AuthContextProvider } from "./components/AuthContext";
 import { CarContextProvider } from "./components/CarContext";
 import { Toaster } from "react-hot-toast";
 import { redirect } from "next/navigation";
-import { getAllEffectNamesRequest, getAllLocationsRequest } from "./request";
+import {
+  allTagsRequet,
+  FromValues,
+  getAllEffectNamesRequest,
+  getAllLocationsRequest,
+  someItemsRequest,
+} from "./request";
+import { mapAPIItemResponseToItem } from "./mappers";
+import fs from "fs";
+import path from "path";
 
 export const metadata = {
   title: "Legends Shop",
 };
+
+function checkIfHDImageAvailable(
+  itemName: string,
+  serverImagePath: string,
+): string {
+  const fileName = `${itemName}.png`;
+  const filePath = path.join(process.cwd(), "public", "hd_images", fileName);
+  if (fs.existsSync(filePath)) {
+    return `/hd_images/${fileName}`;
+  } else {
+    return serverImagePath;
+  }
+}
 
 export default async function RootLayout({
   children,
@@ -25,11 +46,14 @@ export default async function RootLayout({
   let effects: string[] = [];
   let locations: Location[] = [];
   try {
-    items = await fetchItems();
-    tags = await fetchTags();
-    effects = await getAllEffectNamesRequest();
-    locations = await getAllLocationsRequest();
+    items = (await someItemsRequest(FromValues.SERVER)).map(
+      mapAPIItemResponseToItem,
+    );
+    tags = await allTagsRequet(FromValues.SERVER);
+    effects = await getAllEffectNamesRequest(FromValues.SERVER);
+    locations = await getAllLocationsRequest(FromValues.SERVER);
   } catch (error) {
+    console.log(error);
     redirect("/error/wrong");
   }
 
