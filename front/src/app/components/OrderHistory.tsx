@@ -9,7 +9,10 @@ import {
 } from "@/app/interfaces/Order";
 import { APIOrderResponse } from "../interfaces/APIResponse";
 import { mapAPIOrderResponseToOrder } from "../mappers";
-import { getOrderHistoryWithCredentialsRequest } from "@/app/request";
+import {
+  FromValues,
+  getOrderHistoryWithCredentialsRequest,
+} from "@/app/request";
 import React, { useState, useEffect } from "react";
 import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
@@ -48,7 +51,7 @@ export default function OrderHistory() {
   const ordersPerPage = 5;
 
   const { data, error } = useSWR<APIOrderResponse[]>(
-    ["orders-client", "client"],
+    ["orders-client", FromValues.CLIENT],
     getOrderHistoryWithCredentialsRequest,
   );
 
