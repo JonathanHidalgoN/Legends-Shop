@@ -19,7 +19,7 @@ def getProfileWorker(
     return ProfileWorker(db)
 
 
-@router.get("/current_gold", response_model=ProfileGoldResponse)
+@router.get("/current_gold", response_model=int)
 async def getUserGold(
     request: Request,
     profileWorker: Annotated[ProfileWorker, Depends(getProfileWorker)],
@@ -27,7 +27,7 @@ async def getUserGold(
 ):
     try:
         userGold: int = await profileWorker.getUserGoldWithUserName(userName)
-        return {"userGold": userGold}
+        return userGold
     except ProfileWorkerException:
         raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
