@@ -13,6 +13,7 @@ from app.schemas.Location import Location
 from app.routes.auth import getUserIdFromName
 from app.data.mappers import mapLocationTableToLocation
 from app.data.queries.locationQueries import getUserLocation
+from app.logger import logger
 
 router = APIRouter()
 
@@ -51,7 +52,10 @@ async def getUserLocationEndpoint(
         if location is None:
             raise HTTPException(status_code=404, detail="User location not found")
         return mapLocationTableToLocation(location)
+    except HTTPException as e:
+        raise e
     except Exception as e:
+        logger.error(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
