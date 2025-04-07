@@ -6,7 +6,7 @@ import DescriptionTextMapper from "./DescriptionTextMapper";
 import AddToCarButton from "./AddToCarButton";
 import { useStaticData } from "./StaticDataContext";
 import { useEffect, useState } from "react";
-import { getReviewsByItemIdRequest } from "../request";
+import { FromValues, getReviewsByItemIdRequest } from "../request";
 import { APIReviewResponse, APIError } from "../interfaces/APIResponse";
 import { Review } from "../interfaces/Review";
 import { mapAPIReviewResponseToReview } from "../mappers";
@@ -26,7 +26,10 @@ export default function ItemView({ itemName }: { itemName: string }) {
 
       try {
         setIsLoading(true);
-        const apiReviews = await getReviewsByItemIdRequest(item.id, "client");
+        const apiReviews = await getReviewsByItemIdRequest(
+          item.id,
+          FromValues.CLIENT,
+        );
         const mappedReviews = apiReviews.map(mapAPIReviewResponseToReview);
         setReviews(mappedReviews);
 
