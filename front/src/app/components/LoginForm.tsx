@@ -5,9 +5,13 @@ import { useAuthContext } from "./AuthContext";
 import { useCarContext } from "./CarContext";
 import { useStaticData } from "./StaticDataContext";
 import { APILoginResponse, LoginError } from "../interfaces/APIResponse";
-import { getCurrentUserGold } from "../profileFunctions";
 import { CartItem } from "../interfaces/Order";
-import { getAddedCartItemsRequest, getUserLocationRequest } from "../request";
+import {
+  FromValues,
+  getAddedCartItemsRequest,
+  getCurrentUserGoldRequest,
+  getUserLocationRequest,
+} from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
 import { Item } from "../interfaces/Item";
 import { validateUsernameInput, validatePasswordInput } from "../functions";
@@ -70,37 +74,28 @@ export default function LoginForm({
       );
 
       if (apiResponse.status === 200) {
-        const currentGold: number | null = await getCurrentUserGold();
-        if (!currentGold) {
-          apiResponse.errorType = LoginError.CURRENTGOLDERROR;
-        } else {
-          setCurrentGold(currentGold);
-        }
+        const currentGold: number = await getCurrentUserGoldRequest(FromValues.CLIENT);
+        setCurrentGold(currentGold);
+        const apiCartItems = await getAddedCartItemsRequest(
+          FromValues.CLIENT,
+        );
+        const serverCartItems: CartItem[] = apiCartItems.map(
+          (apiCartItem) => {
+            const matchItem: Item | undefined = items.find(
+              (item: Item) => item.id == apiCartItem.itemId,
+            );
+            if (!matchItem) {
+              throw Error("Error");
+            }
+            return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
+          },
+        );
+        setCarItems(serverCartItems);
 
-        try {
-          const apiCartItems = await getAddedCartItemsRequest("client");
-          const serverCartItems: CartItem[] = apiCartItems.map(
-            (apiCartItem) => {
-              const matchItem: Item | undefined = items.find(
-                (item: Item) => item.id == apiCartItem.itemId,
-              );
-              if (!matchItem) {
-                throw Error("Error");
-              }
-              return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
-            },
-          );
-          setCarItems(serverCartItems);
-        } catch (error) {
-          console.error("Error fetching cart items:", error);
-        }
-
-        try {
-          const userLocation: Location = await getUserLocationRequest("client");
-          setCurrentLocation(userLocation);
-        } catch (error) {
-          console.error("Error fetching user location:", error);
-        }
+        const userLocation: Location = await getUserLocationRequest(
+          FromValues.CLIENT,
+        );
+        setCurrentLocation(userLocation);
 
         setFormUserName("");
         setFormPassword("");
