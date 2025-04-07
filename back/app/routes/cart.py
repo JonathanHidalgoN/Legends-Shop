@@ -70,7 +70,7 @@ async def getAddedUserCartItems(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.delete("/delete_cart_item/{cart_item_id}")
+@router.delete("/delete_cart_item/{cart_item_id}", response_model=None)
 async def cancelCartItem(
     cart_item_id: int,
     request: Request,
