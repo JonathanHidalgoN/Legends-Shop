@@ -3,14 +3,16 @@ import { useAuthContext } from "@/app/components/AuthContext";
 import { useCarContext } from "@/app/components/CarContext";
 import CarDropDown from "@/app/components/CarDropDown";
 import { CartItem, Order, OrderStatus } from "@/app/interfaces/Order";
-import { orderRequest } from "@/app/request";
+import {
+  FromValues,
+  getCurrentUserGoldRequest,
+  orderRequest,
+} from "@/app/request";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import OrderSuccessModal from "@/app/components/OrderSuccessModal";
 import { usePathname } from "next/navigation";
-import { getCurrentUserGold } from "@/app/profileFunctions";
 import { showErrorToast } from "@/app/customToast";
-import Image from "next/image";
 
 export default function OrderPage() {
   const {
@@ -60,17 +62,16 @@ export default function OrderPage() {
         location_id: currentLocation.id,
         reviewed: false,
       };
-      const response = await orderRequest(order, "client");
-      if (!response.ok) {
-        showErrorToast("Error making the order");
+      try {
+        const orderId = await orderRequest(order, FromValues.CLIENT);
+        const leftGold = await getCurrentUserGoldRequest(FromValues.CLIENT);
+        setCurrentGold(leftGold);
+        setOrderId(orderId);
+        setShowModal(true);
+        cleanCar();
+      } catch (error) {
         return;
       }
-      const leftGold: number | null = await getCurrentUserGold();
-      setCurrentGold(leftGold);
-      const data = await response.json();
-      setOrderId(data.order_id);
-      setShowModal(true);
-      cleanCar();
     }
   }
 
