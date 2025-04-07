@@ -170,15 +170,15 @@ export default function ReviewPage({
             updatedAt: new Date(),
             comments: review.comment
               ? [
-                {
-                  id: 0, // Will be set by backend
-                  reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
-                  userId: 0, // Will be set by backend
-                  content: review.comment,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              ]
+                  {
+                    id: 0, // Will be set by backend
+                    reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
+                    userId: 0, // Will be set by backend
+                    content: review.comment,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                  },
+                ]
               : [],
           };
 
@@ -271,10 +271,11 @@ export default function ReviewPage({
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting || Object.keys(reviews).length === 0}
-                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${isSubmitting || Object.keys(reviews).length === 0
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-[var(--orange)] text-white hover:bg-opacity-90"
-                    }`}
+                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    isSubmitting || Object.keys(reviews).length === 0
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                  }`}
                 >
                   {isSubmitting
                     ? "Submitting..."

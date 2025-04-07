@@ -74,22 +74,20 @@ export default function LoginForm({
       );
 
       if (apiResponse.status === 200) {
-        const currentGold: number = await getCurrentUserGoldRequest(FromValues.CLIENT);
-        setCurrentGold(currentGold);
-        const apiCartItems = await getAddedCartItemsRequest(
+        const currentGold: number = await getCurrentUserGoldRequest(
           FromValues.CLIENT,
         );
-        const serverCartItems: CartItem[] = apiCartItems.map(
-          (apiCartItem) => {
-            const matchItem: Item | undefined = items.find(
-              (item: Item) => item.id == apiCartItem.itemId,
-            );
-            if (!matchItem) {
-              throw Error("Error");
-            }
-            return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
-          },
-        );
+        setCurrentGold(currentGold);
+        const apiCartItems = await getAddedCartItemsRequest(FromValues.CLIENT);
+        const serverCartItems: CartItem[] = apiCartItems.map((apiCartItem) => {
+          const matchItem: Item | undefined = items.find(
+            (item: Item) => item.id == apiCartItem.itemId,
+          );
+          if (!matchItem) {
+            throw Error("Error");
+          }
+          return mapAPICartItemResponseToCartItem(apiCartItem, matchItem);
+        });
         setCarItems(serverCartItems);
 
         const userLocation: Location = await getUserLocationRequest(
