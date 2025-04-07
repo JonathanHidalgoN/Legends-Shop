@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
+  FromValues,
   logInRequest,
   logoutRequest,
   refreshTokenRequest,
@@ -86,7 +87,7 @@ export function AuthContextProvider({
     userName: string,
     password: string,
   ): Promise<APILoginResponse> {
-    const response = await logInRequest(userName, password, "client");
+    const response = await logInRequest(userName, password, FromValues.CLIENT);
     if (!response.ok) {
       const data = await response.json();
       const result: APILoginResponse = createAPIResponseLogin(response, data);
@@ -172,6 +173,7 @@ export function AuthContextProvider({
       email,
       birthDate,
       location_id,
+      FromValues.CLIENT,
     );
     const data = await response.json();
     return createAPIResponseSingup(response, data);
@@ -179,7 +181,7 @@ export function AuthContextProvider({
 
   async function refreshToken(): Promise<void> {
     try {
-      const response = await refreshTokenRequest("client");
+      const response = await refreshTokenRequest(FromValues.CLIENT);
       if (!response.ok) {
         logOut();
         return;
@@ -192,7 +194,7 @@ export function AuthContextProvider({
 
   async function logOut() {
     try {
-      const response = await logoutRequest("client");
+      const response = await logoutRequest(FromValues.CLIENT);
       if (!response.ok) {
         throw new Error("Logout failed");
       }
