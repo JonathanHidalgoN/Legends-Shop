@@ -19,14 +19,14 @@ router = APIRouter()
 
 
 # TODO: Create a class to handle item fetching logic
-@router.get("/all")
+@router.get("/all", response_model=List[Item])
 async def getAllItems(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
     items: List[Item] = []
     try:
         items = await getAllItemTableRowsAnMapToItems(db)
-        return {"items": items}
+        return items
     except Exception as e:
         logger.error(
             f"Error while trying to query {request.url.path} from database: {e}"
@@ -36,14 +36,14 @@ async def getAllItems(
         )
 
 
-@router.get("/some")
+@router.get("/some", response_model=List[Item])
 async def getSomeItems(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
     items: List[Item] = []
     try:
         items = await getSomeItemTableRowsAnMapToItems(db)
-        return {"items": items}
+        return items
     except Exception as e:
         logger.error(
             f"Error while trying to query {request.url.path} some items from database: {e}"
@@ -54,14 +54,14 @@ async def getSomeItems(
         )
 
 
-@router.get("/uniqueTags")
+@router.get("/uniqueTags", response_model=List[str])
 async def getUniqueTags(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
     tagNames: Set[str] = set()
     try:
         tagNames = await getAllTagsTableNames(db)
-        return {"tagNames": tagNames}
+        return list(tagNames)
     except Exception as e:
         logger.error(
             f"Error while trying to query {request.url.path} from database: {e}"
@@ -91,7 +91,7 @@ async def getItemNames(
 
 
 @router.get("/unique_effects", response_model=Set[str])
-async def getUniqueTags(
+async def getUniqueEffects(
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
     effectNames: Set[str] = set()
