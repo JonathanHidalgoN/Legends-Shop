@@ -6,11 +6,13 @@ import {
   APIUserInfoResponse,
   APICommentResponse,
   APIReviewResponse,
+  APIItemResponse,
 } from "./interfaces/APIResponse";
 import { Item } from "./interfaces/Item";
 import { CartItem, Order, OrderSummary } from "./interfaces/Order";
 import { ProfileInfo, UserInfo } from "./interfaces/profileInterfaces";
 import { Comment, Review } from "./interfaces/Review";
+import { StatKind, EffectKind } from "./interfaces/Item";
 
 export function mapAPIOrderSummaryToOrderSummary(
   apiOrderSummary: APIOrderSummaryResponse,
@@ -109,5 +111,31 @@ export function mapAPIReviewResponseToReview(
     createdAt: new Date(apiReview.createdAt),
     updatedAt: new Date(apiReview.updatedAt),
     comments: apiReview.comments.map(mapAPICommentResponseToComment),
+  };
+}
+
+export function mapAPIItemResponseToItem(apiItem: APIItemResponse): Item {
+  return {
+    name: apiItem.name,
+    gold: {
+      base: apiItem.gold.base,
+      purchaseable: apiItem.gold.purchasable,
+      total: apiItem.gold.total,
+      sell: apiItem.gold.sell,
+    },
+    description: apiItem.description,
+    stats: apiItem.stats.map((stat) => ({
+      name: stat.name,
+      kind: stat.kind === "flat" ? StatKind.Flat : StatKind.Percentage,
+      value: stat.value,
+    })),
+    tags: apiItem.tags,
+    effects: Object.entries(apiItem.effect).map(([name, value]) => ({
+      name,
+      value,
+      kind: EffectKind.effect1,
+    })),
+    img: apiItem.imageUrl,
+    id: apiItem.id,
   };
 }
