@@ -8,7 +8,7 @@ from app.routes.auth import getCurrentUserTokenFlow
 from app.data import database
 from app.customExceptions import ProfileWorkerException
 from app.profile.ProfileWorker import ProfileWorker
-from app.schemas.profileSchemas import ProfileGoldResponse, ProfileInfo
+from app.schemas.profileSchemas import ProfileInfo
 
 router = APIRouter()
 
