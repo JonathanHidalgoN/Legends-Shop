@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { APIProfileInfoResponse } from "../interfaces/APIResponse";
-import { getProfileInfoRequest } from "../request";
+import { FromValues, getProfileInfoRequest } from "../request";
 import { useErrorRedirect } from "./useErrorRedirect";
 import { ProfileInfo } from "../interfaces/profileInterfaces";
 import { mapAPIProfileInfoResponseToProfileInfo } from "../mappers";
@@ -10,7 +10,7 @@ import { useStaticData } from "./StaticDataContext";
 
 export default function ProfileView() {
   const { data, error } = useSWR<APIProfileInfoResponse>(
-    ["profile-client", "client"],
+    ["profile-client", FromValues.CLIENT],
     getProfileInfoRequest,
   );
   const { locations } = useStaticData();
