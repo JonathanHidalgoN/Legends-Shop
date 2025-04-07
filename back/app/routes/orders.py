@@ -23,9 +23,8 @@ def getOrderProcessor(
     return OrderProcessor(db)
 
 
-@router.post("/order")
+@router.post("/order", response_model=int)
 async def order(
-    request: Request,
     order: Order,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
@@ -38,12 +37,11 @@ async def order(
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Unexpected exception")
-    return {"order_id": f"{orderId}"}
+    return orderId
 
 
 @router.get("/order_history", response_model=List[Order])
 async def getOrderHistory(
-    request: Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
@@ -51,13 +49,11 @@ async def getOrderHistory(
         orders: List[Order] = await orderProcessor.getOrderHistory(userId)
         return orders
     except ProcessOrderException as e:
-        logger.error(f"Request to {request.url.path} caused exception: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.put("/cancel_order/{order_id}")
+@router.put("/cancel_order/{order_id}", response_model=None)
 async def cancelOrder(
-    request: Request,
     order_id: int,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
