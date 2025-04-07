@@ -20,7 +20,6 @@ async def addReview(
     )
     asyncSession.add(review)
     await asyncSession.flush()
-    await asyncSession.commit()
     return review.id
 
 
@@ -111,7 +110,6 @@ async def addComment(
     )
     asyncSession.add(comment)
     await asyncSession.flush()
-    await asyncSession.commit()
 
 
 async def updateComment(
