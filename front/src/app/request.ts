@@ -11,6 +11,7 @@ import { Location } from "./interfaces/Location";
 import { DeliveryDate } from "./interfaces/DeliveryDate";
 import { showErrorToast } from "./customToast";
 import { Review } from "./interfaces/Review";
+import { APIItemResponse } from "./interfaces/APIResponse";
 
 //TODO: how to improve this solution?
 export const ENDPOINT_LOGIN: string = `auth/token`;
@@ -28,7 +29,6 @@ export const ENDPOINT_ORDER_HISTORY: string = `orders/order_history`;
 export const ENDPOINT_ORDER_CANCEL: string = `orders/cancel_order`;
 export const ENDPOINT_PROFILE_CURRENT_GOLD: string = `profile/current_gold`;
 export const ENDPOINT_PROFILE_INFO: string = `profile/info`;
-export const ENDPOINT_CART_ADD_ITEMS: string = `cart/add_items`;
 export const ENDPOINT_CART_ADD_ITEM: string = `cart/add_item`;
 export const ENDPOINT_CART_ADDED_CART_ITEMS: string = `cart/added_cart_items`;
 export const ENDPOINT_CART_DELETE_ITEM: string = `cart/delete_cart_item`;
@@ -41,9 +41,14 @@ export const ENDPOINT_USER_REVIEWS: string = `review/user`;
 export const ENDPOINT_ITEM_REVIEWS: string = `review/item`;
 export const ENDPOINT_CHAMPION_ICONS: string = `api/icons`;
 
-function makeUrl(from: string, endpoint: string): string {
+export enum FromValues {
+  CLIENT = "CLIENT",
+  SERVER = "SERVER",
+}
+
+function makeUrl(from: FromValues, endpoint: string): string {
   let url: string;
-  if (from === "server") {
+  if (from === FromValues.SERVER) {
     url = SERVER_DOMAIN + endpoint;
   } else {
     url = CLIENT_DOMAIN + endpoint;
@@ -51,35 +56,34 @@ function makeUrl(from: string, endpoint: string): string {
   return url;
 }
 
-export async function createAPIError(
-  response: Response,
-  errorMsg: string,
-): Promise<APIError> {
+export async function createAPIError(response: Response): Promise<APIError> {
   if (response.status == 401) {
     return new APIError("Unauthorized", 401);
   } else {
     const data = await response.json();
-    return new APIError(data?.message || errorMsg, response.status, data);
+    return new APIError(data?.message || "Error", response.status, data);
   }
 }
 
-async function throwAPIError(response: Response, errorMsg: string) {
-  const apiError: APIError = await createAPIError(response, errorMsg);
-  showErrorToast(errorMsg);
+async function throwAPIError(response: Response, from: FromValues) {
+  const apiError: APIError = await createAPIError(response);
+  if (from === FromValues.CLIENT) showErrorToast(apiError.message);
   throw apiError;
 }
 
-/**
- * Makes a POST request to the login endpoint with the provided username and password.
- *
- * @param userName - The username of the user attempting to log in.
- * @param password - The password for the user.
- * @returns A Promise that resolves with the response from the login request.
- */
+async function checkResponse(
+  response: Response,
+  from: FromValues,
+): Promise<void> {
+  if (!response.ok) {
+    await throwAPIError(response, from);
+  }
+}
+
 export async function logInRequest(
   userName: string,
   password: string,
-  from: string = "server",
+  from: FromValues,
 ) {
   const url: string = makeUrl(from, ENDPOINT_LOGIN);
   const formData = new URLSearchParams();
@@ -101,7 +105,7 @@ export async function singupRequest(
   email: string,
   birthDate: Date,
   location_id: number,
-  from: string = "server",
+  from: FromValues,
 ) {
   const url: string = makeUrl(from, ENDPOINT_SINGUP);
   const formData = new URLSearchParams();
@@ -119,44 +123,14 @@ export async function singupRequest(
   });
 }
 
-export async function refreshTokenRequest(from: string = "server") {
+export async function refreshTokenRequest(from: FromValues) {
   const url: string = makeUrl(from, ENDPOINT_REFRESH_TOKEN);
   return await fetch(url, {
     credentials: "include",
   });
 }
 
-/**
- * Makes a GET request to fetch a subset of items.
- *
- * @returns A Promise that resolves with the response from the request.
- */
-export async function someItemsRequest(from: string = "server") {
-  const url: string = makeUrl(from, ENDPOINT_SOME_ITEMS);
-  return await fetch(url);
-}
-
-/**
- * Makes a GET request to fetch all items.
- *
- * @returns A Promise that resolves with the response from the request.
- */
-export async function allItemsRequest(from: string = "server") {
-  const url: string = makeUrl(from, ENDPOINT_ITEMS_ALL);
-  return await fetch(url);
-}
-
-/**
- * Makes a GET request to fetch all unique tags.
- *
- * @returns A Promise that resolves with the response from the request.
- */
-export async function allTagsRequet(from: string = "server") {
-  const url: string = makeUrl(from, ENDPOINT_ALL_TAGS);
-  return await fetch(url);
-}
-
-export async function logoutRequest(from: string = "server") {
+export async function logoutRequest(from: FromValues) {
   const url: string = makeUrl(from, ENDPOINT_LOGIN_OUT);
   return await fetch(url, {
     method: "GET",
@@ -164,9 +138,37 @@ export async function logoutRequest(from: string = "server") {
   });
 }
 
-export async function orderRequest(order: Order, from: string = "server") {
+export async function someItemsRequest(
+  from: FromValues,
+): Promise<APIItemResponse[]> {
+  const url: string = makeUrl(from, ENDPOINT_SOME_ITEMS);
+  const response = await fetch(url);
+  checkResponse(response, from);
+  return await response.json();
+}
+
+export async function allTagsRequet(from: FromValues): Promise<string[]> {
+  const url: string = makeUrl(from, ENDPOINT_ALL_TAGS);
+  const response = await fetch(url);
+  checkResponse(response, from);
+  return await response.json();
+}
+
+export async function allItemsRequest(
+  from: FromValues,
+): Promise<APIItemResponse[]> {
+  const url: string = makeUrl(from, ENDPOINT_ITEMS_ALL);
+  const response = await fetch(url);
+  checkResponse(response, from);
+  return await response.json();
+}
+
+export async function orderRequest(
+  order: Order,
+  from: FromValues,
+): Promise<number> {
   const url: string = makeUrl(from, ENDPOINT_ORDER);
-  return await fetch(url, {
+  const response = await fetch(url, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -174,41 +176,35 @@ export async function orderRequest(order: Order, from: string = "server") {
     },
     body: JSON.stringify(order),
   });
+  checkResponse(response, from);
+  return await response.json();
 }
 
-/**
- * Makes a GET request to fetch user history.
- */
 export async function getOrderHistoryWithCredentialsRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<APIOrderResponse[]> {
   const url = `${makeUrl(from, ENDPOINT_ORDER_HISTORY)}`;
   const response = await fetch(url, {
     credentials: "include",
   });
-  if (!response.ok) {
-    await throwAPIError(response, "Failed to fetch the orders");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function getProfileInfoRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<APIProfileInfoResponse> {
   const url: string = makeUrl(from, ENDPOINT_PROFILE_INFO);
   const response = await fetch(url, {
     credentials: "include",
   });
-  if (!response.ok) {
-    await throwAPIError(response, "Failed to get the profile info");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function addToCarRequest(
-  from: string = "server",
+  from: FromValues,
   apiCartItem: APICartItemResponse,
-  errorMsg: string,
 ): Promise<APICartItemResponse> {
   const url: string = makeUrl(from, ENDPOINT_CART_ADD_ITEM);
   const response = await fetch(url, {
@@ -220,50 +216,47 @@ export async function addToCarRequest(
     body: JSON.stringify(apiCartItem),
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, errorMsg);
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
-/**
- * Cancel the order requet with id
- */
 export async function cancelOrderRequest(
   orderId: number,
-  from: string = "server",
-) {
+  from: FromValues,
+): Promise<void> {
   const url: string = makeUrl(from, `${ENDPOINT_ORDER_CANCEL}/${orderId}`);
-  return await fetch(url, {
+  const response = await fetch(url, {
     method: "PUT",
     credentials: "include",
   });
+  checkResponse(response, from);
 }
 
-export async function getCurrentUserGoldRequest(from: string = "server") {
+export async function getCurrentUserGoldRequest(
+  from: FromValues,
+): Promise<number> {
   const url: string = makeUrl(from, ENDPOINT_PROFILE_CURRENT_GOLD);
-  return await fetch(url, {
+  const response = await fetch(url, {
     credentials: "include",
   });
+  checkResponse(response, from);
+  return await response.json();
 }
 
 export async function getAddedCartItemsRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<APICartItemResponse[]> {
   const url: string = makeUrl(from, ENDPOINT_CART_ADDED_CART_ITEMS);
   const response = await fetch(url, {
     credentials: "include",
   });
-  if (!response.ok) {
-    await throwAPIError(response, "Error getting cart items");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function deleteCartItemRequest(
-  from: string = "server",
+  from: FromValues,
   cartItemId: number,
-  errorMsg: string,
 ): Promise<void> {
   const url: string = makeUrl(
     from,
@@ -274,22 +267,16 @@ export async function deleteCartItemRequest(
     credentials: "include",
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, errorMsg);
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
-export async function updateItemsRequest(
-  from: string = "server",
-): Promise<void> {
+export async function updateItemsRequest(from: FromValues): Promise<void> {
   const url: string = makeUrl(from, ENDPOINT_UPDATE_ITEMS);
   const response = await fetch(url, {
     method: "PUT",
   });
-  if (!response.ok) {
-    await throwAPIError(response, "Error updating the items");
-  }
+  checkResponse(response, from);
 }
 
 export async function specialDownloadImagesRequest(
@@ -303,74 +290,62 @@ export async function specialDownloadImagesRequest(
     body: JSON.stringify({ itemNames }),
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, "Error updating the hd item images");
-  }
+  checkResponse(response, FromValues.CLIENT);
 }
 
 export async function getAllItemNamesRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<string[]> {
   const url: string = makeUrl(from, ENDPOINT_ALL_ITEM_NAMES);
   const response = await fetch(url);
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching item names");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function getAllEffectNamesRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<string[]> {
   const url: string = makeUrl(from, ENDPOINT_ALL_EFFECT_NAMES);
   const response = await fetch(url);
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching effect names");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function getAllLocationsRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<Location[]> {
   const url: string = makeUrl(from, ENDPOINT_ALL_LOCATIONS);
   const response = await fetch(url);
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching locations");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function getUserLocationRequest(
-  from: string = "client",
+  from: FromValues,
 ): Promise<Location> {
   const url: string = makeUrl(from, ENDPOINT_USER_LOCATION);
   const response = await fetch(url, {
     credentials: "include",
   });
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching user location");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function getDeliveryDatesRequest(
   locationId: number,
-  from: string = "client",
+  from: FromValues,
 ): Promise<DeliveryDate[]> {
   const url: string = makeUrl(from, `${ENDPOINT_DELIVERY_DATES}/${locationId}`);
   const response = await fetch(url, {
     method: "GET",
   });
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching delivery dates");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
 export async function addReviewRequest(
   review: Review,
-  from: string = "server",
+  from: FromValues,
 ): Promise<void> {
   const url: string = makeUrl(from, ENDPOINT_REVIEW);
   const response = await fetch(url, {
@@ -382,20 +357,11 @@ export async function addReviewRequest(
     body: JSON.stringify(review),
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, "Error adding review");
-  }
-  return await response.json();
+  checkResponse(response, from);
 }
 
-/**
- * Get all reviews for the authenticated user.
- *
- * @param from - The domain to make the request to ("server" or "client")
- * @returns A Promise that resolves with an array of reviews
- */
 export async function getUserReviewsRequest(
-  from: string = "server",
+  from: FromValues,
 ): Promise<APIReviewResponse[]> {
   const url: string = makeUrl(from, ENDPOINT_USER_REVIEWS);
   const response = await fetch(url, {
@@ -403,22 +369,13 @@ export async function getUserReviewsRequest(
     credentials: "include",
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching user reviews");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
-/**
- * Update an existing review.
- *
- * @param review - The review object with updated rating and comments
- * @param from - The domain to make the request to ("server" or "client")
- * @returns A Promise that resolves with the response from the update request
- */
 export async function updateReviewRequest(
   review: Review,
-  from: string = "server",
+  from: FromValues,
 ): Promise<void> {
   const url: string = makeUrl(from, ENDPOINT_UPDATE_REVIEW);
   const response = await fetch(url, {
@@ -430,47 +387,27 @@ export async function updateReviewRequest(
     body: JSON.stringify(review),
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, "Error updating review");
-  }
-  return await response.json();
+  checkResponse(response, from);
 }
 
-/**
- * Get all reviews for a specific item.
- *
- * @param itemId - The ID of the item whose reviews to retrieve
- * @param from - The domain to make the request to ("server" or "client")
- * @returns A Promise that resolves with an array of reviews
- */
 export async function getReviewsByItemIdRequest(
   itemId: number,
-  from: string = "server",
+  from: FromValues,
 ): Promise<APIReviewResponse[]> {
   const url: string = makeUrl(from, `${ENDPOINT_ITEM_REVIEWS}/${itemId}`);
   const response = await fetch(url, {
     method: "GET",
   });
 
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching item reviews");
-  }
+  checkResponse(response, from);
   return await response.json();
 }
 
-/**
- * Get champion icons from the Next.js API.
- *
- * @returns A Promise that resolves with an array of champion icons
- */
 export async function getChampionIconsRequest(): Promise<
   { src: string; alt: string }[]
 > {
   const response = await fetch(`/${ENDPOINT_CHAMPION_ICONS}`);
 
-  if (!response.ok) {
-    await throwAPIError(response, "Error fetching champion icons");
-  }
-
+  checkResponse(response, FromValues.CLIENT);
   return await response.json();
 }
