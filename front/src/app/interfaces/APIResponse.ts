@@ -95,6 +95,28 @@ export interface APIReviewResponse {
   comments: APICommentResponse[];
 }
 
+export interface APIItemResponse {
+  name: string;
+  plaintext: string;
+  image: string;
+  imageUrl: string;
+  gold: {
+    base: number;
+    purchasable: boolean;
+    total: number;
+    sell: number;
+  };
+  tags: string[];
+  stats: {
+    name: string;
+    kind: "flat" | "percentage";
+    value: number;
+  }[];
+  effect: Record<string, number>;
+  id: number;
+  description: string;
+}
+
 export class APIError extends Error {
   public status: number;
   public data?: any;
