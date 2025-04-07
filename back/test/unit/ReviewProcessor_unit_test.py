@@ -30,14 +30,14 @@ def mockReview() -> Review:
         updatedAt=datetime.now(),
         comments=[
             Comment(
-                id=1, 
+                id=1,
                 content="Great product!",
                 reviewId=1,
                 userId=123,
                 createdAt=datetime.now(),
-                updatedAt=datetime.now()
+                updatedAt=datetime.now(),
             )
-        ]
+        ],
     )
 
 
@@ -45,7 +45,7 @@ def mockReview() -> Review:
 async def test_checkSameUser_success(processor):
     orderId = 101
     userId = 123
-    userOrderId = 123 
+    userOrderId = 123
     with patch(
         "app.reviews.ReviewProcessor.getUserIdByOrderId",
         new=AsyncMock(return_value=userOrderId),
@@ -262,4 +262,4 @@ async def test_getReviewsAndCommentsByItemId_dbError(processor):
         new=AsyncMock(side_effect=SQLAlchemyError("DB error")),
     ):
         with pytest.raises(ReviewProcessorException):
-            await processor.getReviewsAndCommentsByItemId(itemId) 
+            await processor.getReviewsAndCommentsByItemId(itemId)

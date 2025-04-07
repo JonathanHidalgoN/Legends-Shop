@@ -276,3 +276,6 @@ STATIC_ORDER_SUMMARY2: OrderSummary = OrderSummary(
 STATIC_PROFILE_INFO1: ProfileInfo = ProfileInfo(
     user=STATIC_DATA_USER_IN_DB1, ordersInfo=[STATIC_ORDER_SUMMARY1]
 )
+
+STATIC_DATA_TAGS = {"tag1", "tag2", "tag3"}
+STATIC_DATA_EFFECTS = {"effect1", "effect2", "effect3"}
