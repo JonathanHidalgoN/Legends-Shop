@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Order, OrderStatus } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
-import { cancelOrderRequest } from "../request";
+import { cancelOrderRequest, FromValues } from "../request";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { showErrorToast } from "../customToast";
@@ -34,13 +34,14 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
       showErrorToast("Error canceling order");
       return;
     }
-    const response = await cancelOrderRequest(order.id, "client");
-    if (!response.ok) {
-      showErrorToast("Error canceling order");
+    try {
+      await cancelOrderRequest(order.id, FromValues.CLIENT);
+      order.status = OrderStatus.CANCELED;
+      setOrderStatus(order.status);
+      toast.success("Order cancelled succesfully");
+    } catch {
+      return;
     }
-    order.status = OrderStatus.CANCELED;
-    setOrderStatus(order.status);
-    toast.success("Order cancelled succesfully");
   }
 
   const extraCount = uniqueNames.length - 4;
@@ -151,7 +152,7 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
               className="px-4 py-2 rounded bg-yellow-500 text-white 
                        hover:bg-yellow-600 transition-all duration-300 
                        transform hover:scale-105 w-full md:w-auto"
-              onClick={() => router.push(`/review/${order.id}`)}
+              onClick={() => router.push(`/review/${order.id}/?isNew=true`)}
             >
               Review
             </button>
