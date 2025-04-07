@@ -16,7 +16,7 @@ from app.customExceptions import (
     LocationNotFoundException,
     LocationUpdateError,
 )
-from app.auth.functions import logMethod
+from app.logger import logMethod
 from typing import List
 from app.schemas.Location import Location
 from app.data.mappers import mapLocationTableToLocation

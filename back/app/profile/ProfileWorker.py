@@ -10,7 +10,7 @@ from app.data.queries.orderQueries import (
 from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Order import OrderSummary
 from app.schemas.profileSchemas import ProfileInfo
-from app.auth.functions import logMethod
+from app.logger import logMethod
 
 
 class ProfileWorker:

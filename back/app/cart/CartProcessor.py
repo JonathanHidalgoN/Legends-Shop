@@ -7,7 +7,7 @@ from app.customExceptions import CartProcessorException
 from app.data.queries.cartQueries import getAddedCartItemsWithUserId
 from app.data.mappers import mapCartTableToCartItem
 from app.data.queries.cartQueries import changeCartItemStatusToDeleted
-from app.auth.functions import logMethod
+from app.logger import logMethod
 
 
 class CartProceesor:

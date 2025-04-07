@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.Review import Review
 from sqlalchemy.exc import SQLAlchemyError
-from app.auth.functions import logMethod
+from app.logger import logMethod
 from app.customExceptions import (
     InvalidRatingException,
     InvalidUserReview,

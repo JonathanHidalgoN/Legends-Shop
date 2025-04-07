@@ -39,7 +39,7 @@ from app.data.queries.itemQueries import (
 )
 from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
-from app.auth.functions import logMethod
+from app.logger import logMethod
 
 
 # TODO: remove commits just one needed

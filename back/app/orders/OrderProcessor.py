@@ -23,7 +23,7 @@ from app.data.queries.profileQueries import (
     updateUserGoldWithUserId,
     updateUserSpendGoldWithUserId,
 )
-from app.auth.functions import logMethod
+from app.logger import logMethod
 from app.data.queries.deliveryDatesQueries import getDeliveryDateForItemAndLocation
 
 

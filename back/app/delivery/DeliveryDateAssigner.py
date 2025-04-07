@@ -1,6 +1,6 @@
 import random
-from typing import Dict, List, Sequence
-from sqlalchemy import insert, select
+from typing import List, Sequence
+from sqlalchemy import insert 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.models.DeliveryDatesTable import ItemLocationDeliveryAssociation
 from app.customExceptions import (
@@ -8,10 +8,9 @@ from app.customExceptions import (
     LocationNotFoundException,
     ItemNotFoundException,
 )
-from app.auth.functions import logMethod
+from app.logger import logMethod
 from app.data.queries.itemQueries import getAllItemIds
 from app.data.queries.locationQueries import getAllLocationIds
-from datetime import datetime, timedelta
 from app.schemas.DeliveryDate import DeliveryDate
 from app.data.queries.deliveryDatesQueries import getAllDeliveryDatesByLocationId
 
