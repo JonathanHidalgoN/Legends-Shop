@@ -14,6 +14,7 @@ import { APICartItemResponse } from "../interfaces/APIResponse";
 import {
   addToCarRequest,
   deleteCartItemRequest,
+  FromValues,
   getDeliveryDatesRequest,
 } from "../request";
 import { mapAPICartItemResponseToCartItem } from "../mappers";
@@ -105,7 +106,10 @@ export function CarContextProvider({
     if (!currentLocation) return;
 
     try {
-      const dates = await getDeliveryDatesRequest(currentLocation.id);
+      const dates = await getDeliveryDatesRequest(
+        currentLocation.id,
+        FromValues.CLIENT,
+      );
       setDeliveryDates(dates);
     } catch (error) {
       console.error("Error fetching delivery dates:", error);
@@ -123,9 +127,8 @@ export function CarContextProvider({
         itemId: cartItem.item.id,
       };
       const serverCartItemResponse: APICartItemResponse = await addToCarRequest(
-        "client",
+        FromValues.CLIENT,
         apiCartItem,
-        `Error adding ${cartItem.item.name} to car`,
       );
       const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(
         serverCartItemResponse,
@@ -166,11 +169,7 @@ export function CarContextProvider({
     if (cartItem.status == CartStatus.ADDED && cartItem.id) {
       if (isAuthenticated) {
         try {
-          await deleteCartItemRequest(
-            "client",
-            cartItem.id,
-            `Error deleting ${cartItem.item.name}`,
-          );
+          await deleteCartItemRequest(FromValues.CLIENT, cartItem.id);
           return;
         } catch (error) {
           //The request display the error msg, then add to the list the item pending to delete
@@ -200,11 +199,7 @@ export function CarContextProvider({
       for (const cartItem of pendingServerDeletedCartItems.current) {
         if (cartItem.id) {
           try {
-            await deleteCartItemRequest(
-              "client",
-              cartItem.id,
-              `Error deleting ${cartItem.item.name}`,
-            );
+            await deleteCartItemRequest(FromValues.CLIENT, cartItem.id);
           } catch (error) {
             newPending.push(cartItem);
           }
