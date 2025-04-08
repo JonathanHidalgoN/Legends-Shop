@@ -17,7 +17,6 @@ export default function ReviewHistory() {
   const reviewsPerPage = 5;
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch reviews using SWR with revalidation on focus
   const { data, error, mutate } = useSWR<APIReviewResponse[]>(
     ["reviews", FromValues.CLIENT],
     getUserReviewsRequest,
@@ -28,16 +27,13 @@ export default function ReviewHistory() {
     },
   );
 
-  // Handle errors with the error redirect hook
   useErrorRedirect(error);
 
-  // Map API responses to Review objects - moved outside of conditional rendering
   const reviews: Review[] = useMemo(() => {
     if (!data) return [];
     return data.map(mapAPIReviewResponseToReview);
   }, [data]);
 
-  // Group reviews by orderId
   const reviewsByOrder = useMemo(() => {
     const grouped: Record<number, Review[]> = {};
 
@@ -51,13 +47,11 @@ export default function ReviewHistory() {
     return grouped;
   }, [reviews]);
 
-  // Convert to array for pagination
   const orderIds = useMemo(
     () => Object.keys(reviewsByOrder).map(Number),
     [reviewsByOrder],
   );
 
-  // Calculate pagination
   const totalPages = useMemo(
     () => Math.ceil(orderIds.length / reviewsPerPage),
     [orderIds, reviewsPerPage],
@@ -71,12 +65,10 @@ export default function ReviewHistory() {
     [orderIds, startIndex, reviewsPerPage],
   );
 
-  // Handle navigation to review page
   const handleReviewClick = (orderId: number) => {
     router.push(`/review/${orderId}?isNew=false`);
   };
 
-  // Handle manual refresh
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -89,7 +81,6 @@ export default function ReviewHistory() {
     }
   };
 
-  // Show loading state
   if (!data || error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">

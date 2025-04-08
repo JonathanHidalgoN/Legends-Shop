@@ -22,6 +22,7 @@ import { useStaticData } from "./StaticDataContext";
 import { useAuthContext } from "./AuthContext";
 import { showSuccessToast } from "@/app/customToast";
 import { useSWRWithErrorRedirect } from "./useErrorRedirect";
+import LoadingPage from "./LoadingPage";
 
 export default function ReviewPage({
   orderId,
@@ -42,6 +43,10 @@ export default function ReviewPage({
     getUserReviewsRequest,
     () => (isNew ? null : ["reviews", FromValues.CLIENT]),
   );
+
+  if (!orderData || !reviewData) {
+    return <LoadingPage />
+  }
 
   const { items } = useStaticData();
   const { userName } = useAuthContext();

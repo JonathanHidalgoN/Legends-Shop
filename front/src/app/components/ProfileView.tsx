@@ -6,20 +6,16 @@ import { useSWRWithErrorRedirect } from "./useErrorRedirect";
 import { ProfileInfo } from "../interfaces/profileInterfaces";
 import { mapAPIProfileInfoResponseToProfileInfo } from "../mappers";
 import { useStaticData } from "./StaticDataContext";
+import LoadingPage from "./LoadingPage";
 
 export default function ProfileView() {
+  const { locations } = useStaticData();
   const { data } = useSWRWithErrorRedirect<APIProfileInfoResponse>(
     getProfileInfoRequest,
     () => ["profile-client", FromValues.CLIENT],
   );
-  const { locations } = useStaticData();
-
   if (!data) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
-      </div>
-    );
+    return <LoadingPage />
   }
 
   const profileInfo: ProfileInfo = mapAPIProfileInfoResponseToProfileInfo(data);
