@@ -13,7 +13,6 @@ import {
   mapAPIOrderResponseToOrder,
   mapAPIReviewResponseToReview,
 } from "@/app/mappers";
-import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { addReviewRequest, updateReviewRequest } from "@/app/request";
