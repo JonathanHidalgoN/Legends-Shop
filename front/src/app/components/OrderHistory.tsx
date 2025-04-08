@@ -17,7 +17,7 @@ import React, { useState, useEffect } from "react";
 import Select, { ActionMeta, MultiValue } from "react-select";
 import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
-import { useErrorRedirect } from "./useErrorRedirect";
+import { useErrorRedirect, useSWRWithErrorRedirect } from "./useErrorRedirect";
 
 export default function OrderHistory() {
   const { items } = useStaticData();
@@ -50,14 +50,12 @@ export default function OrderHistory() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const ordersPerPage = 5;
 
-  const { data, error } = useSWR<APIOrderResponse[]>(
-    ["orders-client", FromValues.CLIENT],
+  const { data } = useSWRWithErrorRedirect<APIOrderResponse[]>(
     getOrderHistoryWithCredentialsRequest,
+    () => ["orders-client", FromValues.CLIENT]
   );
 
-  useErrorRedirect(error);
-
-  if (!data || error) {
+  if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
