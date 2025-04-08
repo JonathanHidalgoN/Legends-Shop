@@ -33,4 +33,3 @@ def verifyToken(token: str) -> str | None:
         return userName
     except JWSError:
         return None
-

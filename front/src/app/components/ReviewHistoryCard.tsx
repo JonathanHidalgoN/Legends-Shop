@@ -36,7 +36,6 @@ export default function ReviewHistoryCard({ review }: { review: Review }) {
 
   return (
     <div className="flex border-b border-gray-200 py-3 last:border-b-0">
-      {/* Item Image Section */}
       <div className="w-16 h-16 flex-shrink-0 mr-3">
         {item?.img ? (
           <div className="relative w-full h-full">
@@ -54,7 +53,6 @@ export default function ReviewHistoryCard({ review }: { review: Review }) {
         )}
       </div>
 
-      {/* Review Content Section */}
       <div className="flex-grow">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-[var(--orange)]">

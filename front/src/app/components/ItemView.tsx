@@ -131,7 +131,6 @@ export default function ItemView({ itemName }: { itemName: string }) {
         </div>
       </div>
 
-      {/* Reviews Section */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-[var(--orange)] mb-4">
           Reviews

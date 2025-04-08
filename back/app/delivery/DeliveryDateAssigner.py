@@ -1,6 +1,6 @@
 import random
 from typing import List, Sequence
-from sqlalchemy import insert 
+from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.models.DeliveryDatesTable import ItemLocationDeliveryAssociation
 from app.customExceptions import (

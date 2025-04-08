@@ -213,7 +213,6 @@ export default function ReviewPage({
 
   return (
     <div className="min-h-screen bg-[var(--white)] text-[var(--black)]">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"

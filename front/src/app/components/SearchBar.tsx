@@ -90,7 +90,6 @@ export default function SearchBar({ items }: { items: Item[] }) {
                 className="mr-2"
               />
               <Link href={`/items/${item.name}`}>
-                {/* Clear suggestions on click, but keep the query intact */}
                 <div onClick={() => setSuggestions([])}>{item.name}</div>
               </Link>
             </li>

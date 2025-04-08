@@ -86,7 +86,6 @@ export default function OrderPage() {
   return (
     <div className="min-h-screen bg-[var(--white)] py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[var(--orange)] mb-2">
             Your Order
@@ -96,7 +95,6 @@ export default function OrderPage() {
           </p>
         </div>
 
-        {/* Order Summary Card */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-[var(--orange)]">
@@ -104,12 +102,10 @@ export default function OrderPage() {
             </h2>
           </div>
 
-          {/* Items List */}
           <div className="space-y-4">
             <CarDropDown tiny={true} />
           </div>
 
-          {/* Total Section */}
           <div className="mt-8 pt-6 border-t">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
@@ -139,7 +135,6 @@ export default function OrderPage() {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="mt-8 space-y-4">
               <div className="flex gap-4">
                 {userName ? (
@@ -189,7 +184,6 @@ export default function OrderPage() {
           </div>
         </div>
 
-        {/* Success Modal */}
         {showModal && (
           <OrderSuccessModal
             orderId={orderId}

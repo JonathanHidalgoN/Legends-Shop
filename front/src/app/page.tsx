@@ -38,7 +38,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[var(--white)] text-[var(--black)] overflow-hidden relative z-0">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
@@ -50,7 +49,6 @@ export default function Home() {
 
       <div className="container mx-auto px-4 py-8 relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center min-h-[calc(100vh-4rem)]">
-          {/* Left Side - Text Content */}
           <div className="space-y-6 animate-fade-in">
             <h1 className="text-5xl md:text-6xl font-bold text-[var(--orange)] animate-slide-up">
               Legends Shop
@@ -118,7 +116,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Item Showcase */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 grid grid-cols-3 gap-4">
               <div className="animate-float">
                 <Image
@@ -152,7 +149,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Add custom animations to global CSS */}
       <style jsx global>{`
         @keyframes float {
           0%,

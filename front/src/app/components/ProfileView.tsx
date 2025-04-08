@@ -32,7 +32,6 @@ export default function ProfileView() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Profile Header */}
         <div className="bg-gradient-to-r from-[var(--orange)] to-[var(--pink1)] p-8">
           <h1 className="text-4xl font-bold text-white">
             Welcome back,{" "}
@@ -40,7 +39,6 @@ export default function ProfileView() {
           </h1>
         </div>
 
-        {/* User Information */}
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
@@ -109,7 +107,6 @@ export default function ProfileView() {
           </div>
         </div>
 
-        {/* Orders Summary */}
         <div className="p-8 border-t border-gray-200">
           <h2 className="text-2xl font-semibold text-[var(--orange)] mb-6">
             Orders Summary

@@ -120,7 +120,6 @@ export function showWarningToast(msg: string) {
       >
         <div className="flex items-center">
           <div className="bg-yellow-400 rounded-full p-1">
-            {/* Warning icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-white"

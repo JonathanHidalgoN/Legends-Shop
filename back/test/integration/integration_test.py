@@ -14,9 +14,7 @@ from app.data.database import getDbSession
 # Use an in-memory SQLite database for testing
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 engine = create_async_engine(
-    TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool
+    TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
 )
 
 # Create an async session factory
@@ -25,48 +23,63 @@ TestingSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
     autocommit=False,
-    autoflush=False
+    autoflush=False,
 )
+
 
 @pytest.fixture(scope="function")
 async def db_session():
     """Create a test database session."""
     from app.data.database import base
     from app.data.models import (
-        GoldTable, ItemTable, StatsTable, TagsTable, EffectsTable,
-        MetaDataTable, UserTable, StatsMappingTable, OrderTable,
-        CartTable, DeliveryDatesTable, LocationTable, ReviewTable
+        GoldTable,
+        ItemTable,
+        StatsTable,
+        TagsTable,
+        EffectsTable,
+        MetaDataTable,
+        UserTable,
+        StatsMappingTable,
+        OrderTable,
+        CartTable,
+        DeliveryDatesTable,
+        LocationTable,
+        ReviewTable,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(base.metadata.create_all)
-    
+
     async with TestingSessionLocal() as session:
         yield session
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(base.metadata.drop_all)
+
 
 @pytest.fixture
 def client(db_session):
     """Create a test client with a test database session."""
+
     async def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
+
     app.dependency_overrides[getDbSession] = override_get_db
-    
+
     with TestClient(app) as test_client:
         yield test_client
-    
+
     app.dependency_overrides.clear()
+
 
 def test_get_home(client):
     """Test the home endpoint."""
     response = client.get("/")
     assert response.status_code == 200
+
 
 def test_error_handling(client):
     """Test error handling for non-existent resources."""
@@ -74,6 +87,7 @@ def test_error_handling(client):
     assert response.status_code == 404
     response = client.get("/items/99999")
     assert response.status_code == 404
+
 
 # @pytest.mark.asyncio
 # async def test_signup_success(client, db_session):

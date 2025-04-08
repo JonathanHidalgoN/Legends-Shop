@@ -8,7 +8,7 @@ from app.envVariables import DATABASE_URL
 # will use the same instance
 # Docs: https://docs.sqlalchemy.org/en/20/tutorial/engine.html#tutorial-engine
 engine = create_async_engine(DATABASE_URL, echo=True)
-#All tables have to be an instance of this to be managed together
+# All tables have to be an instance of this to be managed together
 base = declarative_base()
 AsyncSessionLocal = async_sessionmaker(engine, autoflush=False)
 
