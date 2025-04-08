@@ -13,11 +13,10 @@ import {
   FromValues,
   getOrderHistoryWithCredentialsRequest,
 } from "@/app/request";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Select, { ActionMeta, MultiValue } from "react-select";
-import useSWR from "swr";
 import { useStaticData } from "./StaticDataContext";
-import { useErrorRedirect, useSWRWithErrorRedirect } from "./useErrorRedirect";
+import { useSWRWithErrorRedirect } from "./useErrorRedirect";
 
 export default function OrderHistory() {
   const { items } = useStaticData();
