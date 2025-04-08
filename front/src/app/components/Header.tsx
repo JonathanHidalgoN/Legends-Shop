@@ -18,7 +18,6 @@ export default function Header({ items }: { items: Item[] }) {
   const { carItems, currentGold, currentLocation, setCurrentLocation } =
     useCarContext();
   const { locations } = useStaticData();
-  console.log(locations);
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
@@ -280,9 +279,8 @@ export default function Header({ items }: { items: Item[] }) {
                         setCurrentLocation(location);
                         setShowLocationDropdown(false);
                       }}
-                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${
-                        currentLocation?.id === location.id ? "bg-gray-50" : ""
-                      }`}
+                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-150 ${currentLocation?.id === location.id ? "bg-gray-50" : ""
+                        }`}
                     >
                       {location.country_name}
                     </div>
