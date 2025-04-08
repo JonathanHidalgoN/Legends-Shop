@@ -53,7 +53,6 @@ export default async function RootLayout({
     effects = await getAllEffectNamesRequest(FromValues.SERVER);
     locations = await getAllLocationsRequest(FromValues.SERVER);
   } catch (error) {
-    console.log(error);
     redirect("/error/wrong");
   }
 
