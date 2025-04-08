@@ -22,6 +22,7 @@ import ReviewCard from "./ReviewCard";
 import { useStaticData } from "./StaticDataContext";
 import { useAuthContext } from "./AuthContext";
 import { showSuccessToast } from "@/app/customToast";
+import { useErrorRedirect } from "./useErrorRedirect";
 
 export default function ReviewPage({
   orderId,
@@ -30,21 +31,21 @@ export default function ReviewPage({
   orderId: number;
   isNew?: boolean;
 }) {
-  const { data: orderData, error: orderError } = useSWR<APIOrderResponse[]>(
+  const { data, error } = useSWR<APIOrderResponse[]>(
     ["orders-client", FromValues.CLIENT],
     getOrderHistoryWithCredentialsRequest,
   );
+  useErrorRedirect(error);
 
-  // Use SWR for fetching reviews when not a new review
-  const { data: reviewData, mutate: mutateReviews } = useSWR<
+  const { data: reviewData, mutate: mutateReviews, error: reviewError } = useSWR<
     APIReviewResponse[]
   >(isNew ? null : ["reviews", "client"], getUserReviewsRequest);
+  useErrorRedirect(reviewError);
 
   const { items } = useStaticData();
   const { userName } = useAuthContext();
   const router = useRouter();
 
-  // Initialize reviews state
   const [reviews, setReviews] = useState<{
     [key: string]: { rating: number; comment: string };
   }>({});
@@ -54,26 +55,19 @@ export default function ReviewPage({
     [key: string]: number;
   }>({});
 
-  // Load existing reviews if not a new review
   useEffect(() => {
     if (!isNew && reviewData) {
-      console.log("Loading existing reviews for order:", orderId);
       const existingReviews: {
         [key: string]: { rating: number; comment: string };
       } = {};
       const reviewIds: { [key: string]: number } = {};
 
-      // Map API responses to Review objects
       const mappedReviews = reviewData.map(mapAPIReviewResponseToReview);
-      console.log("Mapped reviews:", mappedReviews);
 
-      // Filter reviews for this order
       const orderReviews = mappedReviews.filter(
         (review) => review.orderId === orderId,
       );
-      console.log("Order reviews:", orderReviews);
 
-      // Map reviews to the state format
       orderReviews.forEach((review) => {
         const itemName = items.find((item) => item.id === review.itemId)?.name;
         if (itemName) {
@@ -86,7 +80,6 @@ export default function ReviewPage({
         }
       });
 
-      console.log("Setting reviews state:", existingReviews);
       setReviews(existingReviews);
       setExistingReviewIds(reviewIds);
       setIsLoading(false);
@@ -95,7 +88,7 @@ export default function ReviewPage({
     }
   }, [isNew, reviewData, orderId, items]);
 
-  if (!orderData || orderError) {
+  if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
@@ -103,7 +96,7 @@ export default function ReviewPage({
     );
   }
 
-  const order = orderData
+  const order = data
     .map((apiOrder: APIOrderResponse) => mapAPIOrderResponseToOrder(apiOrder))
     .find((order: Order) => order.id === orderId);
 
@@ -115,7 +108,6 @@ export default function ReviewPage({
     );
   }
 
-  // Group items by name and count their occurrences
   const itemCounts = order.itemNames.reduce(
     (acc, name) => {
       acc[name] = (acc[name] || 0) + 1;
@@ -124,10 +116,8 @@ export default function ReviewPage({
     {} as { [key: string]: number },
   );
 
-  // Get unique item names
   const uniqueItemNames = Object.keys(itemCounts);
 
-  // Map item names to their actual IDs
   const itemNameToId = uniqueItemNames.reduce(
     (acc, name) => {
       const item = items.find((i) => i.name === name);
@@ -170,19 +160,18 @@ export default function ReviewPage({
             updatedAt: new Date(),
             comments: review.comment
               ? [
-                  {
-                    id: 0, // Will be set by backend
-                    reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
-                    userId: 0, // Will be set by backend
-                    content: review.comment,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                  },
-                ]
+                {
+                  id: 0, // Will be set by backend
+                  reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
+                  userId: 0, // Will be set by backend
+                  content: review.comment,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                },
+              ]
               : [],
           };
 
-          // Use the appropriate request function based on whether it's a new review or an update
           if (isNew) {
             return addReviewRequest(reviewData, FromValues.CLIENT);
           } else {
@@ -193,7 +182,6 @@ export default function ReviewPage({
 
       await Promise.all(reviewPromises);
 
-      // Revalidate the reviews cache to ensure we have the latest data
       if (!isNew && mutateReviews) {
         await mutateReviews();
       }
@@ -205,7 +193,6 @@ export default function ReviewPage({
       );
       router.push(`/order/order_history/${userName}`);
     } catch (error) {
-      console.error("Error submitting reviews:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -270,11 +257,10 @@ export default function ReviewPage({
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting || Object.keys(reviews).length === 0}
-                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
-                    isSubmitting || Object.keys(reviews).length === 0
-                      ? "bg-gray-400 text-white cursor-not-allowed"
-                      : "bg-[var(--orange)] text-white hover:bg-opacity-90"
-                  }`}
+                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${isSubmitting || Object.keys(reviews).length === 0
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                    }`}
                 >
                   {isSubmitting
                     ? "Submitting..."
