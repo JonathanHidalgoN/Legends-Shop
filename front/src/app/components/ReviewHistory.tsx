@@ -1,15 +1,14 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import ReviewHistoryCard from "@/app/components/ReviewHistoryCard";
 import { Review } from "@/app/interfaces/Review";
 import { APIReviewResponse } from "../interfaces/APIResponse";
 import { mapAPIReviewResponseToReview } from "../mappers";
 import { FromValues, getUserReviewsRequest } from "@/app/request";
-import useSWR from "swr";
-import { useStaticData } from "./StaticDataContext";
-import { useErrorRedirect } from "./useErrorRedirect";
+import { useSWRWithErrorRedirect } from "./useErrorRedirect";
 import { useRouter } from "next/navigation";
 import { showSuccessToast } from "@/app/customToast";
+import LoadingPage from "./LoadingPage";
 
 export default function ReviewHistory() {
   const router = useRouter();
@@ -17,17 +16,15 @@ export default function ReviewHistory() {
   const reviewsPerPage = 5;
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data, error, mutate } = useSWR<APIReviewResponse[]>(
-    ["reviews", FromValues.CLIENT],
+  const { data, mutate } = useSWRWithErrorRedirect<APIReviewResponse[]>(
     getUserReviewsRequest,
+    () => ["reviews", FromValues.CLIENT],
     {
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
-      refreshInterval: 0, // No automatic refresh
+      refreshInterval: 0,
     },
   );
-
-  useErrorRedirect(error);
 
   const reviews: Review[] = useMemo(() => {
     if (!data) return [];
@@ -56,14 +53,20 @@ export default function ReviewHistory() {
     () => Math.ceil(orderIds.length / reviewsPerPage),
     [orderIds, reviewsPerPage],
   );
+
   const startIndex = useMemo(
     () => (currentPage - 1) * reviewsPerPage,
     [currentPage, reviewsPerPage],
   );
+
   const paginatedOrderIds = useMemo(
     () => orderIds.slice(startIndex, startIndex + reviewsPerPage),
     [orderIds, startIndex, reviewsPerPage],
   );
+
+  if (!data) {
+    return <LoadingPage />;
+  }
 
   const handleReviewClick = (orderId: number) => {
     router.push(`/review/${orderId}?isNew=false`);
@@ -80,14 +83,6 @@ export default function ReviewHistory() {
       setIsRefreshing(false);
     }
   };
-
-  if (!data || error) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
