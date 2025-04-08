@@ -1,22 +1,20 @@
 "use client";
 
-import useSWR from "swr";
 import { APIProfileInfoResponse } from "../interfaces/APIResponse";
 import { FromValues, getProfileInfoRequest } from "../request";
-import { useErrorRedirect } from "./useErrorRedirect";
+import { useSWRWithErrorRedirect } from "./useErrorRedirect";
 import { ProfileInfo } from "../interfaces/profileInterfaces";
 import { mapAPIProfileInfoResponseToProfileInfo } from "../mappers";
 import { useStaticData } from "./StaticDataContext";
 
 export default function ProfileView() {
-  const { data, error } = useSWR<APIProfileInfoResponse>(
-    ["profile-client", FromValues.CLIENT],
+  const { data } = useSWRWithErrorRedirect<APIProfileInfoResponse>(
     getProfileInfoRequest,
+    () => ["profile-client", FromValues.CLIENT],
   );
   const { locations } = useStaticData();
-  useErrorRedirect(error);
 
-  if (!data || error) {
+  if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>

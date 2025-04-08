@@ -22,7 +22,7 @@ import ReviewCard from "./ReviewCard";
 import { useStaticData } from "./StaticDataContext";
 import { useAuthContext } from "./AuthContext";
 import { showSuccessToast } from "@/app/customToast";
-import { useErrorRedirect } from "./useErrorRedirect";
+import { useSWRWithErrorRedirect } from "./useErrorRedirect";
 
 export default function ReviewPage({
   orderId,
@@ -31,16 +31,18 @@ export default function ReviewPage({
   orderId: number;
   isNew?: boolean;
 }) {
-  const { data, error } = useSWR<APIOrderResponse[]>(
-    ["orders-client", FromValues.CLIENT],
-    getOrderHistoryWithCredentialsRequest,
-  );
-  useErrorRedirect(error);
 
-  const { data: reviewData, mutate: mutateReviews, error: reviewError } = useSWR<
+  const { data: orderData } = useSWRWithErrorRedirect<APIOrderResponse[]>(
+    getOrderHistoryWithCredentialsRequest,
+    () => ["orders-client", FromValues.CLIENT]
+  );
+
+  const { data: reviewData, mutate: mutateReviews } = useSWRWithErrorRedirect<
     APIReviewResponse[]
-  >(isNew ? null : ["reviews", "client"], getUserReviewsRequest);
-  useErrorRedirect(reviewError);
+  >(
+    getUserReviewsRequest,
+    () => (isNew ? null : ["reviews", FromValues.CLIENT]),
+  );
 
   const { items } = useStaticData();
   const { userName } = useAuthContext();
@@ -88,7 +90,7 @@ export default function ReviewPage({
     }
   }, [isNew, reviewData, orderId, items]);
 
-  if (!data) {
+  if (!orderData) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
@@ -96,7 +98,7 @@ export default function ReviewPage({
     );
   }
 
-  const order = data
+  const order = orderData
     .map((apiOrder: APIOrderResponse) => mapAPIOrderResponseToOrder(apiOrder))
     .find((order: Order) => order.id === orderId);
 
