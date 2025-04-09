@@ -7,11 +7,13 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import { showErrorToast } from "../customToast";
 import { useRouter } from "next/navigation";
+import { useLoading } from "./LoadingRequestContext";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
   const router = useRouter();
   const { items } = useStaticData();
   const [orderStatus, setOrderStatus] = useState<string>(order.status);
+  const { startLoading, stopLoading } = useLoading();
 
   let itemCount: Record<string, number> = {};
   const uniqueNames: string[] = [...new Set(order.itemNames)];
@@ -35,12 +37,15 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
       return;
     }
     try {
+      startLoading();
       await cancelOrderRequest(order.id, FromValues.CLIENT);
       order.status = OrderStatus.CANCELED;
       setOrderStatus(order.status);
       toast.success("Order cancelled succesfully");
     } catch {
       return;
+    } finally {
+      stopLoading();
     }
   }
 
@@ -137,11 +142,10 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
         <div className="mt-4 flex gap-2">
           <button
             className={`px-4 py-2 rounded transition-colors 
-                       w-full md:w-auto ${
-                         orderStatus === "PENDING"
-                           ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                       }`}
+                       w-full md:w-auto ${orderStatus === "PENDING"
+                ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             onClick={cancelOrder}
             disabled={orderStatus !== "PENDING"}
           >

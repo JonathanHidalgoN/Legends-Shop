@@ -26,6 +26,7 @@ import {
 import { Location } from "../interfaces/Location";
 import { DeliveryDate } from "../interfaces/DeliveryDate";
 import { useStaticData } from "./StaticDataContext";
+import { useLoading } from "./LoadingRequestContext";
 
 interface CarContextType {
   carItems: CartItem[];
@@ -77,6 +78,7 @@ export function CarContextProvider({
   const [deliveryDates, setDeliveryDates] = useState<DeliveryDate[]>([]);
   const { userName } = useAuthContext();
   const { locations, items } = useStaticData();
+  const { startLoading, stopLoading } = useLoading();
 
   let cartItemsNotInServerCount = useRef<number>(0);
   let pendingServerDeletedCartItems = useRef<CartItem[]>([]);
@@ -106,14 +108,16 @@ export function CarContextProvider({
     if (!currentLocation) return;
 
     try {
+      startLoading();
       const dates = await getDeliveryDatesRequest(
         currentLocation.id,
         FromValues.CLIENT,
       );
       setDeliveryDates(dates);
     } catch (error) {
-      console.error("Error fetching delivery dates:", error);
       showErrorToast("Failed to fetch delivery dates");
+    } finally {
+      stopLoading();
     }
   }
 
@@ -126,6 +130,7 @@ export function CarContextProvider({
         status: CartStatus.INCLIENT,
         itemId: cartItem.item.id,
       };
+      startLoading();
       const serverCartItemResponse: APICartItemResponse = await addToCarRequest(
         FromValues.CLIENT,
         apiCartItem,
@@ -137,6 +142,8 @@ export function CarContextProvider({
       return serverCartItem;
     } catch (error) {
       return null;
+    } finally {
+      stopLoading();
     }
   }
 
@@ -169,11 +176,14 @@ export function CarContextProvider({
     if (cartItem.status == CartStatus.ADDED && cartItem.id) {
       if (isAuthenticated) {
         try {
+          startLoading();
           await deleteCartItemRequest(FromValues.CLIENT, cartItem.id);
           return;
         } catch (error) {
           //The request display the error msg, then add to the list the item pending to delete
           //maybe add a timer to try again?
+        } finally {
+          stopLoading();
         }
       }
       pendingServerDeletedCartItems.current.push(cartItem);

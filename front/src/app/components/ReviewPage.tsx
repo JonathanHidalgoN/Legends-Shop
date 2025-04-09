@@ -23,6 +23,7 @@ import { useAuthContext } from "./AuthContext";
 import { showSuccessToast } from "@/app/customToast";
 import { useSWRWithErrorRedirect } from "./useErrorRedirect";
 import LoadingPage from "./LoadingPage";
+import { useLoading } from "./LoadingRequestContext";
 
 export default function ReviewPage({
   orderId,
@@ -31,6 +32,7 @@ export default function ReviewPage({
   orderId: number;
   isNew?: boolean;
 }) {
+  const { startLoading, stopLoading, isLoading, setIsLoading } = useLoading();
 
   const { data: orderData } = useSWRWithErrorRedirect<APIOrderResponse[]>(
     getOrderHistoryWithCredentialsRequest,
@@ -56,7 +58,6 @@ export default function ReviewPage({
     [key: string]: { rating: number; comment: string };
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [existingReviewIds, setExistingReviewIds] = useState<{
     [key: string]: number;
   }>({});
@@ -261,7 +262,13 @@ export default function ReviewPage({
 
               <div className="flex justify-end mt-8">
                 <button
-                  onClick={handleSubmit}
+                  onClick={
+                    () => {
+                      startLoading();
+                      handleSubmit
+                      stopLoading();
+                    }
+                  }
                   disabled={isSubmitting || Object.keys(reviews).length === 0}
                   className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${isSubmitting || Object.keys(reviews).length === 0
                     ? "bg-gray-400 text-white cursor-not-allowed"

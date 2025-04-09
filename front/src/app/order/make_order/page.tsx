@@ -13,6 +13,7 @@ import { useState } from "react";
 import OrderSuccessModal from "@/app/components/OrderSuccessModal";
 import { usePathname } from "next/navigation";
 import { showErrorToast } from "@/app/customToast";
+import { useLoading } from "@/app/components/LoadingRequestContext";
 
 export default function OrderPage() {
   const {
@@ -24,6 +25,7 @@ export default function OrderPage() {
     currentLocation,
   } = useCarContext();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const { startLoading, stopLoading } = useLoading();
   const [orderId, setOrderId] = useState<number | null>(null);
   const { userName } = useAuthContext();
   const router = useRouter();
@@ -63,6 +65,7 @@ export default function OrderPage() {
         reviewed: false,
       };
       try {
+        startLoading();
         const orderId = await orderRequest(order, FromValues.CLIENT);
         const leftGold = await getCurrentUserGoldRequest(FromValues.CLIENT);
         setCurrentGold(leftGold);
@@ -71,6 +74,8 @@ export default function OrderPage() {
         cleanCar();
       } catch (error) {
         return;
+      } finally {
+        stopLoading();
       }
     }
   }
@@ -143,10 +148,9 @@ export default function OrderPage() {
                     disabled={!canBuy}
                     className={`flex-1 py-3 px-6 rounded-lg transition-all duration-300 
                       transform hover:scale-105 font-semibold text-lg
-                      ${
-                        canBuy
-                          ? "bg-[var(--orange)] text-white hover:bg-opacity-90"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      ${canBuy
+                        ? "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}
                   >
                     Confirm Purchase

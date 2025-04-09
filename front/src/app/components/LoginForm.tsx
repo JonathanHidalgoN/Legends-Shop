@@ -20,6 +20,7 @@ import {
   defaultValidationResult,
 } from "../interfaces/Errors";
 import { Location } from "../interfaces/Location";
+import { useLoading } from "./LoadingRequestContext";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -40,7 +41,7 @@ export default function LoginForm({
   const [formUserName, setFormUserName] = useState<string>("");
   const [formPassword, setFormPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<LoginError | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { startLoading, stopLoading, isLoading, setIsLoading } = useLoading();
   const [validUsernameInput, setValidUsernameInput] =
     useState<ValidationResult>(defaultValidationResult);
   const [validPasswordInput, setValidPasswordInput] =
@@ -66,8 +67,9 @@ export default function LoginForm({
       return;
     }
 
-    setIsLoading(true);
     try {
+      setIsLoading(true);
+      startLoading();
       const apiResponse: APILoginResponse = await login(
         formUserName,
         formPassword,
@@ -115,6 +117,7 @@ export default function LoginForm({
       setLoginError(LoginError.INTERNALSERVERERROR);
     } finally {
       setIsLoading(false);
+      stopLoading();
     }
   }
 

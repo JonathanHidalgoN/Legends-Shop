@@ -42,7 +42,6 @@ export default function ItemView({ itemName }: { itemName: string }) {
           setAverageRating(totalRating / mappedReviews.length);
         }
       } catch (err) {
-        console.error("Error fetching reviews:", err);
         if (err instanceof APIError) {
           setError(err);
         } else {
@@ -151,11 +150,10 @@ export default function ItemView({ itemName }: { itemName: string }) {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
-                      className={`w-6 h-6 ${
-                        star <= Math.round(averageRating)
+                      className={`w-6 h-6 ${star <= Math.round(averageRating)
                           ? "text-yellow-400"
                           : "text-gray-300"
-                      }`}
+                        }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       xmlns="http://www.w3.org/2000/svg"
@@ -184,11 +182,10 @@ export default function ItemView({ itemName }: { itemName: string }) {
                           {[1, 2, 3, 4, 5].map((star) => (
                             <svg
                               key={star}
-                              className={`w-5 h-5 ${
-                                star <= review.rating
+                              className={`w-5 h-5 ${star <= review.rating
                                   ? "text-yellow-400"
                                   : "text-gray-300"
-                              }`}
+                                }`}
                               fill="currentColor"
                               viewBox="0 0 20 20"
                               xmlns="http://www.w3.org/2000/svg"

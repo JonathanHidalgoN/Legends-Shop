@@ -17,6 +17,7 @@ import {
   SingupError,
 } from "../interfaces/APIResponse";
 import { showErrorToast } from "../customToast";
+import { useLoading } from "./LoadingRequestContext";
 
 interface AuthContextType {
   userName: string | null;
@@ -42,6 +43,7 @@ export function AuthContextProvider({
 }) {
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
+  const { startLoading, stopLoading } = useLoading();
 
   function createAPIResponseLogin(
     response: Response,
@@ -87,7 +89,9 @@ export function AuthContextProvider({
     userName: string,
     password: string,
   ): Promise<APILoginResponse> {
+    startLoading();
     const response = await logInRequest(userName, password, FromValues.CLIENT);
+    stopLoading();
     if (!response.ok) {
       const data = await response.json();
       const result: APILoginResponse = createAPIResponseLogin(response, data);
@@ -201,7 +205,7 @@ export function AuthContextProvider({
       setUserName(null);
       router.push("/");
       toast.success(`Logout succesfully`);
-    } catch (error) {}
+    } catch (error) { }
   }
 
   useEffect(() => {

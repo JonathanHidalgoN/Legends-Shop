@@ -12,11 +12,13 @@ import { handleClickOutside } from "../functions";
 import LoginForm from "./LoginForm";
 import LoadingButton from "./LoadingButton";
 import { useStaticData } from "./StaticDataContext";
+import { useLoading } from "./LoadingRequestContext";
 
 export default function Header({ items }: { items: Item[] }) {
   const { userName, logOut } = useAuthContext();
   const { carItems, currentGold, currentLocation, setCurrentLocation } =
     useCarContext();
+  const { startLoading, stopLoading } = useLoading();
   const { locations } = useStaticData();
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
@@ -101,7 +103,9 @@ export default function Header({ items }: { items: Item[] }) {
               </LoadingButton>
               <button
                 onClick={() => {
+                  startLoading();
                   logOut();
+                  stopLoading();
                   setShowLoginDropdown(false);
                 }}
                 className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors duration-150"

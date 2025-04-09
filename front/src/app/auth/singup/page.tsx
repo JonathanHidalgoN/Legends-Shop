@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
+import { useLoading } from "@/app/components/LoadingRequestContext";
 import { useStaticData } from "@/app/components/StaticDataContext";
 import { showErrorToast } from "@/app/customToast";
 import {
@@ -18,6 +19,7 @@ import { useState } from "react";
 
 export default function SingupPage() {
   const { singup } = useAuthContext();
+  const { startLoading, stopLoading } = useLoading();
   const { locations } = useStaticData();
   const router = useRouter();
 
@@ -52,8 +54,8 @@ export default function SingupPage() {
 
   function emailInputHandleChange(email: string): void {
     const validInput: ValidationResult = validateEmailInput(email);
-    setFormEmail(email);
     setValidEmailInput(validInput);
+    setFormEmail(email);
   }
 
   function usernameInputHandleChange(username: string): void {
@@ -73,6 +75,7 @@ export default function SingupPage() {
     }
     const birthDate = new Date(formBirthDate);
     const location_id = parseInt(formLocation);
+    startLoading();
     const responseStatus: APISingupResponse = await singup(
       formUserName,
       formPassword1,
@@ -80,6 +83,7 @@ export default function SingupPage() {
       birthDate,
       location_id,
     );
+    stopLoading();
     if (responseStatus.status === 200) {
       router.push("/");
       setFormUserName("");
@@ -157,9 +161,8 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => emailInputHandleChange(e.target.value)}
-            className={`border p-2 rounded ${
-              singupApiError || !validEmailInput.valid ? "border-red-500" : ""
-            }`}
+            className={`border p-2 rounded ${singupApiError || !validEmailInput.valid ? "border-red-500" : ""
+              }`}
           />
           {!validEmailInput.valid && (
             <span className="text-red-500 text-sm mt-1">
@@ -244,9 +247,8 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${
-              singupApiError ? "border-red-500" : ""
-            }`}
+            className={`border p-2 rounded ${singupApiError ? "border-red-500" : ""
+              }`}
           />
           {singupApiError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">

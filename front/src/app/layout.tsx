@@ -18,6 +18,7 @@ import {
 import { mapAPIItemResponseToItem } from "./mappers";
 import fs from "fs";
 import path from "path";
+import { LoadingProvider } from "./components/LoadingRequestContext";
 
 export const metadata = {
   title: "Legends Shop",
@@ -59,20 +60,22 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthContextProvider>
-          <StaticDataContextProvider
-            items={items}
-            tags={tags}
-            effects={effects}
-            locations={locations}
-          >
-            <CarContextProvider>
-              <Header items={items} />
-              <Toaster position="top-left" />
-              {children}
-            </CarContextProvider>
-          </StaticDataContextProvider>
-        </AuthContextProvider>
+        <LoadingProvider>
+          <AuthContextProvider>
+            <StaticDataContextProvider
+              items={items}
+              tags={tags}
+              effects={effects}
+              locations={locations}
+            >
+              <CarContextProvider>
+                <Header items={items} />
+                <Toaster position="top-left" />
+                {children}
+              </CarContextProvider>
+            </StaticDataContextProvider>
+          </AuthContextProvider>
+        </LoadingProvider>
       </body>
     </html>
   );
