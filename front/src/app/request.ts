@@ -56,27 +56,24 @@ function makeUrl(from: FromValues, endpoint: string): string {
   return url;
 }
 
-export async function createAPIError(response: Response): Promise<APIError> {
-  if (response.status == 401) {
-    return new APIError("Unauthorized", 401);
-  } else {
-    const data = await response.json();
-    return new APIError(data?.message || "Error", response.status, data);
-  }
-}
-
-async function throwAPIError(response: Response, from: FromValues) {
-  const apiError: APIError = await createAPIError(response);
-  if (from === FromValues.CLIENT) showErrorToast(apiError.message);
-  throw apiError;
-}
-
 async function checkResponse(
   response: Response,
   from: FromValues,
 ): Promise<void> {
   if (!response.ok) {
-    await throwAPIError(response, from);
+    let apiError: APIError = new APIError("", 0);
+    if (response.status == 401) {
+      apiError.status = 401;
+      apiError.message = "Unauthorized";
+    } else {
+      const data = await response.json();
+      apiError.status = response.status;
+      apiError.message = data?.message || "Error";
+    }
+    if (from === FromValues.CLIENT) {
+      showErrorToast(apiError.message);
+    }
+    throw apiError;
   }
 }
 
