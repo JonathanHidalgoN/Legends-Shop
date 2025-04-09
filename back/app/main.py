@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException
-from httpx import Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
@@ -9,12 +8,13 @@ from app.data.ItemsLoader import ItemsLoader
 from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
-from app.logger import logger
 from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
 from app.rateLimiter import limiter
 from app.routes import reviews
+from app.routes.RequestLoggingMiddleware import RequestLoggingMiddleware
+from app.routes.SecurityHeadersMiddleware import SecurityHeadersMiddleware
 
 
 @asynccontextmanager
@@ -33,17 +33,10 @@ async def tooManyRequestHanlder():
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests"},
-)
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    logger.info(f"Incoming request: {request.method} {request.url}")
-    response = await call_next(request)
-    logger.info(
-        f"Response status: {response.status_code} for {request.method} {request.url}"
     )
-    return response
+
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 origins = [
