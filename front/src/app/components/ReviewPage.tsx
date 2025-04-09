@@ -32,7 +32,18 @@ export default function ReviewPage({
   orderId: number;
   isNew?: boolean;
 }) {
-  const { startLoading, stopLoading, isLoading, setIsLoading } = useLoading();
+  const [localLoading, setLocalLoading] = useState(true);
+  const router = useRouter();
+  const { items } = useStaticData();
+  const { userName } = useAuthContext();
+  
+  const [reviews, setReviews] = useState<{
+    [key: string]: { rating: number; comment: string };
+  }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingReviewIds, setExistingReviewIds] = useState<{
+    [key: string]: number;
+  }>({});
 
   const { data: orderData } = useSWRWithErrorRedirect<APIOrderResponse[]>(
     getOrderHistoryWithCredentialsRequest,
@@ -45,22 +56,6 @@ export default function ReviewPage({
     getUserReviewsRequest,
     () => (isNew ? null : ["reviews", FromValues.CLIENT]),
   );
-
-  if (!orderData || !reviewData) {
-    return <LoadingPage />
-  }
-
-  const { items } = useStaticData();
-  const { userName } = useAuthContext();
-  const router = useRouter();
-
-  const [reviews, setReviews] = useState<{
-    [key: string]: { rating: number; comment: string };
-  }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingReviewIds, setExistingReviewIds] = useState<{
-    [key: string]: number;
-  }>({});
 
   useEffect(() => {
     if (!isNew && reviewData) {
@@ -89,18 +84,14 @@ export default function ReviewPage({
 
       setReviews(existingReviews);
       setExistingReviewIds(reviewIds);
-      setIsLoading(false);
+      setLocalLoading(false);
     } else if (isNew) {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   }, [isNew, reviewData, orderId, items]);
 
-  if (!orderData) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
-      </div>
-    );
+  if (!orderData || !reviewData) {
+    return <LoadingPage />
   }
 
   const order = orderData
@@ -240,7 +231,7 @@ export default function ReviewPage({
             </div>
           </div>
 
-          {isLoading ? (
+          {localLoading ? (
             <div className="flex items-center justify-center min-h-[40vh]">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--orange)]"></div>
             </div>
@@ -262,13 +253,7 @@ export default function ReviewPage({
 
               <div className="flex justify-end mt-8">
                 <button
-                  onClick={
-                    () => {
-                      startLoading();
-                      handleSubmit
-                      stopLoading();
-                    }
-                  }
+                  onClick={handleSubmit}
                   disabled={isSubmitting || Object.keys(reviews).length === 0}
                   className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${isSubmitting || Object.keys(reviews).length === 0
                     ? "bg-gray-400 text-white cursor-not-allowed"
