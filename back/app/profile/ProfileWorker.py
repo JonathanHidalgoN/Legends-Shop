@@ -41,6 +41,7 @@ class ProfileWorker:
             user: UserInDB | None = await getUserInDB(self.dbSession, userName)
             if user is None:
                 raise ProfileWorkerException("None value in user info")
+            user.hashedPassword = ""
             orderSummaryList: List[OrderSummary] = await self.buildOrderSummaryForUser(
                 userName
             )
