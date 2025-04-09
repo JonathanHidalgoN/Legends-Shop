@@ -123,6 +123,8 @@ export class APIError extends Error {
 
   constructor(message: string, status: number, data?: any) {
     super(message);
+    // When you inline the error-handling in getUserReviewsRequest, you’re throwing an error that’s immediately caught by SWR and available in your custom hook. When you extract that logic into a separate function (checkResponse), the thrown error is essentially the same. But if the custom error isn’t recognized as an instance of APIError due to the prototype issue, then your redirect logic (or any conditional handling in your effect) might not work as expected.
+    Object.setPrototypeOf(this, APIError.prototype); // Ensures proper prototype chain
     this.name = "APIError";
     this.status = status;
     this.data = data;
