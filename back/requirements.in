@@ -11,4 +11,3 @@ pytest
 pytest-asyncio
 apscheduler
 aiosqlite
-slowapi
