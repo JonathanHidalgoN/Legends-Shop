@@ -3,6 +3,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from httpx import Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 from app.data import database
 from app.data.ItemsLoader import ItemsLoader
 from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
@@ -12,7 +13,7 @@ from app.logger import logger
 from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
-
+from app.rateLimiter import limiter
 from app.routes import reviews
 
 
@@ -25,6 +26,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+
+@app.exception_handler(429)
+async def tooManyRequestHanlder():
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests"},
+)
 
 
 @app.middleware("http")

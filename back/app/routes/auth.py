@@ -27,6 +27,7 @@ from app.data.queries.authQueries import (
 from app.data.queries.locationQueries import getLocationById
 from app.schemas.AuthSchemas import LogInError, SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from app.rateLimiter import authRateLimiter,sensitiveRateLimit 
 
 from app.data.queries.profileQueries import updateLastSingInWithUserName
 
@@ -67,6 +68,7 @@ async def getUserIdFromName(
 
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token")
+@authRateLimiter()
 async def getToken(
     request: Request,
     response: Response,
@@ -155,6 +157,7 @@ async def tokenRefresh(
 
 
 @router.post("/singup")
+@sensitiveRateLimit()
 async def singUp(
     request: Request,
     username: str = Form(...),
