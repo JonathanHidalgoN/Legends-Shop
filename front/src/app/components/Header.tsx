@@ -54,9 +54,11 @@ export default function Header({ items }: { items: Item[] }) {
   }, [userName]);
 
   const handleNavigation = async (path: string) => {
+    startLoading();
     setIsNavigating(true);
     router.push(path);
     setIsNavigating(false);
+    stopLoading();
   };
 
   return (
