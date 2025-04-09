@@ -27,17 +27,6 @@ export function useSWRWithErrorRedirect<T>(
     : useSWR<T>(configFunction, requestFunction);
 
   const { data, mutate, error } = swrResult;
-  const router = useRouter();
-
-  useEffect(() => {
-    if (error) {
-      if (error.status === 401) {
-        router.push("/error/unauthorized");
-      } else {
-        router.push("/error/wrong");
-      }
-    }
-  }, [error, router]);
-
+  useErrorRedirect(error);
   return { data, mutate };
 }
