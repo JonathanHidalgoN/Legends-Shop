@@ -19,6 +19,7 @@ import { mapAPIItemResponseToItem } from "./mappers";
 import fs from "fs";
 import path from "path";
 import { LoadingProvider } from "./components/LoadingRequestContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 export const metadata = {
   title: "Legends Shop",
@@ -69,9 +70,11 @@ export default async function RootLayout({
               locations={locations}
             >
               <CarContextProvider>
-                <Header items={items} />
-                <Toaster position="top-left" />
-                {children}
+                <ErrorBoundary>
+                  <Header items={items} />
+                  <Toaster position="top-left" />
+                  {children}
+                </ErrorBoundary>
               </CarContextProvider>
             </StaticDataContextProvider>
           </AuthContextProvider>
