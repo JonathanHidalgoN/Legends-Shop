@@ -44,7 +44,7 @@ TestingSessionLocal = async_sessionmaker(
 
 
 @pytest_asyncio.fixture(scope="function")
-async def db_session():
+async def dbSession():
     """Create a test database session."""
     from app.data.database import base
     from app.data.models import (
@@ -74,9 +74,9 @@ async def db_session():
 
 
 @pytest_asyncio.fixture
-def client(db_session):
+def client(dbSession):
     async def fakeAsyncDb():
-        return db_session
+        return dbSession
 
     app.dependency_overrides[getDbSession] = fakeAsyncDb
 
@@ -102,9 +102,8 @@ TEST_SINGUP_DATA_INVALID_LOCATION = {
         "location_id": 32131231
 }
 TEST_LOGIN_DATA = {
-    "username": "loginuser",
-    "password": "LoginPassword123!",
-    "grant_type": "password"
+    "username": TEST_SINGUP_DATA["username"],
+    "password": TEST_SINGUP_DATA["password"],
 }
 
 def test_get_home(client):
@@ -120,15 +119,15 @@ def test_error_handling(client):
     assert response.status_code == 404
 
 @pytest.mark.asyncio
-async def test_signup_success(client, db_session):
+async def test_signup_success(client, dbSession):
     """Test successful user signup."""
     test_location = LocationTable(country_name="Test Country")
-    db_session.add(test_location)
-    await db_session.commit()
+    dbSession.add(test_location)
+    await dbSession.commit()
     response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
     assert response.status_code == 200
     assert response.json() == {"message": "nice"}
-    result = await db_session.execute(
+    result = await dbSession.execute(
         text("SELECT * FROM user_table WHERE userName = 'testuser'")
     )
     user = result.fetchone()
@@ -137,14 +136,14 @@ async def test_signup_success(client, db_session):
     assert user.location_id == 1
 
 @pytest.mark.asyncio
-async def test_signup_username_exists(client, db_session):
+async def test_signup_username_exists(client, dbSession):
     """Test signup with an existing username."""
     test_location = LocationTable(country_name="Test Country")
-    db_session.add(test_location)
-    await db_session.commit()
+    dbSession.add(test_location)
+    await dbSession.commit()
 
     existing_user = UserTable(
-        userName="existinguser",
+        userName=TEST_SINGUP_DATA["username"],
         password=hashPassword("Password123!"),
         gold_spend=0,
         created=date.today(),
@@ -154,19 +153,19 @@ async def test_signup_username_exists(client, db_session):
         birthdate=date(2000, 1, 1),
         location_id=1
     )
-    db_session.add(existing_user)
-    await db_session.commit()
+    dbSession.add(existing_user)
+    await dbSession.commit()
 
     response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
     assert response.status_code == 400
     assert "X-Error-Type" in response.headers
 
 @pytest.mark.asyncio
-async def test_signup_email_exists(client, db_session):
+async def test_signup_email_exists(client, dbSession):
     """Test signup with an existing email."""
     test_location = LocationTable(country_name="Test Country")
-    db_session.add(test_location)
-    await db_session.commit()
+    dbSession.add(test_location)
+    await dbSession.commit()
 
     existing_user = UserTable(
         userName="existinguser",
@@ -175,12 +174,12 @@ async def test_signup_email_exists(client, db_session):
         last_singn=date.today(),
         gold_spend=0,
         current_gold=99999,
-        email="existing@example.com",
+        email=TEST_SINGUP_DATA["email"],
         birthdate=date(2000, 1, 1),
         location_id=1
     )
-    db_session.add(existing_user)
-    await db_session.commit()
+    dbSession.add(existing_user)
+    await dbSession.commit()
 
     response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
 
@@ -195,11 +194,11 @@ async def test_signup_invalid_location(client):
     assert "X-Error-Type" in response.headers
 
 @pytest.mark.asyncio
-async def test_signup_login_flow(client, db_session):
+async def test_signup_login_flow(client, dbSession):
     """Test the complete signup and login flow."""
     test_location = LocationTable(country_name="Test Country")
-    db_session.add(test_location)
-    await db_session.commit()
+    dbSession.add(test_location)
+    await dbSession.commit()
     signup_response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
     assert signup_response.status_code == 200
     login_response = client.post("/auth/token", data=TEST_LOGIN_DATA)
@@ -208,11 +207,11 @@ async def test_signup_login_flow(client, db_session):
 
 
 # @pytest.mark.asyncio
-# async def test_temp(client, db_session):
+# async def test_temp(client, dbSession):
 #     """Test the complete signup and login flow."""
 #     test_location = LocationTable(country_name="Test Country")
-#     db_session.add(test_location)
-#     await db_session.commit()
+#     dbSession.add(test_location)
+#     await dbSession.commit()
 #
 #     signup_data = {
 #         "username": "loginuser",
@@ -244,7 +243,7 @@ async def test_signup_login_flow(client, db_session):
 #     assert user_id_response.status_code == 200
 #     user_id = user_id_response.json()
 #
-#     result = await db_session.execute(
+#     result = await dbSession.execute(
 #         text("SELECT * FROM user_table WHERE userName = 'loginuser'")
 #     )
 #     user = result.fetchone()
