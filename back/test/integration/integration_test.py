@@ -24,6 +24,7 @@ from app.data.models.LocationTable import LocationTable
 from app.data.models.UserTable import UserTable
 from app.auth.functions import hashPassword
 from app.data.models.TagsTable import ItemTagsAssociation
+from app.data.models.EffectsTable import EffectsTable, ItemEffectAssociation
 
 from app.main import app
 from app.data.database import getDbSession
@@ -231,3 +232,134 @@ async def test_get_unique_tags(client, dbSession):
     
     assert len(set(tags)) == 3
 
+@pytest.mark.asyncio
+async def test_get_item_names(client, dbSession):
+    """Test the item_names endpoint."""
+    gold1 = GoldTable(
+        base_cost=100,
+        total=100,
+        sell=70,
+        purchaseable=True
+    )
+    gold2 = GoldTable(
+        base_cost=200,
+        total=200,
+        sell=140,
+        purchaseable=True
+    )
+    dbSession.add(gold1)
+    dbSession.add(gold2)
+    await dbSession.commit()
+    
+    item1 = ItemTable(
+        name="Test Item 1",
+        plain_text="Plain text for test item 1",
+        description="Description for test item 1",
+        image="item1.jpg",
+        imageUrl="http://example.com/item1.jpg",
+        updated=False,
+        gold_id=gold1.id
+    )
+    item2 = ItemTable(
+        name="Test Item 2",
+        plain_text="Plain text for test item 2",
+        description="Description for test item 2",
+        image="item2.jpg",
+        imageUrl="http://example.com/item2.jpg",
+        updated=False,
+        gold_id=gold2.id
+    )
+    dbSession.add(item1)
+    dbSession.add(item2)
+    await dbSession.commit()
+    
+    response = client.get("/items/item_names")
+    
+    print(f"Response status: {response.status_code}")
+    print(f"Response body: {response.text}")
+    
+    assert response.status_code == 200
+    item_names = response.json()
+    
+    assert "Test Item 1" in item_names
+    assert "Test Item 2" in item_names
+    
+    assert len(item_names) == 2
+    
+    assert len(set(item_names)) == 2
+
+@pytest.mark.asyncio
+async def test_get_unique_effects(client, dbSession):
+    """Test the unique_effects endpoint."""
+    gold1 = GoldTable(
+        base_cost=100,
+        total=100,
+        sell=70,
+        purchaseable=True
+    )
+    gold2 = GoldTable(
+        base_cost=200,
+        total=200,
+        sell=140,
+        purchaseable=True
+    )
+    dbSession.add(gold1)
+    dbSession.add(gold2)
+    await dbSession.commit()
+    
+    item1 = ItemTable(
+        name="Test Item 1",
+        plain_text="Plain text for test item 1",
+        description="Description for test item 1",
+        image="item1.jpg",
+        imageUrl="http://example.com/item1.jpg",
+        updated=False,
+        gold_id=gold1.id
+    )
+    item2 = ItemTable(
+        name="Test Item 2",
+        plain_text="Plain text for test item 2",
+        description="Description for test item 2",
+        image="item2.jpg",
+        imageUrl="http://example.com/item2.jpg",
+        updated=False,
+        gold_id=gold2.id
+    )
+    dbSession.add(item1)
+    dbSession.add(item2)
+    await dbSession.commit()
+    
+    effect1 = EffectsTable(name="Effect 1")
+    effect2 = EffectsTable(name="Effect 2")
+    effect3 = EffectsTable(name="Effect 3")
+    dbSession.add(effect1)
+    dbSession.add(effect2)
+    dbSession.add(effect3)
+    await dbSession.commit()
+    
+    await dbSession.execute(
+        insert(ItemEffectAssociation).values(item_id=item1.id, effect_id=effect1.id, value=10.0)
+    )
+    await dbSession.execute(
+        insert(ItemEffectAssociation).values(item_id=item1.id, effect_id=effect2.id, value=20.0)
+    )
+    await dbSession.execute(
+        insert(ItemEffectAssociation).values(item_id=item2.id, effect_id=effect2.id, value=30.0)
+    )
+    await dbSession.execute(
+        insert(ItemEffectAssociation).values(item_id=item2.id, effect_id=effect3.id, value=40.0)
+    )
+    await dbSession.commit()
+    
+    response = client.get("/items/unique_effects")
+    
+    assert response.status_code == 200
+    effects = response.json()
+    
+    assert "Effect 1" in effects
+    assert "Effect 2" in effects
+    assert "Effect 3" in effects
+    
+    assert len(effects) == 3
+    
+    assert len(set(effects)) == 3
