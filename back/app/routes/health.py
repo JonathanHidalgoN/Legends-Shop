@@ -9,7 +9,7 @@ from typing import Dict, Any
 router = APIRouter()
 
 
-@router.get("/health", summary="Basic health check")
+@router.get("/", summary="Basic health check")
 async def health_check() -> Dict[str, str]:
     """
     Basic health check endpoint that returns a simple status message.
