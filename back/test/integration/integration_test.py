@@ -106,6 +106,11 @@ TEST_LOGIN_DATA = {
     "password": TEST_SINGUP_DATA["password"],
 }
 
+async def addLocation(dbSession):
+    test_location = LocationTable(country_name="Test Country")
+    dbSession.add(test_location)
+    await dbSession.commit()
+
 def test_get_home(client):
     """Test the home endpoint."""
     response = client.get("/health")
@@ -118,12 +123,11 @@ def test_error_handling(client):
     response = client.get("/items/99999")
     assert response.status_code == 404
 
+
 @pytest.mark.asyncio
 async def test_signup_success(client, dbSession):
     """Test successful user signup."""
-    test_location = LocationTable(country_name="Test Country")
-    dbSession.add(test_location)
-    await dbSession.commit()
+    await addLocation(dbSession)
     response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
     assert response.status_code == 200
     assert response.json() == {"message": "nice"}
@@ -138,9 +142,7 @@ async def test_signup_success(client, dbSession):
 @pytest.mark.asyncio
 async def test_signup_username_exists(client, dbSession):
     """Test signup with an existing username."""
-    test_location = LocationTable(country_name="Test Country")
-    dbSession.add(test_location)
-    await dbSession.commit()
+    await addLocation(dbSession)
 
     existing_user = UserTable(
         userName=TEST_SINGUP_DATA["username"],
@@ -163,9 +165,7 @@ async def test_signup_username_exists(client, dbSession):
 @pytest.mark.asyncio
 async def test_signup_email_exists(client, dbSession):
     """Test signup with an existing email."""
-    test_location = LocationTable(country_name="Test Country")
-    dbSession.add(test_location)
-    await dbSession.commit()
+    await addLocation(dbSession)
 
     existing_user = UserTable(
         userName="existinguser",
@@ -196,9 +196,7 @@ async def test_signup_invalid_location(client):
 @pytest.mark.asyncio
 async def test_signup_login_flow(client, dbSession):
     """Test the complete signup and login flow."""
-    test_location = LocationTable(country_name="Test Country")
-    dbSession.add(test_location)
-    await dbSession.commit()
+    await addLocation(dbSession)
     signup_response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
     assert signup_response.status_code == 200
     login_response = client.post("/auth/token", data=TEST_LOGIN_DATA)
