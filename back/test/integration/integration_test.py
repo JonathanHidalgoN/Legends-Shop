@@ -12,6 +12,7 @@ def fakeLimit(*args, **kwargs):
 
 slowapi.Limiter.limit = fakeLimit
 
+from app.data.models.StatsTable import ItemStatAssociation, StatsTable
 from integrationStaticData import * 
 import pytest
 import pytest_asyncio
@@ -363,3 +364,166 @@ async def test_get_unique_effects(client, dbSession):
     assert len(effects) == 3
     
     assert len(set(effects)) == 3
+
+@pytest.mark.asyncio
+async def test_get_all_items(client, dbSession):
+    """Test the /items/all endpoint."""
+    # Create gold records first
+    gold1 = GoldTable(
+        base_cost=100,
+        total=100,
+        sell=70,
+        purchaseable=True
+    )
+    gold2 = GoldTable(
+        base_cost=200,
+        total=200,
+        sell=140,
+        purchaseable=True
+    )
+    dbSession.add(gold1)
+    dbSession.add(gold2)
+    await dbSession.commit()
+    
+    # Create test items with references to gold records
+    item1 = ItemTable(
+        name="Test Item 1",
+        plain_text="Plain text for test item 1",
+        description="Description for test item 1",
+        image="item1.jpg",
+        imageUrl="http://example.com/item1.jpg",
+        updated=False,
+        gold_id=gold1.id
+    )
+    item2 = ItemTable(
+        name="Test Item 2",
+        plain_text="Plain text for test item 2",
+        description="Description for test item 2",
+        image="item2.jpg",
+        imageUrl="http://example.com/item2.jpg",
+        updated=False,
+        gold_id=gold2.id
+    )
+    dbSession.add(item1)
+    dbSession.add(item2)
+    await dbSession.commit()
+    
+    # Create test tags
+    tag1 = TagsTable(name="Tag1")
+    tag2 = TagsTable(name="Tag2")
+    dbSession.add(tag1)
+    dbSession.add(tag2)
+    await dbSession.commit()
+    
+    # Create item-tag associations
+    await dbSession.execute(
+        insert(ItemTagsAssociation).values(item_id=item1.id, tags_id=tag1.id)
+    )
+    await dbSession.execute(
+        insert(ItemTagsAssociation).values(item_id=item2.id, tags_id=tag2.id)
+    )
+    await dbSession.commit()
+    
+    # Create test effects
+    effect1 = EffectsTable(name="Effect1")
+    effect2 = EffectsTable(name="Effect2")
+    dbSession.add(effect1)
+    dbSession.add(effect2)
+    await dbSession.commit()
+    
+    # Create item-effect associations
+    await dbSession.execute(
+        insert(ItemEffectAssociation).values(item_id=item1.id, effect_id=effect1.id, value=10.0)
+    )
+    await dbSession.execute(
+        insert(ItemEffectAssociation).values(item_id=item2.id, effect_id=effect2.id, value=20.0)
+    )
+    await dbSession.commit()
+    
+    # Create test stats
+    stat1 = StatsTable(name="Stat1", kind="flat")
+    stat2 = StatsTable(name="Stat2", kind="percentage")
+    dbSession.add(stat1)
+    dbSession.add(stat2)
+    await dbSession.commit()
+    
+    # Create item-stat associations
+    await dbSession.execute(
+        insert(ItemStatAssociation).values(item_id=item1.id, stat_id=stat1.id, value=5.0)
+    )
+    await dbSession.execute(
+        insert(ItemStatAssociation).values(item_id=item2.id, stat_id=stat2.id, value=15.0)
+    )
+    await dbSession.commit()
+    
+    # Call the endpoint
+    response = client.get("/items/all")
+    
+    # Verify the response
+    assert response.status_code == 200
+    items = response.json()
+    
+    # Check that we got the expected number of items
+    assert len(items) == 2
+    
+    # Check the first item
+    item1_response = next((item for item in items if item["name"] == "Test Item 1"), None)
+    assert item1_response is not None
+    assert item1_response["plaintext"] == "Plain text for test item 1"
+    assert item1_response["description"] == "Description for test item 1"
+    assert item1_response["image"] == "item1.jpg"
+    assert item1_response["imageUrl"] == "http://example.com/item1.jpg"
+    assert item1_response["id"] == item1.id
+    
+    # Check gold for the first item
+    assert item1_response["gold"]["base"] == 100
+    assert item1_response["gold"]["total"] == 100
+    assert item1_response["gold"]["sell"] == 70
+    assert item1_response["gold"]["purchasable"] is True
+    
+    # Check tags for the first item
+    assert "Tag1" in item1_response["tags"]
+    assert len(item1_response["tags"]) == 1
+    
+    # Check effects for the first item
+    assert "Effect1" in item1_response["effect"]
+    assert item1_response["effect"]["Effect1"] == 10.0
+    assert len(item1_response["effect"]) == 1
+    
+    # Check stats for the first item
+    stat1_response = next((stat for stat in item1_response["stats"] if stat["name"] == "Stat1"), None)
+    assert stat1_response is not None
+    assert stat1_response["kind"] == "flat"
+    assert stat1_response["value"] == 5.0
+    assert len(item1_response["stats"]) == 1
+    
+    # Check the second item
+    item2_response = next((item for item in items if item["name"] == "Test Item 2"), None)
+    assert item2_response is not None
+    assert item2_response["plaintext"] == "Plain text for test item 2"
+    assert item2_response["description"] == "Description for test item 2"
+    assert item2_response["image"] == "item2.jpg"
+    assert item2_response["imageUrl"] == "http://example.com/item2.jpg"
+    assert item2_response["id"] == item2.id
+    
+    # Check gold for the second item
+    assert item2_response["gold"]["base"] == 200
+    assert item2_response["gold"]["total"] == 200
+    assert item2_response["gold"]["sell"] == 140
+    assert item2_response["gold"]["purchasable"] is True
+    
+    # Check tags for the second item
+    assert "Tag2" in item2_response["tags"]
+    assert len(item2_response["tags"]) == 1
+    
+    # Check effects for the second item
+    assert "Effect2" in item2_response["effect"]
+    assert item2_response["effect"]["Effect2"] == 20.0
+    assert len(item2_response["effect"]) == 1
+    
+    # Check stats for the second item
+    stat2_response = next((stat for stat in item2_response["stats"] if stat["name"] == "Stat2"), None)
+    assert stat2_response is not None
+    assert stat2_response["kind"] == "percentage"
+    assert stat2_response["value"] == 15.0
+    assert len(item2_response["stats"]) == 1
