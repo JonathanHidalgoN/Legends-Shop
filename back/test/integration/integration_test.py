@@ -12,16 +12,18 @@ def fakeLimit(*args, **kwargs):
 
 slowapi.Limiter.limit = fakeLimit
 
+from integrationStaticData import * 
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import text
+from sqlalchemy import text, insert
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 from datetime import datetime, date
 from app.data.models.LocationTable import LocationTable
 from app.data.models.UserTable import UserTable
 from app.auth.functions import hashPassword
+from app.data.models.TagsTable import ItemTagsAssociation
 
 from app.main import app
 from app.data.database import getDbSession
@@ -87,25 +89,6 @@ def client(dbSession):
     app.dependency_overrides.clear()
 
 
-TEST_SINGUP_DATA = {
-        "username": "testuser",
-        "password": "TestPassword123!",
-        "email": "test@example.com",
-        "birthDate": "2000-01-01",
-        "location_id": 1
-}
-TEST_SINGUP_DATA_INVALID_LOCATION = {
-        "username": "testuser",
-        "password": "TestPassword123!",
-        "email": "test@example.com",
-        "birthDate": "2000-01-01",
-        "location_id": 32131231
-}
-TEST_LOGIN_DATA = {
-    "username": TEST_SINGUP_DATA["username"],
-    "password": TEST_SINGUP_DATA["password"],
-}
-
 async def addLocation(dbSession):
     test_location = LocationTable(country_name="Test Country")
     dbSession.add(test_location)
@@ -144,18 +127,18 @@ async def test_signup_username_exists(client, dbSession):
     """Test signup with an existing username."""
     await addLocation(dbSession)
 
-    existing_user = UserTable(
+    existingUser = UserTable(
         userName=TEST_SINGUP_DATA["username"],
-        password=hashPassword("Password123!"),
+        password=hashPassword(TEST_SINGUP_DATA["password"]),
         gold_spend=0,
         created=date.today(),
         last_singn=date.today(),
         current_gold=99999,
-        email="existing@example.com",
+        email=TEST_SINGUP_DATA["email"],
         birthdate=date(2000, 1, 1),
         location_id=1
     )
-    dbSession.add(existing_user)
+    dbSession.add(existingUser)
     await dbSession.commit()
 
     response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
@@ -167,8 +150,8 @@ async def test_signup_email_exists(client, dbSession):
     """Test signup with an existing email."""
     await addLocation(dbSession)
 
-    existing_user = UserTable(
-        userName="existinguser",
+    existingUser = UserTable(
+        userName="different_name",
         password=hashPassword("Password123!"),
         created=date.today(),
         last_singn=date.today(),
@@ -178,7 +161,7 @@ async def test_signup_email_exists(client, dbSession):
         birthdate=date(2000, 1, 1),
         location_id=1
     )
-    dbSession.add(existing_user)
+    dbSession.add(existingUser)
     await dbSession.commit()
 
     response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
@@ -203,47 +186,48 @@ async def test_signup_login_flow(client, dbSession):
     assert login_response.status_code == 200
     assert "access_token" in login_response.cookies
 
+@pytest.mark.asyncio
+async def test_get_unique_tags(client, dbSession):
+    """Test the getUniqueTags endpoint."""
+    dbSession.add(GOLD_TABLE_1)
+    dbSession.add(GOLD_TABLE_2)
+    await dbSession.commit()
+    ITEM_TABLE_1.gold_id = GOLD_TABLE_1.id
+    ITEM_TABLE_2.gold_id = GOLD_TABLE_2.id
+    
+    dbSession.add(ITEM_TABLE_1)
+    dbSession.add(ITEM_TABLE_2)
+    await dbSession.commit()
+    
+    dbSession.add(TAG_TABLE_1)
+    dbSession.add(TAG_TABLE_2)
+    dbSession.add(TAG_TABLE_3)
+    await dbSession.commit()
+    
+    await dbSession.execute(
+        insert(ItemTagsAssociation).values(item_id=ITEM_TABLE_1.id, tags_id=TAG_TABLE_1.id)
+    )
+    await dbSession.execute(
+        insert(ItemTagsAssociation).values(item_id=ITEM_TABLE_1.id, tags_id=TAG_TABLE_2.id)
+    )
+    await dbSession.execute(
+        insert(ItemTagsAssociation).values(item_id=ITEM_TABLE_2.id, tags_id=TAG_TABLE_2.id)
+    )
+    await dbSession.execute(
+        insert(ItemTagsAssociation).values(item_id=ITEM_TABLE_2.id, tags_id=TAG_TABLE_3.id)
+    )
+    await dbSession.commit()
+    
+    response = client.get("/items/uniqueTags")
+    
+    assert response.status_code == 200
+    tags = response.json()
+    
+    assert TAG_TABLE_1.name in tags
+    assert TAG_TABLE_2.name in tags
+    assert TAG_TABLE_3.name in tags
+    
+    assert len(tags) == 3
+    
+    assert len(set(tags)) == 3
 
-# @pytest.mark.asyncio
-# async def test_temp(client, dbSession):
-#     """Test the complete signup and login flow."""
-#     test_location = LocationTable(country_name="Test Country")
-#     dbSession.add(test_location)
-#     await dbSession.commit()
-#
-#     signup_data = {
-#         "username": "loginuser",
-#         "password": "LoginPassword123!",
-#         "email": "login@example.com",
-#         "birthDate": "2000-01-01",
-#         "location_id": 1
-#     }
-#     signup_response = client.post("/auth/singup", data=signup_data)
-#     assert signup_response.status_code == 200
-#
-#     login_data = {
-#         "username": "loginuser",
-#         "password": "LoginPassword123!",
-#         "grant_type": "password"
-#     }
-#     login_response = client.post("/auth/token", data=login_data)
-#
-#     assert login_response.status_code == 200
-#
-#     assert "access_token" in login_response.cookies
-#     access_token = login_response.cookies["access_token"]
-#
-#     headers = {"Cookie": f"access_token={access_token}"}
-#     profile_response = client.get("/profile", headers=headers)
-#     assert profile_response.status_code == 200
-#
-#     user_id_response = client.get("/auth/user_id", headers=headers)
-#     assert user_id_response.status_code == 200
-#     user_id = user_id_response.json()
-#
-#     result = await dbSession.execute(
-#         text("SELECT * FROM user_table WHERE userName = 'loginuser'")
-#     )
-#     user = result.fetchone()
-#     assert user is not None
-#     assert user.id == user_id
