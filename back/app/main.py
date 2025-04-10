@@ -15,6 +15,7 @@ from app.rateLimiter import limiter
 from app.routes import reviews
 from app.routes.RequestLoggingMiddleware import RequestLoggingMiddleware
 from app.routes.SecurityHeadersMiddleware import SecurityHeadersMiddleware
+from app.routes import health
 
 
 @asynccontextmanager
@@ -62,6 +63,7 @@ app.include_router(cart.router, prefix="/cart")
 app.include_router(deliveryDates.router, prefix="/delivery_dates")
 app.include_router(locations.router, prefix="/locations")
 app.include_router(reviews.router, prefix="/review")
+app.include_router(health.router, prefix="/health")
 
 
 def getItemsLoader(
@@ -70,27 +72,6 @@ def getItemsLoader(
     return ItemsLoader(db)
 
 
-@app.get("/")
-async def root():
-    return {"message": "up"}
-
-
-@app.get("/db")
-async def db_status(db: AsyncSession = Depends(database.getDbSession)):
-    try:
-        await db.execute(text("SELECT 1"))
-        return {"message": "Database is connected and healthy"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=503, detail=f"Database connection failed: {str(e)}"
-        )
-
-
-@app.get("/testUpdateTagsTable")
-async def testUpdateTagsTable(db: AsyncSession = Depends(database.getDbSession)):
-    itemsLoader: ItemsLoader = ItemsLoader(db)
-    await itemsLoader.updateItemsStepsJob()
-    return {"message": "tested"}
 
 
 @app.get("/testGetVersion")
