@@ -1,5 +1,21 @@
+import slowapi
+
+#Hacky way of changing the limit function of slowapi, if they change the class 
+#structure or limit signature this wont work, but for now is the best way I found to
+#ignore the rate limiting, maybe when running test add an env variable and dynamically 
+#set the limit
+#TODO: env variable to change the limits in test mode
+def fakeLimit(*args, **kwargs):
+    def decorator(f):
+        return f  
+    return decorator
+
+slowapi.Limiter.limit = fakeLimit
+
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 from datetime import datetime, date
@@ -27,7 +43,7 @@ TestingSessionLocal = async_sessionmaker(
 )
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def db_session():
     """Create a test database session."""
     from app.data.database import base
@@ -57,17 +73,13 @@ async def db_session():
         await conn.run_sync(base.metadata.drop_all)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def client(db_session):
-    """Create a test client with a test database session."""
+    async def fakeAsyncDb():
+        return db_session
 
-    async def override_get_db():
-        try:
-            yield db_session
-        finally:
-            pass
+    app.dependency_overrides[getDbSession] = fakeAsyncDb
 
-    app.dependency_overrides[getDbSession] = override_get_db
 
     with TestClient(app) as test_client:
         yield test_client
@@ -75,11 +87,30 @@ def client(db_session):
     app.dependency_overrides.clear()
 
 
+TEST_SINGUP_DATA = {
+        "username": "testuser",
+        "password": "TestPassword123!",
+        "email": "test@example.com",
+        "birthDate": "2000-01-01",
+        "location_id": 1
+}
+TEST_SINGUP_DATA_INVALID_LOCATION = {
+        "username": "testuser",
+        "password": "TestPassword123!",
+        "email": "test@example.com",
+        "birthDate": "2000-01-01",
+        "location_id": 32131231
+}
+TEST_LOGIN_DATA = {
+    "username": "loginuser",
+    "password": "LoginPassword123!",
+    "grant_type": "password"
+}
+
 def test_get_home(client):
     """Test the home endpoint."""
-    response = client.get("/")
+    response = client.get("/health")
     assert response.status_code == 200
-
 
 def test_error_handling(client):
     """Test error handling for non-existent resources."""
@@ -88,126 +119,134 @@ def test_error_handling(client):
     response = client.get("/items/99999")
     assert response.status_code == 404
 
+@pytest.mark.asyncio
+async def test_signup_success(client, db_session):
+    """Test successful user signup."""
+    test_location = LocationTable(country_name="Test Country")
+    db_session.add(test_location)
+    await db_session.commit()
+    response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
+    assert response.status_code == 200
+    assert response.json() == {"message": "nice"}
+    result = await db_session.execute(
+        text("SELECT * FROM user_table WHERE userName = 'testuser'")
+    )
+    user = result.fetchone()
+    assert user is not None
+    assert user.email == "test@example.com"
+    assert user.location_id == 1
+
+@pytest.mark.asyncio
+async def test_signup_username_exists(client, db_session):
+    """Test signup with an existing username."""
+    test_location = LocationTable(country_name="Test Country")
+    db_session.add(test_location)
+    await db_session.commit()
+
+    existing_user = UserTable(
+        userName="existinguser",
+        password=hashPassword("Password123!"),
+        gold_spend=0,
+        created=date.today(),
+        last_singn=date.today(),
+        current_gold=99999,
+        email="existing@example.com",
+        birthdate=date(2000, 1, 1),
+        location_id=1
+    )
+    db_session.add(existing_user)
+    await db_session.commit()
+
+    response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
+    assert response.status_code == 400
+    assert "X-Error-Type" in response.headers
+
+@pytest.mark.asyncio
+async def test_signup_email_exists(client, db_session):
+    """Test signup with an existing email."""
+    test_location = LocationTable(country_name="Test Country")
+    db_session.add(test_location)
+    await db_session.commit()
+
+    existing_user = UserTable(
+        userName="existinguser",
+        password=hashPassword("Password123!"),
+        created=date.today(),
+        last_singn=date.today(),
+        gold_spend=0,
+        current_gold=99999,
+        email="existing@example.com",
+        birthdate=date(2000, 1, 1),
+        location_id=1
+    )
+    db_session.add(existing_user)
+    await db_session.commit()
+
+    response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
+
+    assert response.status_code == 400
+    assert "X-Error-Type" in response.headers
+
+@pytest.mark.asyncio
+async def test_signup_invalid_location(client):
+    """Test signup with an invalid location ID."""
+    response = client.post("/auth/singup", data=TEST_SINGUP_DATA_INVALID_LOCATION)
+    assert response.status_code == 400
+    assert "X-Error-Type" in response.headers
+
+@pytest.mark.asyncio
+async def test_signup_login_flow(client, db_session):
+    """Test the complete signup and login flow."""
+    test_location = LocationTable(country_name="Test Country")
+    db_session.add(test_location)
+    await db_session.commit()
+    signup_response = client.post("/auth/singup", data=TEST_SINGUP_DATA)
+    assert signup_response.status_code == 200
+    login_response = client.post("/auth/token", data=TEST_LOGIN_DATA)
+    assert login_response.status_code == 200
+    assert "access_token" in login_response.cookies
+
 
 # @pytest.mark.asyncio
-# async def test_signup_success(client, db_session):
-#     """Test successful user signup."""
-#     test_location = LocationTable(country_name="Test Country")
-#     async for session in db_session:
-#         session.add(test_location)
-#         await session.commit()
-#     test_data = {
-#         "username": "testuser",
-#         "password": "TestPassword123!",
-#         "email": "test@example.com",
-#         "birthDate": "2000-01-01",
-#         "location_id": 1
-#     }
-#     response = client.post("/auth/singup", data=test_data)
-#     assert response.status_code == 200
-#     assert response.json() == {"message": "nice"}
-#     async for session in db_session:
-#         result = await session.execute(
-#             "SELECT * FROM user_table WHERE userName = 'testuser'"
-#         )
-#         user = result.fetchone()
-#         assert user is not None
-#         assert user.email == "test@example.com"
-#         assert user.location_id == 1
-
-# @pytest.mark.asyncio
-# async def test_signup_username_exists(client, db_session):
-#     """Test signup with an existing username."""
-#     # Create a test location
+# async def test_temp(client, db_session):
+#     """Test the complete signup and login flow."""
 #     test_location = LocationTable(country_name="Test Country")
 #     db_session.add(test_location)
 #     await db_session.commit()
 #
-#     # Create a user first
-#     existing_user = UserTable(
-#         userName="existinguser",
-#         password=hashPassword("Password123!"),
-#         created=date.today(),
-#         last_singn=date.today(),
-#         gold_spend=0,
-#         current_gold=99999,
-#         email="existing@example.com",
-#         birthdate=date(2000, 1, 1),
-#         location_id=1
-#     )
-#     db_session.add(existing_user)
-#     await db_session.commit()
-#
-#     # Try to sign up with the same username
-#     test_data = {
-#         "username": "existinguser",
-#         "password": "TestPassword123!",
-#         "email": "new@example.com",
+#     signup_data = {
+#         "username": "loginuser",
+#         "password": "LoginPassword123!",
+#         "email": "login@example.com",
 #         "birthDate": "2000-01-01",
 #         "location_id": 1
 #     }
+#     signup_response = client.post("/auth/singup", data=signup_data)
+#     assert signup_response.status_code == 200
 #
-#     response = client.post("/auth/singup", data=test_data)
+#     login_data = {
+#         "username": "loginuser",
+#         "password": "LoginPassword123!",
+#         "grant_type": "password"
+#     }
+#     login_response = client.post("/auth/token", data=login_data)
 #
-#     # Assert response
-#     assert response.status_code == 400
-#     assert response.json()["detail"] == "Username exist, change it"
-#     assert "X-Error-Type" in response.headers
+#     assert login_response.status_code == 200
 #
-# @pytest.mark.asyncio
-# async def test_signup_email_exists(client, db_session):
-#     """Test signup with an existing email."""
-#     # Create a test location
-#     test_location = LocationTable(country_name="Test Country")
-#     db_session.add(test_location)
-#     await db_session.commit()
+#     assert "access_token" in login_response.cookies
+#     access_token = login_response.cookies["access_token"]
 #
-#     # Create a user first
-#     existing_user = UserTable(
-#         userName="existinguser",
-#         password=hashPassword("Password123!"),
-#         created=date.today(),
-#         last_singn=date.today(),
-#         gold_spend=0,
-#         current_gold=99999,
-#         email="existing@example.com",
-#         birthdate=date(2000, 1, 1),
-#         location_id=1
+#     headers = {"Cookie": f"access_token={access_token}"}
+#     profile_response = client.get("/profile", headers=headers)
+#     assert profile_response.status_code == 200
+#
+#     user_id_response = client.get("/auth/user_id", headers=headers)
+#     assert user_id_response.status_code == 200
+#     user_id = user_id_response.json()
+#
+#     result = await db_session.execute(
+#         text("SELECT * FROM user_table WHERE userName = 'loginuser'")
 #     )
-#     db_session.add(existing_user)
-#     await db_session.commit()
-#
-#     # Try to sign up with the same email
-#     test_data = {
-#         "username": "newuser",
-#         "password": "TestPassword123!",
-#         "email": "existing@example.com",
-#         "birthDate": "2000-01-01",
-#         "location_id": 1
-#     }
-#
-#     response = client.post("/auth/singup", data=test_data)
-#
-#     # Assert response
-#     assert response.status_code == 400
-#     assert response.json()["detail"] == "Email exist, change it"
-#     assert "X-Error-Type" in response.headers
-#
-# @pytest.mark.asyncio
-# async def test_signup_invalid_location(client, db_session):
-#     """Test signup with an invalid location ID."""
-#     # Test data with non-existent location ID
-#     test_data = {
-#         "username": "testuser",
-#         "password": "TestPassword123!",
-#         "email": "test@example.com",
-#         "birthDate": "2000-01-01",
-#         "location_id": 999  # Non-existent location ID
-#     }
-#
-#     response = client.post("/auth/singup", data=test_data)
-#
-#     # Assert response
-#     assert response.status_code == 400
-#     assert response.json()["detail"] == "Location does not exist"
-#     assert "X-Error-Type" in response.headers
+#     user = result.fetchone()
+#     assert user is not None
+#     assert user.id == user_id
