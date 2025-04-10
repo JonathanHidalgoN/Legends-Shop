@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 from app.data import database
@@ -30,7 +29,7 @@ app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 
 @app.exception_handler(429)
-async def tooManyRequestHanlder():
+async def tooManyRequestHanlder(request, exc):
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests"},
