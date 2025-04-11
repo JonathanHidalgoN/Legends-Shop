@@ -238,8 +238,8 @@ async def test_get_all_items(client, dbSession):
     # Create gold records
     gold1 = GoldTable(
         base_cost=100,
-        total=100,
         sell=70,
+        total=100,
         purchaseable=True
     )
     gold2 = GoldTable(
