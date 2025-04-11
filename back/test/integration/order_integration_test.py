@@ -2,13 +2,12 @@ from config import *
 from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
-from app.data.models.LocationTable import LocationTable
-from app.data.models.DeliveryDatesTable import DeliveryDatesTable, ItemLocationDeliveryAssociation
+from app.data.models.DeliveryDatesTable import ItemLocationDeliveryAssociation
 from app.data.models.OrderTable import OrderTable, OrderItemAssociation
 from app.schemas.Order import OrderStatus
 import pytest
-from sqlalchemy import text, select
-from datetime import date, datetime, timedelta
+from sqlalchemy import  select
+from datetime import date, timedelta
 from app.auth.functions import hashPassword
 
 
