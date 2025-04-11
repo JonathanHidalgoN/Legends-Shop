@@ -80,7 +80,8 @@ def client(dbSession):
     app.dependency_overrides.clear()
 
 
-async def addLocation(dbSession):
-    test_location = LocationTable(country_name="Test Country")
-    dbSession.add(test_location)
+async def addLocation(dbSession)->int:
+    testLocation = LocationTable(country_name="Test Country")
+    dbSession.add(testLocation)
     await dbSession.commit()
+    return testLocation.id
