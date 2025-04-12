@@ -7,7 +7,7 @@ from logging.handlers import RotatingFileHandler
 import traceback
 from typing import Any, Optional, Callable
 import logging_loki
-from envVariables import LOKI_HOST,LOKI_PORT 
+from app.envVariables import LOKI_HOST,LOKI_PORT 
 
 # ===== CONFIGURATION CONSTANTS =====
 # Directory where log files will be stored
