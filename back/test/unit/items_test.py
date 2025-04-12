@@ -21,13 +21,17 @@ async def test_get_all_items_success():
         "app.routes.items.getAllItemTableRowsAnMapToItems",
         new=AsyncMock(return_value=mock_items),
     ):
-        response = client.get("/items/all")
+        with patch(
+            "app.routes.items.staticDataValidation",
+            new=AsyncMock(return_value=True),
+        ):
+            response = client.get("/items/all")
 
-        assert response.status_code == 200
-        items = response.json()
-        assert len(items) == 2
-        assert items[0]["name"] == STATIC_DATA_ITEM1.name
-        assert items[1]["name"] == STATIC_DATA_ITEM2.name
+            assert response.status_code == 200
+            items = response.json()
+            assert len(items) == 2
+            assert items[0]["name"] == STATIC_DATA_ITEM1.name
+            assert items[1]["name"] == STATIC_DATA_ITEM2.name
 
 
 @pytest.mark.asyncio
@@ -37,9 +41,12 @@ async def test_get_all_items_error():
         "app.routes.items.getAllItemTableRowsAnMapToItems",
         new=AsyncMock(side_effect=Exception("Database error")),
     ):
-        response = client.get("/items/all")
-
-        assert response.status_code == 500
+        with patch(
+            "app.routes.items.staticDataValidation",
+            new=AsyncMock(return_value=True),
+        ):
+            response = client.get("/items/all")
+            assert response.status_code == 500
 
 
 @pytest.mark.asyncio
@@ -50,12 +57,16 @@ async def test_get_some_items_success():
         "app.routes.items.getSomeItemTableRowsAnMapToItems",
         new=AsyncMock(return_value=mock_items),
     ):
-        response = client.get("/items/some")
+        with patch(
+            "app.routes.items.staticDataValidation",
+            new=AsyncMock(return_value=True),
+        ):
+            response = client.get("/items/some")
 
-        assert response.status_code == 200
-        items = response.json()
-        assert len(items) == 1
-        assert items[0]["name"] == STATIC_DATA_ITEM1.name
+            assert response.status_code == 200
+            items = response.json()
+            assert len(items) == 1
+            assert items[0]["name"] == STATIC_DATA_ITEM1.name
 
 
 @pytest.mark.asyncio
@@ -65,9 +76,13 @@ async def test_get_some_items_error():
         "app.routes.items.getSomeItemTableRowsAnMapToItems",
         new=AsyncMock(side_effect=Exception("Database error")),
     ):
-        response = client.get("/items/some")
+        with patch(
+            "app.routes.items.staticDataValidation",
+            new=AsyncMock(return_value=True),
+        ):
+            response = client.get("/items/some")
 
-        assert response.status_code == 500
+            assert response.status_code == 500
 
 
 @pytest.mark.asyncio

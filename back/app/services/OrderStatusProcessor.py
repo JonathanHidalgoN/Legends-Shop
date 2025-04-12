@@ -7,12 +7,14 @@ from app.data.queries.orderQueries import (
     getOrdersWithStatusAndDeliveryDate,
     updateOrderStatus,
 )
+from app.logger import logMethod
 
 
 class OrderStatusProcessor:
     def __init__(self, asyncSession: AsyncSession) -> None:
         self.asyncSession = asyncSession
 
+    @logMethod
     async def updateOrderStatuses(self) -> None:
         today: date = date.today()
         tomorrow: date = today.replace(day=today.day + 1)

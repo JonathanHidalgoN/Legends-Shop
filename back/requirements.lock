@@ -25,8 +25,11 @@ certifi==2025.1.31
     # via
     #   httpcore
     #   httpx
+    #   requests
 cffi==1.17.1
     # via cryptography
+charset-normalizer==3.4.1
+    # via requests
 click==8.1.8
     # via
     #   rich-toolkit
@@ -52,7 +55,7 @@ h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
-httpcore==1.0.7
+httpcore==1.0.8
     # via httpx
 httptools==0.6.4
     # via uvicorn
@@ -65,13 +68,14 @@ idna==3.10
     #   anyio
     #   email-validator
     #   httpx
+    #   requests
 iniconfig==2.1.0
     # via pytest
 jinja2==3.1.6
     # via fastapi
-limits==4.7.1
+limits==4.7.2
     # via slowapi
-mako==1.3.9
+mako==1.3.10
     # via alembic
 markdown-it-py==3.0.0
     # via rich
@@ -113,10 +117,16 @@ python-dotenv==1.0.1
     #   uvicorn
 python-jose[cryptography]==3.4.0
     # via -r requirements.in
+python-logging-loki==0.3.1
+    # via -r requirements.in
 python-multipart==0.0.20
     # via fastapi
 pyyaml==6.0.2
     # via uvicorn
+requests==2.32.3
+    # via python-logging-loki
+rfc3339==6.2
+    # via python-logging-loki
 rich==14.0.0
     # via
     #   rich-toolkit
@@ -141,7 +151,7 @@ starlette==0.46.1
     # via fastapi
 typer==0.15.2
     # via fastapi-cli
-typing-extensions==4.13.1
+typing-extensions==4.13.2
     # via
     #   aiosqlite
     #   alembic
@@ -157,6 +167,8 @@ typing-inspection==0.4.0
     # via pydantic
 tzlocal==5.3.1
     # via apscheduler
+urllib3==2.4.0
+    # via requests
 uvicorn[standard]==0.34.0
     # via
     #   -r requirements.in

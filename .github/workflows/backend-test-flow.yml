@@ -70,7 +70,11 @@ jobs:
 
       - name: Run unit test 
         working-directory: back 
-        run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/
+        run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/unit
+
+      - name: Run integration 
+        working-directory: back 
+        run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/integration
 
       - name: Aply database schema
         working-directory: back

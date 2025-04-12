@@ -64,29 +64,8 @@ app.include_router(locations.router, prefix="/locations")
 app.include_router(reviews.router, prefix="/review")
 app.include_router(health.router, prefix="/health")
 
-
-def getItemsLoader(
-    db: AsyncSession = Depends(database.getDbSession),
-) -> ItemsLoader:
-    return ItemsLoader(db)
-
-
-
-
 @app.get("/testGetVersion")
 async def testUpdateVersion(db: AsyncSession = Depends(database.getDbSession)):
     itemsLoader: ItemsLoader = ItemsLoader(db)
     version = await itemsLoader.getLastVersion()
     return {"message": version}
-
-
-@app.put("/updateItems", include_in_schema=False)
-async def updateItems(itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)]):
-    try:
-        await itemsLoader.updateItems()
-    except SameVersionUpdateError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except ItemsLoaderError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Unexpected error")
