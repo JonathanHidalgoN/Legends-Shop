@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import Annotated, List, Set
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,31 +6,50 @@ from app.data.queries.itemQueries import (
     getAllEffectsTableName,
     getAllItemNames,
     getAllTagsTableNames,
+    itemTableHasRows,
 )
 from app.data.utils import (
     getAllItemTableRowsAnMapToItems,
     getSomeItemTableRowsAnMapToItems,
 )
-from app.logger import logger
+from app.logger import logMethod
 from app.data import database
 from app.schemas.Item import Item
+from app.data.ItemsLoader import ItemsLoader
 
 router = APIRouter()
+
+
+def getItemsLoader(
+    db: AsyncSession = Depends(database.getDbSession),
+) -> ItemsLoader:
+    return ItemsLoader(db)
+
+@logMethod
+async def staticDataValidation(
+    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
+    db: AsyncSession = Depends(database.getDbSession)
+)->None:
+    itemsExist : bool = await itemTableHasRows(db)
+    if itemsExist:
+        return
+    else:
+        await itemsLoader.updateItems()
+        return
 
 
 # TODO: Create a class to handle item fetching logic
 @router.get("/all", response_model=List[Item])
 async def getAllItems(
+    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
     items: List[Item] = []
     try:
+        await staticDataValidation(itemsLoader, db)
         items = await getAllItemTableRowsAnMapToItems(db)
         return items
     except Exception as e:
-        logger.error(
-            f"Error while trying to query {request.url.path} from database: {e}"
-        )
         raise HTTPException(
             status_code=500, detail=f"Error fetching {request.url.path} the database"
         )
@@ -38,16 +57,15 @@ async def getAllItems(
 
 @router.get("/some", response_model=List[Item])
 async def getSomeItems(
+    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     request: Request, db: AsyncSession = Depends(database.getDbSession)
 ):
     items: List[Item] = []
     try:
+        await staticDataValidation(itemsLoader, db)
         items = await getSomeItemTableRowsAnMapToItems(db)
         return items
     except Exception as e:
-        logger.error(
-            f"Error while trying to query {request.url.path} some items from database: {e}"
-        )
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching {request.url.path} from the database",
@@ -63,9 +81,6 @@ async def getUniqueTags(
         tagNames = await getAllTagsTableNames(db)
         return list(tagNames)
     except Exception as e:
-        logger.error(
-            f"Error while trying to query {request.url.path} from database: {e}"
-        )
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching {request.url.path} from the database",
@@ -81,9 +96,6 @@ async def getItemNames(
         itemNames = await getAllItemNames(db)
         return itemNames
     except Exception as e:
-        logger.error(
-            f"Error while trying to query {request.url.path} from database: {e}"
-        )
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching {request.url.path} from the database",
@@ -99,9 +111,6 @@ async def getUniqueEffects(
         effectNames = await getAllEffectsTableName(db)
         return effectNames
     except Exception as e:
-        logger.error(
-            f"Error while trying to query {request.url.path} from database: {e}"
-        )
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching {request.url.path} from the database",
