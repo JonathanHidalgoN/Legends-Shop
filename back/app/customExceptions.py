@@ -2,6 +2,10 @@ class ItemsLoaderError(Exception):
     pass
 
 
+class SameVersionUpdateError(ItemsLoaderError):
+    pass
+
+
 class JsonFetchError(ItemsLoaderError):
     pass
 
@@ -81,4 +85,52 @@ class InvalidUserGoldFieldException(Exception):
 
 
 class InvalidPasswordException(Exception):
+    pass
+
+
+class CartProcessorException(Exception):
+    pass
+
+
+class DeliveryDateAssignerException(Exception):
+    pass
+
+
+class ItemNotFoundException(DeliveryDateAssignerException):
+    pass
+
+
+class DeliveryDateAssignmentError(DeliveryDateAssignerException):
+    pass
+
+
+class LocationManagerException(Exception):
+    pass
+
+
+class LocationNotFoundException(LocationManagerException):
+    pass
+
+
+class LocationAlreadyExistsException(LocationManagerException):
+    pass
+
+
+class LocationUpdateError(LocationManagerException):
+    pass
+
+
+class LocationDeleteError(LocationManagerException):
+    pass
+
+
+class ReviewProcessorException(Exception):
+    pass
+
+
+class InvalidRatingException(ReviewProcessorException):
+    pass
+
+
+class InvalidUserReview(ReviewProcessorException):
     pass

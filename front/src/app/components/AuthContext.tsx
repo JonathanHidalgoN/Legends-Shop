@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
+  FromValues,
   logInRequest,
   logoutRequest,
   refreshTokenRequest,
@@ -15,6 +16,8 @@ import {
   LoginError,
   SingupError,
 } from "../interfaces/APIResponse";
+import { showErrorToast } from "../customToast";
+import { useLoading } from "./LoadingRequestContext";
 
 interface AuthContextType {
   userName: string | null;
@@ -27,6 +30,7 @@ interface AuthContextType {
     password: string,
     email: string,
     birthDate: Date,
+    location_id: number,
   ) => Promise<APISingupResponse>;
 }
 
@@ -39,6 +43,7 @@ export function AuthContextProvider({
 }) {
   const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
+  const { startLoading, stopLoading } = useLoading();
 
   function createAPIResponseLogin(
     response: Response,
@@ -84,16 +89,18 @@ export function AuthContextProvider({
     userName: string,
     password: string,
   ): Promise<APILoginResponse> {
-    const response = await logInRequest(userName, password, "client");
+    startLoading();
+    const response = await logInRequest(userName, password, FromValues.CLIENT);
+    stopLoading();
     if (!response.ok) {
       const data = await response.json();
       const result: APILoginResponse = createAPIResponseLogin(response, data);
       if (result.status == 401) {
-        toast.error(result.message);
+        showErrorToast(result.message);
       } else if (result.status == 500) {
-        toast.error("Internal server error login");
+        showErrorToast("Internal server error login");
       } else {
-        toast.error("Unexpected error");
+        showErrorToast("Unexpected error");
       }
       return result;
     }
@@ -102,7 +109,6 @@ export function AuthContextProvider({
     toast.success(`Welcome ${userName}!`);
     return result;
   }
-
   function createAPIResponseSingup(
     response: Response,
     data: any,
@@ -140,6 +146,9 @@ export function AuthContextProvider({
         if (errorTypeHeader === SingupError.INVALIDPASSWORD) {
           errorType = SingupError.INVALIDPASSWORD;
         }
+        if (errorTypeHeader === SingupError.INVALIDLOCATION) {
+          errorType = SingupError.INVALIDLOCATION;
+        }
         return {
           status: response.status,
           errorType: errorType,
@@ -160,58 +169,43 @@ export function AuthContextProvider({
     password: string,
     email: string,
     birthDate: Date,
+    location_id: number,
   ): Promise<APISingupResponse> {
     const response = await singupRequest(
       userName,
       password,
       email,
       birthDate,
-      "client",
+      location_id,
+      FromValues.CLIENT,
     );
-    if (!response.ok) {
-      const data = await response.json();
-      const result: APISingupResponse = createAPIResponseSingup(response, data);
-      if (result.status == 400) {
-        toast.error(result.message);
-      } else if (result.status == 500) {
-        toast.error("Internal server error login");
-      } else {
-        toast.error("Unexpected error");
-      }
-      return result;
-    }
-    const result: APISingupResponse = createAPIResponseSingup(response, null);
-    toast.success(`Singup succesfully ${userName}!`);
-    await login(userName, password);
-    return result;
+    const data = await response.json();
+    return createAPIResponseSingup(response, data);
   }
 
   async function refreshToken(): Promise<void> {
     try {
-      const response = await refreshTokenRequest("client");
+      const response = await refreshTokenRequest(FromValues.CLIENT);
       if (!response.ok) {
         logOut();
         return;
       }
       await response.json();
     } catch (error) {
-      console.log(error);
-      toast.error("Internal server error refreshing token");
+      showErrorToast("Internal server error refreshing token");
     }
   }
 
   async function logOut() {
     try {
-      const response = await logoutRequest("client");
+      const response = await logoutRequest(FromValues.CLIENT);
       if (!response.ok) {
         throw new Error("Logout failed");
       }
       setUserName(null);
       router.push("/");
       toast.success(`Logout succesfully`);
-    } catch (error) {
-      console.log("Error");
-    }
+    } catch (error) { }
   }
 
   useEffect(() => {

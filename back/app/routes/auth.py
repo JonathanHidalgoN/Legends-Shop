@@ -1,5 +1,4 @@
 from datetime import datetime
-import re
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,8 +24,10 @@ from app.data.queries.authQueries import (
     getUserInDB,
     insertUser,
 )
+from app.data.queries.locationQueries import getLocationById
 from app.schemas.AuthSchemas import LogInError, SingUpError, UserInDB
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from app.rateLimiter import authRateLimiter,sensitiveRateLimit 
 
 from app.data.queries.profileQueries import updateLastSingInWithUserName
 
@@ -36,7 +37,6 @@ oauth2Scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def getCurrentUserTokenFlow(request: Request):
-    logger.debug(f"Request to {request.url.path}, checking token...")
     token: str | None = request.cookies.get("access_token")
     if token is None:
         logger.error(f"Error in {request.url.path} token is None")
@@ -53,7 +53,6 @@ def getCurrentUserTokenFlow(request: Request):
             detail="Invalid credentials",
             headers={"WW-Authenticate": "Bearer"},
         )
-    logger.debug(f"Request to {request.url.path}, authenticated")
     return userName
 
 
@@ -69,6 +68,7 @@ async def getUserIdFromName(
 
 # https://stackoverflow.com/questions/65059811/what-does-depends-with-no-parameter-do
 @router.post("/token")
+@authRateLimiter()
 async def getToken(
     request: Request,
     response: Response,
@@ -76,7 +76,6 @@ async def getToken(
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
-        logger.debug(f"Request to {request.url.path}, authenticating...")
         matchUser: UserInDB | None = await getUserInDB(db, dataForm.username)
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected exception: {e}")
@@ -123,7 +122,6 @@ async def getToken(
         path="/",
     )
     await updateLastSingInWithUserName(db, dataForm.username, datetime.now().date())
-    logger.debug(f"Request to {request.url.path} completed successfully")
 
 
 @router.get("/token_refresh")
@@ -134,14 +132,12 @@ async def tokenRefresh(
     db: AsyncSession = Depends(database.getDbSession),
 ):
     try:
-        logger.debug(f"Request to {request.url.path}")
         matchUser: UserInDB | None = await getUserInDB(db, userName)
         if not matchUser:
             logger.error(f"Error in {request.url.path}, {userName} do not exit")
             raise HTTPException(
                 status_code=401, detail="Incorrect username or password"
             )
-        logger.debug(f"Request to {request.url.path} completed successfully")
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected error {e}")
         raise HTTPException(status_code=500, detail="Error login out")
@@ -158,23 +154,19 @@ async def tokenRefresh(
         path="/",
     )
     await updateLastSingInWithUserName(db, userName, datetime.now().date())
-    logger.debug(
-        f"Request to {request.url.path} completed successfully, token in response"
-    )
 
 
 @router.post("/singup")
+@sensitiveRateLimit()
 async def singUp(
     request: Request,
-    # This ... makes required in fastapi
     username: str = Form(...),
     password: str = Form(...),
     email: str = Form(...),
     birthDate: str = Form(...),
+    location_id: int = Form(...),
     db: AsyncSession = Depends(database.getDbSession),
 ):
-    logger.debug(f"Request to {request.url.path}")
-
     try:
         birthDateDate = datetime.strptime(birthDate, "%Y-%m-%d")
         userInDB: UserInDB = UserInDB(
@@ -186,10 +178,12 @@ async def singUp(
             currentGold=99999,
             birthDate=birthDateDate,
             lastSingIn=datetime.now().date(),
+            locationId=location_id,
             password=password,
         )
         userExist: bool = await checkUserExistInDB(db, username)
         emailExist: bool = await checkEmailExistInDB(db, email)
+        locationExist: bool = await getLocationById(db, location_id) is not None
     except InvalidUserNameException as e:
         logger.error(f"Error in {request.url.path}, exception: {e}")
         raise HTTPException(
@@ -272,9 +266,20 @@ async def singUp(
                 "Access-Control-Expose-Headers": "X-Error-Type",
             },
         )
+    if not locationExist:
+        logger.error(
+            f"Error in {request.url.path}, location {location_id} does not exist"
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="Location does not exist",
+            headers={
+                "X-Error-Type": SingUpError.INVALIDLOCATION,
+                "Access-Control-Expose-Headers": "X-Error-Type",
+            },
+        )
     try:
         await insertUser(db, userInDB)
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"message": "nice"}
     except Exception as e:
         logger.error(
@@ -286,9 +291,7 @@ async def singUp(
 @router.get("/logout")
 async def logoutRequest(request: Request, response: Response):
     try:
-        logger.debug(f"Request to {request.url.path}")
         response.delete_cookie("access_token", path="/")
-        logger.debug(f"Request to {request.url.path} completed successfully")
         return {"detail": "Logged out successfully"}
     except Exception as e:
         logger.error(f"Error in {request.url.path}, unexpected error {e}")

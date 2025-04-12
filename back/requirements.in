@@ -9,3 +9,5 @@ python-jose[cryptography]
 passlib[bcrypt]
 pytest
 pytest-asyncio
+apscheduler
+aiosqlite

@@ -11,6 +11,19 @@ class OrderStatus(str, Enum):
     CANCELED = "CANCELED"
 
 
+class CartStatus(str, Enum):
+    ADDED = "ADDED"
+    DELETED = "DELETED"
+    ORDERED = "ORDERED"
+    INCLIENT = "INCLIENT"
+
+
+class CartItem(BaseModel):
+    id: int | None
+    itemId: int
+    status: CartStatus
+
+
 class Order(BaseModel):
     id: int
     itemNames: List[str]
@@ -19,6 +32,8 @@ class Order(BaseModel):
     orderDate: datetime
     deliveryDate: datetime
     status: OrderStatus
+    location_id: int
+    reviewed: bool = False
 
 
 class OrderDataPerItem(BaseModel):
@@ -26,3 +41,11 @@ class OrderDataPerItem(BaseModel):
     quantity: int
     total: int
     orderId: int
+
+
+class OrderSummary(BaseModel):
+    itemName: str
+    basePrice: int
+    timesOrdered: int
+    totalSpend: int
+    orderDates: List[datetime]

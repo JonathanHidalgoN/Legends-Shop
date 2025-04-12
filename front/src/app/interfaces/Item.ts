@@ -35,4 +35,15 @@ export interface Item {
   tags: string[];
   effects: Effect[];
   img: string;
+  id: number;
+}
+
+export enum FilterItemSortField {
+  PRICE = "Price",
+  NAME = "Name",
+}
+
+export enum FilterSortOrder {
+  ASC = "asc",
+  DESC = "desc",
 }

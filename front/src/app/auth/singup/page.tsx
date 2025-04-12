@@ -1,6 +1,9 @@
 "use client";
 
 import { useAuthContext } from "@/app/components/AuthContext";
+import { useLoading } from "@/app/components/LoadingRequestContext";
+import { useStaticData } from "@/app/components/StaticDataContext";
+import { showErrorToast } from "@/app/customToast";
 import {
   validateEmailInput,
   validatePasswordInput,
@@ -13,10 +16,11 @@ import {
 } from "@/app/interfaces/Errors";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import toast from "react-hot-toast";
 
 export default function SingupPage() {
   const { singup } = useAuthContext();
+  const { startLoading, stopLoading } = useLoading();
+  const { locations } = useStaticData();
   const router = useRouter();
 
   const [formUserName, setFormUserName] = useState<string>("");
@@ -24,6 +28,7 @@ export default function SingupPage() {
   const [formPassword2, setFormPassword2] = useState<string>("");
   const [formEmail, setFormEmail] = useState<string>("");
   const [formBirthDate, setFormBirthDate] = useState<string>("");
+  const [formLocation, setFormLocation] = useState<string>("");
   const [singupApiError, setSingupApiError] = useState<SingupError | null>(
     null,
   );
@@ -49,8 +54,8 @@ export default function SingupPage() {
 
   function emailInputHandleChange(email: string): void {
     const validInput: ValidationResult = validateEmailInput(email);
-    setFormEmail(email);
     setValidEmailInput(validInput);
+    setFormEmail(email);
   }
 
   function usernameInputHandleChange(username: string): void {
@@ -62,19 +67,23 @@ export default function SingupPage() {
   async function handleSingupSubmit(e: any): Promise<void> {
     e.preventDefault();
     if (formPassword1 !== formPassword2) {
-      toast.error("Passwords do not match!");
+      showErrorToast("Passwords do not match!");
       setDifferentPassword(true);
       return;
     } else {
       setDifferentPassword(false);
     }
     const birthDate = new Date(formBirthDate);
+    const location_id = parseInt(formLocation);
+    startLoading();
     const responseStatus: APISingupResponse = await singup(
       formUserName,
       formPassword1,
       formEmail,
       birthDate,
+      location_id,
     );
+    stopLoading();
     if (responseStatus.status === 200) {
       router.push("/");
       setFormUserName("");
@@ -82,16 +91,23 @@ export default function SingupPage() {
       setFormBirthDate("");
       setFormPassword1("");
       setFormPassword2("");
+      setFormLocation("");
       setSingupApiError(null);
     } else if (responseStatus.status === 400) {
       setSingupApiError(responseStatus.errorType);
     }
   }
 
-  const emptyFields: boolean = formPassword1 === "" || formUserName === ""
-    || formPassword2 === "" || formEmail === "" || formBirthDate === "";
+  const emptyFields: boolean =
+    formPassword1 === "" ||
+    formUserName === "" ||
+    formPassword2 === "" ||
+    formEmail === "" ||
+    formBirthDate === "" ||
+    formLocation === "";
 
-  const canSubmit: boolean = validEmailInput.valid &&
+  const canSubmit: boolean =
+    validEmailInput.valid &&
     validPasswordInput.valid &&
     validUsernameInput.valid &&
     !differentPassword &&
@@ -240,14 +256,40 @@ export default function SingupPage() {
             </span>
           )}
         </div>
+
+        <div className="flex flex-col">
+          <label
+            htmlFor="location"
+            className="mb-1 font-bold text-[var(--orange)]"
+          >
+            Location
+          </label>
+          <select
+            id="location"
+            name="location"
+            value={formLocation}
+            onChange={(e) => setFormLocation(e.target.value)}
+            className={`border p-2 rounded ${singupApiError === SingupError.INVALIDLOCATION ? "border-red-500" : ""}`}
+          >
+            <option value="">Select a location</option>
+            {locations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.country_name}
+              </option>
+            ))}
+          </select>
+          {singupApiError === SingupError.INVALIDLOCATION && (
+            <span className="text-red-500 text-sm mt-1">
+              Please select a valid location
+            </span>
+          )}
+        </div>
+
         <button
           type="submit"
           disabled={!canSubmit}
           className={`w-full bg-[var(--orange)] text-white py-2 rounded transition 
-${!canSubmit
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:opacity-80"
-            }`}
+${!canSubmit ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
         >
           Submit
         </button>

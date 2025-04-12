@@ -3,6 +3,7 @@
 import { Item } from "../interfaces/Item";
 import Image from "next/image";
 import { useCarContext } from "./CarContext";
+import { CartItem } from "../interfaces/Order";
 
 type ItemSummary = {
   count: number;
@@ -15,21 +16,21 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
     carItems,
     deleteOneItemFromCar,
     deleteAllItemFromCar,
-    addOneItemToCar,
+    handleClientAddingItemToCar: addOneItemToCar,
     getTotalCost,
   } = useCarContext();
   const itemCount: Record<string, ItemSummary> = {};
   const totalCost: number = getTotalCost();
 
-  carItems.forEach((item: Item) => {
-    if (item.name in itemCount) {
-      itemCount[item.name].count += 1;
-      itemCount[item.name].total += item.gold.base;
+  carItems.forEach((cartItem: CartItem) => {
+    if (cartItem.item.name in itemCount) {
+      itemCount[cartItem.item.name].count += 1;
+      itemCount[cartItem.item.name].total += cartItem.item.gold.base;
     } else {
-      itemCount[item.name] = {
+      itemCount[cartItem.item.name] = {
         count: 1,
-        total: item.gold.base,
-        itemSample: item,
+        total: cartItem.item.gold.base,
+        itemSample: cartItem.item,
       };
     }
   });
@@ -55,7 +56,13 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
                 />
               </div>
               <div className="flex flex-col">
-                <p className="font-semibold text-sm truncate w-16">
+                <p
+                  className={
+                    tiny
+                      ? `font-semibold text-sm truncate w-16`
+                      : `font-semibold text-sm truncate w-32`
+                  }
+                >
                   {summary.itemSample.name}
                 </p>
                 <p className="text-xs text-gray-600 w-8">
@@ -76,8 +83,8 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
               >
                 +
               </button>
-              <div className="w-8 text-center">
-                <span className="text-sm">{summary.count}</span>
+              <div className="w-8 text-center bg-gray-100 rounded px-2 py-1">
+                <span className="text-sm font-medium">×{summary.count}</span>
               </div>
               <button
                 onClick={() => deleteOneItemFromCar(summary.itemSample)}
@@ -91,8 +98,8 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
               >
                 -
               </button>
-              <span className="text-base font-bold whitespace-nowrap w-16">
-                {summary.total} g
+              <span className="text-base font-bold whitespace-nowrap w-16 text-[var(--yellow)]">
+                {summary.total.toLocaleString()} g
               </span>
             </div>
           </div>
@@ -102,9 +109,9 @@ export default function CarDropDown({ tiny }: { tiny: boolean }) {
       {!tiny && (
         <div className="mt-6 border-t pt-4">
           <div className="flex justify-between mb-4">
-            <span className="font-bold">Total:</span>
-            <span className="font-bold text-[var(--yellow)]">
-              {totalCost} g
+            <span className="font-bold text-lg">Total:</span>
+            <span className="font-bold text-lg text-[var(--yellow)]">
+              {totalCost.toLocaleString()} g
             </span>
           </div>
         </div>

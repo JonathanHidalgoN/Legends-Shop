@@ -16,6 +16,10 @@ from app.data.models.MetaDataTable import MetaDataTable
 from app.data.models.UserTable import UserTable
 from app.data.models.StatsMappingTable import StatsMappingTable
 from app.data.models.OrderTable import OrderTable
+from app.data.models.CartTable import CartTable
+from app.data.models.DeliveryDatesTable import DeliveryDatesTable
+from app.data.models.LocationTable import LocationTable
+from app.data.models.ReviewTable import ReviewTable
 
 from app.envVariables import DATABASE_ALEMBIC_URL
 
@@ -33,6 +37,17 @@ config.set_main_option("sqlalchemy.url", DATABASE_ALEMBIC_URL)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
+
+
+# Role of the Base Class
+# The Base class in SQLAlchemy serves as a registry for all your ORM models.
+# When you define a model by inheriting from Base, it gets registered in
+# Base.metadata. This metadata is what Alembic uses to understand
+# the structure of your database schema. By setting target_metadata = Base.metadata
+# in env.py, you're informing Alembic about the schema structure
+# it should reference during migrations.
+
+
 target_metadata = base.metadata
 # target_metadata = mymodel.Base.metadata
 

@@ -1,10 +1,13 @@
 "use client";
 import React, { createContext, useContext } from "react";
 import { Item } from "../interfaces/Item";
+import { Location } from "../interfaces/Location";
 
 interface StaticDataContextType {
   items: Item[];
   tags: string[];
+  effects: string[];
+  locations: Location[];
 }
 
 const StaticDataContext = createContext<StaticDataContextType | undefined>(
@@ -14,14 +17,18 @@ const StaticDataContext = createContext<StaticDataContextType | undefined>(
 export function StaticDataContextProvider({
   items,
   tags,
+  effects,
+  locations,
   children,
 }: {
   items: Item[];
   tags: string[];
+  effects: string[];
+  locations: Location[];
   children: React.ReactNode;
 }) {
   return (
-    <StaticDataContext.Provider value={{ items, tags }}>
+    <StaticDataContext.Provider value={{ items, tags, effects, locations }}>
       {children}
     </StaticDataContext.Provider>
   );

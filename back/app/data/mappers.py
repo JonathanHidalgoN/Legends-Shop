@@ -3,9 +3,14 @@ from app.data.models.OrderTable import OrderTable
 from app.data.models.UserTable import UserTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.GoldTable import GoldTable
+from app.data.models.LocationTable import LocationTable
+from app.data.models.ReviewTable import ReviewTable, CommentTable
 from app.schemas.AuthSchemas import UserInDB
 from app.schemas.Item import Effects, Gold, Item, Stat
-from app.schemas.Order import Order
+from app.schemas.Order import CartItem, Order
+from app.schemas.Location import Location
+from app.schemas.Review import Review, Comment
+from app.data.models.CartTable import CartTable
 
 
 def mapGoldToGoldTable(gold: Gold) -> GoldTable:
@@ -55,7 +60,7 @@ def mapItemTableToItem(
         tags=tags,
         stats=stats,
         effect=effects,
-        id=0,
+        id=itemTable.id,
         image=itemTable.image,
         imageUrl=itemTable.imageUrl,
         description=itemTable.description,
@@ -87,6 +92,7 @@ def mapUserTableToUserInDB(userTable: UserTable) -> UserInDB:
         goldSpend=userTable.gold_spend,
         currentGold=userTable.current_gold,
         birthDate=userTable.birthdate,
+        locationId=userTable.location_id,
     )
     return userInDB
 
@@ -98,5 +104,74 @@ def mapOrderToOrderTable(order: Order, userId: int) -> OrderTable:
         order_date=order.orderDate,
         delivery_date=order.deliveryDate,
         status=order.status,
+        location_id=order.location_id,
+        reviewed=order.reviewed,
     )
     return orderTable
+
+
+def mapCartTableToCartItem(cartTable: CartTable) -> CartItem:
+    cartItem: CartItem = CartItem(
+        id=cartTable.id, itemId=cartTable.item_id, status=cartTable.status
+    )
+    return cartItem
+
+
+def mapLocationToLocationTable(location: Location) -> LocationTable:
+    locationTable = LocationTable(id=location.id, country_name=location.country_name)
+    return locationTable
+
+
+def mapLocationTableToLocation(locationTable: LocationTable) -> Location:
+    location = Location(id=locationTable.id, country_name=locationTable.country_name)
+    return location
+
+
+def mapReviewTableToReview(reviewTable: ReviewTable) -> Review:
+    comments = [mapCommentTableToComment(comment) for comment in reviewTable.comments]
+    review = Review(
+        id=reviewTable.id,
+        orderId=reviewTable.order_id,
+        itemId=reviewTable.item_id,
+        rating=reviewTable.rating,
+        createdAt=reviewTable.created_at,
+        updatedAt=reviewTable.updated_at,
+        comments=comments,
+    )
+    return review
+
+
+def mapCommentTableToComment(commentTable: CommentTable) -> Comment:
+    comment = Comment(
+        id=commentTable.id,
+        reviewId=commentTable.review_id,
+        userId=commentTable.user_id,
+        content=commentTable.content,
+        createdAt=commentTable.created_at,
+        updatedAt=commentTable.updated_at,
+    )
+    return comment
+
+
+def mapReviewToReviewTable(review: Review) -> ReviewTable:
+    reviewTable = ReviewTable(
+        id=review.id,
+        order_id=review.orderId,
+        item_id=review.itemId,
+        rating=review.rating,
+        created_at=review.createdAt,
+        updated_at=review.updatedAt,
+    )
+    return reviewTable
+
+
+def mapCommentToCommentTable(comment: Comment) -> CommentTable:
+    commentTable = CommentTable(
+        id=comment.id,
+        review_id=comment.reviewId,
+        user_id=comment.userId,
+        content=comment.content,
+        created_at=comment.createdAt,
+        updated_at=comment.updatedAt,
+    )
+    return commentTable

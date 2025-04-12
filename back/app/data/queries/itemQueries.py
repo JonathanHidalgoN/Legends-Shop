@@ -1,5 +1,5 @@
-from typing import Dict, List, Set, Tuple
-from sqlalchemy import Row
+from typing import Dict, List, Sequence, Set, Tuple
+from sqlalchemy import Row, distinct, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.data.models.MetaDataTable import MetaDataTable
@@ -151,9 +151,23 @@ async def getEffectNameWithId(asyncSession: AsyncSession, effectId: int) -> str 
 
 async def getAllTagsTableNames(asyncSession: AsyncSession) -> Set[str]:
     """Return a set of unique tag names from the TagsTable."""
-    result = await asyncSession.execute(select(TagsTable.name))
-    existingTags: Set[str] = set(tag for tag in result.scalars().all())
+    result = await asyncSession.execute(select(distinct(TagsTable.name)))
+    existingTags: Set[str] = set(result.scalars().all())
     return existingTags
+
+
+async def getAllEffectsTableName(asyncSession: AsyncSession) -> Set[str]:
+    """Return a set of unique effect names from the EffectsTable."""
+    result = await asyncSession.execute(select(distinct(EffectsTable.name)))
+    existingEffects: Set[str] = set(result.scalars().all())
+    return existingEffects
+
+
+async def getAllItemNames(asyncSession: AsyncSession) -> Set[str]:
+    """Return a set of item names from the Item table."""
+    result = await asyncSession.execute(select(ItemTable.name))
+    itemNames: Set[str] = set(itemName for itemName in result.scalars().all())
+    return itemNames
 
 
 async def getAllStatsTable(asyncSession: AsyncSession) -> List[StatsTable]:
@@ -208,7 +222,12 @@ async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
 
 async def getSomeItems(asyncSession: AsyncSession) -> List[ItemTable]:
     """Fetch some items from the ItemTable."""
-    result = await asyncSession.execute(select(ItemTable).limit(100))
+    result = await asyncSession.execute(
+        select(ItemTable)
+        .join(GoldTable, GoldTable.id == ItemTable.gold_id)
+        .where((GoldTable.purchaseable) & (GoldTable.base_cost > 0))
+        .limit(300)
+    )
     items: List[ItemTable] = [item for item in result.scalars().all()]
     return items
 
@@ -325,9 +344,20 @@ async def getVersion(asyncSession: AsyncSession) -> str | None:
 
 async def updateVersion(asyncSession: AsyncSession, version: str) -> None:
     """Update the application version in the metadata table."""
-    async with asyncSession.begin():
-        versionRow: MetaDataTable = MetaDataTable(field_name="version", value=version)
-        await asyncSession.merge(versionRow)
+    await asyncSession.execute(
+        update(MetaDataTable)
+        .where(MetaDataTable.field_name == "version")
+        .values(value=version)
+    )
+    await asyncSession.commit()
+
+
+async def insertVersion(asyncSession: AsyncSession, version: str) -> None:
+    """Update the application version in the metadata table."""
+    await asyncSession.execute(
+        insert(MetaDataTable).values(field_name="version", value=version)
+    )
+    await asyncSession.commit()
 
 
 async def getStatsMappingTable(asyncSession: AsyncSession) -> List[StatsMappingTable]:
@@ -344,3 +374,21 @@ async def checkItemExist(asyncSession: AsyncSession, itemName: str):
     if not result:
         return False
     return True
+
+
+async def getAllItemIds(asyncSession: AsyncSession) -> Sequence[int]:
+    """Return a list of location IDs."""
+    result = await asyncSession.execute(select(ItemTable.id))
+    itemIds: Sequence[int] = result.scalars().all()
+    return itemIds
+
+
+# async def updateItemImageHDPathWithItemName(asyncSession:AsyncSession, itemName:str, path:str)->None:
+#     await asyncSession.execute(
+#         update(ItemTable.imageHDPath)
+#         .where(
+#             ItemTable.name == itemName
+#         )
+#         .values(imageHDPath = path)
+#     )
+#     await asyncSession.commit()

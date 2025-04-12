@@ -1,56 +1,21 @@
-from datetime import date
-from typing import List, Optional
-from sqlalchemy import select
+from typing import List, Optional, Tuple
+from sqlalchemy import func, select, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from app.data.models.UserTable import UserTable
+from app.data.models.GoldTable import GoldTable
 from app.data.models.ItemTable import ItemTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
-from app.schemas.Order import Order
+from app.schemas.Order import Order, OrderSummary
+from app.schemas.Order import OrderStatus
 
 
-async def getOrderHistoryQuery(
+async def getOrderHistoryByUserId(
     asyncSession: AsyncSession,
     userId: int,
-    orderStatus: str = "ALL",
-    minOrderDate: Optional[date] = None,
-    maxOrderDate: Optional[date] = None,
-    minDeliveryDate: Optional[date] = None,
-    maxDeliveryDate: Optional[date] = None,
-    sortField: Optional[str] = None,
-    sortOrder: Optional[str] = None,
-    filterItemNames: Optional[List[str]] = None,
 ) -> List[Order]:
-    """
-    Retrieves a filtered and sorted list of orders for a given user.
-
-    This function dynamically builds and executes a SQL query using the provided asynchronous
-    session. It filters the order history based on the user's ID and optional criteria such as
-    order status, order date range, delivery date range, sorting preferences, and a list of item
-    names to filter by. The query joins multiple tables to retrieve relevant order details.
-
-    Args:
-        asyncSession (AsyncSession): The SQLAlchemy asynchronous session to execute the query.
-        userId (int): The ID of the user whose order history is being queried.
-        orderStatus (str, optional): The order status filter. Defaults to "ALL" for no filtering.
-        minOrderDate (Optional[date], optional): The earliest order date (inclusive) to include.
-        maxOrderDate (Optional[date], optional): The latest order date (inclusive) to include.
-        minDeliveryDate (Optional[date], optional): The earliest delivery date (inclusive) to include.
-        maxDeliveryDate (Optional[date], optional): The latest delivery date (inclusive) to include.
-        sortField (Optional[str], optional): The field by which to sort the orders. For example, 'price',
-            'orderDate', 'deliveryDate', or 'quantity'. If not provided, a default sort may be applied.
-        sortOrder (Optional[str], optional): The sort order; typically "asc" for ascending or "desc"
-            for descending. Defaults to ascending if not provided.
-        filterItemNames (Optional[List[str]], optional): A list of item names to filter orders by.
-            Only orders containing these items will be returned. If omitted, no filtering on item names occurs.
-
-    Returns:
-        List[Order]: A list of Order objects matching the specified filters and sorting criteria.
-
-    Raises:
-        SQLAlchemyError: If an error occurs while executing the database query.
-        Exception: For any other errors encountered during query construction or execution.
-    """
+    """ """
     query = (
         select(
             OrderTable.id,
@@ -58,55 +23,18 @@ async def getOrderHistoryQuery(
             OrderTable.order_date,
             OrderTable.delivery_date,
             OrderTable.status,
+            OrderTable.location_id,
+            OrderTable.reviewed,
             ItemTable.name,
             UserTable.userName,
             OrderItemAssociation.c.quantity,
         )
+        .select_from(OrderTable)
         .join(OrderItemAssociation, OrderTable.id == OrderItemAssociation.c.order_id)
         .join(ItemTable, OrderItemAssociation.c.item_id == ItemTable.id)
-        .join(UserTable, UserTable.id == userId)
+        .join(UserTable, UserTable.id == OrderTable.user_id)
         .where(OrderTable.user_id == userId)
-    )
-
-    filters = []
-
-    if orderStatus != "ALL":
-        filters.append(OrderTable.status == orderStatus)
-    if minOrderDate:
-        filters.append(OrderTable.order_date >= minOrderDate)
-    if maxOrderDate:
-        filters.append(OrderTable.order_date <= maxOrderDate)
-    if minDeliveryDate:
-        filters.append(OrderTable.delivery_date >= minDeliveryDate)
-    if maxDeliveryDate:
-        filters.append(OrderTable.delivery_date <= maxDeliveryDate)
-    if filterItemNames:
-        filters.append(ItemTable.name.in_(filterItemNames))
-
-    if filters:
-        query = query.where(*filters)
-
-    if sortField:
-        if sortField == "price":
-            if sortOrder == "desc":
-                query = query.order_by(OrderTable.total.desc())
-            else:
-                query = query.order_by(OrderTable.total.asc())
-        elif sortField == "orderDate":
-            if sortOrder == "desc":
-                query = query.order_by(OrderTable.order_date.desc())
-            else:
-                query = query.order_by(OrderTable.order_date.asc())
-        elif sortField == "deliveryDate":
-            if sortOrder == "desc":
-                query = query.order_by(OrderTable.delivery_date.desc())
-            else:
-                query = query.order_by(OrderTable.delivery_date.asc())
-        elif sortField == "quantity":
-            if sortOrder == "desc":
-                query = query.order_by(OrderItemAssociation.c.quantity.desc())
-            else:
-                query = query.order_by(OrderItemAssociation.c.quantity.asc())
+    ).order_by(OrderTable.order_date.desc())
 
     result = await asyncSession.execute(query)
 
@@ -118,6 +46,8 @@ async def getOrderHistoryQuery(
         order_date,
         delivery_date,
         status,
+        location_id,
+        reviewed,
         item_name,
         user_name,
         quantity,
@@ -131,13 +61,15 @@ async def getOrderHistoryQuery(
                 "orderDate": order_date,
                 "deliveryDate": delivery_date,
                 "status": status,
+                "location_id": location_id,
+                "reviewed": reviewed,
             }
         else:
             orders_dict[order_id]["itemNames"].append(item_name)
     return [Order(**order_data) for order_data in orders_dict.values()]
 
 
-async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> None:
+async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> OrderTable | None:
     """
     Retrieve a single order record by its ID.
 
@@ -158,3 +90,86 @@ async def getOrderWithId(asyncSession: AsyncSession, orderId: int) -> None:
         select(OrderTable).where(OrderTable.id == orderId)
     )
     return result.scalars().first()
+
+
+async def getUniqueItemNamesQuantityAndBasePriceByUserName(
+    asyncSession: AsyncSession, userName: str
+) -> List[OrderSummary]:
+    query = (
+        select(
+            ItemTable.name,
+            GoldTable.base_cost,
+            func.sum(OrderItemAssociation.c.quantity).label("total_quantity"),
+        )
+        .select_from(UserTable)
+        .join(OrderTable, OrderTable.user_id == UserTable.id)
+        .join(OrderItemAssociation, OrderTable.id == OrderItemAssociation.c.order_id)
+        .join(ItemTable, OrderItemAssociation.c.item_id == ItemTable.id)
+        .join(GoldTable, GoldTable.id == ItemTable.id)
+        .where(UserTable.userName == userName)
+        .group_by(ItemTable.name, GoldTable.base_cost)
+        .order_by(ItemTable.name)
+    )
+
+    result = await asyncSession.execute(query)
+    rows = result.all()
+    finalList = []
+
+    for (
+        name,
+        baseCost,
+        totalQuantity,
+    ) in rows:
+        ordSummary = OrderSummary(
+            itemName=name,
+            basePrice=baseCost,
+            timesOrdered=totalQuantity,
+            totalSpend=int(baseCost * totalQuantity),
+            orderDates=[],
+        )
+        finalList.append(ordSummary)
+
+    return finalList
+
+
+async def getOrdersWithStatusAndDeliveryDate(
+    asyncSession: AsyncSession, delivery_date: date, status: OrderStatus
+) -> List[OrderTable]:
+    """Get orders that have a specific status and delivery date"""
+    result = await asyncSession.execute(
+        select(OrderTable).where(
+            (OrderTable.status == status) & (OrderTable.delivery_date == delivery_date)
+        )
+    )
+    return list(result.scalars().all())
+
+
+async def updateOrderStatus(
+    asyncSession: AsyncSession, order_id: int, new_status: OrderStatus
+) -> None:
+    """Update the status of an order"""
+    await asyncSession.execute(
+        update(OrderTable).where(OrderTable.id == order_id).values(status=new_status)
+    )
+    await asyncSession.commit()
+
+
+async def getUserIdByOrderId(
+    asyncSession: AsyncSession,
+    orderId: int,
+) -> Optional[int]:
+    """Get the user_id associated with an order."""
+    result = await asyncSession.execute(
+        select(OrderTable.user_id).where(OrderTable.id == orderId)
+    )
+    return result.scalar_one_or_none()
+
+
+async def markOrderAsReviewed(asyncSession: AsyncSession, orderId: int) -> None:
+    """
+    Mark an order as reviewed by setting the reviewed attribute to True.
+    """
+    await asyncSession.execute(
+        update(OrderTable).where(OrderTable.id == orderId).values(reviewed=True)
+    )
+    await asyncSession.commit()

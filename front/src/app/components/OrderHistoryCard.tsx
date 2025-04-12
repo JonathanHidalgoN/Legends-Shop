@@ -2,13 +2,18 @@
 import React, { useState } from "react";
 import { Order, OrderStatus } from "@/app/interfaces/Order";
 import { useStaticData } from "./StaticDataContext";
-import { cancelOrderRequest } from "../request";
+import { cancelOrderRequest, FromValues } from "../request";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { showErrorToast } from "../customToast";
+import { useRouter } from "next/navigation";
+import { useLoading } from "./LoadingRequestContext";
 
 export default function OrderHistoryCard({ order }: { order: Order }) {
+  const router = useRouter();
   const { items } = useStaticData();
   const [orderStatus, setOrderStatus] = useState<string>(order.status);
+  const { startLoading, stopLoading } = useLoading();
 
   let itemCount: Record<string, number> = {};
   const uniqueNames: string[] = [...new Set(order.itemNames)];
@@ -28,16 +33,20 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
 
   async function cancelOrder() {
     if (order.status !== "PENDING" && order.status !== "SHIPPED") {
-      toast.error("Error canceling order");
+      showErrorToast("Error canceling order");
       return;
     }
-    const response = await cancelOrderRequest(order.id, "client");
-    if (!response.ok) {
-      toast.error("Error canceling order");
+    try {
+      startLoading();
+      await cancelOrderRequest(order.id, FromValues.CLIENT);
+      order.status = OrderStatus.CANCELED;
+      setOrderStatus(order.status);
+      toast.success("Order cancelled succesfully");
+    } catch {
+      return;
+    } finally {
+      stopLoading();
     }
-    order.status = OrderStatus.CANCELED;
-    setOrderStatus(order.status);
-    toast.success("Order cancelled succesfully");
   }
 
   const extraCount = uniqueNames.length - 4;
@@ -130,19 +139,28 @@ export default function OrderHistoryCard({ order }: { order: Order }) {
           </p>
           <p className="mt-1 text-sm font-bold">Status: {orderStatus}</p>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 flex gap-2">
           <button
             className={`px-4 py-2 rounded transition-colors 
-                       w-full md:w-auto ${
-                         orderStatus === "PENDING"
-                           ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                       }`}
+                       w-full md:w-auto ${orderStatus === "PENDING"
+                ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             onClick={cancelOrder}
             disabled={orderStatus !== "PENDING"}
           >
             Cancel Order
           </button>
+          {orderStatus === OrderStatus.DELIVERED && !order.reviewed && (
+            <button
+              className="px-4 py-2 rounded bg-yellow-500 text-white 
+                       hover:bg-yellow-600 transition-all duration-300 
+                       transform hover:scale-105 w-full md:w-auto"
+              onClick={() => router.push(`/review/${order.id}/?isNew=true`)}
+            >
+              Review
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,12 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from app.schemas.Item import Effects, Gold, Item, Stat
-from app.schemas.Order import Order, OrderStatus
+from app.schemas.Order import CartItem, CartStatus, Order, OrderStatus, OrderSummary
+from app.schemas.AuthSchemas import UserInDB
+from app.schemas.profileSchemas import ProfileInfo
+from app.schemas.Review import Review
+from app.schemas.Review import Comment
+from app.schemas.Location import Location
+from app.schemas.DeliveryDate import DeliveryDate
 
 STATIC_DATA_ITEMS_JSON: dict = {
     "type": "item",
@@ -223,21 +229,115 @@ STATIC_DATA_ITEM2: Item = Item(
 
 STATIC_DATA_ORDER1: Order = Order(
     id=1,
-    itemNames=["item1", "item2"],
-    userName="test1",
+    itemNames=["item1"],
+    userName="testUser",
     total=100,
-    orderDate=datetime(2025, 1, 1, 12, 0, 0),
-    deliveryDate=datetime(2026, 1, 1, 12, 0, 0),
+    orderDate=date(2025, 1, 1),
+    deliveryDate=date(2025, 1, 8),
     status=OrderStatus.PENDING,
+    location_id=1,
 )
-
 
 STATIC_DATA_ORDER2: Order = Order(
     id=2,
-    itemNames=["item1", "item2", "item1"],
-    userName="test2",
+    itemNames=["item1", "item2"],
+    userName="testUser",
     total=200,
-    orderDate=datetime(2025, 1, 1, 12, 0, 0),
-    deliveryDate=datetime(2026, 1, 1, 12, 0, 0),
-    status=OrderStatus.CANCELED,
+    orderDate=date(2025, 1, 1),
+    deliveryDate=date(2025, 1, 8),
+    status=OrderStatus.PENDING,
+    location_id=1,
+)
+
+STATIC_DATA_USER_IN_DB1: UserInDB = UserInDB(
+    userName="fakeUsername",
+    email="example@hotmail.com",
+    created=date(2025, 1, 1),
+    lastSingIn=date(2025, 1, 1),
+    goldSpend=5000,
+    currentGold=6000,
+    birthDate=date(2024, 1, 1),
+    password="genericpassword",
+    hashedPassword="hashedgenericpassword",
+)
+
+STATIC_ORDER_SUMMARY1: OrderSummary = OrderSummary(
+    itemName="genericItemName",
+    basePrice=500,
+    timesOrdered=2,
+    totalSpend=1000,
+    orderDates=[datetime(2025, 1, 1)],
+)
+
+STATIC_ORDER_SUMMARY2: OrderSummary = OrderSummary(
+    itemName="genericItemName2",
+    basePrice=200,
+    timesOrdered=3,
+    totalSpend=600,
+    orderDates=[datetime(2022, 1, 1)],
+)
+
+STATIC_PROFILE_INFO1: ProfileInfo = ProfileInfo(
+    user=STATIC_DATA_USER_IN_DB1, ordersInfo=[STATIC_ORDER_SUMMARY1]
+)
+
+STATIC_DATA_TAGS = {"tag1", "tag2", "tag3"}
+STATIC_DATA_EFFECTS = {"effect1", "effect2", "effect3"}
+
+STATIC_ORDER_DATA_DICT = {
+    "id": 0,
+    "itemNames": ["item1", "item2"],
+    "userName": "testUser",
+    "total": 200,
+    "orderDate": datetime.now().isoformat(),
+    "deliveryDate": (datetime.now() + timedelta(days=7)).isoformat(),
+    "status": OrderStatus.PENDING,
+    "location_id": 1,
+    "reviewed": False,
+}
+
+
+STATIC_CART_ITEM1 = CartItem(id=1, itemId=1, status=CartStatus.ADDED)
+
+STATIC_CART_ITEM2 = CartItem(id=2, itemId=2, status=CartStatus.ADDED)
+
+STATIC_COMMENT1 = Comment(
+    id=1,
+    reviewId=1,
+    userId=1,
+    content="Great product!",
+    createdAt=datetime.now(),
+    updatedAt=datetime.now(),
+)
+
+STATIC_REVIEW1 = Review(
+    id=1,
+    orderId=1,
+    itemId=1,
+    rating=5,
+    createdAt=datetime.now(),
+    updatedAt=datetime.now(),
+    comments=[STATIC_COMMENT1],
+)
+
+STATIC_REVIEW2 = Review(
+    id=2,
+    orderId=2,
+    itemId=2,
+    rating=4,
+    createdAt=datetime.now(),
+    updatedAt=datetime.now(),
+    comments=[],
+)
+
+STATIC_LOCATION1 = Location(id=1, country_name="United States")
+
+STATIC_LOCATION2 = Location(id=2, country_name="Canada")
+
+STATIC_DELIVERY_DATE1 = DeliveryDate(
+    itemId=1, locationId=1, deliveryDate=date.today() + timedelta(days=3)
+)
+
+STATIC_DELIVERY_DATE2 = DeliveryDate(
+    itemId=2, locationId=1, deliveryDate=date.today() + timedelta(days=5)
 )

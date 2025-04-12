@@ -21,6 +21,10 @@ class OrderTable(base):
     order_date: Mapped[Date] = mapped_column(Date, nullable=False)
     delivery_date: Mapped[Date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String(30), nullable=False)
+    location_id: Mapped[int] = mapped_column(
+        ForeignKey("location_table.id"), nullable=False
+    )
+    reviewed: Mapped[bool] = mapped_column(nullable=False, default=False)
 
     items: Mapped[list["ItemTable"]] = relationship(
         "ItemTable",

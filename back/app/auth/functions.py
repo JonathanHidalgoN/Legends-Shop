@@ -1,4 +1,3 @@
-from fastapi import Depends
 from passlib.context import CryptContext
 from jose import JWSError, jwt
 from datetime import datetime, timedelta, timezone

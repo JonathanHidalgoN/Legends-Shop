@@ -1,11 +1,36 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Item } from "../interfaces/Item";
+import { CartItem, CartStatus } from "../interfaces/Order";
+import { useAuthContext } from "./AuthContext";
+import { APICartItemResponse } from "../interfaces/APIResponse";
+import {
+  addToCarRequest,
+  deleteCartItemRequest,
+  FromValues,
+  getDeliveryDatesRequest,
+} from "../request";
+import { mapAPICartItemResponseToCartItem } from "../mappers";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "../customToast";
+import { Location } from "../interfaces/Location";
+import { DeliveryDate } from "../interfaces/DeliveryDate";
+import { useStaticData } from "./StaticDataContext";
+import { useLoading } from "./LoadingRequestContext";
 
 interface CarContextType {
-  carItems: Item[];
-  setCarItems: (items: Item[]) => void;
+  carItems: CartItem[];
+  setCarItems: (cartItems: CartItem[]) => void;
   /**
    * Deletes one instance of an item from the cart.
    * @param item - The item to be removed.
@@ -20,7 +45,7 @@ interface CarContextType {
    * Adds one instance of an item to the cart.
    * @param item - The item to add.
    */
-  addOneItemToCar: (item: Item) => void;
+  handleClientAddingItemToCar: (item: Item) => Promise<void>;
   /**
    * Calculates and returns the total cost of all items in the cart.
    * Assumes each item has a cost defined in item.gold.base.
@@ -34,6 +59,10 @@ interface CarContextType {
   cleanCar: () => void;
   currentGold: number | null;
   setCurrentGold: (value: number | null) => void;
+  currentLocation: Location | null;
+  setCurrentLocation: (location: Location) => void;
+  deliveryDates: DeliveryDate[];
+  setDeliveryDates: (dates: DeliveryDate[]) => void;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -43,8 +72,159 @@ export function CarContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [carItems, setCarItems] = useState<Item[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [currentGold, setCurrentGold] = useState<number | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
+  const [deliveryDates, setDeliveryDates] = useState<DeliveryDate[]>([]);
+  const { userName } = useAuthContext();
+  const { locations, items } = useStaticData();
+  const { startLoading, stopLoading } = useLoading();
+
+  let cartItemsNotInServerCount = useRef<number>(0);
+  let pendingServerDeletedCartItems = useRef<CartItem[]>([]);
+  const isAuthenticated: boolean = userName !== null;
+
+  useEffect(() => {
+    if (locations.length > 0) {
+      setCurrentLocation(locations[0]);
+    }
+  }, [locations]);
+
+  useEffect(() => {
+    if (currentLocation && items.length > 0) {
+      const locationId = currentLocation.id;
+      const currentDeliveryLocationId = deliveryDates[0]?.locationId;
+
+      if (
+        !currentDeliveryLocationId ||
+        currentDeliveryLocationId !== locationId
+      ) {
+        fetchDeliveryDates();
+      }
+    }
+  }, [currentLocation, cartItems]);
+
+  async function fetchDeliveryDates() {
+    if (!currentLocation) return;
+
+    try {
+      startLoading();
+      const dates = await getDeliveryDatesRequest(
+        currentLocation.id,
+        FromValues.CLIENT,
+      );
+      setDeliveryDates(dates);
+    } catch (error) {
+      showErrorToast("Failed to fetch delivery dates");
+    } finally {
+      stopLoading();
+    }
+  }
+
+  async function addInClientCarItemsToServer(
+    cartItem: CartItem,
+  ): Promise<CartItem | null> {
+    try {
+      const apiCartItem: APICartItemResponse = {
+        id: null,
+        status: CartStatus.INCLIENT,
+        itemId: cartItem.item.id,
+      };
+      startLoading();
+      const serverCartItemResponse: APICartItemResponse = await addToCarRequest(
+        FromValues.CLIENT,
+        apiCartItem,
+      );
+      const serverCartItem: CartItem = mapAPICartItemResponseToCartItem(
+        serverCartItemResponse,
+        cartItem.item,
+      );
+      return serverCartItem;
+    } catch (error) {
+      return null;
+    } finally {
+      stopLoading();
+    }
+  }
+
+  async function handleClientAddingItemToCar(item: Item): Promise<void> {
+    const warningFlagTurn: boolean = cartItemsNotInServerCount.current % 5 == 0;
+    let cartItem: CartItem = {
+      id: null,
+      status: CartStatus.INCLIENT,
+      item: item,
+    };
+    if (!isAuthenticated) {
+      if (warningFlagTurn) {
+        showWarningToast(`Tip: Login so we can remember your cart`);
+      }
+      cartItemsNotInServerCount.current = cartItemsNotInServerCount.current + 1;
+    } else {
+      const serverCartItem = await addInClientCarItemsToServer(cartItem);
+      if (!serverCartItem) {
+        return;
+      }
+      cartItem = serverCartItem;
+    }
+    setCartItems([...cartItems, cartItem]);
+    if (isAuthenticated || !warningFlagTurn) {
+      showSuccessToast(`${cartItem.item.name} added to cart`);
+    }
+  }
+
+  async function checkIfAddCartItemIdToPendingToDeleteList(cartItem: CartItem) {
+    if (cartItem.status == CartStatus.ADDED && cartItem.id) {
+      if (isAuthenticated) {
+        try {
+          startLoading();
+          await deleteCartItemRequest(FromValues.CLIENT, cartItem.id);
+          return;
+        } catch (error) {
+          //The request display the error msg, then add to the list the item pending to delete
+          //maybe add a timer to try again?
+        } finally {
+          stopLoading();
+        }
+      }
+      pendingServerDeletedCartItems.current.push(cartItem);
+    }
+  }
+
+  useEffect(() => {
+    async function handleLoginWithCartClientItems(): Promise<void> {
+      const updatedItems = await Promise.all(
+        cartItems.map(async (cartItem) => {
+          if (cartItem.status === CartStatus.INCLIENT) {
+            const serverCartItem = await addInClientCarItemsToServer(cartItem);
+            return serverCartItem ? serverCartItem : cartItem;
+          }
+          return cartItem;
+        }),
+      );
+      setCartItems(updatedItems);
+    }
+
+    async function handleLoginWithPendingItemsToDelete(): Promise<void> {
+      const newPending: CartItem[] = [];
+      for (const cartItem of pendingServerDeletedCartItems.current) {
+        if (cartItem.id) {
+          try {
+            await deleteCartItemRequest(FromValues.CLIENT, cartItem.id);
+          } catch (error) {
+            newPending.push(cartItem);
+          }
+        } else {
+          newPending.push(cartItem);
+        }
+      }
+      pendingServerDeletedCartItems.current = newPending;
+    }
+
+    if (isAuthenticated) {
+      handleLoginWithCartClientItems();
+      handleLoginWithPendingItemsToDelete();
+    }
+  }, [isAuthenticated]);
 
   /**
    * Removes one instance of an item from the cart.
@@ -52,9 +232,17 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteOneItemFromCar(item: Item): void {
-    const index = carItems.findIndex((cartItem) => cartItem.name === item.name);
+    const index = cartItems.findIndex((i) => i.item.id === item.id);
     if (index !== -1) {
-      setCarItems([...carItems.slice(0, index), ...carItems.slice(index + 1)]);
+      const selectedCartItem: CartItem | undefined = cartItems.at(index);
+      //Have to do the if for the liner ):
+      if (selectedCartItem) {
+        checkIfAddCartItemIdToPendingToDeleteList(selectedCartItem);
+      }
+      setCartItems([
+        ...cartItems.slice(0, index),
+        ...cartItems.slice(index + 1),
+      ]);
     }
   }
 
@@ -63,15 +251,13 @@ export function CarContextProvider({
    * @param item - The item to remove.
    */
   function deleteAllItemFromCar(item: Item): void {
-    setCarItems(carItems.filter((carItem: Item) => carItem.name !== item.name));
-  }
-
-  /**
-   * Adds one instance of an item to the cart.
-   * @param item - The item to add.
-   */
-  function addOneItemToCar(item: Item): void {
-    setCarItems([...carItems, item]);
+    const itemsToDelete = cartItems.filter(
+      (i: CartItem) => i.item.id === item.id,
+    );
+    itemsToDelete.forEach((cartItem: CartItem) =>
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem),
+    );
+    setCartItems(cartItems.filter((i: CartItem) => i.item.id !== item.id));
   }
 
   /**
@@ -80,28 +266,35 @@ export function CarContextProvider({
    * @returns The total cost as a number.
    */
   function getTotalCost(): number {
-    return carItems.reduce((total, item) => total + item.gold.base, 0);
+    return cartItems.reduce((total, item) => total + item.item.gold.base, 0);
   }
 
   /**
    * Deletes all car items
    */
   function cleanCar(): void {
-    setCarItems([]);
+    cartItems.forEach((cartItem: CartItem) =>
+      checkIfAddCartItemIdToPendingToDeleteList(cartItem),
+    );
+    setCartItems([]);
   }
 
   return (
     <CarContext.Provider
       value={{
-        carItems,
-        setCarItems,
+        carItems: cartItems,
+        setCarItems: setCartItems,
         deleteOneItemFromCar,
         deleteAllItemFromCar,
-        addOneItemToCar,
+        handleClientAddingItemToCar,
         getTotalCost,
         cleanCar,
         currentGold,
         setCurrentGold,
+        currentLocation,
+        setCurrentLocation,
+        deliveryDates,
+        setDeliveryDates,
       }}
     >
       {children}
