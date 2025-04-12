@@ -15,3 +15,4 @@ ALGORITHM: str = os.getenv("ALGORITHM", "Empty")
 ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 LOKI_HOST: str = os.getenv("LOKI_HOST", "Empty")
 LOKI_PORT: str = os.getenv("LOKI_PORT", "Empty")
+USE_LOKI: bool = os.getenv("USE_LOKI", "False").lower() == "true"
