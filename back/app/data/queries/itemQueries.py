@@ -212,6 +212,9 @@ async def getItemTableGivenItemName(
         )
         return None
 
+async def itemTableHasRows(asyncSession: AsyncSession) -> bool:
+    result = await asyncSession.execute(select(ItemTable).limit(1))
+    return result.first() is not None
 
 async def getItems(asyncSession: AsyncSession) -> List[ItemTable]:
     """Fetch all items from the ItemTable."""
