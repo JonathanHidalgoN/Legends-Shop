@@ -4,6 +4,7 @@ uvicorn[standard]
 sqlalchemy
 asyncpg
 alembic
+slowapi
 httpx
 python-jose[cryptography] 
 passlib[bcrypt]
@@ -11,3 +12,4 @@ pytest
 pytest-asyncio
 apscheduler
 aiosqlite
+python-logging-loki
