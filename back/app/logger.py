@@ -6,6 +6,8 @@ import asyncio
 from logging.handlers import RotatingFileHandler
 import traceback
 from typing import Any, Optional, Callable
+import logging_loki
+from envVariables import LOKI_HOST,LOKI_PORT 
 
 # ===== CONFIGURATION CONSTANTS =====
 # Directory where log files will be stored
@@ -113,6 +115,12 @@ file_handler = RotatingFileHandler(
 )
 file_handler.setLevel(DEFAULT_LOG_LEVEL)
 
+loki_handler = logging_loki.LokiHandler(
+    url=f"http://{LOKI_HOST}:{LOKI_PORT}/loki/api/v1/push",
+    tags={"application": "python-backend"},
+    version="1"
+)
+
 # Create formatter with detailed information
 # %(asctime)s - Timestamp
 # %(name)s - Logger name
@@ -131,7 +139,7 @@ file_handler.setFormatter(formatter)
 # Add handlers to logger
 logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
-
+logger.addHandler(loki_handler)
 
 def logMethod(func: Callable) -> Callable:
     """
