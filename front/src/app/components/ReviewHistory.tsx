@@ -177,7 +177,7 @@ export default function ReviewHistory() {
         </>
       ) : (
         <div className="text-center text-gray-500 py-12 text-lg">
-          You haven't written any reviews yet.
+          You haven&apos;t written any reviews yet.
         </div>
       )}
     </div>

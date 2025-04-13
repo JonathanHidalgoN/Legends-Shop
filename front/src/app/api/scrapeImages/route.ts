@@ -38,12 +38,12 @@ async function downloadHDImageParallel(
   try {
     await fs.access(filePath);
     return;
-  } catch {}
+  } catch { }
 
   await downloadItemHDImage(itemName, destDir, imageFile);
 }
 
-export async function getHDItemImages(itemNames: string[]): Promise<void> {
+async function getHDItemImages(itemNames: string[]): Promise<void> {
   const destDir = path.join(process.cwd(), "public", "hd_images");
   await fs.mkdir(destDir, { recursive: true });
 

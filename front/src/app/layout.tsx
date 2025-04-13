@@ -43,6 +43,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  console.log("Server log: layout init")
   let items: Item[] = [];
   let tags: string[] = [];
   let effects: string[] = [];
@@ -55,6 +56,7 @@ export default async function RootLayout({
     effects = await getAllEffectNamesRequest(FromValues.SERVER);
     locations = await getAllLocationsRequest(FromValues.SERVER);
   } catch (error) {
+    console.error("Data fetching error in RootLayout:", error);
     redirect("/error/wrong");
   }
 

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import SelectedItems from "../components/SelectedItems";
 import { useStaticData } from "../components/StaticDataContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,11 +17,13 @@ export default function ItemsPage() {
   }, [items, tags, effects, router]);
 
   return (
-    <SelectedItems
-      items={items}
-      tags={tags}
-      effects={effects}
-      initialSearch={searchQuery}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <SelectedItems
+        items={items}
+        tags={tags}
+        effects={effects}
+        initialSearch={searchQuery}
+      />
+    </Suspense>
   );
 }

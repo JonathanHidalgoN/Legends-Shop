@@ -69,7 +69,7 @@ export default function ReviewHistoryCard({ review }: { review: Review }) {
         {review.comments && review.comments.length > 0 && (
           <div className="mt-1">
             <p className="text-sm text-gray-700 italic">
-              "{review.comments[0].content}"
+              {review.comments[0].content}
             </p>
           </div>
         )}

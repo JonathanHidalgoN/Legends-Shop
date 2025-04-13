@@ -22,9 +22,11 @@ export function useSWRWithErrorRedirect<T>(
   configFunction: () => any,
   swrConfig?: SWRConfiguration
 ) {
-  const swrResult = swrConfig
-    ? useSWR<T>(configFunction, requestFunction, swrConfig)
-    : useSWR<T>(configFunction, requestFunction);
+  const swrResult = useSWR<T>(
+    configFunction,
+    requestFunction,
+    swrConfig || undefined
+  );
 
   const { data, mutate, error } = swrResult;
   useErrorRedirect(error);
