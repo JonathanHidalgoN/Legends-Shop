@@ -57,7 +57,8 @@ export default async function RootLayout({
     locations = await getAllLocationsRequest(FromValues.SERVER);
   } catch (error) {
     console.error("Data fetching error in RootLayout:", error);
-    redirect("/error/wrong");
+    return (<div>Error</div>)
+    // redirect("/error/wrong");
   }
 
   return (
