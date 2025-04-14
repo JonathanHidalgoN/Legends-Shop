@@ -41,15 +41,16 @@ export default async function RootLayout({
     tags = await allTagsRequet(FromValues.SERVER);
     effects = await getAllEffectNamesRequest(FromValues.SERVER);
     locations = await getAllLocationsRequest(FromValues.SERVER);
-    const itemNames: string[] = items.map((item: Item) => (item.name));
     try {
+      const itemNames: string[] = items.map((item: Item) => item.name);
+
       await getHDItemImages(itemNames);
+
       items.forEach((item: Item) => {
-        item.img = checkIfHDImageAvailable(item.name, "");
-      })
-    }
-    catch (error) {
-      console.error("Error changing the image to hd of item", error);
+        item.img = checkIfHDImageAvailable(item.name, item.img);
+      });
+    } catch (error) {
+      console.error("Error updating HD images for items:", error);
     }
   } catch (error) {
     console.error("Data fetching error in RootLayout:", error);
