@@ -16,27 +16,13 @@ import {
   someItemsRequest,
 } from "./request";
 import { mapAPIItemResponseToItem } from "./mappers";
-import fs from "fs";
-import path from "path";
 import { LoadingProvider } from "./components/LoadingRequestContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { checkIfHDImageAvailable, getHDItemImages } from "./serverFunctions";
 
 export const metadata = {
   title: "Legends Shop",
 };
-
-function checkIfHDImageAvailable(
-  itemName: string,
-  serverImagePath: string,
-): string {
-  const fileName = `${itemName}.png`;
-  const filePath = path.join(process.cwd(), "public", "hd_images", fileName);
-  if (fs.existsSync(filePath)) {
-    return `/hd_images/${fileName}`;
-  } else {
-    return serverImagePath;
-  }
-}
 
 export default async function RootLayout({
   children,
@@ -55,10 +41,19 @@ export default async function RootLayout({
     tags = await allTagsRequet(FromValues.SERVER);
     effects = await getAllEffectNamesRequest(FromValues.SERVER);
     locations = await getAllLocationsRequest(FromValues.SERVER);
+    const itemNames: string[] = items.map((item: Item) => (item.name));
+    try {
+      await getHDItemImages(itemNames);
+      items.forEach((item: Item) => {
+        item.img = checkIfHDImageAvailable(item.name, "");
+      })
+    }
+    catch (error) {
+      console.error("Error changing the image to hd of item", error);
+    }
   } catch (error) {
     console.error("Data fetching error in RootLayout:", error);
-    return (<div>Error</div>)
-    // redirect("/error/wrong");
+    redirect("/error/wrong");
   }
 
   return (
