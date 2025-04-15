@@ -14,6 +14,7 @@ class SchedulerService:
         self.itemsLoader = None
 
         """Initialize the ItemsLoader with a database session"""
+
     async def initializeItemsLoader(self, db):
         self.itemsLoader = ItemsLoader(db)
 

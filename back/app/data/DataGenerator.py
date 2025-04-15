@@ -23,12 +23,13 @@ from app.customExceptions import (
     OrderItemAssociationError,
     ReviewGenerationError,
     CommentGenerationError,
-    DataGeneratorException
+    DataGeneratorException,
 )
 from app.logger import logMethod
 
+
 class DataGenerator:
-    def __init__(self, dbSession: AsyncSession, items:List[Item]):
+    def __init__(self, dbSession: AsyncSession, items: List[Item]):
         self.dbSession = dbSession
         self.items = items
         self.itemIds = [item.id for item in items]
@@ -39,14 +40,16 @@ class DataGenerator:
     @logMethod
     async def insertDummyLocations(self):
         try:
-            locations : List[str] = ["Mexico","Korea","Japan","China","USA"]
+            locations: List[str] = ["Mexico", "Korea", "Japan", "China", "USA"]
             locationId = 1
             for location in locations:
                 await createLocation(self.dbSession, location)
                 self.locationIds.append(locationId)
-                locationId +=1
+                locationId += 1
         except SQLAlchemyError as e:
-            raise LocationGenerationError(f"Failed to generate locations: {str(e)}") from e
+            raise LocationGenerationError(
+                f"Failed to generate locations: {str(e)}"
+            ) from e
 
     @logMethod
     async def insertFakeUsers(self):
@@ -61,7 +64,7 @@ class DataGenerator:
                     currentGold=500,
                     birthDate=date(1990, 1, 1),
                     hashedPassword="TestPassword123!",
-                    locationId=1
+                    locationId=1,
                 ),
                 UserInDB(
                     userName="testuser2",
@@ -72,7 +75,7 @@ class DataGenerator:
                     currentGold=1000,
                     birthDate=date(1995, 5, 5),
                     hashedPassword="TestPassword456!",
-                    locationId=2
+                    locationId=2,
                 ),
                 UserInDB(
                     userName="testuser3",
@@ -83,10 +86,10 @@ class DataGenerator:
                     currentGold=300,
                     birthDate=date(1985, 10, 10),
                     hashedPassword="TestPassword789!",
-                    locationId=3
-                )
+                    locationId=3,
+                ),
             ]
-            userId = 1 
+            userId = 1
             for user in users:
                 if not await checkUserExistInDB(self.dbSession, user.userName):
                     await insertUser(self.dbSession, user)
@@ -122,9 +125,9 @@ class DataGenerator:
                     deliveryDate=deliveryDate,
                     status=status,
                     location_id=locationId,
-                    reviewed=random.choice([True, False])
+                    reviewed=random.choice([True, False]),
                 )
-                
+
                 row: OrderTable = mapOrderToOrderTable(order, userId)
                 self.dbSession.add(row)
                 await self.dbSession.flush()
@@ -152,7 +155,9 @@ class DataGenerator:
                     ins = insert(OrderItemAssociation).values(**record)
                     await self.dbSession.execute(ins)
         except SQLAlchemyError as e:
-            raise OrderItemAssociationError(f"Failed to generate order-item associations: {str(e)}") from e
+            raise OrderItemAssociationError(
+                f"Failed to generate order-item associations: {str(e)}"
+            ) from e
 
     @logMethod
     async def insertFakeReviewsAndComments(self):
@@ -160,26 +165,27 @@ class DataGenerator:
             for _ in range(500):
                 orderId = random.choice(self.orderIds)
                 userId = random.choice(self.userIds)
-                
+
                 orderItems = await self.dbSession.execute(
-                    select(OrderItemAssociation).where(OrderItemAssociation.c.order_id == orderId)
+                    select(OrderItemAssociation).where(
+                        OrderItemAssociation.c.order_id == orderId
+                    )
                 )
                 orderItems = list(orderItems.scalars().all())
                 if not orderItems:
                     continue
                 itemId = random.choice(orderItems).item_id
                 rating = random.randint(1, 5)
-                
+
                 try:
                     reviewId = await addReview(
-                        self.dbSession,
-                        order_id=orderId,
-                        item_id=itemId,
-                        rating=rating
+                        self.dbSession, order_id=orderId, item_id=itemId, rating=rating
                     )
                 except SQLAlchemyError as e:
-                    raise ReviewGenerationError(f"Failed to generate review: {str(e)}") from e
-                
+                    raise ReviewGenerationError(
+                        f"Failed to generate review: {str(e)}"
+                    ) from e
+
                 if random.random() < 0.7:
                     comments = [
                         "Great product, would buy again!",  # Positive feedback, indicates satisfaction
@@ -230,26 +236,30 @@ class DataGenerator:
                         "Extremely dissatisfied",  # Strong negative feedback on the overall experience
                         "Would definitely purchase again in the future",  # Positive indication of future engagement
                         "Will not be buying from this seller again",  # Negative indication of future engagement
-                        "The packaging was excellent", # Positive feedback on presentation
-                        "The packaging was damaged", # Negative feedback on presentation
-                        "Arrived much sooner than expected", # Very positive feedback on delivery speed
-                        "Delivery took much longer than stated", # Negative feedback on delivery time
-                        "The instructions were clear and easy to follow", # Positive feedback on usability documentation
-                        "The instructions were confusing and unhelpful", # Negative feedback on usability documentation
+                        "The packaging was excellent",  # Positive feedback on presentation
+                        "The packaging was damaged",  # Negative feedback on presentation
+                        "Arrived much sooner than expected",  # Very positive feedback on delivery speed
+                        "Delivery took much longer than stated",  # Negative feedback on delivery time
+                        "The instructions were clear and easy to follow",  # Positive feedback on usability documentation
+                        "The instructions were confusing and unhelpful",  # Negative feedback on usability documentation
                     ]
                     commentContent = random.choice(comments)
-                    
+
                     try:
                         await addComment(
                             self.dbSession,
                             review_id=reviewId,
                             user_id=userId,
-                            content=commentContent
+                            content=commentContent,
                         )
                     except SQLAlchemyError as e:
-                        raise CommentGenerationError(f"Failed to generate comment: {str(e)}") from e
+                        raise CommentGenerationError(
+                            f"Failed to generate comment: {str(e)}"
+                        ) from e
         except SQLAlchemyError as e:
-            raise ReviewGenerationError(f"Failed to generate reviews and comments: {str(e)}") from e
+            raise ReviewGenerationError(
+                f"Failed to generate reviews and comments: {str(e)}"
+            ) from e
 
     @logMethod
     async def generateAllData(self):
@@ -264,7 +274,7 @@ class DataGenerator:
         5. Insert order-item associations
         6. Insert reviews and comments
         7. Add dummy data flag
-        
+
         Raises:
             DataGeneratorException: If any step fails, with details about which step failed
         """
@@ -281,9 +291,6 @@ class DataGenerator:
         except DataGeneratorException as e:
             raise DataGeneratorException(f"Data generation failed: {str(e)}") from e
         except SQLAlchemyError as e:
-            raise DataGeneratorException(f"Database error during data generation: {str(e)}") from e
-
-
-            
-
-
+            raise DataGeneratorException(
+                f"Database error during data generation: {str(e)}"
+            ) from e

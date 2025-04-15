@@ -39,7 +39,7 @@ async function downloadHDImageParallel(
   try {
     await fsPromises.access(filePath);
     return;
-  } catch { }
+  } catch {}
 
   await downloadItemHDImage(itemName, destDir, imageFile);
 }
@@ -54,7 +54,6 @@ export async function getHDItemImages(itemNames: string[]): Promise<void> {
   );
   await Promise.all(downloadPromises);
 }
-
 
 export function checkIfHDImageAvailable(
   itemName: string,

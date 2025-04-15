@@ -23,7 +23,7 @@ from app.customExceptions import SameVersionUpdateError
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler = SchedulerService()
-    
+
     async with AsyncSessionLocal() as db:
         try:
             logger.info("Initializing ItemsLoader...")
@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
             await dataGenerator.generateAllData()
         except Exception as e:
             logger.error(f"Error during startup data generation: {str(e)}")
-    
+
     scheduler.start()
     yield
     scheduler.scheduler.shutdown()
@@ -58,12 +58,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 
+
 @app.exception_handler(429)
 async def tooManyRequestHanlder(request, exc):
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests"},
     )
+
 
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
@@ -93,6 +95,7 @@ app.include_router(deliveryDates.router, prefix="/delivery_dates")
 app.include_router(locations.router, prefix="/locations")
 app.include_router(reviews.router, prefix="/review")
 app.include_router(health.router, prefix="/health")
+
 
 @app.get("/testGetVersion")
 async def testUpdateVersion(db: AsyncSession = Depends(AsyncSessionLocal)):

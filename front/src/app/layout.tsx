@@ -29,7 +29,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("Server log: layout init")
+  console.log("Server log: layout init");
   let items: Item[] = [];
   let tags: string[] = [];
   let effects: string[] = [];

@@ -36,7 +36,7 @@ export default function ReviewPage({
   const router = useRouter();
   const { items } = useStaticData();
   const { userName } = useAuthContext();
-  
+
   const [reviews, setReviews] = useState<{
     [key: string]: { rating: number; comment: string };
   }>({});
@@ -47,14 +47,13 @@ export default function ReviewPage({
 
   const { data: orderData } = useSWRWithErrorRedirect<APIOrderResponse[]>(
     getOrderHistoryWithCredentialsRequest,
-    () => ["orders-client", FromValues.CLIENT]
+    () => ["orders-client", FromValues.CLIENT],
   );
 
   const { data: reviewData, mutate: mutateReviews } = useSWRWithErrorRedirect<
     APIReviewResponse[]
-  >(
-    getUserReviewsRequest,
-    () => (isNew ? null : ["reviews", FromValues.CLIENT]),
+  >(getUserReviewsRequest, () =>
+    isNew ? null : ["reviews", FromValues.CLIENT],
   );
 
   useEffect(() => {
@@ -91,7 +90,7 @@ export default function ReviewPage({
   }, [isNew, reviewData, orderId, items]);
 
   if (!orderData || !reviewData) {
-    return <LoadingPage />
+    return <LoadingPage />;
   }
 
   const order = orderData
@@ -158,15 +157,15 @@ export default function ReviewPage({
             updatedAt: new Date(),
             comments: review.comment
               ? [
-                {
-                  id: 0, // Will be set by backend
-                  reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
-                  userId: 0, // Will be set by backend
-                  content: review.comment,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              ]
+                  {
+                    id: 0, // Will be set by backend
+                    reviewId: isNew ? 0 : existingReviewIds[itemName] || 0, // Use existing review ID if updating
+                    userId: 0, // Will be set by backend
+                    content: review.comment,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                  },
+                ]
               : [],
           };
 
@@ -255,10 +254,11 @@ export default function ReviewPage({
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting || Object.keys(reviews).length === 0}
-                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${isSubmitting || Object.keys(reviews).length === 0
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-[var(--orange)] text-white hover:bg-opacity-90"
-                    }`}
+                  className={`px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    isSubmitting || Object.keys(reviews).length === 0
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                  }`}
                 >
                   {isSubmitting
                     ? "Submitting..."

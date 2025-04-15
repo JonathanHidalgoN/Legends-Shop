@@ -65,7 +65,7 @@ async def createLocation(asyncSession: AsyncSession, countryName: str) -> None:
         select(LocationTable).where(LocationTable.country_name == countryName)
     )
     existing_location = result.scalar_one_or_none()
-    
+
     if not existing_location:
         location = LocationTable(country_name=countryName)
         asyncSession.add(location)

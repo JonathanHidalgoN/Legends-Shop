@@ -38,7 +38,7 @@ async function downloadHDImageParallel(
   try {
     await fs.access(filePath);
     return;
-  } catch { }
+  } catch {}
 
   await downloadItemHDImage(itemName, destDir, imageFile);
 }

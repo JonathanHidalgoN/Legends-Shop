@@ -161,8 +161,9 @@ export default function SingupPage() {
             placeholder="Email"
             value={formEmail}
             onChange={(e) => emailInputHandleChange(e.target.value)}
-            className={`border p-2 rounded ${singupApiError || !validEmailInput.valid ? "border-red-500" : ""
-              }`}
+            className={`border p-2 rounded ${
+              singupApiError || !validEmailInput.valid ? "border-red-500" : ""
+            }`}
           />
           {!validEmailInput.valid && (
             <span className="text-red-500 text-sm mt-1">
@@ -247,8 +248,9 @@ export default function SingupPage() {
             type="date"
             value={formBirthDate}
             onChange={(e) => setFormBirthDate(e.target.value)}
-            className={`border p-2 rounded ${singupApiError ? "border-red-500" : ""
-              }`}
+            className={`border p-2 rounded ${
+              singupApiError ? "border-red-500" : ""
+            }`}
           />
           {singupApiError === SingupError.INVALIDDATE && (
             <span className="text-red-500 text-sm mt-1">

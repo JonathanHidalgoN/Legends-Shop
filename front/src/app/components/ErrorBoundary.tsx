@@ -50,8 +50,8 @@ class ErrorBoundary extends Component<Props, State> {
             Oops, something went wrong!
           </h1>
           <p className="text-[var(--gray)] max-w-md mb-4">
-            We&apos;re having trouble loading this page right now. Please try again later
-            or contact support if the problem continues.
+            We&apos;re having trouble loading this page right now. Please try
+            again later or contact support if the problem continues.
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -67,4 +67,4 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-export default ErrorBoundary; 
+export default ErrorBoundary;

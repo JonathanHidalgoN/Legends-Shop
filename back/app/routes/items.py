@@ -25,12 +25,13 @@ def getItemsLoader(
 ) -> ItemsLoader:
     return ItemsLoader(db)
 
+
 @logMethod
 async def staticDataValidation(
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
-    db: AsyncSession = Depends(database.getDbSession)
-)->None:
-    itemsExist : bool = await itemTableHasRows(db)
+    db: AsyncSession = Depends(database.getDbSession),
+) -> None:
+    itemsExist: bool = await itemTableHasRows(db)
     if itemsExist:
         return
     else:
@@ -42,7 +43,8 @@ async def staticDataValidation(
 @router.get("/all", response_model=List[Item])
 async def getAllItems(
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
-    request: Request, db: AsyncSession = Depends(database.getDbSession)
+    request: Request,
+    db: AsyncSession = Depends(database.getDbSession),
 ):
     items: List[Item] = []
     try:
@@ -58,7 +60,8 @@ async def getAllItems(
 @router.get("/some", response_model=List[Item])
 async def getSomeItems(
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
-    request: Request, db: AsyncSession = Depends(database.getDbSession)
+    request: Request,
+    db: AsyncSession = Depends(database.getDbSession),
 ):
     items: List[Item] = []
     try:

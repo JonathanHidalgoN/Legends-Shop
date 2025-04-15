@@ -20,12 +20,12 @@ export function useErrorRedirect(error: APIError) {
 export function useSWRWithErrorRedirect<T>(
   requestFunction: (from: FromValues) => Promise<T>,
   configFunction: () => any,
-  swrConfig?: SWRConfiguration
+  swrConfig?: SWRConfiguration,
 ) {
   const swrResult = useSWR<T>(
     configFunction,
     requestFunction,
-    swrConfig || undefined
+    swrConfig || undefined,
   );
 
   const { data, mutate, error } = swrResult;

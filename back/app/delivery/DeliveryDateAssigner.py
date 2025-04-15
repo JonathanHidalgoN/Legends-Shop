@@ -48,19 +48,17 @@ class DeliveryDateAssigner:
         """
         try:
             lastUpdateStr = await getMetaData(self.dbSession, "delivery_date_updated")
-            
+
             if not lastUpdateStr or date.fromisoformat(lastUpdateStr) != date.today():
                 await self.assignDeliveryDates()
-                
+
                 await addMetaData(
-                    self.dbSession,
-                    "delivery_date_updated",
-                    date.today().isoformat()
+                    self.dbSession, "delivery_date_updated", date.today().isoformat()
                 )
                 logger.info("Delivery dates updated and metadata recorded")
             else:
                 logger.info("Delivery dates are already up to date")
-                
+
         except Exception as e:
             raise DeliveryDateAssignerException(
                 f"Failed to check and update delivery dates: {str(e)}"
@@ -88,10 +86,12 @@ class DeliveryDateAssigner:
                         "location_id": locationId,
                         "days_plus": daysPlus,
                     }
-                    ins = pg_insert(ItemLocationDeliveryAssociation).values(**association)
+                    ins = pg_insert(ItemLocationDeliveryAssociation).values(
+                        **association
+                    )
                     ins = ins.on_conflict_do_update(
-                        constraint='item_location_delivery_association_pkey',
-                        set_=dict(days_plus=daysPlus)
+                        constraint="item_location_delivery_association_pkey",
+                        set_=dict(days_plus=daysPlus),
                     )
                     await self.dbSession.execute(ins)
 

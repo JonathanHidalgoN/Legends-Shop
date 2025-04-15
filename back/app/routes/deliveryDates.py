@@ -28,6 +28,8 @@ async def getDeliveryDates(
         return await assigner.getItemDeliveryDates(location_id)
     except DeliveryDateAssignerException as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 #
 #
 # @router.post("/populate", include_in_schema=False)
