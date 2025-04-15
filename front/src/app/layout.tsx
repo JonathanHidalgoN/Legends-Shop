@@ -14,8 +14,6 @@ export const metadata = {
   title: "Legends Shop",
 };
 
-export const revalidate = 3600; // Revalidate every hour
-
 export default async function RootLayout({
   children,
 }: Readonly<{

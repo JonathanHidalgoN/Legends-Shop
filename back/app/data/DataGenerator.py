@@ -3,7 +3,6 @@ from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 import random
 from datetime import date, timedelta, datetime
-from passlib.context import CryptContext
 from sqlalchemy.sql import select
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -102,7 +101,7 @@ class DataGenerator:
         return arg.pop(random.randrange(len(arg)))
 
     @logMethod
-    async def insertFakeOrders(self):
+    async def insertFakeOrders(self, userIds, locationIds):
         try:
             orderId = 1
             statuses = list(OrderStatus)
@@ -114,8 +113,8 @@ class DataGenerator:
                 itemNames = [f"Item {random.randint(1, 100)}" for _ in range(numItems)]
                 total = random.randint(100, 5000)
                 status = random.choice(statuses)
-                userId = random.choice(self.userIds)
-                locationId = random.choice(self.locationIds)
+                userId = random.choice(userIds)
+                locationId = random.choice(locationIds)
                 order = Order(
                     id=orderId,
                     itemNames=itemNames,
@@ -137,11 +136,11 @@ class DataGenerator:
             raise OrderGenerationError(f"Failed to generate orders: {str(e)}") from e
 
     @logMethod
-    async def insertFakeOrderItemAssociation(self):
+    async def insertFakeOrderItemAssociation(self, orderIds, itemIds):
         try:
-            for orderId in self.orderIds:
+            for orderId in orderIds:
                 numberOfItemsInOrder = random.randint(1, 5)
-                availableItemIds = self.itemIds.copy()
+                availableItemIds = itemIds.copy()
                 for _ in range(numberOfItemsInOrder):
                     if not availableItemIds:
                         break
@@ -160,11 +159,11 @@ class DataGenerator:
             ) from e
 
     @logMethod
-    async def insertFakeReviewsAndComments(self):
+    async def insertFakeReviewsAndComments(self, orderIds, userIds):
         try:
             for _ in range(500):
-                orderId = random.choice(self.orderIds)
-                userId = random.choice(self.userIds)
+                orderId = random.choice(orderIds)
+                userId = random.choice(userIds)
 
                 orderItems = await self.dbSession.execute(
                     select(OrderItemAssociation).where(
@@ -284,9 +283,9 @@ class DataGenerator:
         try:
             await self.insertDummyLocations()
             await self.insertFakeUsers()
-            await self.insertFakeOrders()
-            await self.insertFakeOrderItemAssociation()
-            await self.insertFakeReviewsAndComments()
+            await self.insertFakeOrders(self.userIds, self.locationIds)
+            await self.insertFakeOrderItemAssociation(self.orderIds, self.itemIds)
+            await self.insertFakeReviewsAndComments(self.orderIds, self.userIds)
             await addMetaData(self.dbSession, "dummyData", "true")
         except DataGeneratorException as e:
             raise DataGeneratorException(f"Data generation failed: {str(e)}") from e

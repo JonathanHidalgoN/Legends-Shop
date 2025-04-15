@@ -3,21 +3,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 from app.data.database import AsyncSessionLocal
 from app.data.ItemsLoader import ItemsLoader
-from app.data.DataGenerator import DataGenerator
-from app.data.utils import getAllItemTableRowsAnMapToItems
-from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
-from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
-from fastapi.middleware.cors import CORSMiddleware
-from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
+from app.data.SystemInitializer import SystemInitializer
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
 from app.rateLimiter import limiter
-from app.routes import reviews
+from app.routes import reviews, items, auth, orders, profile, cart, deliveryDates, locations
 from app.routes.RequestLoggingMiddleware import RequestLoggingMiddleware
 from app.routes.SecurityHeadersMiddleware import SecurityHeadersMiddleware
 from app.routes import health
 from app.logger import logger
-from app.customExceptions import SameVersionUpdateError
+from app.customExceptions import SystemInitializationError
+from fastapi.middleware.cors import CORSMiddleware
+from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 
 
 @asynccontextmanager
@@ -26,29 +23,17 @@ async def lifespan(app: FastAPI):
 
     async with AsyncSessionLocal() as db:
         try:
-            logger.info("Initializing ItemsLoader...")
-            await scheduler.initializeItemsLoader(db)
-            if scheduler.itemsLoader is None:
-                logger.error("Failed to initialize ItemsLoader")
-                raise Exception("ItemsLoader initialization failed")
-            try:
-                logger.info("Updating items from external source...")
-                await scheduler.itemsLoader.updateItems()
-            except SameVersionUpdateError as e:
-                pass
-            logger.info("Assigning delivery dates...")
-            assigner = DeliveryDateAssigner(db)
-            await assigner.checkAndUpdateDeliveryDates()
-            logger.info("Fetching items for data generation...")
-            items = await getAllItemTableRowsAnMapToItems(db)
-            if not items:
-                logger.error("No items found in database")
-                raise Exception("No items available for data generation")
-            logger.info("Generating initial data...")
-            dataGenerator = DataGenerator(db, items)
-            await dataGenerator.generateAllData()
+            logger.info("Starting system initialization...")
+            system_initializer = SystemInitializer(db)
+            await system_initializer.initializeSystem()
+            logger.info("System initialization completed successfully")
+            scheduler.itemsLoader = system_initializer.itemsLoader
+        except SystemInitializationError as e:
+            logger.error(f"System initialization failed: {str(e)}")
+            raise
         except Exception as e:
-            logger.error(f"Error during startup data generation: {str(e)}")
+            logger.error(f"Unexpected error during startup: {str(e)}")
+            raise
 
     scheduler.start()
     yield

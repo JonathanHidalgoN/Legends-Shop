@@ -162,3 +162,8 @@ class ReviewGenerationError(DataGeneratorException):
 
 class CommentGenerationError(DataGeneratorException):
     pass
+
+
+class SystemInitializationError(Exception):
+    """Raised when system initialization fails"""
+    pass
