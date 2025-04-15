@@ -59,10 +59,17 @@ async def getLocationByCountryName(
 
 
 async def createLocation(asyncSession: AsyncSession, countryName: str) -> None:
-    """Create a new location."""
-    location = LocationTable(country_name=countryName)
-    asyncSession.add(location)
-    await asyncSession.flush()
+    """Create a new location if it doesn't exist."""
+    # Check if location exists
+    result = await asyncSession.execute(
+        select(LocationTable).where(LocationTable.country_name == countryName)
+    )
+    existing_location = result.scalar_one_or_none()
+    
+    if not existing_location:
+        location = LocationTable(country_name=countryName)
+        asyncSession.add(location)
+        await asyncSession.flush()
 
 
 async def updateLocation(
