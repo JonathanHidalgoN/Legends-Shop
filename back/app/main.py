@@ -1,13 +1,13 @@
-from typing import Annotated
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
-from app.data import database
+from app.data.database import AsyncSessionLocal
 from app.data.ItemsLoader import ItemsLoader
+from app.data.DataGenerator import DataGenerator
+from app.data.utils import getAllItemTableRowsAnMapToItems
 from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
-from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
 from app.rateLimiter import limiter
@@ -15,11 +15,33 @@ from app.routes import reviews
 from app.routes.RequestLoggingMiddleware import RequestLoggingMiddleware
 from app.routes.SecurityHeadersMiddleware import SecurityHeadersMiddleware
 from app.routes import health
+from app.logger import logger
+from app.customExceptions import SameVersionUpdateError
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler = SchedulerService()
+    
+    async with AsyncSessionLocal() as db:
+        try:
+            await scheduler.initializeItemsLoader(db)
+            if scheduler.itemsLoader is None:
+                logger.error("Failed to initialize ItemsLoader")
+                raise Exception("ItemsLoader initialization failed")
+            try:
+                await scheduler.itemsLoader.updateItems()
+            except SameVersionUpdateError as e:
+                pass
+            items = await getAllItemTableRowsAnMapToItems(db)
+            if not items:
+                raise Exception("No items available for data generation")
+            dataGenerator = DataGenerator(db, items)
+            await dataGenerator.generateAllData()
+            logger.info("Initial data generation completed successfully")
+        except Exception as e:
+            logger.error(f"Error during startup data generation: {str(e)}")
+    
     scheduler.start()
     yield
     scheduler.scheduler.shutdown()
@@ -65,7 +87,7 @@ app.include_router(reviews.router, prefix="/review")
 app.include_router(health.router, prefix="/health")
 
 @app.get("/testGetVersion")
-async def testUpdateVersion(db: AsyncSession = Depends(database.getDbSession)):
+async def testUpdateVersion(db: AsyncSession = Depends(AsyncSessionLocal)):
     itemsLoader: ItemsLoader = ItemsLoader(db)
     version = await itemsLoader.getLastVersion()
     return {"message": version}
