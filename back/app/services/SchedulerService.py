@@ -10,6 +10,11 @@ from app.logger import logger
 class SchedulerService:
     def __init__(self):
         self.scheduler = AsyncIOScheduler()
+        self.itemsLoader = None
+
+    async def initializeItemsLoader(self, db):
+        """Initialize the ItemsLoader with a database session"""
+        self.itemsLoader = ItemsLoader(db)
 
     async def updateOrderStatusJob(self):
         async with AsyncSessionLocal() as db:
@@ -19,8 +24,12 @@ class SchedulerService:
     async def updateItemsJob(self):
         async with AsyncSessionLocal() as db:
             try:
-                itemsLoader = ItemsLoader(db)
-                await itemsLoader.updateItems()
+                if not self.itemsLoader:
+                    await self.initializeItemsLoader(db)
+                if self.itemsLoader:
+                    await self.itemsLoader.updateItems()
+                else:
+                    logger.error("ItemsLoader not initialized")
             except SameVersionUpdateError:
                 # This is expected when the version hasn't changed
                 logger.info("Items are already up to date")
