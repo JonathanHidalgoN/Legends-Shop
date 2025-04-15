@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.schemas.Item import Item
 from app.data.mappers import mapOrderToOrderTable
 from app.data.models.OrderTable import OrderItemAssociation, OrderTable
-from app.data.queries.authQueries import insertUser
+from app.data.queries.authQueries import insertUser, checkUserExistInDB
 from app.data.queries.locationQueries import createLocation
 from app.data.queries.reviewQueries import addReview, addComment
 from app.data.queries.metaDataQueries import addMetaData, getMetaData
@@ -88,8 +88,9 @@ class DataGenerator:
             ]
             userId = 1 
             for user in users:
-                await insertUser(self.dbSession, user)
-                self.userIds.append(userId)
+                if not await checkUserExistInDB(self.dbSession, user.userName):
+                    await insertUser(self.dbSession, user)
+                    self.userIds.append(userId)
                 userId += 1
         except SQLAlchemyError as e:
             raise UserGenerationError(f"Failed to generate users: {str(e)}") from e
@@ -271,21 +272,15 @@ class DataGenerator:
         if existingData:
             return
         try:
-            await self.dbSession.begin()
-            try:
-                await self.insertDummyLocations()
-                await self.insertFakeUsers()
-                await self.insertFakeOrders()
-                await self.insertFakeOrderItemAssociation()
-                await self.insertFakeReviewsAndComments()
-                await addMetaData(self.dbSession, "dummyData", "true")
-                
-                await self.dbSession.commit()
-            except DataGeneratorException as e:
-                await self.dbSession.rollback()
-                raise DataGeneratorException(f"Data generation failed: {str(e)}") from e
+            await self.insertDummyLocations()
+            await self.insertFakeUsers()
+            await self.insertFakeOrders()
+            await self.insertFakeOrderItemAssociation()
+            await self.insertFakeReviewsAndComments()
+            await addMetaData(self.dbSession, "dummyData", "true")
+        except DataGeneratorException as e:
+            raise DataGeneratorException(f"Data generation failed: {str(e)}") from e
         except SQLAlchemyError as e:
-            await self.dbSession.rollback()
             raise DataGeneratorException(f"Database error during data generation: {str(e)}") from e
 
 
