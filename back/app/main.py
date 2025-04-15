@@ -5,6 +5,7 @@ from app.data.database import AsyncSessionLocal
 from app.data.ItemsLoader import ItemsLoader
 from app.data.DataGenerator import DataGenerator
 from app.data.utils import getAllItemTableRowsAnMapToItems
+from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
 from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
 from fastapi.middleware.cors import CORSMiddleware
 from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
@@ -25,20 +26,27 @@ async def lifespan(app: FastAPI):
     
     async with AsyncSessionLocal() as db:
         try:
+            logger.info("Initializing ItemsLoader...")
             await scheduler.initializeItemsLoader(db)
             if scheduler.itemsLoader is None:
                 logger.error("Failed to initialize ItemsLoader")
                 raise Exception("ItemsLoader initialization failed")
             try:
+                logger.info("Updating items from external source...")
                 await scheduler.itemsLoader.updateItems()
             except SameVersionUpdateError as e:
                 pass
+            logger.info("Assigning delivery dates...")
+            assigner = DeliveryDateAssigner(db)
+            await assigner.checkAndUpdateDeliveryDates()
+            logger.info("Fetching items for data generation...")
             items = await getAllItemTableRowsAnMapToItems(db)
             if not items:
+                logger.error("No items found in database")
                 raise Exception("No items available for data generation")
+            logger.info("Generating initial data...")
             dataGenerator = DataGenerator(db, items)
             await dataGenerator.generateAllData()
-            logger.info("Initial data generation completed successfully")
         except Exception as e:
             logger.error(f"Error during startup data generation: {str(e)}")
     
