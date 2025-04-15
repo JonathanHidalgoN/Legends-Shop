@@ -28,18 +28,18 @@ async def getDeliveryDates(
         return await assigner.getItemDeliveryDates(location_id)
     except DeliveryDateAssignerException as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/populate", include_in_schema=False)
-async def populateDeliveryDates(
-    assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)],
-) -> dict:
-    """
-    Hidden endpoint to populate the delivery dates table with random delivery days.
-    This endpoint is not shown in the API schema.
-    """
-    try:
-        await assigner.assignDeliveryDates()
-        return {"message": "Successfully populated delivery dates"}
-    except DeliveryDateAssignerException as e:
-        raise HTTPException(status_code=500, detail=str(e))
+#
+#
+# @router.post("/populate", include_in_schema=False)
+# async def populateDeliveryDates(
+#     assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)],
+# ) -> dict:
+#     """
+#     Hidden endpoint to populate the delivery dates table with random delivery days.
+#     This endpoint is not shown in the API schema.
+#     """
+#     try:
+#         await assigner.checkAndUpdateDeliveryDates()
+#         return {"message": "Successfully populated delivery dates"}
+#     except DeliveryDateAssignerException as e:
+#         raise HTTPException(status_code=500, detail=str(e))
