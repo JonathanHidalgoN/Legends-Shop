@@ -126,12 +126,12 @@ class ItemsLoader:
         lastVersion: str = await self.getLastVersion()
         if currentVersion == lastVersion:
             return
-        elif currentVersion is None:
+        self.version = lastVersion
+        await self.updateItemsStepsJob()
+        if currentVersion is None:
             await insertVersion(self.dbSession, lastVersion)
         elif currentVersion != lastVersion:
             await self.updateDbVersion(lastVersion)
-        self.version = lastVersion
-        await self.updateItemsStepsJob()
 
     @logMethod
     async def updateItemsStepsJob(self) -> None:
@@ -297,6 +297,9 @@ class ItemsLoader:
                 ),
             )
         except Exception as e:
+            logger.warning(
+                f"Error, the item with id {itemId} item parsing will continue but this item won't be updated, exception {e}"
+            )
             return None
 
     @logMethod
