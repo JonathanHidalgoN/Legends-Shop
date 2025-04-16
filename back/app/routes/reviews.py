@@ -10,6 +10,7 @@ from app.customExceptions import (
     InvalidRatingException,
 )
 from app.routes.auth import getUserIdFromName
+from app.rateLimiter import sensitiveRateLimit, apiRateLimit
 
 
 def getReviewProcessor(
@@ -22,6 +23,7 @@ router = APIRouter()
 
 
 @router.post("/add", status_code=200)
+@sensitiveRateLimit()
 async def addReview(
     review: Review,
     userId: Annotated[int, Depends(getUserIdFromName)],
@@ -62,6 +64,7 @@ async def updateReview(
 
 
 @router.get("/user", status_code=200, response_model=List[Review])
+@apiRateLimit()
 async def getReviewsByUserId(
     userId: Annotated[int, Depends(getUserIdFromName)],
     reviewProcessor: ReviewProcessor = Depends(getReviewProcessor),

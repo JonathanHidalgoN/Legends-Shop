@@ -5,11 +5,13 @@ from app.data import database
 from app.logger import logger
 from app.data.ItemsLoader import ItemsLoader
 from typing import Dict, Any
+from app.rateLimiter import apiRateLimit
 
 router = APIRouter()
 
 
 @router.get("/", summary="Basic health check")
+@apiRateLimit()
 async def health_check() -> Dict[str, str]:
     """
     Basic health check endpoint that returns a simple status message.
@@ -60,6 +62,7 @@ async def readiness_probe() -> Dict[str, str]:
 
 
 @router.get("/health/liveness", summary="Liveness probe")
+@apiRateLimit()
 async def liveness_probe() -> Dict[str, str]:
     """
     This endpoint indicates whether the application is alive and functioning.

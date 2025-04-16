@@ -16,6 +16,7 @@ from app.logger import logMethod
 from app.data import database
 from app.schemas.Item import Item
 from app.data.ItemsLoader import ItemsLoader
+from app.rateLimiter import apiRateLimit
 
 router = APIRouter()
 
@@ -41,6 +42,7 @@ async def staticDataValidation(
 
 # TODO: Create a class to handle item fetching logic
 @router.get("/all", response_model=List[Item])
+@apiRateLimit()
 async def getAllItems(
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     request: Request,
@@ -58,6 +60,7 @@ async def getAllItems(
 
 
 @router.get("/some", response_model=List[Item])
+@apiRateLimit()
 async def getSomeItems(
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     request: Request,

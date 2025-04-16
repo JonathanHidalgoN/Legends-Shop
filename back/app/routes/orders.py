@@ -13,6 +13,7 @@ from app.data import database
 from app.orders.OrderProcessor import OrderProcessor
 from app.routes.auth import getUserIdFromName
 from app.schemas.Order import Order
+from app.rateLimiter import sensitiveRateLimit, apiRateLimit
 
 router = APIRouter()
 
@@ -24,6 +25,7 @@ def getOrderProcessor(
 
 
 @router.post("/order", response_model=int)
+@sensitiveRateLimit()
 async def order(
     order: Order,
     userId: Annotated[int, Depends(getUserIdFromName)],
@@ -63,4 +65,18 @@ async def cancelOrder(
     except ProcessOrderException as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/{orderId}")
+@apiRateLimit()
+async def getOrder(
+    orderId: int,
+    userId: Annotated[int, Depends(getUserIdFromName)],
+    orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
+):
+    try:
+        order: Order = await orderProcessor.getOrder(userId, orderId)
+        return order
+    except ProcessOrderException as e:
         raise HTTPException(status_code=500, detail="Internal server error")

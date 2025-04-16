@@ -125,6 +125,7 @@ async def getToken(
 
 
 @router.get("/token_refresh")
+@authRateLimiter()
 async def tokenRefresh(
     request: Request,
     userName: Annotated[str, Depends(getCurrentUserTokenFlow)],

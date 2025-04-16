@@ -9,6 +9,7 @@ from app.data import database
 from app.customExceptions import ProfileWorkerException
 from app.profile.ProfileWorker import ProfileWorker
 from app.schemas.profileSchemas import ProfileInfo
+from app.rateLimiter import apiRateLimit, sensitiveRateLimit
 
 router = APIRouter()
 
@@ -20,6 +21,7 @@ def getProfileWorker(
 
 
 @router.get("/current_gold", response_model=int)
+@apiRateLimit()
 async def getUserGold(
     request: Request,
     profileWorker: Annotated[ProfileWorker, Depends(getProfileWorker)],
@@ -36,6 +38,7 @@ async def getUserGold(
 
 
 @router.get("/info", response_model=ProfileInfo)
+@apiRateLimit()
 async def getProfileInfo(
     request: Request,
     userName: Annotated[str, Depends(getCurrentUserTokenFlow)],
