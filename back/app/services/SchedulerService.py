@@ -4,7 +4,6 @@ from app.data.database import AsyncSessionLocal
 from app.services.OrderStatusProcessor import OrderStatusProcessor
 from app.data.ItemsLoader import ItemsLoader
 from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
-from app.customExceptions import SameVersionUpdateError
 from app.logger import logger
 
 
@@ -34,8 +33,6 @@ class SchedulerService:
                     await assigner.checkAndUpdateDeliveryDates()
                 else:
                     logger.error("ItemsLoader not initialized")
-            except SameVersionUpdateError:
-                logger.info("Items are already up to date")
             except Exception as e:
                 logger.error(f"Error updating items: {str(e)}")
 

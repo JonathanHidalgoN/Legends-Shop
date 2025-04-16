@@ -10,7 +10,6 @@ from app.customExceptions import (
     ItemsLoaderError,
     JsonFetchError,
     JsonParseError,
-    SameVersionUpdateError,
     UpdateEffectsError,
     UpdateItemsError,
     UpdateStatsError,
@@ -126,9 +125,7 @@ class ItemsLoader:
         currentVersion: str | None = await getVersion(self.dbSession)
         lastVersion: str = await self.getLastVersion()
         if currentVersion == lastVersion:
-            raise SameVersionUpdateError(
-                f"Current items version {currentVersion} and API items version {lastVersion} is the same"
-            )
+            return
         elif currentVersion is None:
             await insertVersion(self.dbSession, lastVersion)
         elif currentVersion != lastVersion:

@@ -4,7 +4,7 @@ from app.data.ItemsLoader import ItemsLoader
 from app.data.DataGenerator import DataGenerator
 from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
 from app.data.utils import getAllItemTableRowsAnMapToItems
-from app.customExceptions import SameVersionUpdateError, SystemInitializationError
+from app.customExceptions import SystemInitializationError
 from app.logger import logMethod, logger
 from app.schemas.Item import Item
 from app.data.queries.metaDataQueries import getMetaData, addMetaData
@@ -48,11 +48,8 @@ class SystemInitializer:
         try:
             logger.info("Starting ItemsLoader initialization...")
             self.itemsLoader = ItemsLoader(self.db)
-            try:
-                await self.itemsLoader.updateItems()
-                logger.info("ItemsLoader initialization completed")
-            except SameVersionUpdateError:
-                logger.info("Items are already at the latest version")
+            await self.itemsLoader.updateItems()
+            logger.info("ItemsLoader initialization completed")
         except Exception as e:
             logger.error(f"ItemsLoader initialization failed: {str(e)}")
             raise SystemInitializationError(f"Failed to initialize ItemsLoader: {str(e)}")

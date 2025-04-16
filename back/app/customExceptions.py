@@ -1,11 +1,6 @@
 class ItemsLoaderError(Exception):
     pass
 
-
-class SameVersionUpdateError(ItemsLoaderError):
-    pass
-
-
 class JsonFetchError(ItemsLoaderError):
     pass
 
