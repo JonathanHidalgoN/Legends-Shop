@@ -69,18 +69,3 @@ async def cancelOrder(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
-
-
-@router.get("/{orderId}")
-@apiRateLimit()
-async def getOrder(
-    request: Request,
-    orderId: int,
-    userId: Annotated[int, Depends(getUserIdFromName)],
-    orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
-):
-    try:
-        order: Order = await orderProcessor.getOrder(userId, orderId)
-        return order
-    except ProcessOrderException as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
