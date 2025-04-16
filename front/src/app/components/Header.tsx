@@ -125,6 +125,7 @@ export default function Header({ items }: { items: Item[] }) {
                 <div className="flex flex-col items-center justify-center">
                   <LoginForm
                     onSuccess={() => setShowLoginDropdown(false)}
+                    onSignupClick={() => setShowLoginDropdown(false)}
                     className="w-full"
                   />
                 </div>
