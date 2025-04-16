@@ -5,6 +5,7 @@ import random
 from datetime import date, timedelta, datetime
 from sqlalchemy.sql import select
 from sqlalchemy.exc import SQLAlchemyError
+from app.logger import logMethod, logger
 
 from app.schemas.Item import Item
 from app.data.mappers import mapOrderToOrderTable
@@ -45,7 +46,9 @@ class DataGenerator:
                 await createLocation(self.dbSession, location)
                 self.locationIds.append(locationId)
                 locationId += 1
+            await self.dbSession.commit()
         except SQLAlchemyError as e:
+            await self.dbSession.rollback()
             raise LocationGenerationError(
                 f"Failed to generate locations: {str(e)}"
             ) from e
@@ -132,7 +135,9 @@ class DataGenerator:
                 await self.dbSession.flush()
                 self.orderIds.append(orderId)
                 orderId += 1
+            await self.dbSession.commit()
         except SQLAlchemyError as e:
+            await self.dbSession.rollback()
             raise OrderGenerationError(f"Failed to generate orders: {str(e)}") from e
 
     @logMethod
@@ -161,135 +166,126 @@ class DataGenerator:
     @logMethod
     async def insertFakeReviewsAndComments(self, orderIds, userIds):
         try:
-            for _ in range(500):
+            reviewed_combinations = set()
+            attempts = 0
+            max_attempts = 1000
+            successful_reviews = 0
+            target_reviews = 500
+
+            while successful_reviews < target_reviews and attempts < max_attempts:
+                attempts += 1
                 orderId = random.choice(orderIds)
                 userId = random.choice(userIds)
 
-                orderItems = await self.dbSession.execute(
-                    select(OrderItemAssociation).where(
+                result = await self.dbSession.execute(
+                    select(OrderItemAssociation.c.item_id).where(
                         OrderItemAssociation.c.order_id == orderId
                     )
                 )
-                orderItems = list(orderItems.scalars().all())
-                if not orderItems:
+                item_ids = list(result.scalars().all())
+                if not item_ids:
                     continue
-                itemId = random.choice(orderItems).item_id
+
+                available_items = [
+                    item_id for item_id in item_ids 
+                    if (orderId, item_id) not in reviewed_combinations
+                ]
+                
+                if not available_items:
+                    continue
+
+                itemId = random.choice(available_items)
                 rating = random.randint(1, 5)
 
                 try:
                     reviewId = await addReview(
                         self.dbSession, order_id=orderId, item_id=itemId, rating=rating
                     )
+                    reviewed_combinations.add((orderId, itemId))
+                    successful_reviews += 1
+
+                    if random.random() < 0.7:  # 70% chance to add a comment
+                        comments = [
+                            "Great product, would buy again!",  # Positive feedback, indicates satisfaction
+                            "Not as expected, but still good",  # Mixed feedback, some disappointment but overall positive
+                            "Perfect for my needs",  # Positive feedback, directly addresses utility
+                            "Could be better",  # Negative feedback, vague but indicates room for improvement
+                            "Excellent quality",  # Positive feedback, highlights a key attribute
+                            "Fast delivery",  # Positive feedback, relates to the service aspect
+                            "Good value for money",  # Positive feedback, balances cost and quality
+                            "Not worth the price",  # Negative feedback, directly criticizes the cost
+                            "Exactly what I needed",  # Positive feedback, emphasizes meeting requirements
+                            "Better than expected",  # Very positive feedback, exceeding initial thoughts
+                            "Amazing!",  # Enthusiastic positive feedback
+                            "Disappointed with the purchase",  # Strong negative feedback
+                            "Easy to use",  # Positive feedback, focuses on usability
+                            "Difficult to set up",  # Negative feedback, points out a usability issue
+                            "Highly recommend",  # Strong positive endorsement
+                            "Would not recommend",  # Strong negative discouragement
+                            "The best I've ever used",  # Top-tier positive feedback
+                            "The worst experience",  # Extremely negative feedback
+                            "Met all my expectations",  # Positive feedback, confirms fulfillment
+                            "Fell short of expectations",  # Negative feedback, indicates unmet needs
+                            "Love it!",  # Simple and strong positive feedback
+                            "Hate it!",  # Simple and strong negative feedback
+                            "Works perfectly",  # Positive feedback, focuses on functionality
+                            "Doesn't work as advertised",  # Negative feedback, criticizes functionality claims
+                            "Great customer service",  # Positive feedback, highlights support
+                            "Poor customer service",  # Negative feedback, criticizes support
+                            "A fantastic buy!",  # Positive feedback, emphasizes the purchase decision
+                            "A complete waste of money",  # Negative feedback, strong financial criticism
+                            "So happy with this!",  # Expresses strong positive emotion
+                            "Regret buying this",  # Expresses negative sentiment about the purchase
+                            "Solid performance",  # Positive feedback, focuses on how it functions
+                            "Unreliable",  # Negative feedback, criticizes dependability
+                            "Well-designed",  # Positive feedback, comments on the aesthetics or structure
+                            "Poorly designed",  # Negative feedback, criticizes the aesthetics or structure
+                            "A must-have!",  # Strong positive recommendation
+                            "Avoid at all costs!",  # Strong negative warning
+                            "Incredible features",  # Positive feedback, highlights capabilities
+                            "Lacking in features",  # Negative feedback, points out missing capabilities
+                            "Durable and long-lasting",  # Positive feedback, focuses on longevity
+                            "Broke after only a short time",  # Negative feedback, criticizes durability
+                            "Simple and effective",  # Positive feedback, highlights ease and efficiency
+                            "Complicated and inefficient",  # Negative feedback, criticizes complexity and performance
+                            "Excellent value for the features",  # Positive feedback, balances cost and capabilities
+                            "Overpriced for what it offers",  # Negative feedback, criticizes the price relative to features
+                            "Very satisfied with this purchase",  # Strong positive feedback on the overall experience
+                            "Extremely dissatisfied",  # Strong negative feedback on the overall experience
+                            "Would definitely purchase again in the future",  # Positive indication of future engagement
+                            "Will not be buying from this seller again",  # Negative indication of future engagement
+                            "The packaging was excellent",  # Positive feedback on presentation
+                            "The packaging was damaged",  # Negative feedback on presentation
+                            "Arrived much sooner than expected",  # Very positive feedback on delivery speed
+                            "Delivery took much longer than stated",  # Negative feedback on delivery time
+                            "The instructions were clear and easy to follow",  # Positive feedback on usability documentation
+                            "The instructions were confusing and unhelpful",  # Negative feedback on usability documentation
+                        ]
+                        commentContent = random.choice(comments)
+                        try:
+                            await addComment(
+                                self.dbSession,
+                                review_id=reviewId,
+                                user_id=userId,
+                                content=commentContent,
+                            )
+                        except SQLAlchemyError as e:
+                            raise CommentGenerationError(
+                                f"Failed to generate comment: {str(e)}"
+                            ) from e
                 except SQLAlchemyError as e:
-                    raise ReviewGenerationError(
-                        f"Failed to generate review: {str(e)}"
-                    ) from e
+                    logger.warning(f"Failed to create review for order {orderId}, item {itemId}: {str(e)}")
+                    continue
 
-                if random.random() < 0.7:
-                    comments = [
-                        "Great product, would buy again!",  # Positive feedback, indicates satisfaction
-                        "Not as expected, but still good",  # Mixed feedback, some disappointment but overall positive
-                        "Perfect for my needs",  # Positive feedback, directly addresses utility
-                        "Could be better",  # Negative feedback, vague but indicates room for improvement
-                        "Excellent quality",  # Positive feedback, highlights a key attribute
-                        "Fast delivery",  # Positive feedback, relates to the service aspect
-                        "Good value for money",  # Positive feedback, balances cost and quality
-                        "Not worth the price",  # Negative feedback, directly criticizes the cost
-                        "Exactly what I needed",  # Positive feedback, emphasizes meeting requirements
-                        "Better than expected",  # Very positive feedback, exceeding initial thoughts
-                        "Amazing!",  # Enthusiastic positive feedback
-                        "Disappointed with the purchase",  # Strong negative feedback
-                        "Easy to use",  # Positive feedback, focuses on usability
-                        "Difficult to set up",  # Negative feedback, points out a usability issue
-                        "Highly recommend",  # Strong positive endorsement
-                        "Would not recommend",  # Strong negative discouragement
-                        "The best I've ever used",  # Top-tier positive feedback
-                        "The worst experience",  # Extremely negative feedback
-                        "Met all my expectations",  # Positive feedback, confirms fulfillment
-                        "Fell short of expectations",  # Negative feedback, indicates unmet needs
-                        "Love it!",  # Simple and strong positive feedback
-                        "Hate it!",  # Simple and strong negative feedback
-                        "Works perfectly",  # Positive feedback, focuses on functionality
-                        "Doesn't work as advertised",  # Negative feedback, criticizes functionality claims
-                        "Great customer service",  # Positive feedback, highlights support
-                        "Poor customer service",  # Negative feedback, criticizes support
-                        "A fantastic buy!",  # Positive feedback, emphasizes the purchase decision
-                        "A complete waste of money",  # Negative feedback, strong financial criticism
-                        "So happy with this!",  # Expresses strong positive emotion
-                        "Regret buying this",  # Expresses negative sentiment about the purchase
-                        "Solid performance",  # Positive feedback, focuses on how it functions
-                        "Unreliable",  # Negative feedback, criticizes dependability
-                        "Well-designed",  # Positive feedback, comments on the aesthetics or structure
-                        "Poorly designed",  # Negative feedback, criticizes the aesthetics or structure
-                        "A must-have!",  # Strong positive recommendation
-                        "Avoid at all costs!",  # Strong negative warning
-                        "Incredible features",  # Positive feedback, highlights capabilities
-                        "Lacking in features",  # Negative feedback, points out missing capabilities
-                        "Durable and long-lasting",  # Positive feedback, focuses on longevity
-                        "Broke after only a short time",  # Negative feedback, criticizes durability
-                        "Simple and effective",  # Positive feedback, highlights ease and efficiency
-                        "Complicated and inefficient",  # Negative feedback, criticizes complexity and performance
-                        "Excellent value for the features",  # Positive feedback, balances cost and capabilities
-                        "Overpriced for what it offers",  # Negative feedback, criticizes the price relative to features
-                        "Very satisfied with this purchase",  # Strong positive feedback on the overall experience
-                        "Extremely dissatisfied",  # Strong negative feedback on the overall experience
-                        "Would definitely purchase again in the future",  # Positive indication of future engagement
-                        "Will not be buying from this seller again",  # Negative indication of future engagement
-                        "The packaging was excellent",  # Positive feedback on presentation
-                        "The packaging was damaged",  # Negative feedback on presentation
-                        "Arrived much sooner than expected",  # Very positive feedback on delivery speed
-                        "Delivery took much longer than stated",  # Negative feedback on delivery time
-                        "The instructions were clear and easy to follow",  # Positive feedback on usability documentation
-                        "The instructions were confusing and unhelpful",  # Negative feedback on usability documentation
-                    ]
-                    commentContent = random.choice(comments)
+            if successful_reviews < target_reviews:
+                logger.warning(
+                    f"Only generated {successful_reviews} reviews out of {target_reviews} "
+                    f"after {attempts} attempts. Some orders may not have available items for review."
+                )
 
-                    try:
-                        await addComment(
-                            self.dbSession,
-                            review_id=reviewId,
-                            user_id=userId,
-                            content=commentContent,
-                        )
-                    except SQLAlchemyError as e:
-                        raise CommentGenerationError(
-                            f"Failed to generate comment: {str(e)}"
-                        ) from e
+            await self.dbSession.commit()
         except SQLAlchemyError as e:
+            await self.dbSession.rollback()
             raise ReviewGenerationError(
                 f"Failed to generate reviews and comments: {str(e)}"
-            ) from e
-
-    @logMethod
-    async def generateAllData(self):
-        """
-        Generates all test data in a single transaction.
-        If any step fails, all changes are rolled back.
-        Steps:
-        1. Check if dummy data already exists
-        2. Insert locations
-        3. Insert users
-        4. Insert orders
-        5. Insert order-item associations
-        6. Insert reviews and comments
-        7. Add dummy data flag
-
-        Raises:
-            DataGeneratorException: If any step fails, with details about which step failed
-        """
-        existingData = await getMetaData(self.dbSession, "dummyData")
-        if existingData:
-            return
-        try:
-            await self.insertDummyLocations()
-            await self.insertFakeUsers()
-            await self.insertFakeOrders(self.userIds, self.locationIds)
-            await self.insertFakeOrderItemAssociation(self.orderIds, self.itemIds)
-            await self.insertFakeReviewsAndComments(self.orderIds, self.userIds)
-            await addMetaData(self.dbSession, "dummyData", "true")
-        except DataGeneratorException as e:
-            raise DataGeneratorException(f"Data generation failed: {str(e)}") from e
-        except SQLAlchemyError as e:
-            raise DataGeneratorException(
-                f"Database error during data generation: {str(e)}"
             ) from e
