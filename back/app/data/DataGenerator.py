@@ -13,7 +13,6 @@ from app.data.models.OrderTable import OrderItemAssociation, OrderTable
 from app.data.queries.authQueries import insertUser, checkUserExistInDB
 from app.data.queries.locationQueries import createLocation
 from app.data.queries.reviewQueries import addReview, addComment
-from app.data.queries.metaDataQueries import addMetaData, getMetaData
 from app.schemas.Order import Order, OrderStatus
 from app.schemas.AuthSchemas import UserInDB
 from app.customExceptions import (
@@ -23,7 +22,6 @@ from app.customExceptions import (
     OrderItemAssociationError,
     ReviewGenerationError,
     CommentGenerationError,
-    DataGeneratorException,
 )
 from app.logger import logMethod
 
@@ -109,7 +107,7 @@ class DataGenerator:
             orderId = 1
             statuses = list(OrderStatus)
             now = datetime.now()
-            for _ in range(100):
+            for _ in range(1000):
                 orderDate = now - timedelta(days=random.randint(0, 30))
                 deliveryDate = orderDate + timedelta(days=random.randint(1, 7))
                 numItems = random.randint(1, 5)
@@ -168,11 +166,11 @@ class DataGenerator:
         try:
             reviewed_combinations = set()
             attempts = 0
-            max_attempts = 1000
-            successful_reviews = 0
-            target_reviews = 500
+            maxAttemps = 100000
+            successfulReviews = 0
+            targetReviews = 5000
 
-            while successful_reviews < target_reviews and attempts < max_attempts:
+            while successfulReviews < targetReviews and attempts < maxAttemps:
                 attempts += 1
                 orderId = random.choice(orderIds)
                 userId = random.choice(userIds)
@@ -202,9 +200,9 @@ class DataGenerator:
                         self.dbSession, order_id=orderId, item_id=itemId, rating=rating
                     )
                     reviewed_combinations.add((orderId, itemId))
-                    successful_reviews += 1
+                    successfulReviews += 1
 
-                    if random.random() < 0.7:  # 70% chance to add a comment
+                    if random.random() < 0.85:
                         comments = [
                             "Great product, would buy again!",  # Positive feedback, indicates satisfaction
                             "Not as expected, but still good",  # Mixed feedback, some disappointment but overall positive
@@ -277,9 +275,9 @@ class DataGenerator:
                     logger.warning(f"Failed to create review for order {orderId}, item {itemId}: {str(e)}")
                     continue
 
-            if successful_reviews < target_reviews:
+            if successfulReviews < targetReviews:
                 logger.warning(
-                    f"Only generated {successful_reviews} reviews out of {target_reviews} "
+                    f"Only generated {successfulReviews} reviews out of {targetReviews} "
                     f"after {attempts} attempts. Some orders may not have available items for review."
                 )
 
