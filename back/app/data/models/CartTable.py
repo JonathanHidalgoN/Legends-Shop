@@ -1,7 +1,6 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 from app.data.database import base
-from app.schemas.Order import CartStatus
 
 
 class CartTable(base):
@@ -10,6 +9,6 @@ class CartTable(base):
     id: Mapped[int] = mapped_column(
         primary_key=True, autoincrement=True, nullable=False
     )
-    status: Mapped[CartStatus] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
     item_id: Mapped[int] = mapped_column(ForeignKey("item_table.id"), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("user_table.id"), nullable=False)
