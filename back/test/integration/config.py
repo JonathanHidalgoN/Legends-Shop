@@ -18,9 +18,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.data.models.LocationTable import LocationTable
-from app.data.ItemsLoader import ItemsLoader
 from app.logger import logger
-from app.schemas.Item import Item, Gold, Effects
 
 from app.main import app
 from app.data.database import getDbSession
