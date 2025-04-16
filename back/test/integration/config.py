@@ -13,13 +13,49 @@ def fakeLimit(*args, **kwargs):
 slowapi.Limiter.limit = fakeLimit
 
 import pytest_asyncio
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.data.models.LocationTable import LocationTable
+from app.data.ItemsLoader import ItemsLoader
+from app.logger import logger
+from app.schemas.Item import Item, Gold, Effects
 
 from app.main import app
 from app.data.database import getDbSession
+
+# Mock ItemsLoader for testing
+class MockItemsLoader:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.version = "test-version"
+
+    async def updateItems(self) -> None:
+        """Mock update that does nothing"""
+        logger.info("Mock items update - doing nothing")
+        return
+
+    async def getLastVersion(self) -> str:
+        """Return a fixed test version"""
+        return self.version
+
+# Mock SystemInitializer for testing
+class MockSystemInitializer:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.itemsLoader = MockItemsLoader(db)  # Use MockItemsLoader instead
+        self._initialized = True
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._initialized
+
+    async def initializeSystem(self) -> None:
+        """Mock initialization that does nothing"""
+        logger.info("Mock system initialization - doing nothing")
+        return
+
 # Use an in-memory SQLite database for testing
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 engine = create_async_engine(
@@ -68,16 +104,20 @@ async def dbSession():
 
 @pytest_asyncio.fixture
 def client(dbSession):
-    async def fakeAsyncDb():
-        return dbSession
+    # Patch both SystemInitializer and ItemsLoader with our mock versions
+    with patch('app.main.SystemInitializer', MockSystemInitializer), \
+         patch('app.data.ItemsLoader.ItemsLoader', MockItemsLoader), \
+         patch('app.routes.items.ItemsLoader', MockItemsLoader):
+        
+        async def fakeAsyncDb():
+            return dbSession
 
-    app.dependency_overrides[getDbSession] = fakeAsyncDb
+        app.dependency_overrides[getDbSession] = fakeAsyncDb
 
+        with TestClient(app) as test_client:
+            yield test_client
 
-    with TestClient(app) as test_client:
-        yield test_client
-
-    app.dependency_overrides.clear()
+        app.dependency_overrides.clear()
 
 
 async def addLocation(dbSession)->int:
