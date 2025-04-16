@@ -34,7 +34,7 @@ async function retryOperation<T>(
   }
 }
 
-export async function loadStaticData() {
+export async function loadStaticData(dowloadHDImages: boolean = false) {
   let items: Item[] = [];
   let tags: string[] = [];
   let effects: string[] = [];
@@ -70,17 +70,18 @@ export async function loadStaticData() {
       throw new Error("No locations received from server");
     }
 
-    // Try to load HD images, but don't fail if this fails
-    try {
-      const itemNames: string[] = items.map((item: Item) => item.name);
-      await getHDItemImages(itemNames);
-      items.forEach((item: Item) => {
-        item.img = checkIfHDImageAvailable(item.name, item.img);
-      });
-    } catch (error) {
-      console.error("Error updating HD images for items:", error);
-      // Don't throw here, as HD images are not critical
+    if (dowloadHDImages) {
+      try {
+        const itemNames: string[] = items.map((item: Item) => item.name);
+        await getHDItemImages(itemNames);
+      } catch (error) {
+        console.error("Error updating HD images for items:", error);
+        // Don't throw here, as HD images are not critical
+      }
     }
+    items.forEach((item: Item) => {
+      item.img = checkIfHDImageAvailable(item.name, item.img);
+    });
 
   } catch (error) {
     console.error("Static data loading failed:", error);
