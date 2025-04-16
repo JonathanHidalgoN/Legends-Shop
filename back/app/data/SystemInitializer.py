@@ -165,6 +165,7 @@ class SystemInitializer:
             
             # Mark initialization as complete
             await self.markInitializationComplete()
+            await self.db.commit()
             logger.info("System initialization completed successfully")
             
         except SystemInitializationError as e:
