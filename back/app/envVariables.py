@@ -16,3 +16,4 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 
 LOKI_HOST: str = os.getenv("LOKI_HOST", "Empty")
 LOKI_PORT: str = os.getenv("LOKI_PORT", "Empty")
 USE_LOKI: bool = os.getenv("USE_LOKI", "False").lower() == "true"
+TESTING: bool = os.getenv("TESTING", "False").lower() == "true"
