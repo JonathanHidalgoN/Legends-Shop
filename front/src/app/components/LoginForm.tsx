@@ -24,12 +24,14 @@ import { useLoading } from "./LoadingRequestContext";
 
 interface LoginFormProps {
   onSuccess?: () => void;
+  onSignupClick?: () => void;
   redirectPath?: string;
   className?: string;
 }
 
 export default function LoginForm({
   onSuccess,
+  onSignupClick,
   redirectPath,
   className = "",
 }: LoginFormProps) {
@@ -203,6 +205,7 @@ export default function LoginForm({
         <span className="text-center text-m">Are you new?</span>
         <Link
           href="/auth/signup"
+          onClick={onSignupClick}
           className="w-full text-center bg-[var(--orange)] text-white py-2 rounded hover:opacity-80 transition"
         >
           Sign up
