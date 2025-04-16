@@ -18,7 +18,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.data.models.LocationTable import LocationTable
-from app.logger import logger
 
 from app.main import app
 from app.data.database import getDbSession
@@ -30,19 +29,16 @@ class MockItemsLoader:
         self.version = "test-version"
 
     async def updateItems(self) -> None:
-        """Mock update that does nothing"""
-        logger.info("Mock items update - doing nothing")
         return
 
     async def getLastVersion(self) -> str:
-        """Return a fixed test version"""
         return self.version
 
 # Mock SystemInitializer for testing
 class MockSystemInitializer:
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.itemsLoader = MockItemsLoader(db)  # Use MockItemsLoader instead
+        self.itemsLoader = MockItemsLoader(db)
         self._initialized = True
 
     @property
@@ -50,8 +46,6 @@ class MockSystemInitializer:
         return self._initialized
 
     async def initializeSystem(self) -> None:
-        """Mock initialization that does nothing"""
-        logger.info("Mock system initialization - doing nothing")
         return
 
 # Use an in-memory SQLite database for testing
