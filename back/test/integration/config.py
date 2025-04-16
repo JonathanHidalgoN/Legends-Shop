@@ -1,17 +1,3 @@
-import slowapi
-
-#Hacky way of changing the limit function of slowapi, if they change the class 
-#structure or limit signature this wont work, but for now is the best way I found to
-#ignore the rate limiting, maybe when running test add an env variable and dynamically 
-#set the limit
-#TODO: env variable to change the limits in test mode
-def fakeLimit(*args, **kwargs):
-    def decorator(f):
-        return f  
-    return decorator
-
-slowapi.Limiter.limit = fakeLimit
-
 import pytest_asyncio
 from unittest.mock import patch
 from fastapi.testclient import TestClient
