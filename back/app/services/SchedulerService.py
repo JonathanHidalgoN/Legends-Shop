@@ -29,8 +29,6 @@ class SchedulerService:
                     await self.initializeItemsLoader(db)
                 if self.itemsLoader:
                     await self.itemsLoader.updateItems()
-                    assigner = DeliveryDateAssigner(db)
-                    await assigner.checkAndUpdateDeliveryDates()
                 else:
                     logger.error("ItemsLoader not initialized")
             except Exception as e:
