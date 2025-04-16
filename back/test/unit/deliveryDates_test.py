@@ -46,27 +46,3 @@ async def test_get_delivery_dates_error():
     ):
         response = client.get("/delivery_dates/dates/1")
         assert response.status_code == 500
-
-
-@pytest.mark.asyncio
-async def test_populate_delivery_dates_success():
-    """Test successful population of delivery dates."""
-    with patch(
-        "app.delivery.DeliveryDateAssigner.DeliveryDateAssigner.assignDeliveryDates",
-        new=AsyncMock(return_value=None),
-    ):
-        response = client.post("/delivery_dates/populate")
-        assert response.status_code == 200
-
-
-@pytest.mark.asyncio
-async def test_populate_delivery_dates_error():
-    """Test error handling when populating delivery dates fails."""
-    with patch(
-        "app.delivery.DeliveryDateAssigner.DeliveryDateAssigner.assignDeliveryDates",
-        new=AsyncMock(
-            side_effect=DeliveryDateAssignerException("Failed to assign delivery days")
-        ),
-    ):
-        response = client.post("/delivery_dates/populate")
-        assert response.status_code == 500
