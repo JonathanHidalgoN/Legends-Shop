@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import pLimit from "p-limit";
 
-const PARALLEL_DOWNLOADS = 5;
+const PARALLEL_DOWNLOADS = 3;
 
 async function downloadItemHDImage(
   itemName: string,
@@ -13,20 +13,51 @@ async function downloadItemHDImage(
   const baseUrl = "https://wiki.leagueoflegends.com/en-us/images";
   const formattedItemName = itemName.replace(/ /g, "_");
   const urlEncodedName = encodeURIComponent(formattedItemName);
-  const url = `${baseUrl}/${urlEncodedName}_item_HD.png`;
+
+  const hdUrl = `${baseUrl}/${urlEncodedName}_item_HD.png`;
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image, status: ${response.status}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    const response = await fetch(hdUrl, {
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const filePath = path.join(destFolder, imageFile);
+      await fsPromises.writeFile(filePath, buffer);
+      return true;
     }
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const filePath = path.join(destFolder, imageFile);
-    await fsPromises.writeFile(filePath, buffer);
-    return true;
   } catch (error) {
-    return false;
   }
+
+  const regularUrl = `${baseUrl}/${urlEncodedName}_item.png`;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    const response = await fetch(regularUrl, {
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const filePath = path.join(destFolder, imageFile);
+      await fsPromises.writeFile(filePath, buffer);
+      return true;
+    }
+  } catch (error) {
+  }
+
+  console.log(`Failed to download image for item: ${itemName} from both HD and regular versions ${hdUrl} ${regularUrl}`);
+  return false;
 }
 
 async function downloadHDImageParallel(
@@ -39,7 +70,7 @@ async function downloadHDImageParallel(
   try {
     await fsPromises.access(filePath);
     return;
-  } catch {}
+  } catch { }
 
   await downloadItemHDImage(itemName, destDir, imageFile);
 }
