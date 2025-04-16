@@ -39,6 +39,7 @@ from app.data.queries.itemQueries import (
 from app.schemas.Item import Effects, Gold, Item, Stat
 from app.logger import logger
 from app.logger import logMethod
+from app.items.defaultItems import DEFAULT_ITEMS
 
 
 # TODO: remove commits just one needed
@@ -56,10 +57,11 @@ class ItemsLoader:
     """
     VERSION_URL: str = "https://ddragon.leagueoflegends.com/api/versions.json"
 
-    def __init__(self, dbSession: AsyncSession):
+    def __init__(self, dbSession: AsyncSession, filter:List[str] = DEFAULT_ITEMS):
         self.dbSession = dbSession
         self.version: str = ""
         self.itemsUrl: str = ""
+        self.selectedItems: List[str] = filter
 
     @logMethod
     async def getJson(self, url: str) -> dict | list:
@@ -122,6 +124,8 @@ class ItemsLoader:
 
     @logMethod
     async def updateItems(self) -> None:
+        if len(self.selectedItems) == 0:
+            return
         currentVersion: str | None = await getVersion(self.dbSession)
         lastVersion: str = await self.getLastVersion()
         if currentVersion == lastVersion:
@@ -271,6 +275,8 @@ class ItemsLoader:
                 logger.warning(
                     f"'name' node has the value {itemData['name']} register multiple times, just one (the first) will be register in the database"
                 )
+                return None
+            if itemData["name"] not in self.selectedItems:
                 return None
             return Item(
                 name=itemData["name"],
