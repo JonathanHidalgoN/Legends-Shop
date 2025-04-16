@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data import database
@@ -12,7 +12,9 @@ router = APIRouter()
 
 @router.get("/", summary="Basic health check")
 @apiRateLimit()
-async def health_check() -> Dict[str, str]:
+async def health_check(
+    request:Request
+) -> Dict[str, str]:
     """
     Basic health check endpoint that returns a simple status message.
     This endpoint is lightweight and can be used for basic availability checks.
@@ -22,6 +24,7 @@ async def health_check() -> Dict[str, str]:
 
 @router.get("/health/detailed", summary="Detailed health check")
 async def detailed_health_check(
+    request:Request,
     db: AsyncSession = Depends(database.getDbSession),
 ) -> Dict[str, Any]:
     """
@@ -54,7 +57,9 @@ async def detailed_health_check(
 
 
 @router.get("/health/readiness", summary="Readiness probe")
-async def readiness_probe() -> Dict[str, str]:
+async def readiness_probe(
+    request:Request,
+) -> Dict[str, str]:
     """
     This endpoint indicates whether the application is ready to receive traffic.
     """
@@ -63,7 +68,9 @@ async def readiness_probe() -> Dict[str, str]:
 
 @router.get("/health/liveness", summary="Liveness probe")
 @apiRateLimit()
-async def liveness_probe() -> Dict[str, str]:
+async def liveness_probe(
+    request:Request,
+) -> Dict[str, str]:
     """
     This endpoint indicates whether the application is alive and functioning.
     """

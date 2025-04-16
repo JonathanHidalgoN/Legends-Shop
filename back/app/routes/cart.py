@@ -72,8 +72,8 @@ async def getAddedUserCartItems(
 
 @router.delete("/delete_cart_item/{cart_item_id}", response_model=None)
 async def cancelCartItem(
+    request:Request,
     cart_item_id: int,
-    request: Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
     cartProcessor: Annotated[CartProceesor, Depends(getCartProcessor)],
 ):

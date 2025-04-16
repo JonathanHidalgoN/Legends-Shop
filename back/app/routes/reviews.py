@@ -1,5 +1,5 @@
 from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.data.database import getDbSession
 from app.schemas.Review import Review
@@ -25,6 +25,7 @@ router = APIRouter()
 @router.post("/add", status_code=200)
 @sensitiveRateLimit()
 async def addReview(
+    request:Request,
     review: Review,
     userId: Annotated[int, Depends(getUserIdFromName)],
     reviewProcessor: ReviewProcessor = Depends(getReviewProcessor),
@@ -42,6 +43,7 @@ async def addReview(
 
 @router.put("/update", status_code=200)
 async def updateReview(
+    request:Request,
     review: Review,
     userId: Annotated[int, Depends(getUserIdFromName)],
     reviewProcessor: ReviewProcessor = Depends(getReviewProcessor),
@@ -66,6 +68,7 @@ async def updateReview(
 @router.get("/user", status_code=200, response_model=List[Review])
 @apiRateLimit()
 async def getReviewsByUserId(
+    request:Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
     reviewProcessor: ReviewProcessor = Depends(getReviewProcessor),
 ):
@@ -83,6 +86,7 @@ async def getReviewsByUserId(
 
 @router.get("/item/{item_id}", status_code=200, response_model=List[Review])
 async def getReviewsByItemId(
+    request:Request,
     item_id: int,
     reviewProcessor: ReviewProcessor = Depends(getReviewProcessor),
 ):

@@ -29,6 +29,7 @@ def getItemsLoader(
 
 @logMethod
 async def staticDataValidation(
+    request: Request,
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     db: AsyncSession = Depends(database.getDbSession),
 ) -> None:
@@ -44,8 +45,8 @@ async def staticDataValidation(
 @router.get("/all", response_model=List[Item])
 @apiRateLimit()
 async def getAllItems(
-    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     request: Request,
+    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     db: AsyncSession = Depends(database.getDbSession),
 ):
     items: List[Item] = []
@@ -62,8 +63,8 @@ async def getAllItems(
 @router.get("/some", response_model=List[Item])
 @apiRateLimit()
 async def getSomeItems(
-    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     request: Request,
+    itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
     db: AsyncSession = Depends(database.getDbSession),
 ):
     items: List[Item] = []

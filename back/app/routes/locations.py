@@ -1,5 +1,5 @@
 from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.location.LocationManager import LocationManager
 from app.customExceptions import (
@@ -28,6 +28,7 @@ async def getLocationManager(
 @router.get("/all")
 @apiRateLimit()
 async def getAllLocations(
+    request:Request,
     locationManager: Annotated[LocationManager, Depends(getLocationManager)],
 ):
     """
@@ -42,6 +43,7 @@ async def getAllLocations(
 @router.get("/user", response_model=Location)
 @apiRateLimit()
 async def getUserLocationEndpoint(
+    request:Request,
     userId: Annotated[int | None, Depends(getUserIdFromName)],
     dbSession: Annotated[AsyncSession, Depends(database.getDbSession)],
 ):
@@ -65,6 +67,7 @@ async def getUserLocationEndpoint(
 @router.post("/create")
 @sensitiveRateLimit()
 async def createLocation(
+    request:Request,
     countryName: str,
     locationManager: Annotated[LocationManager, Depends(getLocationManager)],
 ):
@@ -81,6 +84,7 @@ async def createLocation(
 @router.put("/{locationId}/update")
 @sensitiveRateLimit()
 async def updateLocation(
+    request:Request,
     locationId: int,
     countryName: str,
     locationManager: Annotated[LocationManager, Depends(getLocationManager)],
@@ -100,6 +104,7 @@ async def updateLocation(
 @router.delete("/{locationId}")
 @sensitiveRateLimit()
 async def deleteLocation(
+    request:Request,
     locationId: int,
     locationManager: Annotated[LocationManager, Depends(getLocationManager)],
 ):
@@ -118,6 +123,7 @@ async def deleteLocation(
 @router.get("/{locationId}", response_model=Location)
 @apiRateLimit()
 async def getLocation(
+    request:Request,
     locationId: int,
     locationManager: Annotated[LocationManager, Depends(getLocationManager)],
 ):

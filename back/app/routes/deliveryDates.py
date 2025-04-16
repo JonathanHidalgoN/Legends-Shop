@@ -1,5 +1,5 @@
 from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.delivery.DeliveryDateAssigner import DeliveryDateAssigner
@@ -18,6 +18,7 @@ def getDeliveryDateAssigner(
 
 @router.get("/dates/{location_id}", response_model=List[DeliveryDate])
 async def getDeliveryDates(
+    request:Request,
     location_id: int,
     assigner: Annotated[DeliveryDateAssigner, Depends(getDeliveryDateAssigner)],
 ) -> List[DeliveryDate]:
