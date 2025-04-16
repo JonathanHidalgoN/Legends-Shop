@@ -24,10 +24,10 @@ async def lifespan(app: FastAPI):
     async with AsyncSessionLocal() as db:
         try:
             logger.info("Starting system initialization...")
-            system_initializer = SystemInitializer(db)
-            await system_initializer.initializeSystem()
+            systemInitializer = SystemInitializer(db)
+            await systemInitializer.initializeSystem()
             logger.info("System initialization completed successfully")
-            scheduler.itemsLoader = system_initializer.itemsLoader
+            scheduler.itemsLoader = systemInitializer.itemsLoader
         except SystemInitializationError as e:
             logger.error(f"System initialization failed: {str(e)}")
             raise
