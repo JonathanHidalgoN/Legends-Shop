@@ -13,3 +13,5 @@ pytest-asyncio
 apscheduler
 aiosqlite
 python-logging-loki
+fastapi-prometheus-exporter
+python-multipart
