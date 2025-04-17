@@ -5,3 +5,10 @@ datasources:
     access: proxy
     url: http://loki:3100
     isDefault: true
+
+  - name: 'My FastAPI Metrics'
+    type: 'prometheus'
+    url: 'http://prometheus:9090' # Adjust based on your Docker network
+    access: 'proxy' # Or 'direct' depending on your setup
+    isDefault: false
+    editable: true

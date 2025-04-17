@@ -14,8 +14,7 @@ from app.routes import health
 from app.logger import logger
 from app.customExceptions import SystemInitializationError
 from fastapi.middleware.cors import CORSMiddleware
-from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
-
+from app.envVariables import FRONTEND_HOST, FRONTEND_PORT, USE_PROMETHEUS
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,6 +50,14 @@ async def tooManyRequestHanlder(request, exc):
         content={"detail": "Too many requests"},
     )
 
+#This will mess with fastapi configs, find another way of using prometeus with python 
+# if USE_PROMETHEUS:
+#     from fastapi_prometheus_exporter import PrometheusExporterMiddleware
+#     PrometheusExporterMiddleware.setup(
+#         app=app,
+#         metrics_path="/metrics",
+#         ignore_paths=["/health", "/metrics"],
+#     )
 
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
