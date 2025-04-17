@@ -52,6 +52,16 @@ services:
     depends_on:
       - db
 
+  prometheus:
+      image: prom/prometheus:latest
+      ports:
+        - "${PROMETEUS_PORT}:9090"
+      volumes:
+        - ./grafana/prometheus.yml:/etc/prometheus/prometheus.yml
+      depends_on:
+        - backend
+
 volumes:
   postgres_data:
   grafana_data:
+  prometheus_data:
