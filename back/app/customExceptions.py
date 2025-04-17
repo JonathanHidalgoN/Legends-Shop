@@ -1,11 +1,6 @@
 class ItemsLoaderError(Exception):
     pass
 
-
-class SameVersionUpdateError(ItemsLoaderError):
-    pass
-
-
 class JsonFetchError(ItemsLoaderError):
     pass
 
@@ -133,4 +128,37 @@ class InvalidRatingException(ReviewProcessorException):
 
 
 class InvalidUserReview(ReviewProcessorException):
+    pass
+
+
+class DataGeneratorException(Exception):
+    pass
+
+
+class LocationGenerationError(DataGeneratorException):
+    pass
+
+
+class UserGenerationError(DataGeneratorException):
+    pass
+
+
+class OrderGenerationError(DataGeneratorException):
+    pass
+
+
+class OrderItemAssociationError(DataGeneratorException):
+    pass
+
+
+class ReviewGenerationError(DataGeneratorException):
+    pass
+
+
+class CommentGenerationError(DataGeneratorException):
+    pass
+
+
+class SystemInitializationError(Exception):
+    """Raised when system initialization fails"""
     pass

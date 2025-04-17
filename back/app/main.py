@@ -1,25 +1,40 @@
-from typing import Annotated
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
-from app.data import database
+from app.data.database import AsyncSessionLocal
 from app.data.ItemsLoader import ItemsLoader
-from app.routes import items, auth, orders, profile, cart, deliveryDates, locations
-from fastapi.middleware.cors import CORSMiddleware
-from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
-from app.customExceptions import ItemsLoaderError, SameVersionUpdateError
+from app.data.SystemInitializer import SystemInitializer
 from app.services.SchedulerService import SchedulerService
 from contextlib import asynccontextmanager
 from app.rateLimiter import limiter
-from app.routes import reviews
+from app.routes import reviews, items, auth, orders, profile, cart, deliveryDates, locations
 from app.routes.RequestLoggingMiddleware import RequestLoggingMiddleware
 from app.routes.SecurityHeadersMiddleware import SecurityHeadersMiddleware
 from app.routes import health
+from app.logger import logger
+from app.customExceptions import SystemInitializationError
+from fastapi.middleware.cors import CORSMiddleware
+from app.envVariables import FRONTEND_HOST, FRONTEND_PORT
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler = SchedulerService()
+
+    async with AsyncSessionLocal() as db:
+        try:
+            logger.info("Starting system initialization...")
+            systemInitializer = SystemInitializer(db)
+            await systemInitializer.initializeSystem()
+            logger.info("System initialization completed successfully")
+            scheduler.itemsLoader = systemInitializer.itemsLoader
+        except SystemInitializationError as e:
+            logger.error(f"System initialization failed: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error during startup: {str(e)}")
+            raise
+
     scheduler.start()
     yield
     scheduler.scheduler.shutdown()
@@ -28,12 +43,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 
+
 @app.exception_handler(429)
 async def tooManyRequestHanlder(request, exc):
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests"},
     )
+
 
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
@@ -64,8 +81,9 @@ app.include_router(locations.router, prefix="/locations")
 app.include_router(reviews.router, prefix="/review")
 app.include_router(health.router, prefix="/health")
 
+
 @app.get("/testGetVersion")
-async def testUpdateVersion(db: AsyncSession = Depends(database.getDbSession)):
+async def testUpdateVersion(db: AsyncSession = Depends(AsyncSessionLocal)):
     itemsLoader: ItemsLoader = ItemsLoader(db)
     version = await itemsLoader.getLastVersion()
     return {"message": version}

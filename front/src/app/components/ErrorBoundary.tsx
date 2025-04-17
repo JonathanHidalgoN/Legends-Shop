@@ -39,7 +39,7 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
           <div className="relative w-48 h-48 mb-6 opacity-80">
             <Image
-              src="/sadAmumu.png"
+              src="/icons/sadAmumu.png"
               alt="sad amumu"
               fill
               className="object-contain"
@@ -50,8 +50,8 @@ class ErrorBoundary extends Component<Props, State> {
             Oops, something went wrong!
           </h1>
           <p className="text-[var(--gray)] max-w-md mb-4">
-            We&apos;re having trouble loading this page right now. Please try again later
-            or contact support if the problem continues.
+            We&apos;re having trouble loading this page right now. Please try
+            again later or contact support if the problem continues.
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -67,4 +67,4 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-export default ErrorBoundary; 
+export default ErrorBoundary;

@@ -87,6 +87,7 @@ coverage.xml
 .cache/
 
 *.next*
-*public*
 *cursor*
 envs/
+
+tmpNoCommitHdImages/

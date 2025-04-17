@@ -26,4 +26,4 @@ Checks for peer dependencies and shows warnings.
 Finishes installation, and your project is ready to use.
 
 To run test:
-python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/
+TESTING=true python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/

@@ -11,6 +11,47 @@ import { APIReviewResponse, APIError } from "../interfaces/APIResponse";
 import { Review } from "../interfaces/Review";
 import { mapAPIReviewResponseToReview } from "../mappers";
 import { showErrorToast } from "../customToast";
+import Link from "next/link";
+
+function ItemRecommendations({ currentItemId }: { currentItemId: number }) {
+  const { items } = useStaticData();
+  const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    const availableItems = items.filter(item => item.id !== currentItemId);
+    const shuffled = [...availableItems].sort(() => 0.5 - Math.random());
+    setRecommendedItems(shuffled.slice(0, 3));
+  }, [items, currentItemId]);
+
+  return (
+    <div className="mt-12">
+      <h2 className="text-2xl font-bold text-[var(--orange)] mb-6">You might also like</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {recommendedItems.map((item) => (
+          <Link 
+            href={`/items/${item.name}`} 
+            key={item.id}
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
+          >
+            <div className="relative h-48">
+              <Image
+                src={item.img}
+                alt={item.name}
+                fill
+                style={{ objectFit: "cover" }}
+                quality={100}
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-[var(--orange)]">{item.name}</h3>
+              <p className="text-[var(--yellow)] mt-1">{item.gold.base} g</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ItemView({ itemName }: { itemName: string }) {
   const { items } = useStaticData();
@@ -19,6 +60,8 @@ export default function ItemView({ itemName }: { itemName: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<APIError | null>(null);
   const [averageRating, setAverageRating] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const reviewsPerPage = 5;
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -55,6 +98,11 @@ export default function ItemView({ itemName }: { itemName: string }) {
 
     fetchReviews();
   }, [item]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(reviews.length / reviewsPerPage);
+  const startIndex = (currentPage - 1) * reviewsPerPage;
+  const paginatedReviews = reviews.slice(startIndex, startIndex + reviewsPerPage);
 
   if (!item) return <div>Item not found</div>;
 
@@ -150,10 +198,11 @@ export default function ItemView({ itemName }: { itemName: string }) {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
-                      className={`w-6 h-6 ${star <= Math.round(averageRating)
+                      className={`w-6 h-6 ${
+                        star <= Math.round(averageRating)
                           ? "text-yellow-400"
                           : "text-gray-300"
-                        }`}
+                      }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       xmlns="http://www.w3.org/2000/svg"
@@ -170,7 +219,7 @@ export default function ItemView({ itemName }: { itemName: string }) {
             </div>
 
             <div className="space-y-6">
-              {reviews.map((review) => (
+              {paginatedReviews.map((review) => (
                 <div
                   key={review.id}
                   className="bg-white rounded-lg shadow-md p-6"
@@ -182,10 +231,11 @@ export default function ItemView({ itemName }: { itemName: string }) {
                           {[1, 2, 3, 4, 5].map((star) => (
                             <svg
                               key={star}
-                              className={`w-5 h-5 ${star <= review.rating
+                              className={`w-5 h-5 ${
+                                star <= review.rating
                                   ? "text-yellow-400"
                                   : "text-gray-300"
-                                }`}
+                              }`}
                               fill="currentColor"
                               viewBox="0 0 20 20"
                               xmlns="http://www.w3.org/2000/svg"
@@ -213,6 +263,37 @@ export default function ItemView({ itemName }: { itemName: string }) {
                 </div>
               ))}
             </div>
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-6">
+                <button
+                  onClick={() => {
+                    setCurrentPage((prev) => Math.max(prev - 1, 1));
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  disabled={currentPage === 1}
+                  className="px-6 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                  transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                  shadow-sm hover:shadow-md"
+                >
+                  Previous
+                </button>
+                <span className="text-gray-600 font-medium">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => {
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  disabled={currentPage === totalPages}
+                  className="px-6 py-2 bg-[var(--orange)] text-white rounded-lg hover:bg-[var(--pink1)] 
+                  transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                  shadow-sm hover:shadow-md"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
@@ -220,6 +301,8 @@ export default function ItemView({ itemName }: { itemName: string }) {
           </div>
         )}
       </div>
+
+      <ItemRecommendations currentItemId={item.id} />
     </div>
   );
 }

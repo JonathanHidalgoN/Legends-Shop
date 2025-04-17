@@ -7,7 +7,7 @@ from logging.handlers import RotatingFileHandler
 import traceback
 from typing import Any, Optional, Callable
 import logging_loki
-from app.envVariables import LOKI_HOST,LOKI_PORT, USE_LOKI 
+from app.envVariables import LOKI_HOST, LOKI_PORT, USE_LOKI
 
 # ===== CONFIGURATION CONSTANTS =====
 # Directory where log files will be stored
@@ -138,9 +138,10 @@ if USE_LOKI:
     loki_handler = logging_loki.LokiHandler(
         url=f"http://{LOKI_HOST}:{LOKI_PORT}/loki/api/v1/push",
         tags={"application": "python-backend"},
-        version="1"
+        version="1",
     )
     logger.addHandler(loki_handler)
+
 
 def logMethod(func: Callable) -> Callable:
     """

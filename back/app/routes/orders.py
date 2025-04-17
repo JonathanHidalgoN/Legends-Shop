@@ -13,6 +13,7 @@ from app.data import database
 from app.orders.OrderProcessor import OrderProcessor
 from app.routes.auth import getUserIdFromName
 from app.schemas.Order import Order
+from app.rateLimiter import sensitiveRateLimit, apiRateLimit
 
 router = APIRouter()
 
@@ -24,7 +25,9 @@ def getOrderProcessor(
 
 
 @router.post("/order", response_model=int)
+@sensitiveRateLimit()
 async def order(
+    request: Request,
     order: Order,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
@@ -42,6 +45,7 @@ async def order(
 
 @router.get("/order_history", response_model=List[Order])
 async def getOrderHistory(
+    request: Request,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],
 ):
@@ -54,6 +58,7 @@ async def getOrderHistory(
 
 @router.put("/cancel_order/{order_id}", response_model=None)
 async def cancelOrder(
+    request: Request,
     order_id: int,
     userId: Annotated[int, Depends(getUserIdFromName)],
     orderProcessor: Annotated[OrderProcessor, Depends(getOrderProcessor)],

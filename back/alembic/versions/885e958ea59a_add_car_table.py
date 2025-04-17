@@ -24,11 +24,7 @@ def upgrade() -> None:
     op.create_table(
         "cart_table",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column(
-            "status",
-            sa.Enum("ADDED", "DELETED", "ORDERED", name="carstatus"),
-            nullable=False,
-        ),
+        sa.Column("status", sa.String(20), nullable=False),
         sa.Column("item_id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(

@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import EpicLegendMap from "./EpicLegendMap";
 import { useCarContext } from "./CarContext";
-import { DeliveryDate } from "../interfaces/DeliveryDate";
 
 export default function ItemPreView({ item }: { item: Item }) {
   const targetLink = `/items/${item.name}`;

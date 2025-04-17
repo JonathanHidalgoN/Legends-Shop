@@ -51,7 +51,7 @@ async def test_get_all_locations_error():
         ),
     ):
         response = client.get("/locations/all")
-        assert response.status_code == 400
+        assert response.status_code == 500
 
 
 @pytest.mark.asyncio

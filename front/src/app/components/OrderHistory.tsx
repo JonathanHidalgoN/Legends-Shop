@@ -52,11 +52,11 @@ export default function OrderHistory() {
 
   const { data } = useSWRWithErrorRedirect<APIOrderResponse[]>(
     getOrderHistoryWithCredentialsRequest,
-    () => ["orders-client", FromValues.CLIENT]
+    () => ["orders-client", FromValues.CLIENT],
   );
 
   if (!data) {
-    return <LoadingPage />
+    return <LoadingPage />;
   }
 
   function orderMatchItemNames(

@@ -3,7 +3,7 @@
 import { useAuthContext } from "@/app/components/AuthContext";
 import { useLoading } from "@/app/components/LoadingRequestContext";
 import { useStaticData } from "@/app/components/StaticDataContext";
-import { showErrorToast } from "@/app/customToast";
+import { showErrorToast, showSuccessToast } from "@/app/customToast";
 import {
   validateEmailInput,
   validatePasswordInput,
@@ -93,6 +93,7 @@ export default function SingupPage() {
       setFormPassword2("");
       setFormLocation("");
       setSingupApiError(null);
+      showSuccessToast("Singup successfully, now you can login!")
     } else if (responseStatus.status === 400) {
       setSingupApiError(responseStatus.errorType);
     }

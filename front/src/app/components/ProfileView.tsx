@@ -15,7 +15,7 @@ export default function ProfileView() {
     () => ["profile-client", FromValues.CLIENT],
   );
   if (!data) {
-    return <LoadingPage />
+    return <LoadingPage />;
   }
 
   const profileInfo: ProfileInfo = mapAPIProfileInfoResponseToProfileInfo(data);

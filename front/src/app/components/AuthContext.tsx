@@ -205,7 +205,7 @@ export function AuthContextProvider({
       setUserName(null);
       router.push("/");
       toast.success(`Logout succesfully`);
-    } catch (error) { }
+    } catch (error) {}
   }
 
   useEffect(() => {

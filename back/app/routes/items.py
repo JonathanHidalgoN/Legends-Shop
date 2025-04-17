@@ -16,6 +16,7 @@ from app.logger import logMethod
 from app.data import database
 from app.schemas.Item import Item
 from app.data.ItemsLoader import ItemsLoader
+from app.rateLimiter import apiRateLimit
 
 router = APIRouter()
 
@@ -25,12 +26,14 @@ def getItemsLoader(
 ) -> ItemsLoader:
     return ItemsLoader(db)
 
+
 @logMethod
 async def staticDataValidation(
+    request: Request,
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
-    db: AsyncSession = Depends(database.getDbSession)
-)->None:
-    itemsExist : bool = await itemTableHasRows(db)
+    db: Annotated[AsyncSession, Depends(database.getDbSession)],
+) -> None:
+    itemsExist: bool = await itemTableHasRows(db)
     if itemsExist:
         return
     else:
@@ -40,13 +43,15 @@ async def staticDataValidation(
 
 # TODO: Create a class to handle item fetching logic
 @router.get("/all", response_model=List[Item])
+@apiRateLimit()
 async def getAllItems(
+    request: Request,
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
-    request: Request, db: AsyncSession = Depends(database.getDbSession)
+    db: Annotated[AsyncSession, Depends(database.getDbSession)],
 ):
     items: List[Item] = []
     try:
-        await staticDataValidation(itemsLoader, db)
+        await staticDataValidation(request, itemsLoader, db)
         items = await getAllItemTableRowsAnMapToItems(db)
         return items
     except Exception as e:
@@ -56,13 +61,15 @@ async def getAllItems(
 
 
 @router.get("/some", response_model=List[Item])
+@apiRateLimit()
 async def getSomeItems(
+    request: Request,
     itemsLoader: Annotated[ItemsLoader, Depends(getItemsLoader)],
-    request: Request, db: AsyncSession = Depends(database.getDbSession)
+    db: Annotated[AsyncSession, Depends(database.getDbSession)],
 ):
     items: List[Item] = []
     try:
-        await staticDataValidation(itemsLoader, db)
+        await staticDataValidation(request, itemsLoader, db)
         items = await getSomeItemTableRowsAnMapToItems(db)
         return items
     except Exception as e:

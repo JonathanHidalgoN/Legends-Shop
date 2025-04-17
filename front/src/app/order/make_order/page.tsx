@@ -148,9 +148,10 @@ export default function OrderPage() {
                     disabled={!canBuy}
                     className={`flex-1 py-3 px-6 rounded-lg transition-all duration-300 
                       transform hover:scale-105 font-semibold text-lg
-                      ${canBuy
-                        ? "bg-[var(--orange)] text-white hover:bg-opacity-90"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      ${
+                        canBuy
+                          ? "bg-[var(--orange)] text-white hover:bg-opacity-90"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}
                   >
                     Confirm Purchase
