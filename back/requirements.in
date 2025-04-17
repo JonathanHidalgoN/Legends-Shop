@@ -1,3 +1,4 @@
+#App
 fastapi[standard]
 python-dotenv==1.0.1
 uvicorn[standard]
@@ -8,10 +9,14 @@ slowapi
 httpx
 python-jose[cryptography] 
 passlib[bcrypt]
+apscheduler
+
+#Testing
 pytest
 pytest-asyncio
-apscheduler
 aiosqlite
+python-multipart
+
+#Monitoring
 python-logging-loki
 fastapi-prometheus-exporter
-python-multipart
