@@ -11,9 +11,7 @@ router = APIRouter()
 
 
 @router.get("/", summary="Basic health check")
-@apiRateLimit()
 async def health_check(
-    request:Request
 ) -> Dict[str, str]:
     """
     Basic health check endpoint that returns a simple status message.
