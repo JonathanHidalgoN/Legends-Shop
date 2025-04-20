@@ -20,7 +20,7 @@ async function downloadItemHDImage(
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     const response = await fetch(hdUrl, {
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
@@ -32,8 +32,7 @@ async function downloadItemHDImage(
       await fsPromises.writeFile(filePath, buffer);
       return true;
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 
   const regularUrl = `${baseUrl}/${urlEncodedName}_item.png`;
   try {
@@ -41,7 +40,7 @@ async function downloadItemHDImage(
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     const response = await fetch(regularUrl, {
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
@@ -53,10 +52,11 @@ async function downloadItemHDImage(
       await fsPromises.writeFile(filePath, buffer);
       return true;
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 
-  console.log(`Failed to download image for item: ${itemName} from both HD and regular versions ${hdUrl} ${regularUrl}`);
+  console.log(
+    `Failed to download image for item: ${itemName} from both HD and regular versions ${hdUrl} ${regularUrl}`,
+  );
   return false;
 }
 
@@ -70,7 +70,7 @@ async function downloadHDImageParallel(
   try {
     await fsPromises.access(filePath);
     return;
-  } catch { }
+  } catch {}
 
   await downloadItemHDImage(itemName, destDir, imageFile);
 }
