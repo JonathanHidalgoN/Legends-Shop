@@ -125,6 +125,7 @@ class ItemsLoader:
     @logMethod
     async def updateItems(self) -> None:
         if len(self.selectedItems) == 0:
+            logger.info("No items in selected items, returning...")
             return
         currentVersion: str | None = await getVersion(self.dbSession)
         lastVersion: str = await self.getLastVersion()
