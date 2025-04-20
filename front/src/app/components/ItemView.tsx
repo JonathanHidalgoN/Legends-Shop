@@ -18,18 +18,20 @@ function ItemRecommendations({ currentItemId }: { currentItemId: number }) {
   const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
 
   useEffect(() => {
-    const availableItems = items.filter(item => item.id !== currentItemId);
+    const availableItems = items.filter((item) => item.id !== currentItemId);
     const shuffled = [...availableItems].sort(() => 0.5 - Math.random());
     setRecommendedItems(shuffled.slice(0, 3));
   }, [items, currentItemId]);
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-bold text-[var(--orange)] mb-6">You might also like</h2>
+      <h2 className="text-2xl font-bold text-[var(--orange)] mb-6">
+        You might also like
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {recommendedItems.map((item) => (
-          <Link 
-            href={`/items/${item.name}`} 
+          <Link
+            href={`/items/${item.name}`}
             key={item.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
           >
@@ -43,7 +45,9 @@ function ItemRecommendations({ currentItemId }: { currentItemId: number }) {
               />
             </div>
             <div className="p-4">
-              <h3 className="text-lg font-semibold text-[var(--orange)]">{item.name}</h3>
+              <h3 className="text-lg font-semibold text-[var(--orange)]">
+                {item.name}
+              </h3>
               <p className="text-[var(--yellow)] mt-1">{item.gold.base} g</p>
             </div>
           </Link>
@@ -102,7 +106,10 @@ export default function ItemView({ itemName }: { itemName: string }) {
   // Calculate pagination
   const totalPages = Math.ceil(reviews.length / reviewsPerPage);
   const startIndex = (currentPage - 1) * reviewsPerPage;
-  const paginatedReviews = reviews.slice(startIndex, startIndex + reviewsPerPage);
+  const paginatedReviews = reviews.slice(
+    startIndex,
+    startIndex + reviewsPerPage,
+  );
 
   if (!item) return <div>Item not found</div>;
 
