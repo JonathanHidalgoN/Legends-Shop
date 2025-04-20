@@ -166,9 +166,9 @@ class DataGenerator:
         try:
             reviewed_combinations = set()
             attempts = 0
-            maxAttemps = 100000
+            maxAttemps = 10000
             successfulReviews = 0
-            targetReviews = 5000
+            targetReviews = 500
 
             while successfulReviews < targetReviews and attempts < maxAttemps:
                 attempts += 1
