@@ -64,10 +64,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 
 origins = [
-    FRONTEND_HOST
-    # TODO: add env variable to website that host the frontend client
-    ,
+    FRONTEND_HOST,
     f"http://localhost:{FRONTEND_PORT}",
+    "https://legends-shop.vercel.app/",
 ]
 
 app.add_middleware(
