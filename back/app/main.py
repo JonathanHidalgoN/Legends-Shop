@@ -66,7 +66,6 @@ app.add_middleware(SecurityHeadersMiddleware)
 origins = [
     FRONTEND_HOST,
     f"http://localhost:{FRONTEND_PORT}",
-    "https://legends-shop.vercel.app/",
 ]
 
 app.add_middleware(
