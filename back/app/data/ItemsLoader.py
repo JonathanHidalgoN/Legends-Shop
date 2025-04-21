@@ -44,9 +44,6 @@ from app.items.defaultItems import DEFAULT_ITEMS
 
 # TODO: remove commits just one needed
 class ItemsLoader:
-    # I know this class has a lot of code duplication where stats/effects are involved,
-    # maybe is worth to abastract but for now I decided to create indivial functions because
-    # in the future some different functionality will be added
     """
     Handles fetching, parsing, and updating item data from the League of Legends API.
 
