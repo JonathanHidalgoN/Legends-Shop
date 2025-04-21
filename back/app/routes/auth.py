@@ -114,10 +114,8 @@ async def getToken(
         key="access_token",
         value=accessToken,
         httponly=True,
-        # TODO: change this to true when working on https
-        secure=False,
-        # secure=True,
-        samesite="lax",
+        secure=True,
+        samesite="none",
         max_age=60 * 30,
         path="/",
     )
@@ -147,10 +145,8 @@ async def tokenRefresh(
         key="access_token",
         value=accessToken,
         httponly=True,
-        # TODO: change this to true when working on https
-        secure=False,
-        # secure=True,
-        samesite="lax",
+        secure=True,
+        samesite="none",
         max_age=60 * 30,
         path="/",
     )

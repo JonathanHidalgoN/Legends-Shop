@@ -79,6 +79,7 @@ DEFAULT_ITEMS = [
     "Void Staff",
     "Wit's End",
     "Zhonya's Hourglass",
+    "Rabadon's Deathcap",
 
     # Mythic Items
     "Crown of the Shattered Queen",
@@ -96,13 +97,11 @@ DEFAULT_ITEMS = [
     "Luden's Tempest",
     "Moonstone Renewer",
     "Night Harvester",
-    "Prowler's Claw",
     "Riftmaker",
     "Shurelya's Battlesong",
     "Stridebreaker",
     "Sunfire Aegis",
     "Trinity Force",
-    "Turbo Chemtank",
 
     # Consumables
     "Elixir of Iron",
