@@ -16,6 +16,11 @@ provider "azurerm" {
 resource "azurerm_resource_group" "rg" {
   name     = "myTFResourceGroup"
   location = "mexicocentral"
+
+  tags = {
+    Environment = "Legends shop"
+    Team = "DevOps"
+  }
 }
 
 resource "azurerm_virtual_network" "vnet" {
