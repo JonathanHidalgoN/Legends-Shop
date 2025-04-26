@@ -93,3 +93,4 @@ envs/
 tmpNoCommitHdImages/
 .terraform*
 *tfstate*
+private*
