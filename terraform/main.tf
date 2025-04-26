@@ -15,5 +15,5 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "rg" {
   name     = "myTFResourceGroup"
-  location = "MEX33"
+  location = "mexicocentral"
 }
