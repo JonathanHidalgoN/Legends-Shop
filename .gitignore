@@ -91,3 +91,4 @@ coverage.xml
 envs/
 
 tmpNoCommitHdImages/
+.terraform*
