@@ -14,18 +14,18 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "myTFResourceGroup"
-  location = "mexicocentral"
+  name     = var.resource_group_name
+  location = var.location
 
   tags = {
     Environment = "Legends shop"
-    Team = "DevOps"
+    Team        = "DevOps"
   }
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "myTFVnet"
+  name                = var.vnet_name
   address_space       = ["10.0.0.0/16"]
-  location            = "mexicocentral"
+  location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
 }
