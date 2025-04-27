@@ -35,33 +35,33 @@ services:
     volumes:
       - ./front:/app
 
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - "${LOKI_PORT}:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "${GRAFANA_PORT}:3000"
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-    depends_on:
-      - db
-
-  prometheus:
-      image: prom/prometheus:latest
-      ports:
-        - "${PROMETEUS_PORT}:9090"
-      volumes:
-        - ./grafana/prometheus.yml:/etc/prometheus/prometheus.yml
-      depends_on:
-        - backend
+  # loki:
+  #   image: grafana/loki:latest
+  #   ports:
+  #     - "${LOKI_PORT}:3100"
+  #   command: -config.file=/etc/loki/local-config.yaml
+  #
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - "${GRAFANA_PORT}:3000"
+  #   volumes:
+  #     - ./grafana/provisioning:/etc/grafana/provisioning
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+  #   depends_on:
+  #     - db
+  #
+  # prometheus:
+  #     image: prom/prometheus:latest
+  #     ports:
+  #       - "${PROMETEUS_PORT}:9090"
+  #     volumes:
+  #       - ./grafana/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     depends_on:
+  #       - backend
 
 volumes:
   postgres_data:
-  grafana_data:
-  prometheus_data:
+  # grafana_data:
+  # prometheus_data:
