@@ -34,23 +34,26 @@ resource "azurerm_service_plan" "appserviceplan" {
   sku_name            = "F1" # F1 is the free tier
 }
 
-# Web App configuration - sets up the Azure Web App to use the Docker image
 resource "azurerm_linux_web_app" "webapp" {
-  name                  = var.web_app_name
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
-  service_plan_id       = azurerm_service_plan.appserviceplan.id
-  https_only            = true # Ensures that only HTTPS traffic is allowed
-  depends_on            = [azurerm_service_plan.appserviceplan] # Ensures app is deployed after the service plan
+  name                 = var.web_app_name
+  location             = azurerm_resource_group.rg.location
+  resource_group_name  = azurerm_resource_group.rg.name
+  service_plan_id      = azurerm_service_plan.appserviceplan.id
+  https_only           = true
+  site_config {
+    minimum_tls_version = "1.2"
+    always_on           = false 
 
-  application_stack {
-    
-    docker_image_name = var.docker_image_name_backend
+    application_stack {
+      docker_image_name = var.docker_image_name_backend
+    }
+  }
 
+  app_settings = {
+    "WEBSITES_PORT" = "8000"
   }
 }
 
-# (Optional) Virtual Network configuration - you could define a VNet here for security or scaling
 resource "azurerm_virtual_network" "vnet" {
   name                = var.vnet_name
   address_space       = ["10.0.0.0/16"]

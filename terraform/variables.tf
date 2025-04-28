@@ -21,3 +21,11 @@ variable "location" {
 variable "docker_image_name_backend" {
   default = "jonathanhn/dockerhub:legeshop-backend"
 }
+
+variable "azure_branch_name" {
+  default = "azure"
+}
+
+variable "git_url" {
+  default = "https://github.com/JonathanHidalgoN/Legends-Shop"
+}
