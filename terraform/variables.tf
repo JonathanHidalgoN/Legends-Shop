@@ -29,3 +29,7 @@ variable "azure_branch_name" {
 variable "git_url" {
   default = "https://github.com/JonathanHidalgoN/Legends-Shop"
 }
+
+variable "kv_name" {
+  default = "key_vault-jonathan"
+}

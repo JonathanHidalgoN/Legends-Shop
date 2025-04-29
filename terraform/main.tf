@@ -9,12 +9,14 @@ terraform {
   required_version = ">= 1.1.0"
 }
 
-# Provider configuration - tells Terraform to use Azure as the provider
 provider "azurerm" {
   features {}
 }
 
-# Resource Group creation - all Azure resources need to be inside a resource group
+data "azurerm_client_config" "current" {}
+
+resource "random_uuid" "role_assignment_name_namespace" {}
+
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
@@ -25,7 +27,6 @@ resource "azurerm_resource_group" "rg" {
   }
 }
 
-# Service Plan creation - defines the hosting environment for the app
 resource "azurerm_service_plan" "appserviceplan" {
   name                = var.service_plan_name
   location            = azurerm_resource_group.rg.location
@@ -34,12 +35,27 @@ resource "azurerm_service_plan" "appserviceplan" {
   sku_name            = "F1" # F1 is the free tier
 }
 
+resource "azurerm_key_vault" "kv" {
+  name                        = "my-secure-app-secrets-kv"
+  location                    = azurerm_resource_group.rg.location
+  resource_group_name         = azurerm_resource_group.rg.name
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  sku_name                    = "standard"
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = false
+}
+
 resource "azurerm_linux_web_app" "webapp" {
   name                 = var.web_app_name
   location             = azurerm_resource_group.rg.location
   resource_group_name  = azurerm_resource_group.rg.name
   service_plan_id      = azurerm_service_plan.appserviceplan.id
   https_only           = true
+
+  identity {
+    type = "SystemAssigned"
+  }
+
   site_config {
     minimum_tls_version = "1.2"
     always_on           = false 
@@ -50,8 +66,16 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 
   app_settings = {
-    "WEBSITES_PORT" = "8000"
+    "WEBSITES_PORT"      = "8000"
+    # "DATABASE_PASSWORD"  = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.kv.name};SecretName=DatabasePassword)"
   }
+}
+
+resource "azurerm_role_assignment" "app_identity_keyvault_secrets_reader" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Reader"
+  principal_id         = data.azurerm_client_config.current.object_id
+  name = random_uuid.role_assignment_name_namespace.id
 }
 
 resource "azurerm_virtual_network" "vnet" {
