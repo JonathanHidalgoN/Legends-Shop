@@ -66,7 +66,7 @@ Azure for backend and cloud services
 Vercel for frontend
 
 Render/Neon for dev PostgreSQL when Azure is nott used
-
+```
 🛣️ Roadmap
 🧱 Phase 1: Infrastructure & Setup
 ✅ Set up Docker Compose configuration for backend, frontend, and PostgreSQL.
