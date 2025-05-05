@@ -1,0 +1,6 @@
+# Azure Service Principal Credentials
+export ARM_CLIENT_ID="example"
+export ARM_CLIENT_SECRET="example"
+export ARM_SUBSCRIPTION_ID="example"
+export ARM_TENANT_ID="Example"
+export TF_VAR_db_admin_password="your-secure-password-here"
