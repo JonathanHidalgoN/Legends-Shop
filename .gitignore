@@ -94,3 +94,6 @@ tmpNoCommitHdImages/
 .terraform*
 *tfstate*
 private*
+
+.azure_env
+personalSetUp
