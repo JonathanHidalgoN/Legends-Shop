@@ -138,4 +138,4 @@ jobs:
           az webapp config container set \
             --name "Legends-shop-ls-p-mexc-1" \
             --resource-group "resource-group-ls-p-mexc-1" \
-            --docker-custom-image-name "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+            --container-image-name "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
