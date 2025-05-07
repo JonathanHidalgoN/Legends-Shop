@@ -65,14 +65,15 @@ variable "web_app_name" {
   default     = "Legends-shop"
 }
 
+#TODO: how to keep this pointing to latest?
 variable "docker_image_name_backend" {
   description = "Docker image name for the backend web app."
   type        = string
-  default     = "jonathanhn/dockerhub:legeshop-backend"
+  default     = "jonathanhn/leageshop-backend:latest"
 }
 
+description = "Additional application settings for the web app."
 variable "web_app_settings" {
-  description = "Additional application settings for the web app."
   type        = map(string)
   default = {
     "WEBSITES_PORT"          = "8000"
