@@ -9,13 +9,12 @@ from sqlalchemy import select
 from datetime import date
 from app.auth.functions import hashPassword
 
-
 @pytest.mark.asyncio
 async def test_add_items_to_cart_success(client, dbSession):
     """Test successful addition of multiple items to cart."""
     # Setup test data
     locationId:int = await addLocation(dbSession)
-    
+    #
     # Create a test user
     testUser = UserTable(
         userName="testuser",
@@ -30,7 +29,7 @@ async def test_add_items_to_cart_success(client, dbSession):
     )
     dbSession.add(testUser)
     await dbSession.commit()
-    
+
     # Create test items
     gold1 = GoldTable(
         base_cost=100,
@@ -47,7 +46,7 @@ async def test_add_items_to_cart_success(client, dbSession):
     dbSession.add(gold1)
     dbSession.add(gold2)
     await dbSession.commit()
-    
+
     item1 = ItemTable(
         name="Test Item 1",
         plain_text="Plain text for test item 1",
@@ -69,7 +68,7 @@ async def test_add_items_to_cart_success(client, dbSession):
     dbSession.add(item1)
     dbSession.add(item2)
     await dbSession.commit()
-    
+
     # Login to get authentication token
     loginData = {
         "username": "testuser",
@@ -78,21 +77,23 @@ async def test_add_items_to_cart_success(client, dbSession):
     loginResponse = client.post("/auth/token", data=loginData)
     assert loginResponse.status_code == 200
     assert "access_token" in loginResponse.cookies
-    
+
     # Create cart items data
     cartItems = [
         CartItem(id=None,itemId=item1.id, status=CartStatus.ADDED),
         CartItem(id=None,itemId=item2.id, status=CartStatus.ADDED)
     ]
-    
-    # Make the cart request
-    response = client.post("/cart/add_items", json=[item.model_dump() for item in cartItems])
-    
+
+    response = client.post(
+        "/cart/add_items", 
+        json=[item.model_dump() for item in cartItems],
+    )
+
     # Check response
     assert response.status_code == 200
     cartItemsResponse = response.json()
     assert len(cartItemsResponse) == 2
-    
+
     # Verify cart items were created in the database
     result = await dbSession.execute(
         select(CartTable).where(CartTable.user_id == testUser.id)
@@ -101,6 +102,7 @@ async def test_add_items_to_cart_success(client, dbSession):
     assert len(cartItemsDb) == 2
     assert any(item.item_id == item1.id and item.status == CartStatus.ADDED for item in cartItemsDb)
     assert any(item.item_id == item2.id and item.status == CartStatus.ADDED for item in cartItemsDb)
+    assert(1==1)
 
 
 @pytest.mark.asyncio
