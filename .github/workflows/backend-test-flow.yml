@@ -1,5 +1,12 @@
 name: Backend test 
 on: [push]
+# on:
+#   pull_request:
+#     branches:
+#       - master
+#   push:
+#     branches:
+#       - master
 
 env:
   POSTGRES_USER: "postgres"
@@ -13,10 +20,18 @@ env:
   FRONTEND_HOST: "frontend"
   FRONTEND_PORT: "3000"
   BACKEND_PORT: "8000"
+  AZURE_RG_NAME: resource-group-ls-p-mexc-1
+  AZURE_LOCATION: mexicocentral
+  DOCKER_IMAGE_NAME: jonathanhn/leageshop-backend
+  DOCKER_REGISTRY_SERVER: docker.io
+  DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  TERRAFORM_VERSION: 1.11.4
 
 jobs:
   push-test-format:
     runs-on: ubuntu-latest
+    environment: production
     env:
       #This is not possible for now, have to define two times the variables
       # DATABASE_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
@@ -89,3 +104,49 @@ jobs:
 
       - name: Stop backend server
         run: pkill uvicorn
+
+      - name: Set Docker Image Tag
+        run: echo "DOCKER_IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: docker build . -t ${DOCKER_IMAGE_NAME}:${{ env.DOCKER_IMAGE_TAG }}
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_SERVER }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image
+        run: docker push ${DOCKER_IMAGE_NAME}:${{ env.DOCKER_IMAGE_TAG }}
+
+      # --- Azure Deployment with Terraform ---
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
+            }
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan \
+          -var "docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" \
+          -var "db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve \
+          -var "docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" \
+          -var "db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
