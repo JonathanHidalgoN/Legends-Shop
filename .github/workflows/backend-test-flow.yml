@@ -121,7 +121,7 @@ jobs:
       - name: Push Docker Image
         run: docker push ${DOCKER_IMAGE_NAME}:${{ env.DOCKER_IMAGE_TAG }}
 
-      # --- Azure Deployment with Terraform ---
+      # --- Azure Deployment ---
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -133,27 +133,9 @@ jobs:
               "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
             }
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: Set Azure Environment Variables
+      - name: Update Web App Container
         run: |
-          echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
-          echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
-          echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}" >> $GITHUB_ENV
-
-      - name: Terraform Init
-        working-directory: terraform
-        run: terraform init
-
-      - name: Terraform Plan
-        working-directory: terraform
-        run: terraform plan
-
-      - name: Terraform Apply
-        working-directory: terraform
-        run: terraform apply -auto-approve
+          az webapp config container set \
+            --name "Legends-shop-ls-p-mexc-1" \
+            --resource-group "resource-group-ls-p-mexc-1" \
+            --docker-custom-image-name "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
