@@ -33,7 +33,7 @@ resource "azurerm_linux_web_app" "webapp" {
     "DATABASE_PASSWORD" = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.kv.name};SecretName=DatabasePassword)"
     "DATABASE_NAME"     = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.kv.name};SecretName=DatabaseName)"
     "SECRET_KEY"        = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.kv.name};SecretName=SecretKey)"
-    # "DATABASE_CONNECTION_STRING" = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.kv.name};SecretName=DatabaseConnectionString)"
+    "ON_AZURE"          = "true"
   })
 
 }
