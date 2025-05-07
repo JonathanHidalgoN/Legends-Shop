@@ -142,11 +142,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan \
-          -var "docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" \
-          -var "db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
+        run: terraform plan -var="docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve \
-          -var "docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" \
-          -var "db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
+        run: terraform apply -auto-approve -var="docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
