@@ -21,9 +21,9 @@ resource "azurerm_role_assignment" "terraform_identity_keyvault_secrets_manager"
   role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
 }
-value        = var.db_admin_user
 
 resource "azurerm_key_vault_secret" "db_user" {
+  value        = var.db_admin_user
   name         = "DatabaseUser"
   key_vault_id = azurerm_key_vault.kv.id
   content_type = "text/plain"
