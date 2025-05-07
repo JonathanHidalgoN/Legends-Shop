@@ -139,11 +139,12 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Terraform Init
+        working-directory: terraform
         run: terraform init
 
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan -var="docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
+        run: terraform plan -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
 
       - name: Terraform Apply
         working-directory: terraform
