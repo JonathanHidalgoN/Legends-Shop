@@ -3,7 +3,7 @@ resource "azurerm_service_plan" "appserviceplan" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
-  sku_name            = "F1"
+  sku_name            = "B1"
 }
 
 resource "azurerm_linux_web_app" "webapp" {
@@ -19,11 +19,41 @@ resource "azurerm_linux_web_app" "webapp" {
 
   site_config {
     minimum_tls_version = "1.2"
-     always_on = false
+    always_on = true 
+
     application_stack {
       docker_image_name = var.docker_image_name_backend
     }
+
+    ip_restriction {
+      name                      = "vnet-integration"
+      action                    = "Allow"
+      priority                  = 100
+      virtual_network_subnet_id = azurerm_subnet.webapp_subnet.id
+    }
+
+    ip_restriction {
+      name           = "dev-ip"
+      action         = "Allow"
+      priority       = 200
+      ip_address = "${var.development_ip}/32"
+    }
+
+    ip_restriction {
+      name           = "vercel-ip"
+      action         = "Allow"
+      priority       = 300
+      ip_address = "${var.vercel_ip}/32"
+    }
+
+    ip_restriction {
+        name     = "deny-all-other"
+        action   = "Deny"
+        priority = 2147483647
+        description = "Deny all other traffic"
+    }
   }
+
 
   # Application settings (environment variables for the app).
   # --- Use Key Vault references here for runtime secret retrieval by the app ---
