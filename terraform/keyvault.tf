@@ -45,7 +45,7 @@ resource "azurerm_key_vault_secret" "db_name_secret" {
 
 resource "azurerm_key_vault_secret" "secret_key" {
   name         = "SecretKey"
-  value        = var.db_admin_password  
+  value        = var.db_admin_password
   key_vault_id = azurerm_key_vault.kv.id
   content_type = "text/plain"
 }

@@ -76,14 +76,14 @@ variable "web_app_settings" {
   description = "Additional application settings for the web app."
   type        = map(string)
   default = {
-    "WEBSITES_PORT"          = "8000"
-    "DATABASE_PORT"          = "5432"
-    "DATABASE_DIALECT"       = "postgresql"
-    "FRONTEND_HOST"          = "https://legends-shop.vercel.app/"
-    "FRONTEND_PORT"          = "3000"
-    "ALGORITHM"              = "HS256"
+    "WEBSITES_PORT"               = "8000"
+    "DATABASE_PORT"               = "5432"
+    "DATABASE_DIALECT"            = "postgresql"
+    "FRONTEND_HOST"               = "https://legends-shop.vercel.app/"
+    "FRONTEND_PORT"               = "3000"
+    "ALGORITHM"                   = "HS256"
     "ACCESS_TOKEN_EXPIRE_MINUTES" = "30"
-    "LOG_DIR_NAME"           = "backend_logs"
+    "LOG_DIR_NAME"                = "backend_logs"
   }
 }
 
