@@ -13,7 +13,7 @@ echo "This script will:"
 echo "1. Log into Azure"
 echo "2. Set the active subscription"
 echo "3. Create a Resource Group"
-echo "4. Create a Service Principal"
+echo "4. Create a Service Principal (if ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID are set, will use those and skip creation)"
 echo "5. Grant necessary roles to the Service Principal"
 echo "6. Create environment file for Terraform"
 echo "7. Initialize Terraform"
@@ -61,25 +61,33 @@ echo -e "${GREEN}✓ Successfully created Resource Group ${RESOURCE_GROUP_NAME}$
 echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}        Creating Service Principal           ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
-SP_OUTPUT=$(az ad sp create-for-rbac --name "${SERVICE_PRINCIPAL_NAME}" --skip-assignment --output json --only-show-errors)
 
-# Capture the credentials from the output
-SP_APP_ID=$(echo "${SP_OUTPUT}" | jq -r '.appId')
-SP_PASSWORD=$(echo "${SP_OUTPUT}" | jq -r '.password')
-SP_TENANT_ID=$(echo "${SP_OUTPUT}" | jq -r '.tenant')
-
-SP_OBJECT_ID=$(az ad sp list --filter "appId eq '${SP_APP_ID}'" --query "[].id" --output tsv)
-
-if [ -z "${SP_OBJECT_ID}" ]; then
-  echo "Error: Could not find Service Principal Object ID for App ID ${SP_APP_ID}." >&2
-  exit 1
+if [[ -n "$ARM_CLIENT_ID" && -n "$ARM_CLIENT_SECRET" && -n "$ARM_TENANT_ID" ]]; then
+  echo -e "${GREEN}✓ Service Principal environment variables are already set. Skipping creation.${NC}"
+  SP_APP_ID="$ARM_CLIENT_ID"
+  SP_PASSWORD="$ARM_CLIENT_SECRET"
+  SP_TENANT_ID="$ARM_TENANT_ID"
+  SP_OBJECT_ID=$(az ad sp list --filter "appId eq '${SP_APP_ID}'" --query "[].id" --output tsv)
+  if [ -z "${SP_OBJECT_ID}" ]; then
+    echo "Error: Could not find Service Principal Object ID for App ID ${SP_APP_ID}." >&2
+    exit 1
+  fi
+else
+  SP_OUTPUT=$(az ad sp create-for-rbac --name "${SERVICE_PRINCIPAL_NAME}" --skip-assignment --output json --only-show-errors)
+  SP_APP_ID=$(echo "${SP_OUTPUT}" | jq -r '.appId')
+  SP_PASSWORD=$(echo "${SP_OUTPUT}" | jq -r '.password')
+  SP_TENANT_ID=$(echo "${SP_OUTPUT}" | jq -r '.tenant')
+  SP_OBJECT_ID=$(az ad sp list --filter "appId eq '${SP_APP_ID}'" --query "[].id" --output tsv)
+  if [ -z "${SP_OBJECT_ID}" ]; then
+    echo "Error: Could not find Service Principal Object ID for App ID ${SP_APP_ID}." >&2
+    exit 1
+  fi
+  echo -e "${GREEN}✓ Service Principal Created:${NC}"
+  echo "  SP_APP_ID: ${SP_APP_ID}"
+  echo "  SP_TENANT_ID: ${SP_TENANT_ID}"
+  echo "  SP_OBJECT_ID: ${SP_OBJECT_ID}"
+  echo "  SP_PASSWORD: (hidden)"
 fi
-
-echo -e "${GREEN}✓ Service Principal Created:${NC}"
-echo "  SP_APP_ID: ${SP_APP_ID}"
-echo "  SP_TENANT_ID: ${SP_TENANT_ID}"
-echo "  SP_OBJECT_ID: ${SP_OBJECT_ID}"
-echo "  SP_PASSWORD: (hidden)"
 
 # --- 5. Grant Roles to the Service Principal ---
 echo -e "${YELLOW}=============================================${NC}"

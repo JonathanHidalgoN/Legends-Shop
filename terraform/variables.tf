@@ -72,8 +72,8 @@ variable "docker_image_name_backend" {
   default     = "jonathanhn/leageshop-backend:latest"
 }
 
-description = "Additional application settings for the web app."
 variable "web_app_settings" {
+  description = "Additional application settings for the web app."
   type        = map(string)
   default = {
     "WEBSITES_PORT"          = "8000"
@@ -105,6 +105,12 @@ variable "subnet_database_adress_space" {
   default     = ["196.0.0.0/24"]
 }
 
+variable "subnet_webapp_adress_space" {
+  description = "Address space for the Virtual Network."
+  type        = list(string)
+  default     = ["196.1.0.0/24"]
+}
+
 variable "azure_branch_name" {
   description = "Git branch name for deployment to Azure Web App."
   type        = string
@@ -115,4 +121,17 @@ variable "git_url" {
   description = "Git repository URL for deployment to Azure Web App."
   type        = string
   default     = "https://github.com/JonathanHidalgoN/Legends-Shop"
+}
+
+#Allow all ips for now but change to secure
+variable "development_ip" {
+  description = "Developer IP"
+  type        = string
+  default     = "0.0.0.0"
+}
+
+variable "vercel_ip" {
+  description = "Vercel IP"
+  type        = string
+  default     = "0.0.0.0"
 }
