@@ -23,3 +23,25 @@ resource "azurerm_subnet" "db_subnet" {
     }
   }
 }
+
+#subnet for the web app
+resource "azurerm_subnet" "webapp_subnet" {
+  name                 = "webapp-subnet-${var.project-sufix}"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = var.subnet_webapp_adress_space
+
+  delegation {
+    name = "webapp-delegation"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+}
+
+#VNet integration for the web app
+resource "azurerm_app_service_virtual_network_swift_connection" "webapp_vnet_integration" {
+  app_service_id = azurerm_linux_web_app.webapp.id
+  subnet_id      = azurerm_subnet.webapp_subnet.id
+}
