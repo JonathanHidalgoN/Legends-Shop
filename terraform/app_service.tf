@@ -36,14 +36,14 @@ resource "azurerm_linux_web_app" "webapp" {
       name       = "dev-ip"
       action     = "Allow"
       priority   = 200
-      ip_address = "${var.development_ip}/32"
+      ip_address = "${var.development_ip}/0"
     }
 
     ip_restriction {
       name       = "vercel-ip"
       action     = "Allow"
       priority   = 300
-      ip_address = "${var.vercel_ip}/32"
+      ip_address = "${var.vercel_ip}/0"
     }
 
     ip_restriction {
