@@ -15,6 +15,14 @@ resource "azurerm_postgresql_flexible_server" "db_server" {
   private_dns_zone_id           = azurerm_private_dns_zone.db_zone.id
   delegated_subnet_id           = azurerm_subnet.db_subnet.id
   public_network_access_enabled = false
+
+
+  lifecycle {
+    ignore_changes = [
+      # Tell Terraform to ignore differences for this attribute after create.
+      zone,
+    ]
+  }
 }
 
 resource "azurerm_postgresql_flexible_server_database" "database" {
