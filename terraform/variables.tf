@@ -96,19 +96,19 @@ variable "vnet_name" {
 variable "vnet_address_space" {
   description = "Address space for the Virtual Network."
   type        = list(string)
-  default     = ["196.0.0.0/16"]
+  default     = ["192.168.0.0/16"] # Covers 192.168.0.0 - 192.168.255.255
 }
 
 variable "subnet_database_adress_space" {
-  description = "Address space for the Virtual Network."
+  description = "Address space for the database subnet."
   type        = list(string)
-  default     = ["196.0.0.0/24"]
+  default     = ["192.168.0.0/24"] # Covers 192.168.0.0 - 192.168.0.255
 }
 
 variable "subnet_webapp_adress_space" {
-  description = "Address space for the Virtual Network."
+  description = "Address space for the web app subnet."
   type        = list(string)
-  default     = ["196.1.0.0/24"]
+  default     = ["192.168.1.0/24"] # Covers 192.168.1.0 - 192.168.1.255
 }
 
 variable "azure_branch_name" {
