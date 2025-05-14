@@ -51,6 +51,7 @@ resource "azurerm_linux_web_app" "webapp" {
       action      = "Deny"
       priority    = 2147483647
       description = "Deny all other traffic"
+      ip_address  = "0.0.0.0/0"
     }
   }
 
