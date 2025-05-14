@@ -12,7 +12,6 @@ resource "azurerm_subnet" "db_subnet" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = var.subnet_database_adress_space
-
   #This is like setting a policy telling the subnet that only flexible server 
   #will use this subnet 
   delegation {
