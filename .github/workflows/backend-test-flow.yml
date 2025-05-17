@@ -29,7 +29,7 @@ env:
   TERRAFORM_VERSION: 1.11.4
 
 jobs:
-  push-test-format:
+  test-run-dockerhub-terraform:
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -121,21 +121,19 @@ jobs:
       - name: Push Docker Image
         run: docker push ${DOCKER_IMAGE_NAME}:${{ env.DOCKER_IMAGE_TAG }}
 
-      # --- Azure Deployment ---
-      - name: Azure Login
-        uses: azure/login@v1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
-          creds: |
-            {
-              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
-              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
-              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
-              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
-            }
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Update Web App Container
-        run: |
-          az webapp config container set \
-            --name "Legends-shop-ls-p-mexc-1" \
-            --resource-group "resource-group-ls-p-mexc-1" \
-            --container-image-name "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
