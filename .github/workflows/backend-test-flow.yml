@@ -85,13 +85,13 @@ jobs:
         working-directory: back
         run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/integration
 
-      - name: Start backend server
-        working-directory: back
-        run: |
-          uvicorn app.main:app --host 0.0.0.0 --port ${{ env.BACKEND_PORT }}
-          sleep 10
-      - name: Stop backend server
-        run: pkill uvicorn
+      # - name: Start backend server
+      #   working-directory: back
+      #   run: |
+      #     uvicorn app.main:app --host 0.0.0.0 --port ${{ env.BACKEND_PORT }}
+      #     sleep 10
+      # - name: Stop backend server
+      #   run: pkill uvicorn
 
 
   # Job 2: Build and push Docker image (depends on tests passing)
