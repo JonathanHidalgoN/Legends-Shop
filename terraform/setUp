@@ -9,7 +9,9 @@ echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}           Azure Infrastructure Setup         ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
 echo ""
-echo "This script will:"
+echo "The purpose of this script is to setup everything to run 'terraform apply' in a fresh install."
+echo -e "${YELLOW} Inside this file you have a VARIABLES BLOCK, please modify${NC} "
+echo "The following actions will be executed:"
 echo "1. Log into Azure"
 echo "2. Set the active subscription"
 echo "3. Create a Resource Group"
@@ -29,12 +31,17 @@ if [[ $confirm != "yes" ]]; then
 fi
 
 #TODO: sync this with the variables.tf file
+
+#VARIABLES BLOCK
 AZURE_SUBSCRIPTION_ID="example"
 RESOURCE_GROUP_NAME="example"
 LOCATION="mexicocentral"
 SERVICE_PRINCIPAL_NAME="terraform-sp-legends-shop"
 TERRAFORM_DIR="./terraform"
 ENV_FILE=".azure_env"
+STORAGE_ACCOUNT_NAME="lspmexc1storageacc54"
+CONTAINER_NAME="tfstate"
+SCOPE="/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}"
 
 # --- 1. Log in to Azure ---
 echo -e "${YELLOW}=============================================${NC}"
@@ -93,7 +100,6 @@ fi
 echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}        Granting Roles to Service Principal  ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
-SCOPE="/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}"
 
 # User Access Administrator role is required to:
 # - SP needs to assing roles for the key vault reading and writting
@@ -123,9 +129,50 @@ az role assignment create \
   --output none \
   --only-show-errors
 
+# Grant Storage Blob Data Contributor role for Terraform state management
+echo "Granting 'Storage Blob Data Contributor' on scope ${SCOPE}..."
+az role assignment create \
+  --assignee "${SP_OBJECT_ID}" \
+  --role "Storage Blob Data Contributor" \
+  --scope "${SCOPE}" \
+  --output none \
+  --only-show-errors
+
 echo -e "${GREEN}✓ Roles assigned successfully to Service Principal${NC}"
 
-# --- 6. Create Environment File for Terraform ---
+# --- 6. Create Storage Account for Terraform State ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}      Creating Storage Account for Terraform State     ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+if az storage account check-name --name "$STORAGE_ACCOUNT_NAME" | grep -q "AlreadyExists"; then
+  echo -e "${YELLOW}Storage account $STORAGE_ACCOUNT_NAME already exists.${NC}"
+else
+  az storage account create \
+    --name "$STORAGE_ACCOUNT_NAME" \
+    --resource-group "$RESOURCE_GROUP_NAME" \
+    --location "$LOCATION" \
+    --sku Standard_LRS \
+    --kind StorageV2 \
+    --https-only true \
+    --min-tls-version TLS1_2
+
+  az storage container create \
+    --name "${CONTAINER_NAME}" \
+    --account-name "$STORAGE_ACCOUNT_NAME" \
+    --auth-mode login \
+    --public-access off
+
+  echo -e "${GREEN}✓ Successfully configured Storage Account $STORAGE_ACCOUNT_NAME for Terraform state${NC}"
+fi
+
+# Output storage account details for reference
+echo -e "${YELLOW}Storage Account Details:${NC}"
+echo "Storage Account Name: $STORAGE_ACCOUNT_NAME"
+echo "Resource Group: $RESOURCE_GROUP_NAME"
+echo "Container Name: ${CONTAINER_NAME}"
+
+# --- 7. Create Environment File for Terraform ---
 echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}      Creating Environment File             ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
@@ -144,7 +191,7 @@ echo -e "${GREEN}✓ Environment file created at ${ENV_FILE}${NC}"
 echo "  The file contains your Azure credentials and a placeholder for the database password"
 echo "  Please review the file and set your database password before proceeding"
 
-# --- 7. Initialize Terraform ---
+# --- 8. Initialize Terraform ---
 echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}      Initializing Terraform                ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
@@ -154,14 +201,14 @@ source "${ENV_FILE}"
 terraform init --upgrade
 echo -e "${GREEN}✓ Terraform initialized successfully${NC}"
 
-# --- 8. Import the Resource Group into Terraform State ---
+# --- 9. Import the Resource Group into Terraform State ---
 echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}      Importing Resource Group State         ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
 terraform import azurerm_resource_group.rg "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}"
 echo -e "${GREEN}✓ Resource Group imported successfully${NC}"
 
-# --- 9. Final Information ---
+# --- 10. Final Information ---
 echo -e "${YELLOW}=============================================${NC}"
 echo -e "${YELLOW}           Setup Complete!                   ${NC}"
 echo -e "${YELLOW}=============================================${NC}"
