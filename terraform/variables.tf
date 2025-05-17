@@ -5,17 +5,16 @@ variable "project-sufix" {
 }
 
 variable "resource_group_name" {
-  description = "Name of the Azure Resource Group."
+  description = "Name of the Azure Resource Group, has to match name in setup file"
   type        = string
-  default     = "resource-group"
+  default     = "resource-group-ls-p-mexc-1"
 }
 
 variable "location" {
-  description = "Azure region for deployment."
+  description = "Azure region for deployment, has to match name in setup file"
   type        = string
   default     = "mexicocentral"
 }
-
 
 variable "dns_database_server_link" {
   description = "Link to connect with the vn to the database"
@@ -109,18 +108,6 @@ variable "subnet_webapp_adress_space" {
   description = "Address space for the web app subnet."
   type        = list(string)
   default     = ["192.168.1.0/24"] # Covers 192.168.1.0 - 192.168.1.255
-}
-
-variable "azure_branch_name" {
-  description = "Git branch name for deployment to Azure Web App."
-  type        = string
-  default     = "azure"
-}
-
-variable "git_url" {
-  description = "Git repository URL for deployment to Azure Web App."
-  type        = string
-  default     = "https://github.com/JonathanHidalgoN/Legends-Shop"
 }
 
 #Allow all ips for now but change to secure
