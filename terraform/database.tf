@@ -6,23 +6,26 @@ resource "azurerm_postgresql_flexible_server" "db_server" {
 
   administrator_password = var.db_admin_password
 
-  sku_name   = "B_Standard_B1ms"
-  storage_mb = 32768
-  version    = "14"
+  sku_name            = "B_Standard_B1ms"
+  storage_mb          = 32768
+  version             = "14"
 
-  #This is the action, telling the server there is a subnet to use.
-  #The subnet then has a policy where only this kind of service can use it 
-  private_dns_zone_id           = azurerm_private_dns_zone.db_zone.id
-  delegated_subnet_id           = azurerm_subnet.db_subnet.id
-  public_network_access_enabled = false
-
+  private_dns_zone_id          = azurerm_private_dns_zone.db_zone.id
+  delegated_subnet_id          = azurerm_subnet.db_subnet.id
+  public_network_access_enabled = true
 
   lifecycle {
     ignore_changes = [
-      # Tell Terraform to ignore differences for this attribute after create.
       zone,
     ]
   }
+}
+
+resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_my_ip" {
+  name                = "AllowMyLocalIP"
+  server_id           = azurerm_postgresql_flexible_server.db_server.id
+  start_ip_address    = var.development_ip 
+  end_ip_address      = var.development_ip
 }
 
 resource "azurerm_postgresql_flexible_server_database" "database" {

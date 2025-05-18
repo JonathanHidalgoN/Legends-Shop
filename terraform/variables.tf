@@ -110,11 +110,10 @@ variable "subnet_webapp_adress_space" {
   default     = ["192.168.1.0/24"] # Covers 192.168.1.0 - 192.168.1.255
 }
 
-#Allow all ips for now but change to secure
 variable "development_ip" {
   description = "Developer IP"
   type        = string
-  default     = "0.0.0.0"
+  default     = "189.162.192.232"
 }
 
 variable "vercel_ip" {
