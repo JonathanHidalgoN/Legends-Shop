@@ -10,7 +10,7 @@ interface StaticDataContextType {
   locations: Location[];
 }
 
-const StaticDataContext = createContext<StaticDataContextType | undefined>(
+export const StaticDataContext = createContext<StaticDataContextType | undefined>(
   undefined,
 );
 
