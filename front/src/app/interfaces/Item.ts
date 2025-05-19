@@ -36,6 +36,7 @@ export interface Item {
   effects: Effect[];
   img: string;
   id: number;
+  hasHdImage?: boolean;
 }
 
 export enum FilterItemSortField {
