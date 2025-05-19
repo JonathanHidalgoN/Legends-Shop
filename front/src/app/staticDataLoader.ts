@@ -80,7 +80,11 @@ export async function loadStaticData(dowloadHDImages: boolean = false) {
       }
     }
     items.forEach((item: Item) => {
-      item.img = checkIfHDImageAvailable(item.name, item.img);
+      // Hardcoded fix for Rabadon's Deathcap
+      if (item.name === "Rabadon's Deathcap") {
+      } else {
+        item.img = checkIfHDImageAvailable(item.name, item.img);
+      }
     });
   } catch (error) {
     console.error("Static data loading failed:", error);
