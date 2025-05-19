@@ -8,7 +8,7 @@ if ON_AZURE:
     DATABASE_USER: str = os.getenv("DATABASE_USER", "")
     DATABASE_PASSWORD: str = os.getenv("DATABASE_PASSWORD", "")
     DATABASE_NAME: str = os.getenv("DATABASE_NAME", "")
-    DATABASE_URL: str = f"postgresql+asyncpg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
+    DATABASE_URL: str = f"postgresql+asyncpg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}?ssl=require"
     DATABASE_ALEMBIC_URL: str = DATABASE_URL
 else:
     DATABASE_ALEMBIC_URL: str = os.getenv(
