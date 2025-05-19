@@ -24,7 +24,7 @@ export default async function RootLayout({
   let effects = [];
   let locations = [];
   try {
-    const data = await loadStaticData();
+    const data = await loadStaticData(true);
     items = data.items;
     tags = data.tags;
     effects = data.effects;
