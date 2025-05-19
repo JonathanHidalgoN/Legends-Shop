@@ -1,28 +1,37 @@
-name: Backend test 
-on: [push]
+name: Backend CI/CD Pipeline
+
+on:
+  push:
 
 env:
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  POSTGRES_DB: "test_db"
-  POSTGRES_HOST: "localhost"
-  POSTGRES_PORT: "5432"
-  SECRET_KEY: "testKey"
-  ALGORITHM: "HS256"
-  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
-  FRONTEND_HOST: "frontend"
-  FRONTEND_PORT: "3000"
-  BACKEND_PORT: "8000"
+  DOCKER_IMAGE_NAME: jonathanhn/leageshop-backend
+  DOCKER_REGISTRY_SERVER: docker.io
+  TERRAFORM_VERSION: 1.11.4
 
 jobs:
-  push-test-format:
+  # Job 1: Run tests and schema migration
+  test:
+    name: Run Backend Tests
     runs-on: ubuntu-latest
+    #To use env variables
+    environment: production
+
     env:
-      #This is not possible for now, have to define two times the variables
-      # DATABASE_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
-      # DATABASE_ALEMBIC_URL: "postgresql+asyncpg://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "test_db"
+      POSTGRES_HOST: "localhost"
+      POSTGRES_PORT: "5432"
+      SECRET_KEY: "testKey"
+      ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      FRONTEND_HOST: "frontend"
+      FRONTEND_PORT: "3000"
+      BACKEND_PORT: "8000"
       DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
       DATABASE_ALEMBIC_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+      TESTING: "true"
+
     services:
       postgres:
         image: postgres:14
@@ -32,7 +41,7 @@ jobs:
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
           - "5432:5432"
-        options: >-
+        options: >- # Folded block scalar for multi-line string options
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
@@ -47,18 +56,12 @@ jobs:
         with:
           python-version: '3.12.2'
           architecture: 'x64'
-          
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
 
       - name: Cache pip dependencies
         uses: actions/cache@v3
         with:
-          #Where pip cache
           path: ~/.cache/pip
-          #Cache for different OS also if the .lock changes the hash does and wont use same cache
           key: ${{ runner.os }}-pip-${{ hashFiles('back/requirements.lock') }}
-          #Default if no cache
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -68,24 +71,91 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.lock
 
-      - name: Run unit test 
-        working-directory: back 
-        run: TESTING=true python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/unit
-
-      - name: Run integration 
-        working-directory: back 
-        run: TESTING=true python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/integration
-
-      - name: Aply database schema
+      - name: Aply database schema (for tests)
         working-directory: back
-        run: |
-          alembic upgrade head
+        run: alembic upgrade head
 
-      - name: Start backend server
+      - name: Run unit tests
         working-directory: back
-        run: |
-          uvicorn app.main:app --host 0.0.0.0 --port $BACKEND_PORT &
-          sleep 10 
+        run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/unit
 
-      - name: Stop backend server
-        run: pkill uvicorn
+      - name: Run integration tests
+        working-directory: back
+        run: python -m pytest -v -o asyncio_default_fixture_loop_scope=function test/integration
+
+      # - name: Start backend server
+      #   working-directory: back
+      #   run: |
+      #     uvicorn app.main:app --host 0.0.0.0 --port ${{ env.BACKEND_PORT }}
+      #     sleep 10
+      # - name: Stop backend server
+      #   run: pkill uvicorn
+
+
+  # Job 2: Build and push Docker image (depends on tests passing)
+  build_docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    environment: production
+    if: github.ref == 'refs/heads/main'
+    outputs:
+          image_tag: ${{ steps.set_image_tag.outputs.tag }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set Docker Image Tag
+        id: set_image_tag
+        run: echo "tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker Image
+        run: docker build back -t ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.set_image_tag.outputs.tag }}
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_SERVER }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image
+        run: docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.set_image_tag.outputs.tag }}
+
+
+  # Job 3: Deploy infrastructure using Terraform
+  deploy_infra:
+    name: Deploy Azure Infrastructure
+    runs-on: ubuntu-latest
+    needs: build_docker
+    environment: production
+    if: github.ref == 'refs/heads/main'
+    # --- IMPORTANT: Expose Azure and Terraform Secrets as Environment Variables ---
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      TF_VAR_db_admin_password: ${{ secrets.TF_VAR_DB_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan -out=tfplan -var "docker_image_name_backend=${{ env.DOCKER_IMAGE_NAME }}:${{ needs.build_docker.outputs.image_tag }}"
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan

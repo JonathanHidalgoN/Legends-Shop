@@ -29,8 +29,9 @@ class SystemInitializer:
         try:
             status = await getMetaData(self.db, "system_initialized")
             return status == "true"
-        except Exception:
-            return False
+        except Exception as e:
+            logger.error(f"Failed to get system_initialized value from database, exception: {str(e)}")
+            raise e
 
     @logMethod
     async def markInitializationComplete(self) -> None:

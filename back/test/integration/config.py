@@ -92,7 +92,8 @@ def client(dbSession):
 
         app.dependency_overrides[getDbSession] = fakeAsyncDb
 
-        with TestClient(app) as test_client:
+        # Create test client with base_url to handle secure cookies
+        with TestClient(app, base_url="https://testserver") as test_client:
             yield test_client
 
         app.dependency_overrides.clear()

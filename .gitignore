@@ -91,3 +91,10 @@ coverage.xml
 envs/
 
 tmpNoCommitHdImages/
+.terraform*
+*tfstate*
+private*
+
+.azure_env
+personalSetUp
+azCommands.txt

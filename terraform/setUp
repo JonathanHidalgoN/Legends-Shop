@@ -1,0 +1,229 @@
+#!/bin/bash
+set -e
+
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}           Azure Infrastructure Setup         ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+echo ""
+echo "The purpose of this script is to setup everything to run 'terraform apply' in a fresh install."
+echo -e "${YELLOW} Inside this file you have a VARIABLES BLOCK, please modify${NC} "
+echo "The following actions will be executed:"
+echo "1. Log into Azure"
+echo "2. Set the active subscription"
+echo "3. Create a Resource Group"
+echo "4. Create a Service Principal (if ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID are set, will use those and skip creation)"
+echo "5. Grant necessary roles to the Service Principal"
+echo "6. Create environment file for Terraform"
+echo "7. Initialize Terraform"
+echo "8. Import the Resource Group into Terraform state"
+echo ""
+echo -e "${YELLOW}WARNING: This will create Azure resources and modify your Terraform state.${NC}"
+echo ""
+
+read -p "Do you want to continue? (yes/no): " confirm
+if [[ $confirm != "yes" ]]; then
+  echo "Operation cancelled."
+  exit 1
+fi
+
+#TODO: sync this with the variables.tf file
+
+#VARIABLES BLOCK
+AZURE_SUBSCRIPTION_ID="example"
+RESOURCE_GROUP_NAME="example"
+LOCATION="mexicocentral"
+SERVICE_PRINCIPAL_NAME="terraform-sp-legends-shop"
+TERRAFORM_DIR="./terraform"
+ENV_FILE=".azure_env"
+STORAGE_ACCOUNT_NAME="lspmexc1storageacc54"
+CONTAINER_NAME="tfstate"
+SCOPE="/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}"
+
+# --- 1. Log in to Azure ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}              Logging into Azure             ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+az login --output none --only-show-errors
+echo -e "${GREEN}✓ Successfully logged into Azure${NC}"
+
+# --- 2. Set the Correct Subscription ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}         Setting Active Subscription         ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+az account set --subscription "${AZURE_SUBSCRIPTION_ID}" --only-show-errors
+echo -e "${GREEN}✓ Successfully set subscription to ${AZURE_SUBSCRIPTION_ID}${NC}"
+
+# --- 3. Create the Resource Group ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}          Creating Resource Group            ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+az group create --name "${RESOURCE_GROUP_NAME}" --location "${LOCATION}" --output json --only-show-errors
+echo -e "${GREEN}✓ Successfully created Resource Group ${RESOURCE_GROUP_NAME}${NC}"
+
+# --- 4. Create the Service Principal ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}        Creating Service Principal           ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+if [[ -n "$ARM_CLIENT_ID" && -n "$ARM_CLIENT_SECRET" && -n "$ARM_TENANT_ID" ]]; then
+  echo -e "${GREEN}✓ Service Principal environment variables are already set. Skipping creation.${NC}"
+  SP_APP_ID="$ARM_CLIENT_ID"
+  SP_PASSWORD="$ARM_CLIENT_SECRET"
+  SP_TENANT_ID="$ARM_TENANT_ID"
+  SP_OBJECT_ID=$(az ad sp list --filter "appId eq '${SP_APP_ID}'" --query "[].id" --output tsv)
+  if [ -z "${SP_OBJECT_ID}" ]; then
+    echo "Error: Could not find Service Principal Object ID for App ID ${SP_APP_ID}." >&2
+    exit 1
+  fi
+else
+  SP_OUTPUT=$(az ad sp create-for-rbac --name "${SERVICE_PRINCIPAL_NAME}" --skip-assignment --output json --only-show-errors)
+  SP_APP_ID=$(echo "${SP_OUTPUT}" | jq -r '.appId')
+  SP_PASSWORD=$(echo "${SP_OUTPUT}" | jq -r '.password')
+  SP_TENANT_ID=$(echo "${SP_OUTPUT}" | jq -r '.tenant')
+  SP_OBJECT_ID=$(az ad sp list --filter "appId eq '${SP_APP_ID}'" --query "[].id" --output tsv)
+  if [ -z "${SP_OBJECT_ID}" ]; then
+    echo "Error: Could not find Service Principal Object ID for App ID ${SP_APP_ID}." >&2
+    exit 1
+  fi
+  echo -e "${GREEN}✓ Service Principal Created:${NC}"
+  echo "  SP_APP_ID: ${SP_APP_ID}"
+  echo "  SP_TENANT_ID: ${SP_TENANT_ID}"
+  echo "  SP_OBJECT_ID: ${SP_OBJECT_ID}"
+  echo "  SP_PASSWORD: (hidden)"
+fi
+
+# --- 5. Grant Roles to the Service Principal ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}        Granting Roles to Service Principal  ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+# User Access Administrator role is required to:
+# - SP needs to assing roles for the key vault reading and writting
+echo "Granting 'User Access Administrator' role to SP on scope ${SCOPE}..."
+az role assignment create \
+  --assignee "${SP_OBJECT_ID}" \
+  --role "User Access Administrator" \
+  --scope "${SCOPE}" \
+  --output none \
+  --only-show-errors
+
+# Grant Contributor role at subscription level for purging deleted key vaults and creating resources
+echo "Granting 'Contributor' on scope ${SCOPE}..."
+az role assignment create \
+  --assignee "${SP_OBJECT_ID}" \
+  --role "Contributor" \
+  --scope "/subscriptions/${AZURE_SUBSCRIPTION_ID}" \
+  --output none \
+  --only-show-errors
+
+# Grant Key Vault RBAC permissions
+echo "Granting 'Key Vault Administrator' on scope ${SCOPE}..."
+az role assignment create \
+  --assignee "${SP_OBJECT_ID}" \
+  --role "Key Vault Administrator" \
+  --scope "${SCOPE}" \
+  --output none \
+  --only-show-errors
+
+# Grant Storage Blob Data Contributor role for Terraform state management
+echo "Granting 'Storage Blob Data Contributor' on scope ${SCOPE}..."
+az role assignment create \
+  --assignee "${SP_OBJECT_ID}" \
+  --role "Storage Blob Data Contributor" \
+  --scope "${SCOPE}" \
+  --output none \
+  --only-show-errors
+
+echo -e "${GREEN}✓ Roles assigned successfully to Service Principal${NC}"
+
+# --- 6. Create Storage Account for Terraform State ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}      Creating Storage Account for Terraform State     ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+if az storage account check-name --name "$STORAGE_ACCOUNT_NAME" | grep -q "AlreadyExists"; then
+  echo -e "${YELLOW}Storage account $STORAGE_ACCOUNT_NAME already exists.${NC}"
+else
+  az storage account create \
+    --name "$STORAGE_ACCOUNT_NAME" \
+    --resource-group "$RESOURCE_GROUP_NAME" \
+    --location "$LOCATION" \
+    --sku Standard_LRS \
+    --kind StorageV2 \
+    --https-only true \
+    --min-tls-version TLS1_2
+
+  az storage container create \
+    --name "${CONTAINER_NAME}" \
+    --account-name "$STORAGE_ACCOUNT_NAME" \
+    --auth-mode login \
+    --public-access off
+
+  echo -e "${GREEN}✓ Successfully configured Storage Account $STORAGE_ACCOUNT_NAME for Terraform state${NC}"
+fi
+
+# Output storage account details for reference
+echo -e "${YELLOW}Storage Account Details:${NC}"
+echo "Storage Account Name: $STORAGE_ACCOUNT_NAME"
+echo "Resource Group: $RESOURCE_GROUP_NAME"
+echo "Container Name: ${CONTAINER_NAME}"
+
+# --- 7. Create Environment File for Terraform ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}      Creating Environment File             ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+# Create the environment file
+cat >"${ENV_FILE}" <<EOF
+# Azure Service Principal Credentials
+export ARM_CLIENT_ID="${SP_APP_ID}"
+export ARM_CLIENT_SECRET="${SP_PASSWORD}"
+export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
+export ARM_TENANT_ID="${SP_TENANT_ID}"
+export TF_VAR_db_admin_password="your-secure-password-here"
+EOF
+
+echo -e "${GREEN}✓ Environment file created at ${ENV_FILE}${NC}"
+echo "  The file contains your Azure credentials and a placeholder for the database password"
+echo "  Please review the file and set your database password before proceeding"
+
+# --- 8. Initialize Terraform ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}      Initializing Terraform                ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+# Source the environment file temporarily for terraform init
+source "${ENV_FILE}"
+terraform init --upgrade
+echo -e "${GREEN}✓ Terraform initialized successfully${NC}"
+
+# --- 9. Import the Resource Group into Terraform State ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}      Importing Resource Group State         ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+terraform import azurerm_resource_group.rg "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}"
+echo -e "${GREEN}✓ Resource Group imported successfully${NC}"
+
+# --- 10. Final Information ---
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}           Setup Complete!                   ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+echo ""
+echo "Next steps:"
+echo "1. Review and edit ${ENV_FILE}:"
+echo "   - Set your TF_VAR_db_admin_password"
+echo "   - Verify all other variables are correct"
+echo "2. Source the environment file:"
+echo "   source ${ENV_FILE}"
+echo "3. Run 'terraform plan' to see the changes"
+echo "4. Run 'terraform apply' to create the rest of the infrastructure"
+echo ""
+echo -e "${YELLOW}IMPORTANT:${NC}"
+echo "- Keep ${ENV_FILE} secure as it contains sensitive credentials"
+echo "- Add ${ENV_FILE} to your .gitignore to prevent accidental commits"
+echo "- To remove the environment variables, run:"
+echo "  unset ARM_CLIENT_ID ARM_CLIENT_SECRET ARM_SUBSCRIPTION_ID ARM_TENANT_ID TF_VAR_db_admin_password"

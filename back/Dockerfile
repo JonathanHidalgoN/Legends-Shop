@@ -8,5 +8,9 @@ RUN pip install --no-cache-dir -r requirements.lock
 COPY . .
 #Have to set up the PYTHONPATH or my custom modules wont be find
 ENV PYTHONPATH /docker_back/app
-#This command run the server uvicorn with some options, we have to tell whre main is
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+RUN chmod +x start.sh
+
+EXPOSE 8000
+
+CMD ["./start.sh"]

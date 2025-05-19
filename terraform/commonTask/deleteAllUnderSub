@@ -1,0 +1,78 @@
+#!/bin/bash
+set -e
+
+#TODO: ADD PURGE FOR KEY VAULT
+
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW} Checking Azure Subscription ID              ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+if [[ -z "${AZURE_SUBSCRIPTION_ID}" ]]; then
+  echo "The AZURE_SUBSCRIPTION_ID environment variable is not set."
+  read -p "Please enter your Azure Subscription ID: " entered_subscription_id
+
+  if [[ -z "${entered_subscription_id}" ]]; then
+    echo -e "${RED}Error: No Subscription ID entered. Exiting.${NC}" >&2
+    exit 1
+  fi
+
+  export AZURE_SUBSCRIPTION_ID="${entered_subscription_id}"
+  echo -e "${GREEN}✓ Using Subscription ID from prompt: ${AZURE_SUBSCRIPTION_ID}${NC}"
+else
+  echo -e "${GREEN}✓ Using Subscription ID from environment: ${AZURE_SUBSCRIPTION_ID}${NC}"
+fi
+
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW}Listing Resource Groups                      ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+# --query "[].name" uses JMESPath to select only the 'name' property from each item in the list output by 'az group list'.
+# --output tsv formats the output as tab-separated values, which is easy for bash to work with.
+RESOURCE_GROUPS_LIST=$(az group list --subscription "${ARM_SUBSCRIPTION_ID}" --query "[].name" --output tsv)
+
+if [[ -z "${RESOURCE_GROUPS_LIST}" ]]; then
+  echo -e "${GREEN}No Resource Groups found in subscription ${ARM_SUBSCRIPTION_ID}. Nothing to delete.${NC}"
+  exit 0
+fi
+
+echo "Found Resource Groups:"
+echo "${RESOURCE_GROUPS_LIST}" | tr ' ' '\n' # Replace spaces with newlines if tsv used spaces
+echo ""
+
+# --- Prompt to Select Resource Group for Deletion
+echo -e "${YELLOW}=============================================${NC}"
+echo -e "${YELLOW} Select Resource Group to Delete             ${NC}"
+echo -e "${YELLOW}=============================================${NC}"
+
+read -p "Enter the EXACT name of the Resource Group you want to delete: " RG_TO_DELETE
+
+echo ""
+echo -e "${YELLOW}WARNING: You are about to DELETE Resource Group '${RG_TO_DELETE}' and ALL resources within it.${NC}"
+echo -e "${YELLOW}This action is irreversible.${NC}"
+read -p "Type the name '${RG_TO_DELETE}' to confirm deletion: " confirm_name
+
+if [[ "$confirm_name" == "$RG_TO_DELETE" ]]; then
+  echo "Proceeding with deletion of Resource Group: ${RG_TO_DELETE} (Waiting...)"
+
+  # --- Delete the Selected Resource Group (Waiting) ---
+  az group delete --name "${RG_TO_DELETE}" --subscription "${ARM_SUBSCRIPTION_ID}" --yes
+
+  DELETE_EXIT_STATUS=$?
+  if [ $DELETE_EXIT_STATUS -eq 0 ]; then
+    echo -e "${GREEN}✓ Successfully deleted Resource Group: ${RG_TO_DELETE}${NC}"
+  else
+    echo -e "${RED}✗ Error deleting Resource Group: ${RG_TO_DELETE}. Check Azure Portal for status.${NC}" >&2 # Send error to stderr
+    exit 1
+  fi
+
+else
+  echo "Deletion confirmation failed. Deletion cancelled for ${RG_TO_DELETE}."
+  exit 1
+fi
+
+echo ""
+echo -e "${GREEN}Resource Group deletion process finished.${NC}"
