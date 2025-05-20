@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getChampionIconsRequest } from "./request";
+import { useStaticData } from "./components/StaticDataContext";
+import { Item } from "./interfaces/Item";
 
 interface ImageItem {
   src: string;
@@ -14,6 +16,24 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [championImages, setChampionImages] = useState<ImageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  let items: Item[] = [];
+  let displayItems: Item[] = [];
+
+  try {
+    const staticData = useStaticData();
+    items = staticData.items;
+    // Filter for items with HD images
+    const hdItems = items.filter(item => item.hasHdImage === true);
+
+    // Shuffle and pick 3 items
+    if (hdItems.length > 0) {
+      const shuffled = [...hdItems].sort(() => 0.5 - Math.random());
+      displayItems = shuffled.slice(0, 3);
+    }
+  } catch (error) {
+    console.error("Failed to get static data from context:", error);
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -117,33 +137,20 @@ export default function Home() {
             </div>
 
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 grid grid-cols-3 gap-4">
-              <div className="animate-float">
-                <Image
-                  src="/hd_images/Rabadon's Deathcap.png"
-                  alt="Rabadon's Deathcap"
-                  width={80}
-                  height={80}
-                  className="rounded-lg shadow-lg"
-                />
-              </div>
-              <div className="animate-float-delayed">
-                <Image
-                  src="/hd_images/Black Cleaver.png"
-                  alt="Black Cleaver"
-                  width={80}
-                  height={80}
-                  className="rounded-lg shadow-lg"
-                />
-              </div>
-              <div className="animate-float-more-delayed">
-                <Image
-                  src="/hd_images/Guardian Angel.png"
-                  alt="Guardian Angel"
-                  width={80}
-                  height={80}
-                  className="rounded-lg shadow-lg"
-                />
-              </div>
+              {displayItems.map((item, index) => (
+                <div 
+                  key={item.id} 
+                  className={`animate-float${index > 0 ? (index === 1 ? '-delayed' : '-more-delayed') : ''}`}
+                >
+                  <Image
+                    src={item.img}
+                    alt={item.name}
+                    width={80}
+                    height={80}
+                    className="rounded-lg shadow-lg"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import {
+  allItemsRequest,
   allTagsRequet,
   FromValues,
   getAllEffectNamesRequest,
@@ -47,7 +48,7 @@ export async function loadStaticData(dowloadHDImages: boolean = false) {
   try {
     // Load all data with retries
     items = (
-      await retryOperation(() => someItemsRequest(FromValues.SERVER), "items")
+      await retryOperation(() => allItemsRequest(FromValues.SERVER), "items")
     ).map(mapAPIItemResponseToItem);
 
     tags = await retryOperation(() => allTagsRequet(FromValues.SERVER), "tags");
@@ -80,11 +81,9 @@ export async function loadStaticData(dowloadHDImages: boolean = false) {
       }
     }
     items.forEach((item: Item) => {
-      // Hardcoded fix for Rabadon's Deathcap
-      if (item.name === "Rabadon's Deathcap") {
-      } else {
-        item.img = checkIfHDImageAvailable(item.name, item.img);
-      }
+      const newImgPath = checkIfHDImageAvailable(item.name, item.img);
+      item.img = newImgPath;
+      item.hasHdImage = newImgPath.startsWith("/hd_images/");
     });
   } catch (error) {
     console.error("Static data loading failed:", error);
