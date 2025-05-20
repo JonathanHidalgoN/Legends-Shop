@@ -7,11 +7,12 @@
 - **FastAPI** backend with full REST API support
 - **PostgreSQL** database via Azure PostgreSQL Flexible Server
 - **Dockerized** deployment for consistent local and cloud environments
-- **Working on Cloud-native integration** with:
+- **Cloud-native integration** with:
   - Azure Blob Storage
-  - Azure Functions
   - Azure Key Vault
-  - Azure Application Insights
+  - Azure web app
+  - Azure VNET
+  - Azure postgres flexible server
 - **Logging and monitoring** using Prometheus, Loki, and Grafana
 - **Frontend** powered by **Next.js (TypeScript)** and deployed on Vercel
 - CI/CD-friendly architecture, designed for easy extension
@@ -32,7 +33,6 @@
 This project is part of a long-term plan. It serves as a learning platform and demonstration of:
 
 - Cost-efficient backend design with real-world practices
-- Containerization and microservice-oriented thinking
 - Infrastructure observability and secure secret management
 
 ## 🐳 Getting Started
@@ -173,6 +173,3 @@ Delivery Dates
 ✅ Add Grafana + Loki + Prometheus stack for monitoring and observability.
 
 ✅ Add HD image fetching and storage to /public directory.
-
-🛠️ (WIP) Migrate infrastructure to Azure using Terraform.
-
