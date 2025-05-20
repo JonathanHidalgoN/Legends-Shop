@@ -67,6 +67,11 @@ class ItemsLoader:
         "Effect8Amount": "Armor",
         "Effect9Amount": "CooldownReduction",
         "Effect10Amount": "MoveSpeed",
+        "Effect11Amount": "Gold",
+        "Effect12Amount": "Attack crit",
+        "Effect13Amount": "Slow",
+        "Effect14Amount": "Aly ing",
+        "Effect15Amount": "Ult reduction",
     }
 
     def mapEffectName(self, api_effect_name: str) -> str:
@@ -320,11 +325,7 @@ class ItemsLoader:
                     else set()
                 ),
                 description=itemData["description"],
-                effect=(
-                    Effects(root=self.mapEffectName(itemData["effect"]))
-                    if "effect" in itemData
-                    else Effects(root={})
-                ),
+                effect=self._parse_effects(itemData.get("effect")),
             )
         except Exception as e:
             logger.warning(
@@ -586,9 +587,9 @@ class ItemsLoader:
         This function inserts the relations given the itemId and effects.
         Raises UpdateItemsError when something fails.
         """
-        for effect, effectValue in effects.root.items():
+        for effect, effectValue in effects.root.items(): 
             effectId: int | None = await getEffectIdWithEffectName(
-                self.dbSession, self.map_effect_name(effect)
+                self.dbSession, effect 
             )
             if effectId is None:
                 raise UpdateItemsError("Effect was not found in the database")
@@ -701,3 +702,13 @@ class ItemsLoader:
         # Add a space before each uppercase letter, then strip leading/trailing spaces
         s1 = re.sub(r"(\B[A-Z])", r" \1", tag)
         return s1.capitalize()
+
+    def _parse_effects(self, effect_data: Dict[str, str] | None) -> Effects:
+        if not effect_data or not isinstance(effect_data, dict):
+            return Effects(root={})
+        
+        parsed_effects_root = {}
+        for key, value in effect_data.items():
+            mapped_key = self.mapEffectName(key) # map each key
+            parsed_effects_root[mapped_key] = str(value) 
+        return Effects(root=parsed_effects_root)
