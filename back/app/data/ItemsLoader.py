@@ -1,6 +1,7 @@
 from typing import Dict, List, Set
 import json
 import httpx
+import re
 
 from pydantic import Json
 from sqlalchemy import delete, insert
@@ -53,6 +54,27 @@ class ItemsLoader:
     The main method to be used is `updateItems()`.
     """
     VERSION_URL: str = "https://ddragon.leagueoflegends.com/api/versions.json"
+
+    # Effect Name Mapping
+    EFFECT_NAME_MAPPING = {
+        "Effect1Amount": "ArmorPenetration",
+        "Effect2Amount": "AttackSpeed",
+        "Effect3Amount": "CriticalStrikeChance",
+        "Effect4Amount": "Health",
+        "Effect5Amount": "Mana",
+        "Effect6Amount": "AbilityPower",
+        "Effect7Amount": "MagicResist",
+        "Effect8Amount": "Armor",
+        "Effect9Amount": "CooldownReduction",
+        "Effect10Amount": "MoveSpeed",
+    }
+
+    def mapEffectName(self, api_effect_name: str) -> str:
+        """
+        Maps an API effect name (e.g., 'Effect1Amount') to a more readable name.
+        If the name is not in the mapping, returns the original name.
+        """
+        return self.EFFECT_NAME_MAPPING.get(api_effect_name, api_effect_name)
 
     def __init__(self, dbSession: AsyncSession, filter:List[str] = DEFAULT_ITEMS):
         self.dbSession = dbSession
@@ -287,7 +309,11 @@ class ItemsLoader:
                     if "gold" in itemData
                     else Gold(base=0, purchasable=False, total=0, sell=0)
                 ),
-                tags=set(itemData["tags"]) if "tags" in itemData else set(),
+                tags=(
+                    {self._format_tag(tag) for tag in itemData["tags"]}
+                    if "tags" in itemData
+                    else set()
+                ),
                 stats=(
                     self.parseStatsNodeIntoStats(itemData["stats"], statMapping)
                     if "stats" in itemData
@@ -295,7 +321,7 @@ class ItemsLoader:
                 ),
                 description=itemData["description"],
                 effect=(
-                    Effects(root=itemData["effect"])
+                    Effects(root=self.mapEffectName(itemData["effect"]))
                     if "effect" in itemData
                     else Effects(root={})
                 ),
@@ -562,7 +588,7 @@ class ItemsLoader:
         """
         for effect, effectValue in effects.root.items():
             effectId: int | None = await getEffectIdWithEffectName(
-                self.dbSession, effect
+                self.dbSession, self.map_effect_name(effect)
             )
             if effectId is None:
                 raise UpdateItemsError("Effect was not found in the database")
@@ -668,3 +694,10 @@ class ItemsLoader:
             raise UpdateItemsError(
                 "Unexpected exception happened while inserting/updating a gold row"
             ) from e
+
+    def _format_tag(self, tag: str) -> str:
+        if not tag:
+            return ""
+        # Add a space before each uppercase letter, then strip leading/trailing spaces
+        s1 = re.sub(r"(\B[A-Z])", r" \1", tag)
+        return s1.capitalize()
