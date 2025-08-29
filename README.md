@@ -17,6 +17,23 @@
 - **Frontend** powered by **Next.js (TypeScript)** and deployed on Vercel
 - CI/CD-friendly architecture, designed for easy extension
 
+## 📸 Screenshots
+
+### Landing Page
+![Landing Page](./assets/LSlanding.png)
+
+### Store
+![Store](./assets/LSstore.png)
+
+### Shopping Cart
+![Shopping Cart](./assets/LScar.png)
+
+### Order History
+![Order History](./assets/LShistory.png)
+
+### Account Profile
+![Account Profile](./assets/LSaccount.png)
+
 ## 📦 Tech Stack
 
 | Layer     | Technologies |
@@ -58,118 +75,76 @@ http://localhost:8000 for API
 
 http://localhost:3000 for frontend
 
-☁️ Deployment
-The app is designed to deploy on:
-
-Azure for backend and cloud services
-
-Vercel for frontend
-
-Render/Neon for dev PostgreSQL when Azure is nott used
 ```
-🛣️ Roadmap
-🧱 Phase 1: Infrastructure & Setup
-✅ Set up Docker Compose configuration for backend, frontend, and PostgreSQL.
 
-✅ Implement League of Legends API data-fetching class to pull updated items.
+## ☁️ Deployment
 
-✅ Integrate Alembic for database migrations.
+The app is designed to deploy on:
+- **Azure** for backend and cloud services
+- **Vercel** for frontend  
+- **Render/Neon** for dev PostgreSQL when Azure is not used
 
-✅ Implement database session management using async context managers.
+## 🛣️ Roadmap
 
-✅ Move database table logic into modular, asynchronous functions.
+### 🧱 Phase 1: Infrastructure & Setup
+- ✅ Set up Docker Compose configuration for backend, frontend, and PostgreSQL
+- ✅ Implement League of Legends API data-fetching class to pull updated items
+- ✅ Integrate Alembic for database migrations
+- ✅ Implement database session management using async context managers
+- ✅ Move database table logic into modular, asynchronous functions
+- ✅ Standardize environment variables in .env and docker-compose.yml
 
-✅ Standardize environment variables in .env and docker-compose.yml.
+### 🔧 Phase 2: Backend API Foundations
+- ✅ Implement item-related API endpoints
+- ✅ Add field validation (e.g., email format) using pydantic models
+- ✅ Establish layered architecture: Request Validation → Business Logic Class → Atomic DB Functions
+- ✅ Add structured logging with standardized middleware for API calls
+- ✅ Use custom exceptions for clear and modular error handling
+- ✅ Implement security headers middleware
+- ✅ Add logging decorators with JSON structure
+- ✅ Add rate limiting using decorators and slowapi
+- ✅ Create random data seeding utility class
 
-🔧 Phase 2: Backend API Foundations
-✅ Implement item-related API endpoints.
+### 🧪 Phase 3: Testing & Quality Assurance
+- ✅ Add unit testing for backend business logic with mocking
+- ✅ Add unit testing for API endpoints
+- ✅ Add integration tests using SQLite as the test database
+- ✅ Create requirements.lock file for dependency management
 
-✅ Add field validation (e.g., email format) using pydantic models.
+### 🔐 Phase 4: Authentication & Authorization
+- ✅ Add OAuth2 + JWT token authentication
+- ✅ Implement Depends-based dependency injection for authorization logic
+- ✅ Implement profile feature (API + business logic)
 
-✅ Establish layered architecture:
-Request Validation → Business Logic Class → Atomic DB Functions.
+### 🛍️ Phase 5: Core E-commerce Features
+- ✅ Implement ordering logic following established backend architecture
+- ✅ Add delivery dates logic
+- ✅ Add location-based logic
+- ✅ Add review generation and fake user data on system init
+- ✅ Implement backend lifespan event that:
+  - Detects previous system initialization
+  - Updates item data
+  - Loads items into DB
+  - Generates locations, users, orders, and reviews
+  - Marks initialization complete
 
-✅ Add structured logging with standardized middleware for API calls.
+### 🌐 Phase 6: Frontend Development (Next.js)
+- ✅ Create a modular and styled base UI with a custom color palette
+- ✅ Design layout using Amazon as a visual reference
+- ✅ Build reusable components and pages:
+  - Home / Items
+  - Orders
+  - Logic Debugging
+  - Profile
+  - Location
+  - Delivery Dates
+- ✅ Add React Context for static data (items, effects, tags)
+- ✅ Mirror backend interfaces in frontend using TypeScript
+- ✅ Standardize API request functions using typed response interfaces
+- ✅ Create custom error pages (404, 500, etc.)
 
-✅ Use custom exceptions for clear and modular error handling.
-
-✅ Implement security headers middleware.
-
-✅ Add logging decorators with JSON structure.
-
-✅ Add rate limiting using decorators and slowapi.
-
-✅ Create random data seeding utility class.
-
-🧪 Phase 3: Testing & Quality Assurance
-✅ Add unit testing for backend business logic with mocking.
-
-✅ Add unit testing for API endpoints.
-
-✅ Add integration tests using SQLite as the test database.
-
-✅ Create requirements.lock file for dependency management.
-
-🔐 Phase 4: Authentication & Authorization
-✅ Add OAuth2 + JWT token authentication.
-
-✅ Implement Depends-based dependency injection for authorization logic.
-
-✅ Implement profile feature (API + business logic).
-
-🛍️ Phase 5: Core E-commerce Features
-✅ Implement ordering logic following established backend architecture.
-
-✅ Add delivery dates logic.
-
-✅ Add location-based logic.
-
-✅ Add review generation and fake user data on system init.
-
-✅ Implement backend lifespan event that:
-
-Detects previous system initialization
-
-Updates item data
-
-Loads items into DB
-
-Generates locations, users, orders, and reviews
-
-Marks initialization complete
-
-🌐 Phase 6: Frontend Development (Next.js)
-✅ Create a modular and styled base UI with a custom color palette.
-
-✅ Design layout using Amazon as a visual reference.
-
-✅ Build reusable components and pages:
-
-Home / Items
-
-Orders
-
-Logic Debugging
-
-Profile
-
-Location
-
-Delivery Dates
-
-✅ Add React Context for static data (items, effects, tags).
-
-✅ Mirror backend interfaces in frontend using TypeScript.
-
-✅ Standardize API request functions using typed response interfaces.
-
-✅ Create custom error pages (404, 500, etc.)
-
-🧪 Phase 7: Deployment, CI/CD & Observability
-✅ Deploy backend (Render), frontend (Vercel), and database (Neon).
-
-✅ Add GitHub Actions workflows for backend and frontend CI.
-
-✅ Add Grafana + Loki + Prometheus stack for monitoring and observability.
-
-✅ Add HD image fetching and storage to /public directory.
+### 🧪 Phase 7: Deployment, CI/CD & Observability
+- ✅ Deploy backend (Render), frontend (Vercel), and database (Neon)
+- ✅ Add GitHub Actions workflows for backend and frontend CI
+- ✅ Add Grafana + Loki + Prometheus stack for monitoring and observability
+- ✅ Add HD image fetching and storage to /public directory
